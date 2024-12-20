@@ -49,4 +49,8 @@ public class View : IViewEntity, ITenantEntety
             .Concat(PageBreakSections.Cast<ISection>())
             .OrderBy(s => s.Order);
     }
+    public override string ToString()
+    {
+        return Name;
+    }
 }

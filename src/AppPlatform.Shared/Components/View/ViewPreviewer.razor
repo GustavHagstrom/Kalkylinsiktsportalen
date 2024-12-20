@@ -1,14 +1,15 @@
 <div style="height: 100%">
     <MudToolBar Dense="true" Gutters="false" Class="border-b border-solid">
-        <MudSelect T="View" Dense="true" Margin="Margin.Dense">
+        <MudSelect T="View" Dense="true" Margin="Margin.Dense" MultiSelection="false" Value="SelectedView" SelectedValuesChanged="x => SelectionChanged(x.FirstOrDefault())">
             @foreach (var view in Views)
             {
                 <MudSelectItem Value="view" />
             }
         </MudSelect>
+        <MudSpacer/>
     </MudToolBar>
     <div style="height: calc(100% - 48px)">
-        <ViewPreviewer Estimation="Estimation" />
+        <ViewPresenter Estimation="Estimation" View="SelectedView" />
     </div>
 </div>
 
@@ -36,5 +37,10 @@
     {
         if (view is null) return Localizer["ERROR"];
         return view.Name ?? Localizer["ERROR"];
+    }
+    void SelectionChanged(View? view)
+    {
+        SelectedView = view;
+        StateHasChanged();
     }
 }
