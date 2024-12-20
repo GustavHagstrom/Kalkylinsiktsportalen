@@ -7,7 +7,7 @@
         <NavigationContent>
             @foreach (var estimation in Estimations)
             {
-                <div class="@EstimationClass(estimation)" style="padding: 8px" @onclick="x => SelectedEstimation = estimation">
+                <div class="@EstimationClass(estimation)" style="padding: 8px" @onclick="x => SelectEstimation(estimation)">
                     @estimation.ToString()
                 </div>
             }
@@ -81,5 +81,6 @@
     void SelectEstimation(Estimation? estimation)
     {
         SelectedEstimation = estimation;
+        StateHasChanged();
     }
 }

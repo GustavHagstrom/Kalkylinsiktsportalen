@@ -60,11 +60,14 @@ internal static class EstimationModelBuilder
             sheetItem.CostBearerUnitCost = bcItem.UnitCost;
             return sheetItem;
         }
-        foreach (var item in bcItem.Items)
+        if(sheetItem.Type == RowType.Group || sheetItem.Type == RowType.Part)
         {
-            if (item.IsActive && item.IsPosting)
+            foreach (var item in bcItem.Items)
             {
-                sheetItem.Children.Add(BuildSheetItem(item, ref position, sheetItem));
+                if (item.IsActive)
+                {
+                    sheetItem.Children.Add(BuildSheetItem(item, ref position, sheetItem));
+                }
             }
         }
         return sheetItem;
@@ -73,12 +76,12 @@ internal static class EstimationModelBuilder
     {
         return bcType switch
         {
-            BidCon.SDK.EstimationItemType.NetSheet => RowType.NetSheet,
-            BidCon.SDK.EstimationItemType.TenderSheet => RowType.TenderSheet,
-            BidCon.SDK.EstimationItemType.SummarySheet => RowType.SummarySheet,
-            BidCon.SDK.EstimationItemType.LockedStagesSheet => RowType.LockedStagesSheet,
-            BidCon.SDK.EstimationItemType.ReconciliationSheet => RowType.ReconciliationSheet,
-            BidCon.SDK.EstimationItemType.PrelimsSheet => RowType.PrelimsSheet,
+            BidCon.SDK.EstimationItemType.NetSheet => RowType.Group,
+            BidCon.SDK.EstimationItemType.TenderSheet => RowType.Group,
+            BidCon.SDK.EstimationItemType.SummarySheet => RowType.Group,
+            BidCon.SDK.EstimationItemType.LockedStagesSheet => RowType.Group,
+            BidCon.SDK.EstimationItemType.ReconciliationSheet => RowType.Group,
+            BidCon.SDK.EstimationItemType.PrelimsSheet => RowType.Group,
 
             BidCon.SDK.EstimationItemType.Group => RowType.Group,
             BidCon.SDK.EstimationItemType.Part => RowType.Part,
