@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Utilities;
+﻿using Core.Utilities;
 using Microsoft.AspNetCore.Components;
 
-namespace AppPlatform.Core.Abstractions;
+namespace Core.Abstractions;
 public interface IInjectableComponent
 {
     RenderFragment Render()

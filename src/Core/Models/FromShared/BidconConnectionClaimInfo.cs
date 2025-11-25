@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Abstractions;
-using AppPlatform.Core.Constants;
+﻿using Core.Abstractions;
+using Core.Constants;
 using Microsoft.Extensions.Localization;
 
-namespace AppPlatform.Core.Models.FromShared;
+namespace Core.Models.FromShared;
 public class BidconConnectionClaimInfo(IStringLocalizer<BidconConnectionClaimInfo> Localizer) : IAccessClaimInfo
 {
     public string Value => SharedAccessClaimValues.BidconConnection;

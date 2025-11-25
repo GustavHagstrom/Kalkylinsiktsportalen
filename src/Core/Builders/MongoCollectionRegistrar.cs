@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
-namespace AppPlatform.Core.Builders;
+namespace Core.Builders;
 public class MongoCollectionRegistrar(IServiceCollection services)
 {
     private readonly Dictionary<Type, string> _collectionNames = [];

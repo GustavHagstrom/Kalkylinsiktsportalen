@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Models.EstimationEnteties;
-using AppPlatform.Core.Constants;
-using AppPlatform.Core.Utilities;
+﻿using Core.Models.EstimationEnteties;
+using Core.Constants;
+using Core.Utilities;
 
-namespace AppPlatform.Tests.Core.Utilities;
+namespace Tests.Core.Utilities;
 [TestFixture]
 public class ViewFormulaProcessorTests
 {

@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Abstractions;
+﻿namespace Core.Abstractions;
 public interface IAccessClaimInfo
 {
     /// <summary>

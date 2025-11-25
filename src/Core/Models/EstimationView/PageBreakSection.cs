@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 public class PageBreakSection : ISection, IViewEntity
 {
     [StringLength(50)]

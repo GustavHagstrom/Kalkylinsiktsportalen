@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Server;
+﻿namespace Server;
 
 public static class DatabaseSeed
 {

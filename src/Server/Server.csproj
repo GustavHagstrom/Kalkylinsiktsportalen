@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>BidConReport.Server-949adea7-a732-4e08-a1aa-3f4fbd960fb7</UserSecretsId>
+    <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
+  </PropertyGroup>
+	
+  <ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.0" />
+
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+
+	  <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
+
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\BidconAccessModule\BidconAccessModule.csproj" />
+    <ProjectReference Include="..\BidconBrowserModule\BidconBrowserModule.csproj" />
+    <ProjectReference Include="..\UserRightSettingsModule\UserRightSettingsModule.csproj" />
+    <ProjectReference Include="..\ViewsSettingsModule\ViewSettingsModule.csproj" />
+    <ProjectReference Include="..\SharedModule\SharedModule.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Shared\Dialogs\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\css\Components\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\ResizeListener.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

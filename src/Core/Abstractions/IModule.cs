@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Builders;
+﻿using Core.Builders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 
-namespace AppPlatform.Core.Abstractions;
+namespace Core.Abstractions;
 public interface IModule
 {
     void GeneralConfig(WebApplicationBuilder builder);

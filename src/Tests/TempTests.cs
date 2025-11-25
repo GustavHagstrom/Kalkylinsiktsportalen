@@ -1,6 +1,6 @@
-﻿using AppPlatform.Core.Services;
+﻿using Core.Services;
 
-namespace AppPlatform.Tests;
+namespace Tests;
 [TestFixture]
 public class TempTests
 {

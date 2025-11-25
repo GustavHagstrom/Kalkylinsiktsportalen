@@ -1,9 +1,9 @@
-﻿using AppPlatform.Core.Models.EstimationEnteties;
-using AppPlatform.Core.Constants;
+﻿using Core.Models.EstimationEnteties;
+using Core.Constants;
 using System.Text.RegularExpressions;
 using NCalc;
 
-namespace AppPlatform.Core.Utilities;
+namespace Core.Utilities;
 public static class ViewFormulaProcessor
 {
     private static readonly Dictionary<string, Func<Estimation, string?>> _formulas = new()

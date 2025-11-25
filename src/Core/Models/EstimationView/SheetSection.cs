@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Enums.BidconAccess;
-using AppPlatform.Core.Enums.ViewTemplate;
+﻿using Core.Enums.BidconAccess;
+using Core.Enums.ViewTemplate;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 
 public class SheetSection : IViewEntity, ISection
 {

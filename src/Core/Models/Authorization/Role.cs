@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.Abstractions;
+﻿using Core.Models.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.Authorization;
+namespace Core.Models.Authorization;
 public class Role : ITenantEntety
 {
     [StringLength(50)]

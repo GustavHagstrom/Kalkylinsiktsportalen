@@ -1,25 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using AppPlatform.Server.Components;
+using Server.Components;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Security.Claims;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using MudBlazor.Services;
 using MudBlazor;
-using AppPlatform.Core.Extensions;
-using AppPlatform.ViewSettingsModule;
-using AppPlatform.UserRightSettingsModule;
-using AppPlatform.BidconBrowserModule;
+using Core.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Identity.Client;
-using AppPlatform.BidconAccessModule;
 using MongoDB.Driver;
-using AppPlatform.Data.EfCore;
-using AppPlatform.SharedModule;
-using AppPlatform.Data.Abstractions;
-using System.Collections;
+using Data.EfCore;
+using Data.Abstractions;
 
 internal class Program
 {
@@ -96,11 +90,11 @@ internal class Program
 
         builder.ConfigureMonolith(config =>
         {
-            config.AddModule<SharedModule>();
-            config.AddModule<ViewSettingsModule>();
-            config.AddModule<UserRightSettingsModule>();
-            config.AddModule<BidconBrowserModule>();
-            config.AddModule<BidconAccessModule>();
+            config.AddModule<SharedModule.Module>();
+            config.AddModule<ViewSettingsModule.Module>();
+            config.AddModule<UserRightSettingsModule.Module>();
+            config.AddModule<BidconBrowserModule.Module>();
+            config.AddModule<BidconAccessModule.Module>();
 
 
         }); //add assembly to the route aswell
@@ -179,11 +173,11 @@ internal class Program
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode()
             .AddAdditionalAssemblies(
-            typeof(SharedModule).Assembly,
-            typeof(ViewSettingsModule).Assembly,
-            typeof(UserRightSettingsModule).Assembly,
-            typeof(BidconBrowserModule).Assembly,
-            typeof(BidconAccessModule).Assembly);
+            typeof(SharedModule.Module).Assembly,
+            typeof(ViewSettingsModule.Module).Assembly,
+            typeof(UserRightSettingsModule.Module).Assembly,
+            typeof(BidconBrowserModule.Module).Assembly,
+            typeof(BidconAccessModule.Module).Assembly);
 
         app.MapControllers();
         app.Run();

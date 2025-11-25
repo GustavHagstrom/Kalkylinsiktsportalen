@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using AppPlatform.Core.Data;
-using AppPlatform.Data.EfCore;
+using Core.Data;
+using Data.EfCore;
 
 #nullable disable
 
-namespace AppPlatform.Server.Migrations
+namespace Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240104211524_Subscription")]

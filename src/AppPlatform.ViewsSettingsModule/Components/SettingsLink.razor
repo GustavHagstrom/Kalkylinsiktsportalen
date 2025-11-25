@@ -1,8 +1,0 @@
-@using AppPlatform.Core.Abstractions
-@inject IStringLocalizer<SettingsLink> Localizer
-@implements IInjectableComponent
-
-<SettingsNavLink Text="@Localizer["Vyer"]"
-                 AuthPolicy="@Constants.Authorization.Policy"
-                 Href="@Constants.Routes.ViewListPage"
-                 Icon="@Icons.Material.Sharp.Pageview" />

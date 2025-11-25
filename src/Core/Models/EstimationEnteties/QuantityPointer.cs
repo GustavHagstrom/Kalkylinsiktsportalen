@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Models.EstimationEnteties;
+﻿namespace Core.Models.EstimationEnteties;
 public class QuantityPointer : IUndoRedoItem
 {
     public int Order { get; set; }

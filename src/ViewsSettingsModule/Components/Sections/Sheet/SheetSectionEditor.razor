@@ -1,0 +1,158 @@
+@using Core.Enums.ViewTemplate
+@using Core.Services
+@using ViewSettingsModule.Components.Format
+@inject ISheetDataService SheetDataService
+@inject IStringLocalizer<SheetSectionEditor> Localizer
+
+@if(Section is not null && View is not null)
+{
+   
+
+
+    <CustomMudField Title="@Localizer["Kolumner"]" MudFieldClass="custom-input-1" Alignment="CustomMudField.HeaderAlignment.Right">
+        <HeaderContent>
+            <MudIconButton Icon="@Icons.Material.Sharp.ArrowUpward" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Medium"
+                           Disabled="!CanMoveColumnUp()" OnClick="() => MoveColumnUp()" />
+            <MudIconButton Icon="@Icons.Material.Sharp.ArrowDownward" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Medium"
+                           Disabled="!CanMoveColumnDown()" OnClick="() => MoveColumnDown()" />
+        </HeaderContent>
+        <ChildContent>        
+            <ul>
+                @foreach (var column in Section.Columns.OrderBy(x => x.Order))
+                {
+                    <li class="@(column.ColumnType == SelectedColumn.ColumnType ? "selected" : string.Empty)" @onclick="() => SelectedColumnType = column.ColumnType">
+                        <div class="d-flex" style="align-items: center;" >
+                            <MudCheckBox T="bool" Value="column.IsVisible" ValueChanged="value => SetColumnVisibility(column.ColumnType, value)" Dense="true"/>
+                            <MudText Typo="Typo.body1">@SheetDataService.GetColumnTypeName(column.ColumnType)</MudText>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </ChildContent>
+    </CustomMudField>
+
+    <CustomMudField Title="@Localizer["Rader"]" MudFieldClass="custom-input-1">
+        <ul>
+            @foreach (var rowType in Enum.GetValues<SheetRowType>())
+            {
+                <li class="@(rowType == SelectedRowType ? "selected" : string.Empty)" @onclick="() => SelectedRowType = rowType">
+                    <div class="d-flex pa-1" style="align-items: center;">
+                        <MudText Typo="Typo.body1">@SheetDataService.GetRowTypeName(rowType)</MudText>
+                    </div>
+                </li>
+            }
+        </ul>
+    </CustomMudField>
+   
+
+    
+    <Row>
+        @* <SelectList T="SheetColumnType" DropDownLabel="@Localizer["Kolumn"]" ShowActions="false"  Items="Enum.GetValues<SheetColumnType>().ToList()" ListVariant="ListVariant.DropDown" @bind-SelectedItem="SelectedColumnType" GetItemNameFunc="SheetDataService.GetColumnTypeName" /> *@
+        <MudTextField T="string" Value="SheetDataService.GetColumnTypeName(SelectedColumnType)" ReadOnly="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="@Localizer["Kolumn"]" />
+        <MudTextField T="string" Value="SheetDataService.GetRowTypeName(SelectedRowType)" ReadOnly="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="@Localizer["Rad"]" />
+       @*  <SelectList T="SheetRowType" DropDownLabel="@Localizer["Rad"]" ShowActions="false" Items="Enum.GetValues<SheetRowType>().ToList()" ListVariant="ListVariant.DropDown"
+                    @bind-SelectedItem="SelectedRowType" GetItemNameFunc="SheetDataService.GetRowTypeName" /> *@
+    </Row>
+
+    <MudTextField Style="width: calc(50% - 4px);" T="int" Margin="Margin.Dense" Value="SelectedColumn.Width" ValueChanged="SetColumnWidth" Label="@Localizer["Kolumnbredd"]" Variant="Variant.Outlined" />
+    
+    <div>
+        @* <MudCheckBox Style="width: 50%; margin-left: -4px !important;" T="bool" Value="SelectedColumn.IsVisible" ValueChanged="SetColumnVisibility" Dense="true" Label="@Localizer["Visa kolumn"]" /> *@
+        <MudCheckBox Style="width: 50%; margin-left: -4px !important;" T="bool" Value="SelectedCellFormat.IsVisible" ValueChanged="SetCellVisibility" Dense="true" Label="@Localizer["Visa cell-värde"]" />
+    </div>
+    
+
+
+
+    <SheetCellEditor Section="Section" SheetCellFormat="SelectedCellFormat" />
+   
+       
+}
+
+@code {
+    [Parameter] public SheetSection? Section { get; set; }
+    [Parameter] public View? View { get; set; }
+    [CascadingParameter] public EditViewPage? EditViewPage { get; set; }
+    
+
+    SheetColumnType SelectedColumnType = SheetColumnType.Description;
+    SheetRowType SelectedRowType = SheetRowType.Group;
+    SheetCellFormat SelectedCellFormat => Section!.CellFormats.First(x => x.RowType == SelectedRowType && x.ColumnType == SelectedColumnType);
+    SheetColumn SelectedColumn => Section!.Columns.First(x => x.ColumnType == SelectedColumnType);
+
+    void SetColumnVisibility(bool isVisible)
+    {
+        SelectedColumn.IsVisible = isVisible;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void SetColumnVisibility(SheetColumnType type, bool isVisible)
+    {
+        if (Section is not null)
+        {
+            var column = Section.Columns.FirstOrDefault(x => x.ColumnType == type);
+            if (column is not null)
+            {
+                column.IsVisible = isVisible;
+                EditViewPage?.TriggerStateHasChanged();
+            }
+        }
+    }
+    void SetCellVisibility(bool isVisible)
+    {
+        SelectedCellFormat.IsVisible = isVisible;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void SetColumnWidth(int width)
+    {
+        SelectedColumn.Width = width;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+
+
+    bool CanMoveColumnUp()
+    {
+        var columns = Section?.Columns.OrderBy(x => x.Order).ToList();
+        if (columns is null || columns.Count < 2)
+        {
+            return false;
+        }
+        return columns.First() != SelectedColumn;
+    }
+    bool CanMoveColumnDown()
+    {
+        var columns = Section?.Columns.OrderBy(x => x.Order).ToList();
+        if (columns is null || columns.Count < 2)
+        {
+            return false;
+        }
+        return columns.Last() != SelectedColumn;
+    }
+    void MoveColumnUp()
+    {
+        var columns = Section?.Columns.OrderBy(x => x.Order).ToList();
+        if (!CanMoveColumnUp() || columns is null)
+        {
+            return;
+        }
+        var value = SelectedColumn.Order - 1;
+        var otherColumn = columns.First(x => x.Order == value);
+        otherColumn.Order += 1;
+        SelectedColumn.Order -= 1;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void MoveColumnDown()
+    {
+        var columns = Section?.Columns.OrderBy(x => x.Order).ToList();
+        if (!CanMoveColumnDown() || columns is null)
+        {
+            return;
+        }
+
+        var value = SelectedColumn.Order + 1;
+        var otherColumn = columns.First(x => x.Order == value);
+        otherColumn.Order -= 1;
+        SelectedColumn.Order += 1;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+
+}

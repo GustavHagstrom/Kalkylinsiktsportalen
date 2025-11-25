@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Models.FromShared;
+﻿namespace Core.Models.FromShared;
 public class Folder
 {
     public int FolderNum { get; set; }

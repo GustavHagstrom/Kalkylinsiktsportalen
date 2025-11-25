@@ -1,0 +1,33 @@
+﻿@using Data.Abstractions
+<MudThemeProvider Theme="CustomThemes.PlatformStandard" IsDarkMode="IsDarkMode" DefaultScrollbar="false" />
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code{
+    [Inject] IDarkModeStore? DarkModeService { get; set; }
+    [Inject] AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    public bool IsDarkMode { get; private set; } = false;
+
+    public async Task SetDarkModeAsync(bool isDarkMode)
+    {
+        IsDarkMode = isDarkMode;
+        var authState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        if (authState?.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            await DarkModeService!.SetAsync(authState.User, IsDarkMode);
+        }
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        if (authState?.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            IsDarkMode = await DarkModeService!.GetAsync(authState.User);
+        }
+    }
+}

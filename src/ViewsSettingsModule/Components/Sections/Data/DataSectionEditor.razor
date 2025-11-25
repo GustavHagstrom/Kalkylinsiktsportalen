@@ -1,0 +1,134 @@
+@using ViewSettingsModule.Components.Format
+@inject IStringLocalizer<DataSectionEditor> Localizer
+
+@if (Section is not null && View is not null)
+{
+    <Row>
+        <MudField Margin="Margin.Dense" Variant="Variant.Outlined" Label="@Localizer["Antal kolumner"]">
+            <div class="d-flex">
+                <div>
+                    @Section.Columns.Count
+                </div>
+                <MudSpacer />
+                <div class="button-container">
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="AddColumn" Style="min-width: 0; padding: 0;">
+                        <MudIcon Icon="@Icons.Material.Sharp.KeyboardArrowUp" Style="height: 20px; width: 20px;" />
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="RemoveColumn" Style="min-width: 0; padding: 0;">
+                        <MudIcon Icon="@Icons.Material.Sharp.KeyboardArrowDown" Style="height: 20px; width: 20px;" />
+                    </MudButton>
+                </div>
+            </div>
+        </MudField>
+        <MudField Margin="Margin.Dense" Variant="Variant.Outlined" Label="@Localizer["Antal rader"]">
+            <div class="d-flex">
+                <div>
+                    @Section.Rows.Count
+                </div>
+                <MudSpacer />
+                <div class="button-container">
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="AddRow" Style="min-width: 0; padding: 0;">
+                        <MudIcon Icon="@Icons.Material.Sharp.KeyboardArrowUp" Style="height: 20px; width: 20px;" />
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="RemoveRow" Style="min-width: 0; padding: 0;">
+                        <MudIcon Icon="@Icons.Material.Sharp.KeyboardArrowDown" Style="height: 20px; width: 20px;" />
+                    </MudButton>
+                </div>
+            </div>
+        </MudField>
+
+    </Row>
+    <Row>
+        <SelectList T="int" ListStyle="width: 100%; min-height: 40px;" @bind-SelectedItem="SelectedColumnCount" Items="Enumerable.Range(1, Section!.Columns.Count).ToList()" ShowActions="false" DropDownLabel="@Localizer["Kolumn"]" ListVariant="ListVariant.DropDown" />
+        <SelectList T="int" @bind-SelectedItem="SelectedRowCount" Items="Enumerable.Range(1, Section!.Rows.Count).ToList()" ShowActions="false" DropDownLabel="@Localizer["Rad"]" ListVariant="ListVariant.DropDown" />
+    </Row>
+
+
+    @if (SelectedCell is not null && SelectedColumn is not null && SelectedRow is not null)
+    {
+        <Row Class="align-center relative">
+            <MudTextField T="string" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@Localizer["Formel"]" Value="SelectedCell.Formula" ValueChanged="value => SetFormula(SelectedCell, value)" />
+            <MudIconButton Color="Color.Info" Icon="@Icons.Material.Sharp.Help" Size="Size.Large" Class="pa-0" OnClick="() => ShowFormulaHelp = !ShowFormulaHelp"/>
+            <MudPopover AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.BottomRight" Paper="true" Open="ShowFormulaHelp" OverflowBehavior="OverflowBehavior.FlipAlways">
+
+            </MudPopover>
+        </Row>
+        <Row>
+            <MudTextField T="int" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@Localizer["Kolumnbredd"]" Value="SelectedColumn.Width" ValueChanged="value => SetWidth(SelectedColumn, value)" />
+            <MudTextField T="int" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@Localizer["Radhöjd"]" Value="SelectedRow.Height" ValueChanged="value => SetHeight(SelectedRow, value)" />
+        </Row>
+        <DataCellEditor Section="Section" DataCellFormat="SelectedCell.CellFormat" />
+    }
+
+
+}
+
+@code {
+    [Parameter] public DataSection? Section { get; set; }
+    [Parameter] public View? View { get; set; }
+    [CascadingParameter] public EditViewPage? EditViewPage { get; set; }
+    int SelectedRowCount = 1;
+    int SelectedColumnCount = 1;
+    bool ShowFormulaHelp = false;
+
+    DataColumn? SelectedColumn => Section?.Columns.FirstOrDefault(x => x.Order == SelectedColumnCount);
+    DataRow? SelectedRow => Section?.Rows.FirstOrDefault(x => x.Order == SelectedRowCount);
+    DataCell? SelectedCell
+    {
+        get
+        {
+            if (Section is null || SelectedRowCount == 0 || SelectedColumnCount == 0) return null;
+
+            var cell = Section?.Cells.FirstOrDefault(x => x.Row == SelectedRowCount && x.Column == SelectedColumnCount);
+            return cell;
+        }
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            SelectedRowCount = Section?.Rows.Count > 0 ? 1 : 0;
+            SelectedColumnCount = Section?.Columns.Count > 0 ? 1 : 0;
+        }
+
+    }
+    void AddColumn()
+    {
+        if (Section is null) return;
+        Section.AddColumn();
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void RemoveColumn()
+    {
+        if (Section is null || Section.Columns.Count < 2) return;
+        Section.Columns.Remove(Section.Columns.Last());
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void AddRow()
+    {
+        if (Section is null) return;
+        Section.AddRow();
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void RemoveRow()
+    {
+        if (Section is null || Section.Rows.Count < 2) return;
+        Section.Rows.Remove(Section.Rows.Last());
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void SetHeight(DataRow row, int height)
+    {
+        row.Height = height;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void SetWidth(DataColumn column, int width)
+    {
+        column.Width = width;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+    void SetFormula(DataCell cell, string formula)
+    {
+        cell.Formula = formula;
+        EditViewPage?.TriggerStateHasChanged();
+    }
+}

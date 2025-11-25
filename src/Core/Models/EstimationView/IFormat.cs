@@ -1,6 +1,6 @@
-﻿using AppPlatform.Core.Enums.ViewTemplate;
+﻿using Core.Enums.ViewTemplate;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 public interface IFormat
 {
     Align? HorizontalAlign { get; set; }

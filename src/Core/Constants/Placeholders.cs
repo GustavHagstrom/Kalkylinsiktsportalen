@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Constants;
+﻿namespace Core.Constants;
 public static class Placeholders
 {
     // The value of these must not ever be changed!!!!

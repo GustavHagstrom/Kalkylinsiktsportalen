@@ -1,9 +1,9 @@
-﻿using AppPlatform.Core.Abstractions;
-using AppPlatform.Core.Constants;
-using AppPlatform.Core.Extensions;
+﻿using Core.Abstractions;
+using Core.Constants;
+using Core.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AppPlatform.Core.Builders;
+namespace Core.Builders;
 public class ComponentBuilder(IServiceCollection Services)
 {
     /// <summary>

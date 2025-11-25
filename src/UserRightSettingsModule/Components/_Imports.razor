@@ -1,0 +1,20 @@
+﻿@attribute [Authorize(Policy = Constants.AuthorizationConstants.Policy)]
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using SharedModule.Components.Settings
+@using MudBlazor
+@using Microsoft.Extensions.Localization
+@using SharedModule.Services.MicrosoftGraph
+@using UserRightSettingsModule.Data.Abstractions
+@using Microsoft.Graph.Models
+@using SharedModule.Components
+@using Core.Models.Authorization
+@using Core.Abstractions
+@using SharedModule.Services
+@using SharedModule.Components.Dialogs
+@using SharedModule.Components.Rights
+@using System.Security.Claims
+@using Core.Models.FromShared
+@using Core.Extensions

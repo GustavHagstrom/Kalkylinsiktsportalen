@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.Authorization;
+namespace Core.Models.Authorization;
 public class RoleAccess
 {
     [StringLength(50)]

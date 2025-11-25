@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Utilities;
+﻿namespace Core.Utilities;
 public class RulesEngine<T> where T : class
 {
     private readonly List<IRule<T>> rules = new();

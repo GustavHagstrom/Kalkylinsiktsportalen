@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Abstractions;
+﻿namespace Core.Abstractions;
 internal interface ICommonSettingsComponent : IInjectableComponent
 {
 

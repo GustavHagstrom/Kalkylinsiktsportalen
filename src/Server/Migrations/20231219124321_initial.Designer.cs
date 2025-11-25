@@ -4,16 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using AppPlatform.Core.Data;
-using AppPlatform.Data.EfCore;
+using Core.Data;
+using Data.EfCore;
 
 #nullable disable
 
-namespace AppPlatform.Server.Migrations
+namespace Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20231219124321_initial")]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     partial class initial
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

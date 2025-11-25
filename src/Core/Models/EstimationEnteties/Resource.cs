@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Models.EstimationEnteties;
+﻿namespace Core.Models.EstimationEnteties;
 public class Resource
 {
     public string Name { get; set; } = string.Empty;

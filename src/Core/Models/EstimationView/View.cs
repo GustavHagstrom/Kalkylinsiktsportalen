@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.Abstractions;
+﻿using Core.Models.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 public class View : IViewEntity, ITenantEntety
 {
     [StringLength(50)]

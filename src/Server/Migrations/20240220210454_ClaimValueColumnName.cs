@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace AppPlatform.Server.Migrations
+namespace Server.Migrations
 {
     /// <inheritdoc />
     public partial class ClaimValueColumnName : Migration

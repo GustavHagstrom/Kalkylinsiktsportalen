@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.Abstractions;
+﻿using Core.Models.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models;
+namespace Core.Models;
 public class UserSettings : IUserEntety
 {
     [StringLength(50)]

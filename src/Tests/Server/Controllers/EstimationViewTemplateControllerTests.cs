@@ -1,5 +1,5 @@
-﻿//using AppPlatform.Shared.Services.EstimationView;
-//using AppPlatform.Shared.DTOs.EstimationView;
+﻿//using Shared.Services.EstimationView;
+//using Shared.DTOs.EstimationView;
 //using Microsoft.AspNetCore.Http;
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@
 //using System.Security.Claims;
 //using static SharedLibrary.Constants.BackendApiEndpoints;
 
-//namespace AppPlatform.Tests.Server.Controllers;
+//namespace Tests.Server.Controllers;
 //[TestFixture]
 //public class EstimationViewTemplateControllerTests
 //{

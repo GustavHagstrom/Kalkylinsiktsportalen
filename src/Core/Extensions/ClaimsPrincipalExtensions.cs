@@ -1,7 +1,7 @@
 ﻿using Microsoft.Identity.Web;
 using System.Security.Claims;
 
-namespace AppPlatform.Core.Extensions;
+namespace Core.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {

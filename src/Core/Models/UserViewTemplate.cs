@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Models.Abstractions;
-using AppPlatform.Core.Models.EstimationView;
+﻿using Core.Models.Abstractions;
+using Core.Models.EstimationView;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models;
+namespace Core.Models;
 
 public class UserViewTemplate : IUserEntety
 {

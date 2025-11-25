@@ -1,0 +1,34 @@
+﻿@using Core.Constants
+@using Core.Abstractions
+
+@inherits LayoutComponentBase
+
+
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+<PageTitle>@($"{CommonAppConstants.ApplicationName} {CommonAppConstants.ApplicationVersion}")</PageTitle>
+
+
+
+<MudLayout Style="height: 100vh">
+    <MudAppBar Elevation="3" Dense="true" Gutters="false">
+
+        <AppBarNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Dashboard" Text="@Localizer["Start"]" />
+
+        @foreach (var component in injectableComponentService.AppBarNavLinkComponents)
+        {
+            @component.Render();
+        }
+        <MudSpacer />
+        <LoginDisplay />
+    </MudAppBar>
+
+    <MudMainContent Style="height: 100%;">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@inject IStringLocalizer<MainLayout> Localizer
+@inject IApplicationRenderComponentsService injectableComponentService
+

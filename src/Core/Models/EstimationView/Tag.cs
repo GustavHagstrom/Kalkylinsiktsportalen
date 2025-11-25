@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Enums.ViewTemplate;
+﻿using Core.Enums.ViewTemplate;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 
 public class Tag : IViewEntity
 {

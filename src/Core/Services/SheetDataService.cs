@@ -1,9 +1,9 @@
-﻿using AppPlatform.Core.Models.EstimationEnteties;
-using AppPlatform.Core.Enums.ViewTemplate;
+﻿using Core.Models.EstimationEnteties;
+using Core.Enums.ViewTemplate;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
 
-namespace AppPlatform.Core.Services;
+namespace Core.Services;
 public class SheetDataService(IStringLocalizer<SheetDataService> Localizer) : ISheetDataService
 {
     public string? GetColumnDataFromItem(SheetColumnType type, SheetItem item)

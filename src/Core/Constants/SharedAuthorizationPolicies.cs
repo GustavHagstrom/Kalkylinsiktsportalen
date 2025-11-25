@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Constants;
+﻿namespace Core.Constants;
 public static class SharedAuthorizationPolicies
 {
     public const string Admin = "Admin";

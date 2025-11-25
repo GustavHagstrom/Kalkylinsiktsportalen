@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Models.EstimationView;
+﻿namespace Core.Models.EstimationView;
 
 public interface IViewEntity
 {

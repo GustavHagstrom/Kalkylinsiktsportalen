@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Abstractions;
-using AppPlatform.Core.Extensions;
+﻿using Core.Abstractions;
+using Core.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AppPlatform.Core.Builders;
+namespace Core.Builders;
 public class AccessClaimInfoBuilder(IServiceCollection Services)
 {
     private readonly HashSet<Type> _accessValuesTypes = new();

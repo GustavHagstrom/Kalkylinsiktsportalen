@@ -1,12 +1,12 @@
-﻿//using AppPlatform.Core.Data;
-//using AppPlatform.Shared.Services.EstimationView;
-//using AppPlatform.Shared.DTOs.EstimationView;
+﻿//using Core.Data;
+//using Shared.Services.EstimationView;
+//using Shared.DTOs.EstimationView;
 //using Mapster;
 //using Microsoft.EntityFrameworkCore;
 //using Microsoft.Extensions.Logging;
 //using Moq;
 
-//namespace AppPlatform.Tests.Server.Services;
+//namespace Tests.Server.Services;
 //[TestFixture]
 //public class EstimationViewTemplateServiceTests
 //{

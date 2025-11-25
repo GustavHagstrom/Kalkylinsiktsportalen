@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Models.Abstractions;
+﻿using Core.Models.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AppPlatform.Core.Models;
+namespace Core.Models;
 
 public class BidconAccessCredentials  : ITenantEntety
 {

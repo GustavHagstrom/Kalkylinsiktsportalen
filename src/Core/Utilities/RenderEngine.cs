@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace AppPlatform.Core.Utilities;
+namespace Core.Utilities;
 public static class RenderEngine
 {
     public static RenderFragment Render(Type componentType, params KeyValuePair<string, object>[] parameters)

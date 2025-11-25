@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Enums.BidconAccess;
+﻿using Core.Enums.BidconAccess;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AppPlatform.Core.Models.EstimationEnteties;
+namespace Core.Models.EstimationEnteties;
 
 public class SheetItem
 {

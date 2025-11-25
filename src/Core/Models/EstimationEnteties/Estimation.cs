@@ -1,6 +1,6 @@
-﻿using AppPlatform.Core.Models.Abstractions;
+﻿using Core.Models.Abstractions;
 
-namespace AppPlatform.Core.Models.EstimationEnteties;
+namespace Core.Models.EstimationEnteties;
 public class Estimation : ITenantEntety
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();

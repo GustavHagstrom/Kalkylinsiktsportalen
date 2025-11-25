@@ -1,9 +1,9 @@
-﻿using AppPlatform.Core.Abstractions;
-using AppPlatform.Core.Builders;
+﻿using Core.Abstractions;
+using Core.Builders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AppPlatform.Core.Extensions;
+namespace Core.Extensions;
 public static class HostApplicationBuilderExtensions
 {
 

@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.Authorization;
+﻿using Core.Models.Authorization;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppPlatform.Core.Models.EstimationView;
+namespace Core.Models.EstimationView;
 public class RoleView
 {
     [StringLength(50)]

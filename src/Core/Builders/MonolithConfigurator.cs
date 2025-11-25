@@ -1,8 +1,8 @@
-﻿using AppPlatform.Core.Abstractions;
+﻿using Core.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AppPlatform.Core.Builders;
+namespace Core.Builders;
 public class MonolithConfigurator(WebApplicationBuilder builder)
 {
     private readonly AccessClaimInfoBuilder _accessIdBuilder = new(builder.Services);

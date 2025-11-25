@@ -1,4 +1,4 @@
-﻿namespace AppPlatform.Core.Enums.BidconAccess;
+﻿namespace Core.Enums.BidconAccess;
 public enum SheetType
 {
     None = 0,

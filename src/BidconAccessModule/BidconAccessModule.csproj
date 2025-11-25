@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SdkAccess\Models\**" />
+    <Compile Remove="SdkAccess\ReflectionUtilities\**" />
+    <Content Remove="SdkAccess\Models\**" />
+    <Content Remove="SdkAccess\ReflectionUtilities\**" />
+    <EmbeddedResource Remove="SdkAccess\Models\**" />
+    <EmbeddedResource Remove="SdkAccess\ReflectionUtilities\**" />
+    <None Remove="SdkAccess\Models\**" />
+    <None Remove="SdkAccess\ReflectionUtilities\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Dapper" Version="2.1.35" />
+	  <PackageReference Include="Elecosoft.Bidcon.SDK" Version="2023.2.23307.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharedModule\SharedModule.csproj" />
+  </ItemGroup>
+
+</Project>

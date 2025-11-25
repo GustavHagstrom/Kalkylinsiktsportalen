@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.EstimationEnteties;
-using AppPlatform.Core.Enums.ViewTemplate;
+﻿using Core.Models.EstimationEnteties;
+using Core.Enums.ViewTemplate;
 
-namespace AppPlatform.Core.Services;
+namespace Core.Services;
 public interface ISheetDataService
 {
     string? GetColumnDataFromItem(SheetColumnType type, SheetItem item);

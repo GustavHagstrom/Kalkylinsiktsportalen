@@ -1,7 +1,7 @@
-﻿using AppPlatform.Core.Models.EstimationEnteties;
-using AppPlatform.Core.Models.FromShared;
+﻿using Core.Models.EstimationEnteties;
+using Core.Models.FromShared;
 
-namespace AppPlatform.Core.Abstractions;
+namespace Core.Abstractions;
 public interface IBidconAccess
 {
     Task<Folder> GetFolderRootAsync(string tenantId);
