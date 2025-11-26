@@ -13,7 +13,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudButton Style="height: 100%" OnClick=" ToggltPopover">
+        <MudButton Style="height: 100%" OnClick=" TogglePopover">
             <UserAvatar User="UserWithPhoto" ShowText="!IsSmOrDown" TextPosition="UserAvatar.UserAvatarTextPosition.Left" />
         </MudButton>
         
@@ -23,7 +23,7 @@
                 <MudButton OnClick="Logout" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
 
-        <MudOverlay Visible="PopOverIsVisible" LockScroll="true" OnClick="ToggltPopover" />
+        <MudOverlay Visible="PopOverIsVisible" LockScroll="true" OnClick="TogglePopover" />
 
     </Authorized>
     <NotAuthorized>
@@ -79,12 +79,12 @@
     }
     async Task Logout()
     {
-        ToggltPopover();
-        var loginUrl = NavigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignOut");
-        await JSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{loginUrl}');");
+        TogglePopover();
+        var logoutUrl = NavigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignOut");
+        await JSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{logoutUrl}');");
     }
 
-    void ToggltPopover()
+    void TogglePopover()
     {
         PopOverIsVisible = !PopOverIsVisible;
     }

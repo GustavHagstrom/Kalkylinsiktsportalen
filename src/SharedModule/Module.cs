@@ -48,9 +48,8 @@ public class Module : IModule
     public void GeneralConfig(WebApplicationBuilder builder)
     {
         builder.Services.AddLocalization();
-        
+
         builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
-        
         builder.Services.AddSingleton<IApplicationRenderComponentsService, ApplicationRenderComponentsService>();
         builder.Services.AddApplicationInjectableComponent<AppbarSettingsLink>(SharedInjectableComponentKeys.AppBarNavLinkComponent);
         builder.Services.AddSingleton<IAccessClaimInfoContainer, AccessClaimInfoContainer>();
@@ -59,11 +58,7 @@ public class Module : IModule
         builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         builder.Services.AddScoped<IMicrosoftGraphUserAccess, GraphClientUserAccess>();
         builder.Services.AddTransient<IViewStyleService, ViewStyleService>();
-
-
-        //Core services
         builder.Services.AddScoped<ISheetDataService, SheetDataService>();
-
         builder.Services.AddAuthorization(configure =>
         {
             configure.AddPolicy(SharedAuthorizationPolicies.BidconConnection, policy =>

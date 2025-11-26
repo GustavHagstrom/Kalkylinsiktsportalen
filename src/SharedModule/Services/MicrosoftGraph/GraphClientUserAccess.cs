@@ -12,9 +12,14 @@ internal class GraphClientUserAccess(GraphServiceClient graphServiceClient) : IM
     public async Task<UserWithPhoto?> GetMeWithPhotoAsync()
     {
         var user = await GetMeAsync();
-        if (user is not null)
+        if (user is not null && user.Id is not null)
         {
-            return await GetUserPhotoAsync(user);
+            var photo = await GetUserPhotoAsync(user.Id);
+            return new UserWithPhoto
+            {
+                User = user,
+                PhotoBase64 = photo
+            };
         }
         return null;
     }
@@ -30,34 +35,52 @@ internal class GraphClientUserAccess(GraphServiceClient graphServiceClient) : IM
         {
             var tasks = users.Select(async user =>
             {
-                return await GetUserPhotoAsync(user);
+                string? photo = null;
+                if (user.Id is not null)
+                {
+                    photo = await GetUserPhotoAsync(user.Id);
+                }
+                return new UserWithPhoto
+                {
+                    User = user,
+                    PhotoBase64 = photo
+                };
             });
             return await Task.WhenAll(tasks);
         }
 
         return Enumerable.Empty<UserWithPhoto>();
     }
-    public async Task<User?> GetUserAsync(string id)
+    public async Task<User?> GetUserAsync(string userId)
     {
-        return await graphServiceClient.Users[id].GetAsync();
+        return await graphServiceClient.Users[userId].GetAsync();
     }
-    public async Task<UserWithPhoto?> GetUserWithPhotoAsync(string id)
+    public async Task<UserWithPhoto?> GetUserWithPhotoAsync(string userId)
     {
-        var user = await GetUserAsync(id);
+        var user = await GetUserAsync(userId);
         if (user is not null)
         {
-            return await GetUserPhotoAsync(user);
+            var photo = await GetUserPhotoAsync(userId);
+            return new UserWithPhoto
+            {
+                User = user,
+                PhotoBase64 = photo
+            };
         }
         return null;
     }
 
-
-    async Task<UserWithPhoto> GetUserPhotoAsync(User user)
+    /// <summary>
+    /// Base64 image string
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<string?> GetUserPhotoAsync(string userId)
     {
-        var stream = await GetPhotoStreamAsync(user.Id);
+        var stream = await GetPhotoStreamAsync(userId);
         var bytes = ReadStream(stream);
         var photo = bytes is not null ? Convert.ToBase64String(bytes) : null;
-        return new UserWithPhoto { User = user, PhotoBase64 = photo };
+        return photo;
     }
     async Task<Stream?> GetPhotoStreamAsync(string? userId)
     {

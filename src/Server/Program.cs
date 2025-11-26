@@ -14,6 +14,9 @@ using Microsoft.Identity.Client;
 using MongoDB.Driver;
 using Data.EfCore;
 using Data.Abstractions;
+using Data;
+using SharedModule.Services.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
 
 internal class Program
 {
@@ -21,57 +24,9 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-
         builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
-
+           .AddInteractiveServerComponents();
         builder.Services.AddCascadingAuthenticationState();
-
-        builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityWebApp(options =>
-            {
-                var section = builder.Configuration.GetSection("AzureAd");
-                section.Bind(options);
-                options.Events.OnTokenValidated += OnTokenValidatedFunc;
-            })
-            .EnableTokenAcquisitionToCallDownstreamApi()
-            .AddInMemoryTokenCaches();
-
-        builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
-        if (builder.Configuration["DbType"] == "SqlServer")
-        {
-#if DEBUG
-            var connectionString = "Data Source=bin/debug/database.db";
-            builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString, b => b.MigrationsAssembly("AppPlatform.Server")));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-#else
-    var connectionString = builder.Configuration.GetConnectionString("SqlServer") ?? throw new InvalidOperationException("Connection string 'SqlServer' not found.");
-    builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString, b => b.MigrationsAssembly("AppPlatform.Server")));
-#endif
-        }
-        else if (builder.Configuration["DbType"] == "MongoDb")
-        {
-            builder.Services.AddSingleton(sp =>
-            {
-                var configuration = sp.GetRequiredService<IConfiguration>();
-                var connectionString = configuration["MongoDbSettings:ConnectionString"];
-                var dbName = configuration["MongoDbSettings:DatabaseName"];
-                if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(connectionString))
-                {
-                    throw new InvalidOperationException("MongoDB settings are not configured properly.");
-                }
-                var client = new MongoClient(connectionString);
-                return client.GetDatabase(dbName);
-            });
-            
-        }
-        else
-        {
-            throw new InvalidOperationException("DbType not found");
-        }
-
-
-
         builder.Services.AddMudServices(config =>
         {
             config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
@@ -85,9 +40,6 @@ internal class Program
 
         });
 
-
-
-
         builder.ConfigureMonolith(config =>
         {
             config.AddModule<SharedModule.Module>();
@@ -95,9 +47,34 @@ internal class Program
             config.AddModule<UserRightSettingsModule.Module>();
             config.AddModule<BidconBrowserModule.Module>();
             config.AddModule<BidconAccessModule.Module>();
-
-
         }); //add assembly to the route aswell
+
+        builder.RegisterDataServices();
+
+        if (builder.Environment.IsProduction())
+        {
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApp(options =>
+                    {
+                        var section = builder.Configuration.GetSection("AzureAd");
+                        section.Bind(options);
+                        options.Events.OnTokenValidated += OnTokenValidatedFunc;
+                    })
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                    .AddInMemoryTokenCaches();
+            builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
+
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddScoped<IAuthService, MockedAuthService>();
+            builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthenticationStateProvider>();
+        }
+
+
+
+       
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.
