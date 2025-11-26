@@ -1,4 +1,4 @@
-﻿using Core.Models.Abstractions;
+﻿using Core.Abstractions;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Data.MongoDb.Enteties.Authorization;

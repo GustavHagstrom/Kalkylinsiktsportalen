@@ -17,6 +17,7 @@ using SharedModule.Services.MicrosoftGraph;
 using SharedModule.Services.Views;
 using Data.MongoDb.Stores;
 using MongoEnteties = Data.MongoDb.Enteties;
+using Microsoft.Extensions.Hosting;
 namespace SharedModule;
 public class Module : IModule
 {
@@ -47,8 +48,15 @@ public class Module : IModule
 
     public void GeneralConfig(WebApplicationBuilder builder)
     {
-        builder.Services.AddLocalization();
+        if(builder.Environment.IsProduction())
+        {
 
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+
+        }
+        builder.Services.AddLocalization();
         builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
         builder.Services.AddSingleton<IApplicationRenderComponentsService, ApplicationRenderComponentsService>();
         builder.Services.AddApplicationInjectableComponent<AppbarSettingsLink>(SharedInjectableComponentKeys.AppBarNavLinkComponent);

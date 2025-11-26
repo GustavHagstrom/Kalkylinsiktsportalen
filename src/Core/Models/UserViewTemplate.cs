@@ -1,4 +1,4 @@
-﻿using Core.Models.Abstractions;
+﻿using Core.Abstractions;
 using Core.Models.EstimationView;
 using System.ComponentModel.DataAnnotations;
 

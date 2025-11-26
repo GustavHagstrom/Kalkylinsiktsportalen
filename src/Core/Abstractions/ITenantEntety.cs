@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Core.Models.Abstractions;
+namespace Core.Abstractions;
 public interface ITenantEntety
 {
     [StringLength(50)]

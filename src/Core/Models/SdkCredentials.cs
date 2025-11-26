@@ -1,4 +1,4 @@
-﻿using Core.Models.Abstractions;
+﻿using Core.Abstractions;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 

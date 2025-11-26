@@ -73,13 +73,15 @@ public class AuthService : IAuthService, IDisposable
     public async Task LoginAsync()
     {
         await _localStorageService.SetItemAsync(LocalStorageKeys.RedirectPostLoginUrl, _navigationManager.Uri);
-        var loginUrl = _navigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignIn");
-        await _jSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{loginUrl}');");
+        var loginUrl = _navigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignIn").ToString();
+        _navigationManager.NavigateTo(loginUrl, forceLoad: true);
+        //await _jSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{loginUrl}');");
     }
 
     public async Task LogoutAsync()
     {
-        var logoutUrl = _navigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignOut");
-        await _jSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{logoutUrl}');");
+        var logoutUrl = _navigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignOut").ToString();
+        _navigationManager.NavigateTo(logoutUrl, forceLoad: true);
+        //await _jSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{logoutUrl}');");
     }
 }

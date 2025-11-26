@@ -1,4 +1,4 @@
-﻿using Core.Models.Abstractions;
+﻿using Core.Abstractions;
 
 namespace Core.Models.EstimationEnteties;
 public class Estimation : ITenantEntety
