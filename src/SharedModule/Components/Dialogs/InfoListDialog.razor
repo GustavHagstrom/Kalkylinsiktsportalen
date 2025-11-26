@@ -11,8 +11,8 @@
 </MudDialog>
 @code {
     public const string InfoParameter = "Info";
-    [CascadingParameter] public required MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialog? MudDialog { get; set; }
     [Parameter] public required HashSet<string> Info { get; set; } = new();
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    Task Submit() => MudDialog?.CloseAsync(DialogResult.Ok(true)) ?? Task.CompletedTask;
 }

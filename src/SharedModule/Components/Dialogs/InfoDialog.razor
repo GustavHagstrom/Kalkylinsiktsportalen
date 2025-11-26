@@ -8,8 +8,8 @@
 </MudDialog>
 @code {
     public const string InfoParameter = "Info";
-    [CascadingParameter] public required MudDialogInstance MudDialog { get; set; }
-    [Parameter] public required string Info { get; set; } = string.Empty;
+    [CascadingParameter] public MudDialog? MudDialog { get; set; }
+    [Parameter] public string Info { get; set; } = string.Empty;
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    Task Submit() => MudDialog?.CloseAsync(DialogResult.Ok(true)) ?? Task.CompletedTask;
 }

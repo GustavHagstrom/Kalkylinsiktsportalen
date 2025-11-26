@@ -21,13 +21,13 @@
 @inject IStringLocalizer<NewSectionDialog> Localizer
 @inject Helper Helper
 @code {
-    [CascadingParameter] public required MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] public MudDialog MudDialog { get; set; } = default!;
     string Name { get; set; } = string.Empty;
     SectionType Type = SectionType.DataSection;
 
 
     [Parameter] public Color YesButtonColor { get; set; } = Color.Primary;
 
-    void Ok() => MudDialog.Close(DialogResult.Ok(new NewSectionDialogResult(Name, Type)));
-    void Cancel() => MudDialog.Cancel();
+    Task Ok() => MudDialog?.CloseAsync(DialogResult.Ok(new NewSectionDialogResult(Name, Type))) ?? Task.CompletedTask;
+    Task Cancel() => MudDialog.CloseAsync(DialogResult.Cancel());
 }

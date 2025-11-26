@@ -15,23 +15,23 @@
 </MudDialog>
 
 @code{
-    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [CascadingParameter] MudDialog? MudDialog { get; set; }
 
     [Parameter] public string InputLabel { get; set; } = string.Empty;
 
     string Input { get; set; } = string.Empty;
     MudTextField<string>? InputField { get; set; }
 
-    void Cancel()
+    Task Cancel()
     {
-        MudDialog?.Cancel();
+        return MudDialog?.CloseAsync(DialogResult.Cancel()) ?? Task.CompletedTask;
     }
     async Task Ok()
     {
         await InputField!.Validate();
-        if (ValidateInput(Input) is null)
+        if (ValidateInput(Input) is null && MudDialog is not null)
         {
-            MudDialog?.Close(DialogResult.Ok(Input));
+            await MudDialog.CloseAsync(DialogResult.Ok(Input));
         }
     }
     string? ValidateInput(string value)

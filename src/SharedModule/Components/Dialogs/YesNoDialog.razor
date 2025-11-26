@@ -10,11 +10,11 @@
     </DialogActions>
 </MudDialog>
 @code {
-    [CascadingParameter] public required MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] public MudDialog? MudDialog { get; set; }
     [Parameter] public string Info { get; set; } = string.Empty;
     [Parameter] public Color YesButtonColor { get; set; } = Color.Primary;
     [Inject] public required IStringLocalizer<YesNoDialog> Localizer { get; set; }
 
-    void Ok() => MudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => MudDialog.Cancel();
+    Task Ok() => MudDialog?.CloseAsync(DialogResult.Ok(true)) ?? Task.CompletedTask;
+    Task Cancel() => MudDialog?.CloseAsync(DialogResult.Cancel()) ?? Task.CompletedTask;
 }
