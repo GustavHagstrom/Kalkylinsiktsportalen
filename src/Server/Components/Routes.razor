@@ -1,7 +1,21 @@
 ﻿@using ViewSettingsModule
 @using UserRightSettingsModule
 
-<StateManager>
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+
+
+@* <StateManager>
     <Router AppAssembly="@typeof(Program).Assembly"
             AdditionalAssemblies="@(new[] 
 { 
@@ -17,9 +31,6 @@
                 <NotAuthorized>
                     @if(context.User.Identity is not null && context.User.Identity.IsAuthenticated)
                     {
-                       @*  <LayoutView Layout="@typeof(MainLayout)">
-                            <p>Sorry, you're not authorized to access this page.</p>
-                        </LayoutView> *@
                         <p>Sorry, you're not authorized to access this page.</p>
                     }
                     else
@@ -51,3 +62,4 @@
         }
     }
 }
+ *@

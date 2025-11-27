@@ -13,22 +13,27 @@
 
 <MudLayout Style="height: 100vh">
     <MudAppBar Elevation="3" Dense="true" Gutters="false">
-
-        <AppBarNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Dashboard" Text="@Localizer["Start"]" />
+        <MudButton Variant="Variant.Filled">test1</MudButton>
+        <MudButton Variant="Variant.Filled">test1</MudButton>
+        <MudButton Variant="Variant.Filled">test1</MudButton>
+        <MudButton Variant="Variant.Filled">test1</MudButton>
+        
+     @*    <AppBarNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Dashboard" Text="@Localizer["Start"]" />
 
         @foreach (var component in injectableComponentService.AppBarNavLinkComponents)
         {
             @component.Render();
-        }
+        } *@
         <MudSpacer />
-        <LoginDisplay />
+       @*  <LoginDisplay /> *@
     </MudAppBar>
 
     <MudMainContent Style="height: 100%;">
         @Body
     </MudMainContent>
 </MudLayout>
-
+@* 
 @inject IStringLocalizer<MainLayout> Localizer
 @inject IApplicationRenderComponentsService injectableComponentService
 
+ *@
