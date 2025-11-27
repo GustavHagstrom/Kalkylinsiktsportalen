@@ -14,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 if (builder.HostEnvironment.IsDevelopment())
 {
+    builder.Services.AddAuthorizationCore();
     builder.Services.AddScoped<IAuthService, MockedAuthService>();
     builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthenticationStateProvider>();
 }
@@ -24,10 +25,7 @@ else
     {
         builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
     });
-
 }
 
 
-
 await builder.Build().RunAsync();
-
