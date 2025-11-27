@@ -1,0 +1,9 @@
+﻿
+@inject IAuthService AuthService
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.LoginAsync();
+    }
+}
