@@ -1,4 +1,4 @@
-﻿namespace BlazorServer.Shared.Services.Authentication;
+﻿namespace BlazorServer.Shared.Constants;
 
 public static class AuthConstants
 {

@@ -25,7 +25,7 @@
 
 @if (User is not null)
 {
-    <MudAvatar Size="Size" Class="@ClassNames" Style="@Styles" @onclick="@OnClick">
+    <MudAvatar Size="Size" Class="@ClassNames" Style="@Style" @onclick="@OnClick">
         @if (User.AvatarBase64 != null)
         {
             <MudImage Src="@($"data:image/png;base64, {User.AvatarBase64}")" Alt="User photo" />
@@ -40,7 +40,7 @@
 }
 else
 {
-    <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+    <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" Class="@ClassNames" Style="@Style" @onclick="@OnClick" />
 }
 
 @code{
@@ -49,7 +49,6 @@ else
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
 
     string ClassNames => $"{Class} avatar-style";
-    string Styles => $"{Style}";
    
 
 }

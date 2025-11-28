@@ -1,4 +1,5 @@
-﻿using BlazorServer.Shared.Models;
+﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace BlazorServer.Shared.Services.Authentication;
@@ -50,11 +51,8 @@ public class MockedAuthService : IAuthService, IDisposable
         _authProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
     public string? OrganizationId => _cachedAuthState?.User.FindFirst(AuthConstants.TenantId)?.Value;
-
     public string? UserId => _cachedAuthState?.User.FindFirst(AuthConstants.ObjectId)?.Value;
-
     public bool IsAuthenticated => _cachedAuthState?.User.Identity?.IsAuthenticated ?? false;
-
     public User? User => _cachedUser;
     public Task LoginAsync()
     {
@@ -79,6 +77,11 @@ public class MockedAuthService : IAuthService, IDisposable
             mockedAuthStateProvider.SignOut();
         }
         return Task.CompletedTask;
+    }
+    public async Task<User?> UpdateUserAsync()
+    {
+        await UpdateCachedStateAsync(_authProvider.GetAuthenticationStateAsync());
+        return _cachedUser;
     }
 }
  

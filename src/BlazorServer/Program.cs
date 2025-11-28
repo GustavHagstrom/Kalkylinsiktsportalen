@@ -1,11 +1,15 @@
 using BlazorServer;
 using BlazorServer.Shared.Components;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+builder.Services.AddControllers();
 
 builder.AddKipServicesAndFeatures();
 
@@ -22,6 +26,8 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.MapControllers();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

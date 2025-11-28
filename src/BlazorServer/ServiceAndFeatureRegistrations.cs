@@ -2,9 +2,15 @@
 using BlazorServer.Shared.FeatureRegistration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Graph;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
+using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
+using System.Security.Claims;
 
 namespace BlazorServer;
 
@@ -21,7 +27,20 @@ public static class ServiceAndFeatureRegistrations
         }
         else
         {
-
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApp(options =>
+                    {
+                        var section = builder.Configuration.GetSection("AzureAd");
+                        section.Bind(options);
+                        options.Events.OnTokenValidated += OnTokenValidatedFunc;
+                    })
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                    .AddInMemoryTokenCaches();
+            builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
+            builder.Services.AddTransient<IAuthenticationProvider, GraphClientAuthProvider>();
+            builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         }
 
         builder.ConfigureFeatures(config =>
@@ -52,4 +71,23 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddSingleton(featureBuilder.RenderCollection);
 
     }
+
+
+    static async Task OnTokenValidatedFunc(TokenValidatedContext context)
+    {
+        //implement access claims retrieval here
+
+        //var accessClaimService = context.HttpContext.RequestServices.GetRequiredService<IAccessClaimStore>();
+        //if (accessClaimService is not null)
+        //{
+        //    var claims = (await accessClaimService.GetAccessClaims(context.Principal)).ToList();
+        //    context.Principal?.AddIdentity(new ClaimsIdentity(claims));
+        //}
+        //else
+        //{
+        //    //handle?
+        //}
+        //await Task.CompletedTask.ConfigureAwait(false);
+    }
 }
+

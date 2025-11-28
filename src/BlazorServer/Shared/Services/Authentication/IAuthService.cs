@@ -9,5 +9,6 @@ public interface IAuthService
     bool IsAuthenticated { get; }
     User? User { get; }
     string? OrganizationId { get; }
+    Task<User?> UpdateUserAsync(); 
     
 }

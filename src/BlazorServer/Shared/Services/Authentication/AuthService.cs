@@ -1,6 +1,6 @@
-﻿using BlazorServer.Shared.Models;
+﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
-//using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 
 
@@ -30,6 +30,7 @@ public class AuthService : IAuthService, IDisposable
     {
         try
         {
+            Console.WriteLine("HEI imtryIng here");
             _cachedAuthState = await task;
             if (IsAuthenticated)
             {
@@ -65,11 +66,17 @@ public class AuthService : IAuthService, IDisposable
 
     public async Task LoginAsync()
     {
-        //_navigationManager.NavigateToLogin("authentication/login");
+        _navigationManager.NavigateTo($"/auth/login", true);
     }
 
     public async Task LogoutAsync()
     {
-        //_navigationManager.NavigateToLogout("authentication/logout");
+        _navigationManager.NavigateTo($"/auth/logout", true);
+    }
+
+    public async Task<User?> UpdateUserAsync()
+    {
+        await UpdateCachedStateAsync(_authProvider.GetAuthenticationStateAsync());
+        return _cachedUser;
     }
 }
