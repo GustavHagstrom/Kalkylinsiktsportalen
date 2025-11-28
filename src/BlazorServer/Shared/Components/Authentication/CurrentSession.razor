@@ -1,0 +1,12 @@
+<AuthorizeView>
+    <Authorized>
+            @foreach (var claim in @context.User.Claims)
+            {
+            <MudText Typo="Typo.h6">@claim.Type</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-0">@claim.Value</MudText>
+            }
+    </Authorized>
+    <NotAuthorized>
+        <h3>No session</h3>
+    </NotAuthorized>
+</AuthorizeView>

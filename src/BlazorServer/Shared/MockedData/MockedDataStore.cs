@@ -8,20 +8,20 @@ public static class MockedDataStore
     [
         new User
         {
-            Id = "UserID123",
-            Name = "1 Test User",
+            Id = "Admin",
+            Name = "Admin",
             AvatarBase64 = null
         },
         new User
         {
-            Id = "UserID456",
-            Name = "2 Test User",
+            Id = "User",
+            Name = "User",
             AvatarBase64 = null
         },
         new User
         {
-            Id = "UserID789",
-            Name = "3 Test User",
+            Id = "Guest",
+            Name = "Guest",
             AvatarBase64 = null
         }
     ];
