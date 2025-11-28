@@ -1,0 +1,75 @@
+﻿using BlazorServer.Shared.Models;
+using Microsoft.AspNetCore.Components;
+//using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+
+
+namespace BlazorServer.Shared.Services.Authentication;
+
+public class AuthService : IAuthService, IDisposable
+{
+    private readonly AuthenticationStateProvider _authProvider;
+    private readonly NavigationManager _navigationManager;
+    private readonly IUserService _userService;
+    private AuthenticationState? _cachedAuthState;
+    private User? _cachedUser;
+
+    public AuthService(AuthenticationStateProvider authProvider, NavigationManager navigationManager, IUserService userService) 
+    {
+        _authProvider = authProvider;
+        _navigationManager = navigationManager;
+        _userService = userService;
+        _authProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+    }
+
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        _ = UpdateCachedStateAsync(task);
+    }
+    async Task UpdateCachedStateAsync(Task<AuthenticationState> task)
+    {
+        try
+        {
+            _cachedAuthState = await task;
+            if (IsAuthenticated)
+            {
+                var userId = UserId;
+                if (userId is not null)
+                {
+                    _cachedUser = await _userService.GetUserAsync(userId);
+                }
+            }
+            else
+            {
+                _cachedUser = null;
+            }
+        }
+        catch (Exception e)
+        {
+            //should probably logg?
+            throw;
+        }
+    }
+
+    public void Dispose()
+    {
+        _authProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+    public string? OrganizationId => _cachedAuthState?.User.FindFirst(AuthConstants.TenantId)?.Value;
+
+    public string? UserId => _cachedAuthState?.User.FindFirst(AuthConstants.ObjectId)?.Value;
+
+    public bool IsAuthenticated => _cachedAuthState?.User.Identity?.IsAuthenticated ?? false;
+
+    public User? User => _cachedUser;
+
+    public async Task LoginAsync()
+    {
+        //_navigationManager.NavigateToLogin("authentication/login");
+    }
+
+    public async Task LogoutAsync()
+    {
+        //_navigationManager.NavigateToLogout("authentication/logout");
+    }
+}

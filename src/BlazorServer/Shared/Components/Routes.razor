@@ -1,0 +1,29 @@
+﻿@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    @if(context.User.Identity is not null && context.User.Identity.IsAuthenticated)
+                    {
+                        <p>Sorry, you're not authorized to access this page.</p>
+                    }
+                    else
+                    {
+                        <RedirectToLogin/>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        @* <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" /> *@
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

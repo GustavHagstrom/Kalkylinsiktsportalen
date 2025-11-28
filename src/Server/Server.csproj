@@ -13,22 +13,14 @@
 
 	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
 
+	  <PackageReference Include="MudBlazor" Version="8.15.0" />
+
 	  <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
 
   </ItemGroup>
 
-
-  <ItemGroup>
-    <ProjectReference Include="..\BidconAccessModule\BidconAccessModule.csproj" />
-    <ProjectReference Include="..\BidconBrowserModule\BidconBrowserModule.csproj" />
-    <ProjectReference Include="..\UserRightSettingsModule\UserRightSettingsModule.csproj" />
-    <ProjectReference Include="..\ViewsSettingsModule\ViewSettingsModule.csproj" />
-    <ProjectReference Include="..\SharedModule\SharedModule.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Components\Shared\Dialogs\" />
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\css\Components\" />
   </ItemGroup>
 

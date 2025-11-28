@@ -1,4 +1,4 @@
-﻿@rendermode InteractiveServer
+﻿@* @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject ILocalStorageService LocalStorageService
@@ -9,4 +9,4 @@
         var loginUrl = NavigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignIn?ReturnUrl={NavigationManager.Uri}");
         await JSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{loginUrl}');");
     }
-}
+} *@

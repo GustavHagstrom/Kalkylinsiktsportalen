@@ -1,0 +1,124 @@
+﻿
+
+@using Services
+@using Microsoft.AspNetCore.Antiforgery
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.JSInterop
+@* @implements IBrowserViewportObserver
+@implements IAsyncDisposable *@
+@inject IStringLocalizer<LoginDisplay> Localizer
+
+<AuthorizeView>
+   @*  <Authorized>
+        <MudButton Style="height: 100%" OnClick=" TogglePopover">
+            <UserAvatar User="UserWithPhoto" ShowText="!IsSmOrDown" TextPosition="UserAvatar.UserAvatarTextPosition.Left" />
+        </MudButton>
+        
+
+        <MudPopover Open="PopOverIsVisible" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@context.User.FindFirst(ClaimConstants.Name)?.Value</MudText>
+                <MudButton OnClick="Logout" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
+        </MudPopover>
+
+        <MudOverlay Visible="PopOverIsVisible" LockScroll="true" OnClick="TogglePopover" />
+
+    </Authorized>
+    <NotAuthorized>
+            <MudButton OnClick="Login" Class="px-4" Style="height: 100%;" Variant="Variant.Text"
+                       Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Login">@Localizer["Logga in"]</MudButton>
+    </NotAuthorized> *@
+</AuthorizeView>
+
+@* @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject ILocalStorageService LocalStorageService
+@inject IMicrosoftGraphUserAccess MicrosoftGraphUserAccess
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IBrowserViewportService BrowserViewportService
+
+    @code{
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    bool PopOverIsVisible { get; set; } = false;
+    UserWithPhoto? UserWithPhoto { get; set; }
+    bool IsSmOrDown => _breakPoint == Breakpoint.Sm || _breakPoint == Breakpoint.Xs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SetUserWithPhotoAsync();
+    }
+    async Task SetUserWithPhotoAsync()
+    {
+        try
+        {
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (state.User.Identity is not null && state.User.Identity.IsAuthenticated)
+            {
+                UserWithPhoto = await MicrosoftGraphUserAccess.GetMeWithPhotoAsync();
+            }
+            else
+            {
+                UserWithPhoto = null;
+            }
+            // StateHasChanged();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    async Task Login()
+    {
+        await LocalStorageService.SetItemAsync(LocalStorageKeys.RedirectPostLoginUrl, NavigationManager.Uri);
+        var loginUrl = NavigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignIn");
+        await JSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{loginUrl}');");
+    }
+    async Task Logout()
+    {
+        TogglePopover();
+        var logoutUrl = NavigationManager.ToAbsoluteUri($"/MicrosoftIdentity/Account/SignOut");
+        await JSRuntime.InvokeVoidAsync("eval", $"window.location.replace('{logoutUrl}');");
+    }
+
+    void TogglePopover()
+    {
+        PopOverIsVisible = !PopOverIsVisible;
+    }
+
+    public static string GetInitials(string? name)
+    {
+        if (name is null) return string.Empty;
+        var names = name.Split(" ");
+        var initials = string.Empty;
+        foreach (var item in names)
+        {
+            initials += item.First();
+        }
+        return initials;
+    }
+    private Breakpoint _breakPoint;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
+
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        _breakPoint = browserViewportEventArgs.Breakpoint;
+
+        return InvokeAsync(StateHasChanged);
+    }
+}
+ *@

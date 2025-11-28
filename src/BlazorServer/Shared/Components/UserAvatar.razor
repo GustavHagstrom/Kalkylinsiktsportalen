@@ -1,0 +1,55 @@
+@using BlazorServer.Shared.Models
+@inherits StyleComponent
+
+<style>
+    .avatar-style {
+        background-color: var(--mud-palette-action-default-hover);
+        box-shadow: 0px 3px 5px -1px rgba(0,0,0,.2), 0px 6px 10px 0px rgba(0,0,0,.14), 0px 1px 18px 0px rgba(0,0,0,.12);
+        cursor: pointer;
+    }
+
+    .avatar-style::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 200, 0, 0); /* start: ingen färg */
+        pointer-events: none;
+        transition: background 0.25s ease;
+    }
+
+    .avatar-style:hover::after {
+            background: var(--mud-palette-action-default-hover);
+            /* rgba(0, 0, 0, 1); */
+    }
+</style>
+
+@if (User is not null)
+{
+    <MudAvatar Size="Size" Class="@ClassNames" Style="@Styles" @onclick="@OnClick">
+        @if (User.AvatarBase64 != null)
+        {
+            <MudImage Src="@($"data:image/png;base64, {User.AvatarBase64}")" Alt="User photo" />
+        }
+        else
+        {
+            <div class="pa-0">
+                @User.Name.First()
+            </div>
+        }
+    </MudAvatar>
+}
+else
+{
+    <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+}
+
+@code{
+    [Parameter] public User? User { get; set; }
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    string ClassNames => $"{Class} avatar-style";
+    string Styles => $"{Style}";
+   
+
+}

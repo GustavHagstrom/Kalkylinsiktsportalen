@@ -1,22 +1,6 @@
-using Core.Extensions;
-using Data;
-using Data.Abstractions;
-using Data.EfCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
-using MongoDB.Driver;
-using MudBlazor;
 using MudBlazor.Services;
 using Server.Components;
-using SharedModule.Services.Authentication;
-using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
