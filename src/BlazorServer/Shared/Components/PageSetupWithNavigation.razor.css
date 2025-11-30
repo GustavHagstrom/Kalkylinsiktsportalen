@@ -1,0 +1,37 @@
+﻿/*Mobile*/
+@media (width <= 960px) {
+    .main-container {
+        height: 100%;
+        width: 100%;
+        display: block;
+    }
+    .nav-container {
+        border-style: solid;
+        border-bottom-width: 1px;
+        display: flex;
+        height: calc(var(--mud-appbar-height) - var(--mud-appbar-height)/3);
+    }
+    .child-container {
+        height: calc(100% - var(--mud-appbar-height) + var(--mud-appbar-height)/3);
+        overflow: auto;
+        flex-grow: 1;
+    }
+}
+
+/*Desktop*/
+@media (width > 960px) {
+    .main-container {
+        height: 100%;
+        max-width: 100%;
+        display: flex;
+    }
+    .nav-container {
+        border-style: solid;
+        border-right-width: 1px;
+    }
+    .child-container {
+        height: 100%;
+        overflow: auto;
+        flex-grow: 1;
+    }
+}

@@ -1,0 +1,45 @@
+@inject IStringLocalizer<StringInputDialog> Localizer
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @ref="InputField" T="string" @bind-Value="Input" Label="@InputLabel" Variant="Variant.Outlined" Validation="@((Func<string, string?>)ValidateInput)" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Filled" Color="Color.Error">
+            @Localizer["Avbryt"]
+        </MudButton>
+        <MudButton OnClick="Ok" Variant="Variant.Filled" Color="Color.Success">
+            @Localizer["Ok"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code{
+    [CascadingParameter] MudDialog? MudDialog { get; set; }
+
+    [Parameter] public string InputLabel { get; set; } = string.Empty;
+
+    string Input { get; set; } = string.Empty;
+    MudTextField<string>? InputField { get; set; }
+
+    Task Cancel()
+    {
+        return MudDialog?.CloseAsync(DialogResult.Cancel()) ?? Task.CompletedTask;
+    }
+    async Task Ok()
+    {
+        await InputField!.Validate();
+        if (ValidateInput(Input) is null && MudDialog is not null)
+        {
+            await MudDialog.CloseAsync(DialogResult.Ok(Input));
+        }
+    }
+    string? ValidateInput(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Localizer["Fältet är obligatoriskt"];
+        }
+        return null;
+    }
+}

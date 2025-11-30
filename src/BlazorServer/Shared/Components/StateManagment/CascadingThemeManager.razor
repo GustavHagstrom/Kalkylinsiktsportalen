@@ -1,0 +1,32 @@
+﻿<MudThemeProvider Theme="CustomThemes.PlatformStandard" IsDarkMode="IsDarkMode" DefaultScrollbar="false" />
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@inject IAuthService AuthService
+@inject IDarkmodeService DarkmodeService
+
+@code{
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    public bool IsDarkMode { get; private set; } = false;
+
+    public async Task SetDarkModeAsync(bool isDarkMode)
+    {
+        IsDarkMode = isDarkMode;
+        
+        if (AuthService.IsAuthenticated && AuthService.User is not null)
+        {
+            await DarkmodeService.SetAsync(AuthService.User.Id, IsDarkMode);
+        }
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.IsAuthenticated && AuthService.User is not null)
+        {
+            IsDarkMode= await DarkmodeService.GetAsync(AuthService.User.Id);
+        }
+    }
+}

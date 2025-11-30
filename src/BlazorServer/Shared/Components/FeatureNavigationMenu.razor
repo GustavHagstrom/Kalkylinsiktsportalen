@@ -6,7 +6,7 @@
 {
     <MudMenu Dense="true">
         <ActivatorContent>
-            <MudText Style="@MenuStyle(FeatureRoute, Match)" Class="mud-button" Typo="Typo.body2">
+            <MudText Style="@MenuStyle(Href, Match)" Class="mud-button" Typo="Typo.body2">
                 @MenuTitle
             </MudText>
         </ActivatorContent>
@@ -21,8 +21,8 @@
 }
 else
 {
-    <a href="@FeatureRoute">
-        <MudText Typo="Typo.body2" Style="@($"{MenuStyle(FeatureRoute, Match)}")" Class="mud-button">
+    <a href="@Href">
+        <MudText Typo="Typo.body2" Style="@($"{MenuStyle(Href, Match)}")" Class="mud-button">
             @MenuTitle
         </MudText>
     </a>
@@ -35,7 +35,7 @@ else
     
 
     [Parameter] public string MenuTitle { get; set; } = string.Empty;
-    [Parameter] public string? FeatureRoute { get; set; }
+    [Parameter] public string? Href { get; set; }
     [Parameter] public List<MenuLink> MenuLinks { get; set; } = [];
     [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
 
