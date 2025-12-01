@@ -1,4 +1,4 @@
-﻿using BlazorServer.Shared.FeatureRegistration;
+﻿using BlazorServer.Shared.Registration;
 
 namespace BlazorServer.Shared.Abstractions;
 

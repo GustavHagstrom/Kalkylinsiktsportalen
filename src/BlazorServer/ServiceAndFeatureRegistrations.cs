@@ -1,5 +1,5 @@
 ﻿using BlazorServer.Shared.Components.Authentication;
-using BlazorServer.Shared.FeatureRegistration;
+using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -9,6 +9,7 @@ using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
+using MongoDB.Driver;
 using MudBlazor.Services;
 using System.Security.Claims;
 
@@ -71,7 +72,25 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddSingleton(featureBuilder.RenderCollection);
 
     }
-
+    public static IServiceCollection AddMongoCollection<T>(this IServiceCollection services, string collectionName)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            var names = database.ListCollectionNames().ToList();
+            if (names.Contains(collectionName))
+            {
+                throw new InvalidOperationException($"Collection with name {collectionName} already registered");
+            }
+            else
+            {
+                database.CreateCollection(collectionName);
+            }
+            var collection = database.GetCollection<T>(collectionName);
+            return collection;
+        });
+        return services;
+    }
 
     static async Task OnTokenValidatedFunc(TokenValidatedContext context)
     {
@@ -89,5 +108,6 @@ public static class ServiceAndFeatureRegistrations
         //}
         //await Task.CompletedTask.ConfigureAwait(false);
     }
+
 }
 

@@ -1,29 +1,22 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using BlazorServer
+@using BlazorServer.Shared.Abstractions
+@using BlazorServer.Shared.Components
+@using BlazorServer.Shared.Components.Authentication
+@using BlazorServer.Shared.Components.Layout
+@using BlazorServer.Shared.Components.StateManagment
+@using BlazorServer.Shared.Constants
+@using BlazorServer.Shared.Models
+@using BlazorServer.Shared.Registration
+@using BlazorServer.Shared.Services
+@using BlazorServer.Shared.Services.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
-@using Microsoft.JSInterop
 @using Microsoft.Extensions.Localization
-@using Microsoft.AspNetCore.Components.Authorization
-
-
-@using BlazorServer
-@using BlazorServer.Shared.Components
-@using BlazorServer.Shared.Components.Layout
-@using BlazorServer.Shared.Components.Authentication
-@using BlazorServer.Shared.Components.StateManagment
-
-@using BlazorServer.Shared.Abstractions
-
-@using BlazorServer.Shared.FeatureRegistration
-
-@using BlazorServer.Shared.Services
-@using BlazorServer.Shared.Services.Authentication
-
-
-@using BlazorServer.Shared.Models
-@using BlazorServer.Shared.Constants
+@using Microsoft.JSInterop
 @using MudBlazor
+@using static Microsoft.AspNetCore.Components.Web.RenderMode

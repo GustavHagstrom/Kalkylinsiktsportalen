@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace BlazorServer.Shared.FeatureRegistration;
+namespace BlazorServer.Shared.Registration;
 
 public class RenderCollection
 {

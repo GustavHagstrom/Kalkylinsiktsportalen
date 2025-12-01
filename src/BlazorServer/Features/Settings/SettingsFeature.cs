@@ -1,5 +1,5 @@
 ﻿using BlazorServer.Shared.Abstractions;
-using BlazorServer.Shared.FeatureRegistration;
+using BlazorServer.Shared.Registration;
 
 namespace BlazorServer.Features.Settings;
 

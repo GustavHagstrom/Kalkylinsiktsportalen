@@ -1,6 +1,6 @@
 ﻿using BlazorServer.Shared.Abstractions;
 
-namespace BlazorServer.Shared.FeatureRegistration;
+namespace BlazorServer.Shared.Registration;
 
 public class FeatureBuilder
 {

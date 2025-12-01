@@ -1,10 +1,12 @@
-﻿<MudThemeProvider Theme="CustomThemes.PlatformStandard" IsDarkMode="IsDarkMode" DefaultScrollbar="false" />
+﻿@using BlazorServer.Shared.Registration
+@using BlazorServer.Shared.Stores
+<MudThemeProvider Theme="CustomThemes.PlatformStandard" IsDarkMode="IsDarkMode" DefaultScrollbar="false" />
 <CascadingValue Value="this">
     @ChildContent
 </CascadingValue>
 
 @inject IAuthService AuthService
-@inject IDarkmodeService DarkmodeService
+@inject IDarkmodeStore DarkmodeStore
 
 @code{
     [Parameter] public RenderFragment? ChildContent { get; set; }
@@ -17,7 +19,7 @@
         
         if (AuthService.IsAuthenticated && AuthService.User is not null)
         {
-            await DarkmodeService.SetAsync(AuthService.User.Id, IsDarkMode);
+            await DarkmodeStore.SetDarkmodeAsync(AuthService.User.Id, IsDarkMode);
         }
         StateHasChanged();
     }
@@ -26,7 +28,7 @@
     {
         if (AuthService.IsAuthenticated && AuthService.User is not null)
         {
-            IsDarkMode= await DarkmodeService.GetAsync(AuthService.User.Id);
+            IsDarkMode = await DarkmodeStore.IsDarkmodeAsync(AuthService.User.Id);
         }
     }
 }
