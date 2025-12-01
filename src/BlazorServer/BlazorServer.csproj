@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DataAccess\" />
-    <Folder Include="Features\" />
+    <Folder Include="DataAccess\MongoDb\" />
   </ItemGroup>
 
   <ItemGroup>
