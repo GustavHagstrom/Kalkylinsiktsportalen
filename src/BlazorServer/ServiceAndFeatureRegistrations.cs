@@ -66,10 +66,9 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddMudServices();
         return builder;
     }
-    public static void ConfigureFeatures(this WebApplicationBuilder builder, Action<FeatureBuilder> config)
+    public static void ConfigureFeatures(this WebApplicationBuilder builder, Action<FeatureRegistrator> config)
     {
-        var sp = builder.Services.BuildServiceProvider();
-        var featureBuilder = new FeatureBuilder(builder, sp);
+        var featureBuilder = new FeatureRegistrator(builder);
         config(featureBuilder);
         builder.Services.AddSingleton(featureBuilder.RenderCollection);
 

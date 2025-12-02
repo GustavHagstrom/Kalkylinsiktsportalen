@@ -2,15 +2,15 @@
 
 namespace BlazorServer.Shared.Registration;
 
-public class FeatureBuilder
+public class FeatureRegistrator
 {
     private readonly WebApplicationBuilder _builder;
     private readonly IServiceProvider _sp;
 
-    public FeatureBuilder(WebApplicationBuilder builder, IServiceProvider sp)
+    public FeatureRegistrator(WebApplicationBuilder builder)
     {
         _builder = builder;
-        _sp = sp;
+        _sp = builder.Services.BuildServiceProvider();
     }
     public RenderCollection RenderCollection { get; set; } = new();
     public void AddFeature<T>() where T : IFeature

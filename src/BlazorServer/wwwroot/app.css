@@ -1,7 +1,9 @@
 h1:focus {
     outline: none;
 }
-
+* {
+    border-color: var(--mud-palette-lines-inputs);
+}
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -36,3 +38,22 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.App-Nav-Link {
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, padding 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    cursor: pointer;
+}
+
+    .App-Nav-Link:hover {
+        background-color: var(--mud-palette-action-default-hover);
+    }
+
+.App-Nav-Link-Active {
+    color: var(--mud-palette-primary);
+    background-color: var(--mud-palette-primary-hover);
+}
+
+    .App-Nav-Link-Active:hover {
+        color: var(--mud-palette-primary);
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+    }
