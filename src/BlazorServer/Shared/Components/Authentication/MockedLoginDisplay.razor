@@ -9,6 +9,7 @@
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
+            <DarkmodeSwitch ThemeManagerBackup="ThemeProvider" />
             <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
 
@@ -39,6 +40,8 @@
 @inject IStringLocalizer<MockedLoginDisplay> Localizer
 
 @code {
+
+    [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
     bool ShowLogoutPopover = false;
     bool ShowLoginPopover = false;
    
@@ -46,6 +49,7 @@
     string LoginText(User user) => $"{Localizer["Logga in med"]} : {user.Name}";
     User? user => AuthService.User;
 
+    
 
     // Define IsSmOrDown in the current context
     private bool IsSmOrDown => /* logic to determine if small or down, e.g. based on screen size or breakpoint */ false;

@@ -2,13 +2,12 @@
 @layout SettingsLayout
 @inject RenderService RenderService
 
-@inject IStringLocalizer<CommonPage> Localizer
+@inject IStringLocalizer<SettingsPage> Localizer
 
 @inject RenderCollection RenderCollection
 
 
 <SettingsPageBase>
-    <DarkModeSection />
     @foreach (var component in RenderCollection.GetSharedSettingComponents())
     {
         @RenderService.Render(component);

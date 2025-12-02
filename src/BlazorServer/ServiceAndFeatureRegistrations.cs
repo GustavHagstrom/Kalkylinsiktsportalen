@@ -1,17 +1,16 @@
-﻿using BlazorServer.Shared.Components.Authentication;
+﻿using BlazorServer.Features.Settings;
+using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
+using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
-using MongoDB.Driver;
 using MudBlazor.Services;
-using System.Security.Claims;
 
 namespace BlazorServer;
 
@@ -19,7 +18,8 @@ public static class ServiceAndFeatureRegistrations
 {
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
-        if(builder.Environment.IsDevelopment())
+        builder.UseMongoDb();
+        if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
             builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthStateProvider>();
@@ -46,6 +46,8 @@ public static class ServiceAndFeatureRegistrations
 
         builder.ConfigureFeatures(config =>
         {
+            config.AddFeature<SettingsFeature>();
+
             if (builder.Environment.IsDevelopment())
             {
                 config.RenderCollection.SetLoginDisplayComponent<MockedLoginDisplay>();
@@ -72,25 +74,7 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddSingleton(featureBuilder.RenderCollection);
 
     }
-    public static IServiceCollection AddMongoCollection<T>(this IServiceCollection services, string collectionName)
-    {
-        services.AddSingleton(sp =>
-        {
-            var database = sp.GetRequiredService<IMongoDatabase>();
-            var names = database.ListCollectionNames().ToList();
-            if (names.Contains(collectionName))
-            {
-                throw new InvalidOperationException($"Collection with name {collectionName} already registered");
-            }
-            else
-            {
-                database.CreateCollection(collectionName);
-            }
-            var collection = database.GetCollection<T>(collectionName);
-            return collection;
-        });
-        return services;
-    }
+    
 
     static async Task OnTokenValidatedFunc(TokenValidatedContext context)
     {

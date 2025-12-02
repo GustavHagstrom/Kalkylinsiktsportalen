@@ -1,0 +1,24 @@
+@inject IStringLocalizer<DarkmodeSwitch> Localizer
+
+
+<MudSwitch T="bool?" Value="isDarkMode" ValueChanged="SetDarkMode" Color="Color.Primary" Label="@Localizer["Mörkt tema"]" />
+
+@code {
+    [CascadingParameter] public CascadingThemeManager? ThemeManager { get; set; }
+    [Parameter] public CascadingThemeManager? ThemeManagerBackup { get; set; }
+
+    bool isDarkMode => ThemeManager?.IsDarkMode ?? ThemeManagerBackup?.IsDarkMode ?? false;
+
+    async Task SetDarkMode(bool? value)
+    {
+        if (ThemeManager is not null)
+        {
+            await ThemeManager.SetDarkModeAsync(value ?? false);
+        }
+        else if (ThemeManagerBackup is not null)
+        {
+            await ThemeManagerBackup.SetDarkModeAsync(value ?? false);
+        }
+    }
+
+}

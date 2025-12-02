@@ -6,6 +6,5 @@ public class MongoUserSettings
 {
     [BsonId]
     public string UserId { get; set; } = string.Empty;
-    public string OrganizationId { get; set; } = string.Empty;
     public bool IsDarkMode { get; set; } = false;
 }

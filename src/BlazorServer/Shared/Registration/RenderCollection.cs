@@ -4,12 +4,12 @@ namespace BlazorServer.Shared.Registration;
 
 public class RenderCollection
 {
-    private HashSet<Type> _appBarNavigationComponents = new();
+    private HashSet<(Type Type, int Order)> _appBarNavMenueComponents = new();
     private HashSet<Type> __sharedSettingsCompoenents = new();
     private HashSet<Type> _settingNavigationComponents = new();
     private Type? _loginDisplayComponent;
-    public void AddAppBarNavigationComponent<T>() where T : ComponentBase => _appBarNavigationComponents.Add(typeof(T));
-    public IEnumerable<Type> GetAppBarNavigationComponents() => _appBarNavigationComponents;
+    public void AddAppBarNavMenuComponent<T>(int order) where T : ComponentBase => _appBarNavMenueComponents.Add((typeof(T), order));
+    public IEnumerable<(Type Type, int Order)> GetAppBarNavMenueComponents() => _appBarNavMenueComponents;
 
     /// <summary>
     /// Components to be rendered in the shared settings page

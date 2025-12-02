@@ -7,6 +7,7 @@
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
+            <DarkmodeSwitch  ThemeManagerBackup="ThemeProvider" />
             <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
 
@@ -26,7 +27,7 @@
 @code {
     bool ShowLogoutPopover = false;
     User? user => AuthService.User;
-
+    [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
 
     // Define IsSmOrDown in the current context
     private bool IsSmOrDown => /* logic to determine if small or down, e.g. based on screen size or breakpoint */ false;
@@ -37,5 +38,7 @@
     {
         await AuthService.UpdateUserAsync();
     }
+
+    
 
 }

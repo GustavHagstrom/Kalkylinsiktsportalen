@@ -7,8 +7,8 @@
 
 @* <PageTitle>@($"{CommonAppConstants.ApplicationName} {CommonAppConstants.ApplicationVersion}")</PageTitle> *@
 
-<MudLayout>
 
+<div style="height: 100dvh;">
     <style>
         .app-bar{
             position: fixed;
@@ -21,18 +21,17 @@
 
 
     <MudToolBar Dense="true" Gutters="false" Class="px-4 mud-elevation-4 app-bar" Style="z-index: 10000; background-color: var(--mud-palette-drawer-background)">
-        <a href="@AppRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
+        <a href="@SharedAppRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
         <div class="py-2 px-3" style="height: 100%;">
             <MudDivider Vertical="true" />
         </div>
                 
         <div class="d-flex gap-1">
-            @foreach (var componentType in RenderCollection.GetAppBarNavigationComponents())
+            @foreach (var component in RenderCollection.GetAppBarNavMenueComponents().OrderBy(i => i.Order))
             {
-                RenderService.Render(componentType);
+                @RenderService.Render(component.Type)
             }
         </div>
-        
 
         <MudSpacer />
 
@@ -43,5 +42,4 @@
     <div style="padding-top: 48px; height: 100%;">
         @Body
     </div>
-</MudLayout>
-
+</div>
