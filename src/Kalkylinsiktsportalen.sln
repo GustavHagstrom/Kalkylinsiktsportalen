@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testserver", "testserver\te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorServer", "BlazorServer\BlazorServer.csproj", "{E4CF8B65-5346-405A-B365-2D5D4E61BCE0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PwCracker", "PwCracker\PwCracker.csproj", "{1619F862-9004-443C-BD3F-8BAB72D8F16A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{E4CF8B65-5346-405A-B365-2D5D4E61BCE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4CF8B65-5346-405A-B365-2D5D4E61BCE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4CF8B65-5346-405A-B365-2D5D4E61BCE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1619F862-9004-443C-BD3F-8BAB72D8F16A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1619F862-9004-443C-BD3F-8BAB72D8F16A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1619F862-9004-443C-BD3F-8BAB72D8F16A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1619F862-9004-443C-BD3F-8BAB72D8F16A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

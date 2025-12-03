@@ -18,7 +18,7 @@ public static class ServiceAndFeatureRegistrations
 {
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
-        builder.UseMongoDb();
+        
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
@@ -46,6 +46,10 @@ public static class ServiceAndFeatureRegistrations
 
         builder.ConfigureFeatures(config =>
         {
+            //config.AddAuthorizationPolicy("AdminOnly", policy =>
+            //{
+            //    policy.RequireClaim("role", "Admin");
+            //});
             config.AddFeature<SettingsFeature>();
 
             if (builder.Environment.IsDevelopment())
@@ -56,10 +60,8 @@ public static class ServiceAndFeatureRegistrations
             {
                 config.RenderCollection.SetLoginDisplayComponent<LoginDisplay>();
             }
-
-                
         });
-
+        builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddSingleton<RenderService>();
         builder.Services.AddLocalization();
@@ -68,10 +70,17 @@ public static class ServiceAndFeatureRegistrations
     }
     public static void ConfigureFeatures(this WebApplicationBuilder builder, Action<FeatureRegistrator> config)
     {
-        var featureBuilder = new FeatureRegistrator(builder);
-        config(featureBuilder);
-        builder.Services.AddSingleton(featureBuilder.RenderCollection);
-
+        var featureRegistrator = new FeatureRegistrator(builder);
+        config(featureRegistrator);
+        builder.Services.AddSingleton(featureRegistrator.RenderCollection);
+        builder.Services.AddSingleton(featureRegistrator.ClaimInfoCollection);
+        builder.Services.AddAuthorization(options =>
+        {
+            foreach (var policy in featureRegistrator.Policies.PolicyList)
+            {
+                options.AddPolicy(policy.Name, policy.Builder);
+            }
+        });
     }
     
 
