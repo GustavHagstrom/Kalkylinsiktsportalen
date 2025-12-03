@@ -1,0 +1,33 @@
+<MudSimpleTable Dense="true" Bordered="false">
+    <tbody>
+        @foreach (var claimInfo in ClaimInfoCollection.AccessClaimInfos)
+        {
+            <tr>
+                <td class="pl-2">
+                    <MudCheckBox T="bool" 
+                                 Dense="true" 
+                                 Value="@PickedAccessClaimValues.Any(x => x == claimInfo.Value)" 
+                                 Label="@claimInfo.Description"
+                                 ValueChanged="x => OnCheckChanged(claimInfo, x)" />
+                </td>
+            </tr>
+            
+        }
+    </tbody>
+</MudSimpleTable>
+
+@inject ClaimInfoCollection ClaimInfoCollection
+
+@code{
+    /// <summary>
+    /// Picked access claim values for role or user.
+    /// </summary>
+    [Parameter] public IEnumerable<string> PickedAccessClaimValues { get; set; } = [];
+    [Parameter] public EventCallback<PickChangedRecord<AccessClaimInfo>> PickChanged { get; set; }
+
+    Task OnCheckChanged(AccessClaimInfo info, bool isChecked)
+    {
+        return PickChanged.InvokeAsync(new (info, isChecked));
+    }
+
+}

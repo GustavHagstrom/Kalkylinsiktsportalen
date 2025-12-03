@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Localization;
 
 namespace BlazorServer.Features.Access;
-internal class ModuleAccessClaimInfo(IStringLocalizer<ModuleAccessClaimInfo> Localizer) : IAccessClaimInfo
+internal class FeatureAccessClaimInfo(IStringLocalizer<FeatureAccessClaimInfo> Localizer) : IAccessClaimInfo
 {
     public string Value => FeatureConstants.Authorization.AccessClaimValue;
 

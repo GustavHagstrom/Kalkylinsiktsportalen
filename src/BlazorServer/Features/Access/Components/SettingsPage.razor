@@ -1,0 +1,57 @@
+@page "/Settings/rights"
+
+@layout SettingsLayout
+@inject IStringLocalizer<SettingsPage> Localizer
+
+<SettingsPageBase>
+    
+    <SettingsSection Title="@Localizer["Roller"]" LoadDataAsync="LoadRoleDataAsync">
+        <RoleList Roles="Roles"/>
+    </SettingsSection>
+
+    <SettingsSection Title="@Localizer["Användare"]" LoadDataAsync="LoadUserDataAsync">
+        <UserPicker AllUsers="Users" EnablePicking="false">
+            <ExtraTdContent>
+                <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" OnClick="() => EditUserAccess(context)" Size="Size.Small" />
+            </ExtraTdContent>
+        </UserPicker>
+    </SettingsSection>
+
+</SettingsPageBase>
+
+@inject IAuthService AuthService
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject NavigationManager NavigationManager
+
+@code{
+    List<Role> Roles { get; set; } = new();
+    List<User> Users { get; set; } = new();
+
+    async Task LoadUserDataAsync()
+    {
+        Users.Clear();
+        if (AuthService.OrganizationId is null)
+        {
+            StateHasChanged();
+            return;
+        }
+        Users = await UserService.GetUsersAsync(AuthService.OrganizationId);
+        StateHasChanged();
+    }
+    async Task LoadRoleDataAsync()
+    {
+        Roles.Clear();
+        if (AuthService.OrganizationId is null)
+        {
+            StateHasChanged();
+            return;
+        }
+        Roles.AddRange(await RoleService.GetRolesAsync(AuthService.OrganizationId));
+        StateHasChanged();
+    }
+    void EditUserAccess(User user)
+    {
+        NavigationManager.NavigateTo($"{FeatureConstants.Routes.UserAccessEdit}/{user.Id}");
+    }
+}

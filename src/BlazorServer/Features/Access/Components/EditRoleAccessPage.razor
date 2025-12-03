@@ -1,0 +1,81 @@
+@page "/Settings/rights/RoleEdit/{RoleId}"
+
+@inject IStringLocalizer<EditRoleAccessPage> Localizer
+@layout SettingsLayout
+
+
+<SettingsPageBase IsLoading="IsLoading" Title="@Title">
+@*     <SettingsSection Title="@Localizer["Roll"]">
+        <MudTextField T="string" Variant="Variant.Outlined" Value="Role?.Name" ValueChanged="SetName" Label="@Localizer["Namn"]"/>
+        <MudTextField T="string" Variant="Variant.Outlined" Value="Role?.Description" ValueChanged="SetDescription" 
+                      Label="@Localizer["Beskrivning"]" Lines="3"/>
+    </SettingsSection> *@
+
+    <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
+        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues" PickChanged="RoleAccessCheckBoxClick" />
+    </SettingsSection>
+    
+    <SettingsSection Title="@Localizer["Användare"]">
+        <UserPicker AllUsers="PickedUsers" EnablePicking="false" />
+    </SettingsSection>
+
+</SettingsPageBase>
+
+
+@inject IAccessStore AccessStore
+@inject ClaimInfoCollection ClaimInfoCollection
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject IDialogService DialogService
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+@code{
+    [Parameter] public string? RoleId { get; set; }
+
+    bool IsLoading { get; set; } = false;
+
+    Role? Role { get; set; }
+    RoleAccess? RoleAccess { get; set; }
+
+    List<User> PickedUsers { get; set; } = new();
+
+    string Title => Role is null ? "Roll: " : $"{Localizer["Roll:"]} {Role.Name}";
+    void EditUser(User user)
+    {
+        NavigationManager.NavigateTo($"{FeatureConstants.Routes.UserAccessEdit}/{user.Id}");
+    }
+
+
+    async Task LoadDataAsync()
+    {
+        SetIsLoading(true);
+        if (RoleId is not null && AuthService.OrganizationId is not null)
+        {
+            RoleAccess = await AccessStore.GetRoleAccessAsync(RoleId, AuthService.OrganizationId);
+            Role = await RoleService.GetRoleAsync(RoleId);
+            PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, AuthService.OrganizationId);
+        }
+        SetIsLoading(false);
+    }
+    void SetIsLoading(bool isLoading)
+    {
+        IsLoading = isLoading;
+        StateHasChanged();
+    }
+    async Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> checkedRecord)
+    {
+        if (RoleAccess is null) return;
+        if (checkedRecord.IsPicked)
+        {
+            RoleAccess.AccessClaimValues.Add(checkedRecord.Data.Value);
+            await AccessStore.AddRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+        }
+        else
+        {
+            RoleAccess.AccessClaimValues.Remove(checkedRecord.Data.Value);
+            await AccessStore.DeleteRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+        }
+        
+    }
+}

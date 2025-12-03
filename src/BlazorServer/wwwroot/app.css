@@ -44,16 +44,42 @@ h1:focus {
     cursor: pointer;
 }
 
-    .App-Nav-Link:hover {
-        background-color: var(--mud-palette-action-default-hover);
-    }
+.App-Nav-Link:hover {
+    background-color: var(--mud-palette-action-default-hover);
+}
 
 .App-Nav-Link-Active {
     color: var(--mud-palette-primary);
     background-color: var(--mud-palette-primary-hover);
 }
 
-    .App-Nav-Link-Active:hover {
-        color: var(--mud-palette-primary);
-        background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
-    }
+.App-Nav-Link-Active:hover {
+    color: var(--mud-palette-primary);
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+}
+
+table.table-row-border {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.table-row-border tr:nth-child(n+2) {
+    border-top-width: 1px;
+    border-style: solid;
+}
+
+table.striped {
+}
+
+table.striped th {
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+}
+
+table.striped tr:nth-child(even) {
+    background-color: var(--mud-palette-background-grey);
+}
+
+table.striped tr:nth-child(odd) {
+    background-color: var(--mud-palette-background);
+}
