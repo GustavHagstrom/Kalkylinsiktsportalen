@@ -6,10 +6,13 @@
     .avatar-style {
         background-color: var(--mud-palette-action-default-hover);
         box-shadow: 0px 3px 5px -1px rgba(0,0,0,.2), 0px 6px 10px 0px rgba(0,0,0,.14), 0px 1px 18px 0px rgba(0,0,0,.12);
-        cursor: pointer;
     }
 
-    .avatar-style::after {
+    .avatar-style.clickable {
+            cursor: pointer;
+        }
+
+    .avatar-style.clickable::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -18,7 +21,7 @@
         transition: background 0.25s ease;
     }
 
-    .avatar-style:hover::after {
+    .avatar-style.clickable:hover::after {
             background: var(--mud-palette-action-default-hover);
             /* rgba(0, 0, 0, 1); */
     }
@@ -26,7 +29,7 @@
 
 @if (User is not null)
 {
-    <MudAvatar Size="Size" Class="@ClassNames" Style="@Style" @onclick="@OnClick">
+    <MudAvatar Size="Size" Class="@ClassNames" Style="@Style" @onclick="@OnAvatarClick">
         @if (User.AvatarBase64 != null)
         {
             <MudImage Src="@($"data:image/png;base64, {User.AvatarBase64}")" Alt="User photo" />
@@ -48,8 +51,19 @@ else
     [Parameter] public User? User { get; set; }
     [Parameter] public Size Size { get; set; } = Size.Medium;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public bool Clickable { get; set; } = true;
 
-    string ClassNames => $"{Class} avatar-style";
-   
+    string ClassNames => $"{Class} avatar-style {(Clickable ? "clickable" : "")}";
+
+    Task OnAvatarClick(MouseEventArgs args)
+    {
+        return Clickable ? OnClick.InvokeAsync(args) : Task.CompletedTask;
+    }
+
+    public enum AvtarNamePosition
+    {
+        Left,
+        Right
+    }
 
 }

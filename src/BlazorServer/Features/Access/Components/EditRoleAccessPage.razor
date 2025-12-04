@@ -4,12 +4,10 @@
 @layout SettingsLayout
 
 
-<SettingsPageBase IsLoading="IsLoading" Title="@Title">
-@*     <SettingsSection Title="@Localizer["Roll"]">
-        <MudTextField T="string" Variant="Variant.Outlined" Value="Role?.Name" ValueChanged="SetName" Label="@Localizer["Namn"]"/>
-        <MudTextField T="string" Variant="Variant.Outlined" Value="Role?.Description" ValueChanged="SetDescription" 
-                      Label="@Localizer["Beskrivning"]" Lines="3"/>
-    </SettingsSection> *@
+<SettingsPageBase IsLoading="IsLoading">
+    <SettingsSection Title="@Localizer["Roll"]">
+        <MudText Typo="Typo.subtitle2">@Role?.Name</MudText>
+    </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
         <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
@@ -40,7 +38,7 @@
 
     List<User> PickedUsers { get; set; } = new();
 
-    string Title => Role is null ? "Roll: " : $"{Localizer["Roll:"]} {Role.Name}";
+    // string Title => Role is null ? "Roll: " : $"{Localizer["Roll:"]} {Role.Name}";
     void EditUser(User user)
     {
         NavigationManager.NavigateTo($"{FeatureConstants.Routes.UserAccessEdit}/{user.Id}");
@@ -63,18 +61,18 @@
         IsLoading = isLoading;
         StateHasChanged();
     }
-    async Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> checkedRecord)
+    Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> checkedRecord)
     {
-        if (RoleAccess is null) return;
-        if (checkedRecord.IsPicked)
+        if (RoleAccess is null) return Task.CompletedTask;
+        if (checkedRecord.IsPicked && !RoleAccess.AccessClaimValues.Contains(checkedRecord.Data.Value))
         {
             RoleAccess.AccessClaimValues.Add(checkedRecord.Data.Value);
-            await AccessStore.AddRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return AccessStore.AddRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
         }
         else
         {
             RoleAccess.AccessClaimValues.Remove(checkedRecord.Data.Value);
-            await AccessStore.DeleteRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return AccessStore.DeleteRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
         }
         
     }

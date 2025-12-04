@@ -46,14 +46,17 @@ public class MongoAccessStore : IAccessStore
     public async Task<List<AccessClaim>> GetAccessClaimsForUserAsync(string userId, IEnumerable<string> roleIds, string orgId)
     {
         var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var userAccess = await _userAccessCollection.Find(filter).FirstOrDefaultAsync();
+        var userAccess = await GetUserAccessAsync(userId, orgId);
 
         var accessClaimValues = new HashSet<string>(userAccess?.AccessClaimValues ?? Enumerable.Empty<string>());
 
         if (roleIds != null && roleIds.Any())
         {
             var roleFilter = Builders<MongoRoleAccess>.Filter.In(ra => ra.RoleId, roleIds) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-            var roleAccesses = await _roleAccessCollection.Find(roleFilter).ToListAsync();
+
+
+            var roleAccessTasks = roleIds.Select(roleId => GetLazyMongoRoleAccessAsync(roleId, orgId));
+            var roleAccesses = await Task.WhenAll(roleAccessTasks);
             foreach (var roleAccess in roleAccesses)
             {
                 foreach (var claimValue in roleAccess.AccessClaimValues)
@@ -67,15 +70,48 @@ public class MongoAccessStore : IAccessStore
 
     public async Task<RoleAccess> GetRoleAccessAsync(string roleId, string orgId)
     {
-        var filter = Builders<MongoRoleAccess>.Filter.Eq(ra => ra.RoleId, roleId) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-        var result = await _roleAccessCollection.Find(filter).FirstOrDefaultAsync();
+        var result = await GetLazyMongoRoleAccessAsync(roleId, orgId);
         return MongoRoleAccessMapper.ToModel(result);
     }
 
     public async Task<UserAccess> GetUserAccessAsync(string userId, string orgId)
     {
-        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var mongoUserAccess = await _userAccessCollection.Find(filter).FirstOrDefaultAsync();
+        var mongoUserAccess = await GetLazyMongoUserAccessAsync(userId, orgId);
         return MongoUserAccessMapper.ToModel(mongoUserAccess);
+    }
+
+    async Task<MongoUserAccess> GetLazyMongoUserAccessAsync(string userId, string orgId)
+    {
+        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
+        var user = await _userAccessCollection.Find(filter).FirstOrDefaultAsync();
+        if (user != null)
+        {
+            return user;
+        }
+        var newUserAccess = new MongoUserAccess
+        {
+            UserId = userId,
+            OrganizationId = orgId,
+            AccessClaimValues = new List<string>()
+        };
+        await _userAccessCollection.InsertOneAsync(newUserAccess);
+        return newUserAccess;
+    }
+    async Task<MongoRoleAccess> GetLazyMongoRoleAccessAsync(string roleId, string orgId)
+    {
+        var filter = Builders<MongoRoleAccess>.Filter.Eq(ra => ra.RoleId, roleId) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
+        var role = await _roleAccessCollection.Find(filter).FirstOrDefaultAsync();
+        if(role != null)
+        {
+            return role;
+        }
+        var newRoleAccess = new MongoRoleAccess
+        {
+            RoleId = roleId,
+            OrganizationId = orgId,
+            AccessClaimValues = new List<string>()
+        };
+        await _roleAccessCollection.InsertOneAsync(newRoleAccess);
+        return newRoleAccess;
     }
 }

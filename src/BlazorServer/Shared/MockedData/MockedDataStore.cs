@@ -29,20 +29,20 @@ public static class MockedDataStore
     [
         new Role
         {
-            Id = "RoleIDAdmin",
-            Name = "Admin",
+            Id = "Admin",
+            Name = "AdminRole",
             Description = "Administrator role with full permissions."
         },
         new Role
         {
-            Id = "RoleIDUser",
-            Name = "User",
+            Id = "User",
+            Name = "UserRole",
             Description = "Standard user role with limited permissions."
         },
         new Role
         {
-            Id = "RoleIDGuest",
-            Name = "Guest",
+            Id = "Guest",
+            Name = "GuestRole",
             Description = "Guest role with minimal permissions."
         }
     ];

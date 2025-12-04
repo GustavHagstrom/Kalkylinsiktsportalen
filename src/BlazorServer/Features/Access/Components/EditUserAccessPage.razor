@@ -5,7 +5,7 @@
 <SettingsPageBase>
 
     <SettingsSection Title="@Localizer["Användare"]">
-        <UserAvatar User="User"/>
+        <UserAvatarWithName User="User"/>
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadUserDataAsync">
@@ -54,40 +54,18 @@
         IsLoading = isLoading;
         StateHasChanged();
     }
-    async Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> pickedRecord)
+    Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> pickedRecord)
     {
-        // if (pickedRecord.IsPicked)
-        // {
-        //     await CreateUserAccess(pickedRecord.Data.Value);
-        // }
-        // else
-        // {
-        //     await DeleteUserAccess(pickedRecord.Data.Value);
-        // }
+        if (UserAccess is null) return Task.CompletedTask;
+        if (pickedRecord.IsPicked && !UserAccess.AccessClaimValues.Contains(pickedRecord.Data.Value))
+        {
+            UserAccess.AccessClaimValues.Add(pickedRecord.Data.Value);
+            return AccessStore.AddUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
+        }
+        else
+        {
+            UserAccess.AccessClaimValues.Remove(pickedRecord.Data.Value);
+            return AccessStore.DeleteUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
+        }
     }
-
-    // async Task RolesChanged(PickChangedRecord<Role> pickedRecord)
-    // {
-    //     var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-    //     var userId = state.User.GetUserId();
-    //     if (userId is null)
-    //     {
-    //         return;
-    //     }
-    //     if (state is null) return;
-    //     if (pickedRecord.IsPicked)
-    //     {
-    //         await RoleStore.CreateUserRoleAsync(userId, pickedRecord.Data);
-    //         AllRoles.Add(pickedRecord.Data);
-    //     }
-    //     else
-    //     {
-    //         await RoleStore.DeleteUserRoleAsync(userId, pickedRecord.Data);
-    //         AllRoles.Remove(AllRoles.First(x => x.Id == pickedRecord.Data.Id));
-    //     }
-    // }
-    // void EditRoleAccess(Role role)
-    // {
-    //     NavigationManager.NavigateTo($"{FeatureConstants.Routes.RoleAccessEdit}/{role.Id}");
-    // }
 }

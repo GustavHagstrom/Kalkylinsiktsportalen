@@ -17,11 +17,13 @@ public class MockedRoleService : IRoleService
 
     public Task<List<Role>> GetRolesForUserAsync(string userId, string orgId)
     {
-        throw new NotImplementedException();
+        var roles = MockedDataStore.Roles.Where(r => r.Id == userId).ToList();
+        return Task.FromResult(roles);
     }
 
     public Task<List<User>> GetUsersInRoleAsync(string roleId, string orgId)
     {
-        throw new NotImplementedException();
+        var users = MockedDataStore.Users.Where(u => u.Id == roleId).ToList();
+        return Task.FromResult(users);
     }
 }

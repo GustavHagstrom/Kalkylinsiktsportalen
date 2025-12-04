@@ -1,0 +1,23 @@
+﻿<MudStack Spacing="2" Row="true" Class="align-center">
+    @if (NamePosition == Position.Left)
+    {
+        <MudText Typo="Typo.subtitle2">@User?.Name</MudText>
+    }
+    <UserAvatar Clickable="false" User="User" Size="@Size" />
+    @if (NamePosition == Position.Right)
+    {
+        <MudText Typo="Typo.subtitle2">@User?.Name</MudText>
+    }
+</MudStack>
+
+
+@code {
+    [Parameter] public User? User { get; set; }
+    [Parameter] public Position NamePosition { get; set; } = Position.Right;
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+    public enum Position
+    {
+        Left,
+        Right
+    }
+}
