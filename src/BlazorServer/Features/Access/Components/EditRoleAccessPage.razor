@@ -12,7 +12,7 @@
     </SettingsSection> *@
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
-        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues" PickChanged="RoleAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
     </SettingsSection>
     
     <SettingsSection Title="@Localizer["Användare"]">

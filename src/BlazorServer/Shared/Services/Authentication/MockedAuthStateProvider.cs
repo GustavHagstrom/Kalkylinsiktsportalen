@@ -13,14 +13,14 @@ public class MockedAuthStateProvider : AuthenticationStateProvider
 
     private ClaimsPrincipal SetUser(User user)
     {
-        _user = new ClaimsPrincipal(new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, "Admin"),
-                new Claim(AuthConstants.ObjectId, user.Id),
-                new Claim(AuthConstants.TenantId, "OrganizationID123"),
-            ],
-            "mock"));
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(AuthConstants.ObjectId, user.Id),
+            new Claim(AuthConstants.TenantId, "OrganizationID123"),
+        };
+        if(user.Name == "Admin") claims.Add(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
+        _user = new ClaimsPrincipal(new ClaimsIdentity(claims, "mock"));
         return _user;
     }
     private ClaimsPrincipal? _user;

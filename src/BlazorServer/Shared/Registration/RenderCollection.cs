@@ -23,7 +23,10 @@ public class RenderCollection
     /// collection may be empty if no shared setting components are defined. Used in the shared settings space to group settings from different features on the same page.</returns>
     public IEnumerable<Type> GetSharedSettingComponents() => __sharedSettingsCompoenents;
     public void AddSettingNavigationComponent<T>() where T : ComponentBase => _settingNavigationComponents.Add(typeof(T));
-    public IEnumerable<Type> GetSettingNavigationComponents() => _settingNavigationComponents;
+    public IEnumerable<Type> GetSettingNavigationComponents() 
+    {
+        return _settingNavigationComponents;
+    } 
 
     public void SetLoginDisplayComponent<T>() where T : ComponentBase
     {

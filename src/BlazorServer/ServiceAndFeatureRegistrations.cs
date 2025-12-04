@@ -1,4 +1,5 @@
-﻿using BlazorServer.Features.Settings;
+﻿using BlazorServer.Features.Access;
+using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
@@ -51,6 +52,7 @@ public static class ServiceAndFeatureRegistrations
             //    policy.RequireClaim("role", "Admin");
             //});
             config.AddFeature<SettingsFeature>();
+            config.AddFeature<AccessFeature>();
 
             if (builder.Environment.IsDevelopment())
             {

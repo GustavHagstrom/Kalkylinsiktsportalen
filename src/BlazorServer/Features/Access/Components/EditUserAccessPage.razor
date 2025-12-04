@@ -8,21 +8,15 @@
         <UserAvatar User="User"/>
     </SettingsSection>
 
-    <SettingsSection Title="@Localizer["Roller"]">
-        <RolePicker AllRoles="AllRoles" PickedRoleIds="PickedRoleIds" PickChanged="RolesChanged">
-            <ExtraTdContent>
-                <div style="display: flex; justify-content: flex-end;">
-                    <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" OnClick="() => EditRoleAccess(context)" Size="Size.Small" />
-                </div>
-            </ExtraTdContent>
-        </RolePicker>
-    </SettingsSection>
-
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadUserDataAsync">
         <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
             <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
         </MudOverlay>
-        <AccessClaimValuePicker PickedAccessClaimValues="Access.Select(x => x.AccessClaimValue)" PickChanged="UserAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="UserAccess?.AccessClaimValues ?? []" PickChanged="UserAccessCheckBoxClick" />
+    </SettingsSection>
+
+    <SettingsSection Title="@Localizer["Roller"]">
+        <RoleList Roles="PickedRoles" />
     </SettingsSection>
 </SettingsPageBase>
 
@@ -50,8 +44,8 @@
             UserAccess = await AccessStore.GetUserAccessAsync(UserId, AuthService.OrganizationId);
             User = await UserService.GetUserAsync(UserId);
             AllRoles = await RoleService.GetRolesAsync(AuthService.OrganizationId);
-            var prickedRoles = await RoleService.GetRolesForUserAsync(UserId, AuthService.OrganizationId);
-            PickedRoles = AllRoles.Where(r => prickedRoles.Any(pr => pr.Id == r.Id)).ToList();)
+            var pickedRoles = await RoleService.GetRolesForUserAsync(UserId, AuthService.OrganizationId);
+            PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);
     }
@@ -72,28 +66,28 @@
         // }
     }
 
-    async Task RolesChanged(PickChangedRecord<Role> pickedRecord)
-    {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = state.User.GetUserId();
-        if (userId is null)
-        {
-            return;
-        }
-        if (state is null) return;
-        if (pickedRecord.IsPicked)
-        {
-            await RoleStore.CreateUserRoleAsync(userId, pickedRecord.Data);
-            AllRoles.Add(pickedRecord.Data);
-        }
-        else
-        {
-            await RoleStore.DeleteUserRoleAsync(userId, pickedRecord.Data);
-            AllRoles.Remove(AllRoles.First(x => x.Id == pickedRecord.Data.Id));
-        }
-    }
-    void EditRoleAccess(Role role)
-    {
-        NavigationManager.NavigateTo($"{FeatureConstants.Routes.RoleAccessEdit}/{role.Id}");
-    }
+    // async Task RolesChanged(PickChangedRecord<Role> pickedRecord)
+    // {
+    //     var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    //     var userId = state.User.GetUserId();
+    //     if (userId is null)
+    //     {
+    //         return;
+    //     }
+    //     if (state is null) return;
+    //     if (pickedRecord.IsPicked)
+    //     {
+    //         await RoleStore.CreateUserRoleAsync(userId, pickedRecord.Data);
+    //         AllRoles.Add(pickedRecord.Data);
+    //     }
+    //     else
+    //     {
+    //         await RoleStore.DeleteUserRoleAsync(userId, pickedRecord.Data);
+    //         AllRoles.Remove(AllRoles.First(x => x.Id == pickedRecord.Data.Id));
+    //     }
+    // }
+    // void EditRoleAccess(Role role)
+    // {
+    //     NavigationManager.NavigateTo($"{FeatureConstants.Routes.RoleAccessEdit}/{role.Id}");
+    // }
 }
