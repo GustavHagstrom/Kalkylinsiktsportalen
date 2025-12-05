@@ -1,6 +1,6 @@
 ﻿namespace BlazorServer.Shared.Constants;
 
-public static class SharedAppRoutes
+public static class AppRoutes
 {
     public const string Home = "/";
 

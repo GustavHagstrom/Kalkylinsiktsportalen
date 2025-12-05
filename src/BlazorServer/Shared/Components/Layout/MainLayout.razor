@@ -1,11 +1,6 @@
-﻿
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @inject RenderCollection RenderCollection
 @inject RenderService RenderService
-
-
-
-@* <PageTitle>@($"{CommonAppConstants.ApplicationName} {CommonAppConstants.ApplicationVersion}")</PageTitle> *@
 
 
 <div style="height: 100dvh;">
@@ -21,7 +16,7 @@
 
 
     <MudToolBar Dense="true" Gutters="false" Class="px-4 mud-elevation-4 app-bar" Style="z-index: 10000; background-color: var(--mud-palette-drawer-background)">
-        <a href="@SharedAppRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
+        <a href="@AppRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
         <div class="py-2 px-3" style="height: 100%;">
             <MudDivider Vertical="true" />
         </div>

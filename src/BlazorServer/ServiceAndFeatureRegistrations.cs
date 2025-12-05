@@ -1,6 +1,7 @@
 ﻿using BlazorServer.Features.Access;
 using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
+using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
@@ -31,6 +32,7 @@ public static class ServiceAndFeatureRegistrations
         {
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IRoleService, RoleService>();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                     .AddMicrosoftIdentityWebApp(options =>
                     {
@@ -47,9 +49,9 @@ public static class ServiceAndFeatureRegistrations
 
         builder.ConfigureFeatures(config =>
         {
-            //config.AddAuthorizationPolicy("AdminOnly", policy =>
+            //config.AddAuthorizationPolicy(AuthConstants.RequireAuthenticatedUserPolicyName, policy =>
             //{
-            //    policy.RequireClaim("role", "Admin");
+            //    policy.RequireAuthenticatedUser();
             //});
             config.AddFeature<SettingsFeature>();
             config.AddFeature<AccessFeature>();

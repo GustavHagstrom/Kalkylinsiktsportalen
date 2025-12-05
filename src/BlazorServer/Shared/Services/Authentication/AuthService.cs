@@ -30,7 +30,6 @@ public class AuthService : IAuthService, IDisposable
     {
         try
         {
-            Console.WriteLine("HEI imtryIng here");
             _cachedAuthState = await task;
             if (IsAuthenticated)
             {

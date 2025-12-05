@@ -9,7 +9,7 @@
 <PageSetupWithNavigation >
     <NavigationContent>
 
-        <SettingsNavLink Href="@SharedAppRoutes.Settings" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Settings" Text="@Localizer["Allmänt"]"/>
+        <SettingsNavLink Href="@AppRoutes.Settings" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Settings" Text="@Localizer["Allmänt"]"/>
         @foreach (var component in RenderCollection.GetSettingNavigationComponents())
         {
             @RenderService.Render(component)

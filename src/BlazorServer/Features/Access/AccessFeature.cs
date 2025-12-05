@@ -13,7 +13,7 @@ public class AccessFeature : IFeature
         policies.AddPolicy(FeatureConstants.Authorization.PolicyName, config =>
         {
             config.RequireAssertion(context => 
-                context.User.HasClaim(SharedApplicationClaimTypes.AccessClaim, FeatureConstants.Authorization.AccessClaimValue) || 
+                context.User.HasClaim(ApplicationClaimTypes.AccessClaim, FeatureConstants.Authorization.AccessClaimValue) || 
                 context.User.IsInRole(AuthConstants.AdminRoleClaimValue));
         });
     }
