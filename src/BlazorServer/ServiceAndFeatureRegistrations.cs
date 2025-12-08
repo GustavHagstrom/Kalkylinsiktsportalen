@@ -74,6 +74,7 @@ public static class ServiceAndFeatureRegistrations
             }
         });
         builder.UseMongoDb();
+        builder.Services.AddSingleton<IClaimsCache, MemoryClaimsCache>();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         builder.Services.AddSingleton<RenderService>();

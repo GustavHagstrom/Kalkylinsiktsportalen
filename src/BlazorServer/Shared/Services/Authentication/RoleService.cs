@@ -8,29 +8,39 @@ public class RoleService : IRoleService
 {
     private readonly GraphServiceClient _graphClient;
     private readonly IUserService _userService;
+    private readonly IClaimsCache _cache;
 
-    public RoleService(GraphServiceClient graphClient, IUserService userService)
+    public RoleService(GraphServiceClient graphClient, IUserService userService, IClaimsCache claimsCache)
     {
         _graphClient = graphClient;
         _userService = userService;
+        _cache = claimsCache;
     }
 
     public async Task<bool> IsAdminAsync(string userId, string orgId)
     {
-        var result = await _graphClient.DirectoryRoles[AuthConstants.AdminRoleClaimValue].Members.GetAsync();
-        var adminUsers = result?.Value ?? [];
-        if(adminUsers.Any(u => u.Id == userId))
+        if(_cache.TryGetIsAdminRole(userId, orgId, out bool isAdmin))
         {
-            return true;
+            return isAdmin;
+        }
+        else
+        {
+            var roleResult = await _graphClient.Users[userId].MemberOf.GetAsync();
+            var adminRole = roleResult?.Value?
+            .Where(r => r is Microsoft.Graph.Models.DirectoryRole)
+            .Select(dr => dr as Microsoft.Graph.Models.DirectoryRole)
+            .FirstOrDefault(dr => dr?.RoleTemplateId == AuthConstants.AdminRoleClaimValue);
+            if (adminRole != null)
+            {
+                _cache.SetIsAdminRole(userId, orgId);
+                return true;
+            }
+            else
+            {
+                _cache.ClearIsAdminRole(userId, orgId);
+            }
         }
         return false;
-        //var result = await _graphClient.Users[userId].Mem;
-        //var roles = result?.Value ?? [];
-        //foreach (var role in roles)
-        //{
-
-        //    var test = "";
-        //}
     }
 
     public async Task<Role?> GetRoleAsync(string roleId)
@@ -91,4 +101,5 @@ public class RoleService : IRoleService
         var allUsers = await _userService.GetUsersAsync(orgId);
         return allUsers.Where(u => userIds.Contains(u.Id)).ToList();
     }
+
 }

@@ -1,4 +1,5 @@
 using BlazorServer;
+using BlazorServer.Middlewares;
 using BlazorServer.Shared.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
@@ -51,5 +52,6 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
         }
     }
 });
+app.UseClaimsLoader();
 
 app.Run();

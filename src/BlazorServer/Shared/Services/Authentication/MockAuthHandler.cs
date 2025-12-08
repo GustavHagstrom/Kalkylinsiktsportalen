@@ -18,7 +18,7 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var user = _session.CurrentUser;
+        var user = _session.User;
         if (user == null) return Task.FromResult(AuthenticateResult.NoResult());
 
         var claims = new List<Claim>
@@ -27,7 +27,6 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
             new Claim(ClaimConstants.ObjectId, user.Id),
             new Claim(ClaimConstants.TenantId, "OrganizationID123"),
         };
-        if (user.Name == "Admin") claims.Add(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
        return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)), Scheme.Name)));
     }
 }
