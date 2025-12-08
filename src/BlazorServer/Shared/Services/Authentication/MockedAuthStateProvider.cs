@@ -2,6 +2,7 @@
 using BlazorServer.Shared.MockedData;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace BlazorServer.Shared.Services.Authentication;
@@ -16,8 +17,8 @@ public class MockedAuthStateProvider : AuthenticationStateProvider
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.Name),
-            new Claim(AuthConstants.ObjectId, user.Id),
-            new Claim(AuthConstants.TenantId, "OrganizationID123"),
+            new Claim(ClaimConstants.ObjectId, user.Id),
+            new Claim(ClaimConstants.TenantId, "OrganizationID123"),
         };
         if(user.Name == "Admin") claims.Add(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
         _user = new ClaimsPrincipal(new ClaimsIdentity(claims, "mock"));

@@ -1,4 +1,5 @@
 ﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Extensions;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -55,9 +56,9 @@ public class AuthService : IAuthService, IDisposable
     {
         _authProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
-    public string? OrganizationId => _cachedAuthState?.User.FindFirst(AuthConstants.TenantId)?.Value;
+    public string? OrganizationId => _cachedAuthState?.User.GetOrganizationId();
 
-    public string? UserId => _cachedAuthState?.User.FindFirst(AuthConstants.ObjectId)?.Value;
+    public string? UserId => _cachedAuthState?.User.GetUserId();
 
     public bool IsAuthenticated => _cachedAuthState?.User.Identity?.IsAuthenticated ?? false;
 

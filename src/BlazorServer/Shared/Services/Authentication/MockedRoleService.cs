@@ -1,10 +1,20 @@
-﻿using BlazorServer.Shared.MockedData;
+﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.MockedData;
 using BlazorServer.Shared.Models;
 
 namespace BlazorServer.Shared.Services.Authentication;
 
 public class MockedRoleService : IRoleService
 {
+    public Task<bool> IsAdminAsync(string userId, string orgId)
+    {
+        if (userId == "Admin")
+        {
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
+    }
+
     public Task<Role?> GetRoleAsync(string roleId)
     {
         return Task.FromResult(MockedDataStore.Roles.FirstOrDefault(r => r.Id == roleId));

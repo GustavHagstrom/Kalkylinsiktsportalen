@@ -8,4 +8,5 @@ public interface IRoleService
     Task<List<Role>> GetRolesAsync(string orgId);
     Task<List<Role>> GetRolesForUserAsync(string userId, string orgId);
     Task<List<User>> GetUsersInRoleAsync(string roleId, string orgId);
+    Task<bool> IsAdminAsync(string userId, string orgId);
 }

@@ -2,8 +2,8 @@
 
 public static class AuthConstants
 {
-    public const string ObjectId = "http://schemas.microsoft.com/identity/claims/objectidentifier";
-    public const string TenantId = "http://schemas.microsoft.com/identity/claims/tenantid";
-    public const string AdminRoleClaimValue = "Admin";
+    public const string AdminRoleClaimValue = "62e90394-69f5-4237-9190-012177145e10";
     public const string RequireAuthenticatedUserPolicyName = "RequireAuthentication";
+
+    public const string MockAuthScheme = "Mock";
 }

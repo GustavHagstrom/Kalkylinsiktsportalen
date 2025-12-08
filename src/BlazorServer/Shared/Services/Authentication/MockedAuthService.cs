@@ -1,5 +1,8 @@
 ﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Extensions;
+using BlazorServer.Shared.MockedData;
 using BlazorServer.Shared.Models;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace BlazorServer.Shared.Services.Authentication;
@@ -8,14 +11,17 @@ public class MockedAuthService : IAuthService, IDisposable
 {
     private readonly AuthenticationStateProvider _authProvider;
     private readonly IUserService _userService;
-
+    private readonly MockedAuthSession _session;
+    private readonly NavigationManager _navigation;
     private AuthenticationState? _cachedAuthState;
     private User? _cachedUser;
-    public MockedAuthService(AuthenticationStateProvider authProvider, IUserService userService)
+    public MockedAuthService(AuthenticationStateProvider authProvider, IUserService userService, MockedAuthSession session, NavigationManager navigation)
     {
         authProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         _authProvider = authProvider;
         _userService = userService;
+        _session = session;
+        _navigation = navigation;
     }
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
     {
@@ -50,32 +56,35 @@ public class MockedAuthService : IAuthService, IDisposable
     {
         _authProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
-    public string? OrganizationId => _cachedAuthState?.User.FindFirst(AuthConstants.TenantId)?.Value;
-    public string? UserId => _cachedAuthState?.User.FindFirst(AuthConstants.ObjectId)?.Value;
+    public string? OrganizationId => _cachedAuthState?.User.GetOrganizationId();
+    public string? UserId => _cachedAuthState?.User.GetUserId();
     public bool IsAuthenticated => _cachedAuthState?.User.Identity?.IsAuthenticated ?? false;
     public User? User => _cachedUser;
     public Task LoginAsync()
     {
-        if (_authProvider is MockedAuthStateProvider mockedAuthStateProvider)
-        {
-            mockedAuthStateProvider.SignIn();
-        }
-        
+        _session.CurrentUser = MockedDataStore.Users.FirstOrDefault();
+        _navigation.NavigateTo(AppRoutes.Home, forceLoad: true);
         return Task.CompletedTask;
     }
     public void Login(User user)
     {
-        if (_authProvider is MockedAuthStateProvider mockedAuthStateProvider)
-        {
-            mockedAuthStateProvider.SignIn(user);
-        }
+        _session.CurrentUser = user;
+        _navigation.NavigateTo(AppRoutes.Home, forceLoad: true);
+
+        //if (_authProvider is MockedAuthStateProvider mockedAuthStateProvider)
+        //{
+        //    mockedAuthStateProvider.SignIn(user);
+        //}
     }
     public Task LogoutAsync()
     {
-        if (_authProvider is MockedAuthStateProvider mockedAuthStateProvider)
-        {
-            mockedAuthStateProvider.SignOut();
-        }
+        _session.CurrentUser = null;
+        _navigation.NavigateTo(AppRoutes.Home, forceLoad: true);
+
+        //if (_authProvider is MockedAuthStateProvider mockedAuthStateProvider)
+        //{
+        //    mockedAuthStateProvider.SignOut();
+        //}
         return Task.CompletedTask;
     }
     public async Task<User?> UpdateUserAsync()

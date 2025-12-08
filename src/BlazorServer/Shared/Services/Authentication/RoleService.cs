@@ -1,4 +1,5 @@
-﻿using BlazorServer.Shared.Models;
+﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Models;
 using Microsoft.Graph;
 
 namespace BlazorServer.Shared.Services.Authentication;
@@ -13,6 +14,25 @@ public class RoleService : IRoleService
         _graphClient = graphClient;
         _userService = userService;
     }
+
+    public async Task<bool> IsAdminAsync(string userId, string orgId)
+    {
+        var result = await _graphClient.DirectoryRoles[AuthConstants.AdminRoleClaimValue].Members.GetAsync();
+        var adminUsers = result?.Value ?? [];
+        if(adminUsers.Any(u => u.Id == userId))
+        {
+            return true;
+        }
+        return false;
+        //var result = await _graphClient.Users[userId].Mem;
+        //var roles = result?.Value ?? [];
+        //foreach (var role in roles)
+        //{
+
+        //    var test = "";
+        //}
+    }
+
     public async Task<Role?> GetRoleAsync(string roleId)
     {
         var group = await _graphClient.Groups[roleId].GetAsync();

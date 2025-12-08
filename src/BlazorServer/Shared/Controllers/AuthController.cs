@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BlazorServer.Shared.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorServer.Shared.Controllers;
 
@@ -15,4 +16,17 @@ public class AuthController : Controller
     {
         return Redirect("/MicrosoftIdentity/Account/SignOut");
     }
+    //[HttpGet("mock-login")]
+    //public IActionResult MockLogin(User user)
+    //{
+    //    // Simulate a successful login by setting a mock user
+    //    var mockUser = new User
+    //    {
+    //        Id = Guid.NewGuid(),
+    //        Email = "mockuser@example.com",
+    //        Name = "Mock User"
+    //    };
+    //    _session.SetCurrentUser(mockUser);
+    //    return Ok();
+    //}
 }

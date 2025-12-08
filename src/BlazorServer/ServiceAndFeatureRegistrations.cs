@@ -2,10 +2,12 @@
 using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Extensions;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Graph;
@@ -13,6 +15,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
+using System.Security.Claims;
 
 namespace BlazorServer;
 
@@ -24,9 +27,14 @@ public static class ServiceAndFeatureRegistrations
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
-            builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthStateProvider>();
+            builder.Services.AddSingleton<MockedAuthSession>();
+            builder.Services.AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthConstants.MockAuthScheme, null);
+
+            //builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthStateProvider>();
             builder.Services.AddTransient<IUserService, MockedUserService>();
             builder.Services.AddTransient<IRoleService, MockedRoleService>();
+            builder.Services.AddMemoryCache();
         }
         else
         {
@@ -67,6 +75,7 @@ public static class ServiceAndFeatureRegistrations
         });
         builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         builder.Services.AddSingleton<RenderService>();
         builder.Services.AddLocalization();
         builder.Services.AddMudServices();
@@ -86,23 +95,25 @@ public static class ServiceAndFeatureRegistrations
             }
         });
     }
-    
+
 
     static async Task OnTokenValidatedFunc(TokenValidatedContext context)
     {
         //implement access claims retrieval here
 
-        //var accessClaimService = context.HttpContext.RequestServices.GetRequiredService<IAccessClaimStore>();
-        //if (accessClaimService is not null)
+        //var userId = context.Principal?.GetUserId();
+        //var orgId = context.Principal?.GetOrganizationId();
+        //if (userId is null || orgId is null) return;
+
+        //var roleService = context.HttpContext.RequestServices.GetRequiredService<IRoleService>();
+        //if (roleService is null) return;
+
+        //var isAdmin = await roleService.IsAdminAsync(userId, orgId);
+        //if (isAdmin)
         //{
-        //    var claims = (await accessClaimService.GetAccessClaims(context.Principal)).ToList();
-        //    context.Principal?.AddIdentity(new ClaimsIdentity(claims));
+        //    ((ClaimsIdentity)context.Principal?.Identity!).AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
         //}
-        //else
-        //{
-        //    //handle?
-        //}
-        //await Task.CompletedTask.ConfigureAwait(false);
+
     }
 
 }

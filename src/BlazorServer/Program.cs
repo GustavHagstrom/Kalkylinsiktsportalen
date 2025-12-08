@@ -1,6 +1,10 @@
 using BlazorServer;
 using BlazorServer.Shared.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Identity.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,5 +36,20 @@ app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+    ExceptionHandler = async ctx =>
+    {
+        var feature = await Task.FromResult(ctx.Features.Get<IExceptionHandlerFeature>());
+        if (feature?.Error is MsalUiRequiredException
+            or { InnerException: MsalUiRequiredException }
+            or { InnerException.InnerException: MsalUiRequiredException })
+        {
+            ctx.Response.Cookies.Delete($"{CookieAuthenticationDefaults.CookiePrefix}{CookieAuthenticationDefaults.AuthenticationScheme}");
+            ctx.Response.Redirect(ctx.Request.GetEncodedPathAndQuery());
+        }
+    }
+});
 
 app.Run();
