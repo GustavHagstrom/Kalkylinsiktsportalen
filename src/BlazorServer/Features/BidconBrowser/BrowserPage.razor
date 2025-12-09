@@ -1,0 +1,34 @@
+﻿@page "/BidconBrowser"
+@inject IStringLocalizer<BrowserPage> Localizer
+<MudTabs>
+    <MudTabPanel Text="@Localizer["Sök"]">
+        <EstimationList Estimations="@Estimations" Height="100%"/> 
+    </MudTabPanel>
+    <MudTabPanel Text="@Localizer["Valda"]" BadgeColor="Color.Info" BadgeData="Estimations.Where(x => x.Selected).Count()">
+        <EstimationList Estimations="@Estimations.Where(x => x.Selected)" Height="100%" />
+    </MudTabPanel>
+</MudTabs>
+
+@inject IBidconAccess BidconAccess
+@inject IAuthService AuthService
+@code {
+    List<(Estimation Estimation, bool Selected)> Estimations { get; set; } = [];
+    bool IsLoading { get; set; } = true;
+    protected override Task OnInitializedAsync()
+    {
+        return LoadData();
+    }
+    async Task LoadData()
+    {
+        SetIsLoading(true);
+        if (AuthService.UserEmail is null || AuthService.OrganizationId is null) return;
+        var estimations = await BidconAccess.GetAllEstimationsFlat(AuthService.UserEmail, AuthService.OrganizationId);
+        Estimations = estimations.Select(e => (e, false)).ToList();
+        SetIsLoading(false);
+    }
+    void SetIsLoading(bool isLoading)
+    {
+        IsLoading = isLoading;
+        StateHasChanged();
+    }
+}

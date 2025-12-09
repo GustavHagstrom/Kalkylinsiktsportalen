@@ -18,6 +18,9 @@ public class MockedAuthService : IAuthService
     public string? UserId => _session.User?.Id;
     public bool IsAuthenticated => _session.User is not null;
     public User? User => _session.User;
+
+    public string? UserEmail => "gustav@rorvikshus.se";
+
     public Task LoginAsync()
     {
         _session.SetSession(MockedDataStore.Users.First(), MockedDataStore.OrganizationId);

@@ -28,7 +28,8 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         {
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimConstants.ObjectId, user.Id),
-            new Claim(ClaimConstants.TenantId, MockedDataStore.OrganizationId)
+            new Claim(ClaimConstants.TenantId, MockedDataStore.OrganizationId),
+            new Claim(@"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "gustav@rorvikshus.se")
         };
         claims.AddRange(roles);
 

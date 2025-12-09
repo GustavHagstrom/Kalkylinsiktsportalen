@@ -1,5 +1,6 @@
 ﻿using BlazorServer.Features.Access;
 using BlazorServer.Features.BidconAccess;
+using BlazorServer.Features.BidconBrowser;
 using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
@@ -45,6 +46,7 @@ public static class ServiceAndFeatureRegistrations
                     {
                         var section = builder.Configuration.GetSection("AzureAd");
                         section.Bind(options);
+                        options.Scope.Add("email");
                         options.Events.OnTokenValidated += OnTokenValidatedFunc;
                     })
                     .EnableTokenAcquisitionToCallDownstreamApi()
@@ -63,6 +65,7 @@ public static class ServiceAndFeatureRegistrations
             config.AddFeature<SettingsFeature>();
             config.AddFeature<AccessFeature>();
             config.AddFeature<BidconAccessFeature>();
+            config.AddFeature<BidconBrowserFeature>();
 
             if (builder.Environment.IsDevelopment())
             {
