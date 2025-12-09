@@ -2,20 +2,17 @@
 using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Extensions;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
-using System.Security.Claims;
 
 namespace BlazorServer;
 

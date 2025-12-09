@@ -20,13 +20,13 @@ public class MockedAuthService : IAuthService
     public User? User => _session.User;
     public Task LoginAsync()
     {
-        _session.SetSession(MockedDataStore.Users.First(), "mockedOrgId");
+        _session.SetSession(MockedDataStore.Users.First(), MockedDataStore.OrganizationId);
         _navigation.NavigateTo(AppRoutes.Home, forceLoad: true);
         return Task.CompletedTask;
     }
     public void Login(User user)
     {
-        _session.SetSession(user, "mockedOrgId");
+        _session.SetSession(user, MockedDataStore.OrganizationId);
         _navigation.Refresh(forceReload: true);
     }
     public Task LogoutAsync()

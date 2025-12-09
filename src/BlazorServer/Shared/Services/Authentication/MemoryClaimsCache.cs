@@ -7,7 +7,7 @@ public class MemoryClaimsCache : IClaimsCache
     private readonly IMemoryCache _memoryCache;
     private MemoryCacheEntryOptions _cacheOptions = new MemoryCacheEntryOptions
     {
-        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
     };
 
     public MemoryClaimsCache(IMemoryCache memoryCache)

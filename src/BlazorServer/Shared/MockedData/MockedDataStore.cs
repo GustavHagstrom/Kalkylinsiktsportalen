@@ -46,4 +46,5 @@ public static class MockedDataStore
             Description = "Guest role with minimal permissions."
         }
     ];
+    public const string OrganizationId = "MockedOrganization";
 }

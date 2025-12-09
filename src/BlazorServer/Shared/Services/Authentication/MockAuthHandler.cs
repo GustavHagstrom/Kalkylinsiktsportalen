@@ -1,4 +1,5 @@
 ﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.MockedData;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
@@ -21,13 +22,21 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         var user = _session.User;
         if (user == null) return Task.FromResult(AuthenticateResult.NoResult());
 
+        var roles = MockedDataStore.Roles.Where(r => r.Id == user.Id).Select(r => new Claim("groups", r.Id));
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimConstants.ObjectId, user.Id),
-            new Claim(ClaimConstants.TenantId, "OrganizationID123"),
+            new Claim(ClaimConstants.TenantId, MockedDataStore.OrganizationId)
         };
-       return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)), Scheme.Name)));
+        claims.AddRange(roles);
+
+        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
 
