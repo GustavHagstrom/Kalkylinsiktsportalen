@@ -1,3 +1,28 @@
 ﻿@page "/"
+@using BlazorServer.Shared.Services.Bidcon
 
 <CurrentSession/>
+
+<AuthorizeView>
+    <Authorized>
+        <button @onclick="GetAllEstimationsFlat">Get Estimations flat</button>
+        <button @onclick="@(() => GetEstimationById("...."))">Get estimation with ID: ....</button>
+    </Authorized>
+</AuthorizeView>
+
+@inject IBidconAccess BidconAccess
+@inject IAuthService AuthService
+
+@code{
+    async Task GetAllEstimationsFlat()
+    {
+        if (AuthService.OrganizationId is null) return;
+        var estimations = await BidconAccess.GetAllEstimationsFlat("gustav@rorvikshus.se", AuthService.OrganizationId);
+    }
+    async Task GetEstimationById(string estimationId)
+    {
+        if (AuthService.OrganizationId is null) return;
+        var estimation = await BidconAccess.GetEstimationAsync(estimationId, AuthService.OrganizationId);
+    }
+
+}

@@ -23,6 +23,7 @@ public static class Registrations
         services.AddMongoCollection<MongoUserSettings>("UserSettings");
         services.AddMongoCollection<MongoUserAccess>("UserAccess");
         services.AddMongoCollection<MongoRoleAccess>("RoleAccess");
+        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
         return services;
     }
     static IServiceCollection RegisterSharedMongoStores(this IServiceCollection services)
@@ -30,6 +31,7 @@ public static class Registrations
         services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
         services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
         services.AddSingleton<IAccessStore, MongoAccessStore>();
+        services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         return services;
     }
     public static IServiceCollection AddMongoCollection<T>(this IServiceCollection services, string collectionName)

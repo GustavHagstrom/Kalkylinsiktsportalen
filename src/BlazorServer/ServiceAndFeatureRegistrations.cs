@@ -1,10 +1,12 @@
 ﻿using BlazorServer.Features.Access;
+using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.Settings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
+using BlazorServer.Shared.Services.Bidcon;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -60,6 +62,7 @@ public static class ServiceAndFeatureRegistrations
             //});
             config.AddFeature<SettingsFeature>();
             config.AddFeature<AccessFeature>();
+            config.AddFeature<BidconAccessFeature>();
 
             if (builder.Environment.IsDevelopment())
             {
@@ -70,7 +73,13 @@ public static class ServiceAndFeatureRegistrations
                 config.RenderCollection.SetLoginDisplayComponent<LoginDisplay>();
             }
         });
+        builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
+        {
+            client.BaseAddress = new Uri(builder.Configuration["Bidcon:BaseUrl"] ?? throw new InvalidOperationException("BidconApi:BaseUrl configuration is missing"));
+        });
+
         builder.UseMongoDb();
+        builder.Services.AddTransient<IBidconAccess, ApiAccess>();
         builder.Services.AddSingleton<IClaimsCache, MemoryClaimsCache>();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();

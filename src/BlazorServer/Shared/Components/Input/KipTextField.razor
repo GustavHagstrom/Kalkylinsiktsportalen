@@ -1,0 +1,11 @@
+﻿@using System.Linq.Expressions
+@typeparam TValue
+<MudTextField T="TValue" Value="@Value" ValueChanged="@ValueChanged" Label="@Label" For="@For" Variant="Variant.Outlined" Margin="Margin.Dense" />
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public Expression<Func<TValue>>? For { get; set; }
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+}

@@ -1,0 +1,50 @@
+﻿@page "/settings/api"
+
+@layout SettingsLayout
+@inject IStringLocalizer<SettingsPage> Localizer
+
+<SettingsPageBase Title="@Localizer["Bidcon API"]">
+    <SettingsSection LoadDataAsync="LoadDataAsync">
+        <KipTextField TValue="string" Label="@Localizer["Nyckel"]" Value="@key" ValueChanged="@UpdateKeyAsync"/>
+        <KipTextField TValue="string" Label="@Localizer["Hemlighet"]" Value="@secret" ValueChanged="@UpdateSecretAsync"/>
+    </SettingsSection>
+</SettingsPageBase>
+
+@inject IBidconApiCredentialsStore CredentialsStore
+@inject IAuthService AuthService
+
+@code {
+    string key { get; set; } = string.Empty;
+    string secret { get; set; } = string.Empty;
+
+    Task UpdateKeyAsync(string value)
+    {
+        key = value;
+        return SaveAsync();
+    }
+    Task UpdateSecretAsync(string value)
+    {
+        secret = value;
+        return SaveAsync();
+    }
+    async Task LoadDataAsync()
+    {
+        if (AuthService.OrganizationId is null) return;
+        var credentials = await CredentialsStore.GetAsync(AuthService.OrganizationId);
+        if (credentials is not null)
+        {
+            key = credentials.ApiKey;
+            secret = credentials.ApiSecret;
+        }
+    }
+    Task SaveAsync()
+    {
+        if (AuthService.OrganizationId is null) return Task.CompletedTask;
+
+        var credentials = new BidconApiCredentials();
+        credentials.ApiKey = key;
+        credentials.ApiSecret = secret;
+        credentials.OrganizationId = AuthService.OrganizationId;
+        return CredentialsStore.UpsertAsync(credentials);
+    }
+}
