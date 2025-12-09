@@ -1,0 +1,32 @@
+@inject IStringLocalizer<RoleList> Localizer
+
+<MudSimpleTable Hover="false" Dense="true" Bordered="false">
+    <tbody>
+        @foreach (var user in UsersIterator)
+        {
+            <tr>
+                
+                <td class="pl-2">
+                    <UserAvatarWithName User="user" Size="Size.Small" />
+                </td>
+                <td>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" OnClick="() => EditUserAccess(user)" Size="Size.Small" />
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+@inject NavigationManager NavigationManager
+@code {
+    [Parameter] public List<User> Users { get; set; } = new();
+    IEnumerable<User> UsersIterator => Users.OrderBy(x => x.Name);
+
+
+    void EditUserAccess(User user)
+    {
+        NavigationManager.NavigateTo($"{FeatureConstants.Routes.UserAccessEdit}/{user.Id}");
+    }
+}
