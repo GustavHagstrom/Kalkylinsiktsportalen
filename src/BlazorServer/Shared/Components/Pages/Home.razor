@@ -1,23 +1,34 @@
 ﻿@page "/"
-@using BlazorServer.Shared.Services.Bidcon
 
-<CurrentSession/>
+
 
 <AuthorizeView>
     <Authorized>
-        <button @onclick="GetAllEstimationsFlat">Get Estimations flat</button>
-        <button @onclick="@(() => GetEstimationById("2db38e0e-aaa3-413e-80b6-e9a97d4c861e"))">Get estimation with ID: ....</button>
+        <MudStack Spacing="2" Row="true">
+            <div>
+                <CurrentSession />
+            </div>
+            <div>
+                <MudStack Spacing="2">
+                    <MudButton OnClick="GetAllEstimationsFlat">Get Estimations flat</MudButton>
+                    <MudButton Onclick="@(() => GetEstimationById("2db38e0e-aaa3-413e-80b6-e9a97d4c861e"))">Get "2db38e0e-aaa3-413e-80b6-e9a97d4c861e"</MudButton>
+                </MudStack>
+            </div>
+            
+        </MudStack>
     </Authorized>
 </AuthorizeView>
+
 
 @inject BidconApiAccess BidconAccess
 @inject IAuthService AuthService
 
 @code{
+    string output = "";
     async Task GetAllEstimationsFlat()
     {
-        if (AuthService.OrganizationId is null) return;
-        var estimations = await BidconAccess.GetAllEstimationsFlat("gustav@rorvikshus.se", AuthService.OrganizationId);
+        if (AuthService.OrganizationId is null || AuthService.UserEmail is null) return;
+        var estimations = await BidconAccess.GetAllEstimationsFlat(AuthService.UserEmail, AuthService.OrganizationId);
     }
     async Task GetEstimationById(string estimationId)
     {

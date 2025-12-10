@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Web.Virtualization
+@inject IStringLocalizer<EstimationList> Localizer
 
 <div style="@($"height: {Height}")">
     <div>
@@ -15,9 +16,9 @@
                 <Virtualize Items="@GetFilteredEstimations()">
                     <tr class="d-flex">
                         <td class="d-flex flex-grow-1">
-                            <MudCheckBox T="bool" @bind-Value="context.Selected"/>
+                            <MudCheckBox T="bool" Value="context.IsSelected" ValueChanged="x => SetIsSelected(context, x)" Dense="true"/>
                             <MudIcon Icon="@Icons.Material.Sharp.Article"  Style="color: var(--mud-palette-warning-lighten)" Class="align-self-center ml-0" />
-                            <MudText Class="align-self-center ml-2">@context.Estimation.ToString()</MudText>
+                            <MudText Class="align-self-center ml-2">@context.Name</MudText>
                         </td>
                     </tr>
                 </Virtualize>
@@ -28,16 +29,24 @@
     
 </div>
 
-@code{
-    [Parameter, EditorRequired] public IEnumerable<(Estimation Estimation, bool Selected)> Estimations { get; set; } = [];
-    [Parameter] public string Height { get; set; } = string.Empty;
-    [Inject] public required IStringLocalizer<EstimationList> Localizer { get; set; }
-    private string Filter { get; set; } = string.Empty;
 
-    List<(Estimation Estimation, bool Selected)> GetFilteredEstimations()
+@code{
+    [Parameter, EditorRequired] public IEnumerable<EstimationInfo> Estimations { get; set; } = [];
+    [Parameter] public string Height { get; set; } = string.Empty;
+    [Parameter] public EventCallback SelectionChanged { get; set; }
+
+
+    string Filter { get; set; } = string.Empty;
+
+    List<EstimationInfo> GetFilteredEstimations()
     {
         var words = Filter.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return Estimations.Where(e => words.All(w => e.Estimation.Name.Contains(w, StringComparison.OrdinalIgnoreCase))).ToList();
+        return Estimations.Where(e => words.All(w => e.Name.Contains(w, StringComparison.OrdinalIgnoreCase))).ToList();
     }
 
+    Task SetIsSelected(EstimationInfo estimation, bool value)
+    {
+        estimation.IsSelected = value;
+        return SelectionChanged.InvokeAsync();
+    }
 }
