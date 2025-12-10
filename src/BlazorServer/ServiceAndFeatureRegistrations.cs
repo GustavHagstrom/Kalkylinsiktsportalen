@@ -7,7 +7,6 @@ using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
-using BlazorServer.Shared.Services.Bidcon;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -82,7 +81,7 @@ public static class ServiceAndFeatureRegistrations
         });
 
         builder.UseMongoDb();
-        builder.Services.AddTransient<IBidconAccess, ApiAccess>();
+        builder.Services.AddTransient<BidconApiAccess>();
         builder.Services.AddSingleton<IClaimsCache, MemoryClaimsCache>();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();

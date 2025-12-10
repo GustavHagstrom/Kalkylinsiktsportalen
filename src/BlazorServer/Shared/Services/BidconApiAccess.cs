@@ -1,38 +1,44 @@
 ﻿using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Models.Bidcon;
+using BlazorServer.Shared.DTOs.Bidcon;
 using BlazorServer.Shared.Stores;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http.Headers;
 
-namespace BlazorServer.Shared.Services.Bidcon;
+namespace BlazorServer.Shared.Services;
 
-public class ApiAccess : IBidconAccess
+public class BidconApiAccess
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _cache;
     private readonly IBidconApiCredentialsStore _credentialsStore;
 
 
-    public ApiAccess(IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, IBidconApiCredentialsStore credentialsStore)
+    public BidconApiAccess(IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, IBidconApiCredentialsStore credentialsStore)
     {
         _httpClientFactory = httpClientFactory;
         _cache = memoryCache;
         _credentialsStore = credentialsStore;
     }
-    public async Task<Estimation?> GetEstimationAsync(string estimationId, string orgId)
+    public async Task<EstimationDetailsDto?> GetEstimationAsync(string estimationId, string orgId)
     {
         using var client = await GetClientAsync(orgId);
-        throw new NotImplementedException();
+        var hrefToEstimation = await client.GetStringAsync($"EstimationUri/{estimationId}");
+
+        client.DefaultRequestHeaders.Clear();
+        var estimationResponse = await client.GetFromJsonAsync<EstimationDetailsDto>(hrefToEstimation);
+
+        return estimationResponse;
     }
 
-    public async Task<List<Estimation>> GetAllEstimationsFlat(string userEmail, string orgId)
+
+    public async Task<List<EstimationDto>> GetAllEstimationsFlat(string userEmail, string orgId)
     {
         using var client = await GetClientAsync(orgId);
         var response = await client.GetAsync($"Estimations/{userEmail}");
         if(response.IsSuccessStatusCode)
         {
-            var estimations = await response.Content.ReadFromJsonAsync<List<Estimation>>();
-            return estimations ?? new List<Estimation>();
+            var estimations = await response.Content.ReadFromJsonAsync<List<EstimationDto>>();
+            return estimations ?? new List<EstimationDto>();
         }
         throw new HttpRequestException($"Failed to retrieve estimations for user {userEmail} in orgId {orgId}. Status code: {response.StatusCode}");
     }
@@ -55,7 +61,7 @@ public class ApiAccess : IBidconAccess
             {
                 apiKey = credentials.ApiKey,
                 secret = credentials.ApiSecret
-            }).Result.Content.ReadFromJsonAsync<BidconTokenResponse>();
+            }).Result.Content.ReadFromJsonAsync<ApiKeyAuthenticateResultDto>();
 
             if(tokenResponse is null || string.IsNullOrEmpty(tokenResponse.AccessToken))
             {
@@ -68,9 +74,4 @@ public class ApiAccess : IBidconAccess
         }
     }
 
-}
-public class BidconTokenResponse
-{
-    public string AccessToken { get; set; } = string.Empty;
-    public int ExpireInSeconds { get; set; }
 }

@@ -6,11 +6,11 @@
 <AuthorizeView>
     <Authorized>
         <button @onclick="GetAllEstimationsFlat">Get Estimations flat</button>
-        <button @onclick="@(() => GetEstimationById("...."))">Get estimation with ID: ....</button>
+        <button @onclick="@(() => GetEstimationById("2db38e0e-aaa3-413e-80b6-e9a97d4c861e"))">Get estimation with ID: ....</button>
     </Authorized>
 </AuthorizeView>
 
-@inject IBidconAccess BidconAccess
+@inject BidconApiAccess BidconAccess
 @inject IAuthService AuthService
 
 @code{
