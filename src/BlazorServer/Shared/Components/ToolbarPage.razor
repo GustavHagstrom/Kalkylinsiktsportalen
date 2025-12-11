@@ -1,0 +1,23 @@
+﻿<div class="container">
+    <div class="toolbar">
+        <div>
+            @LeftToolbarContent
+        </div>
+        <div>
+            @CenterToolbarContent
+        </div>
+        <div>
+            @RightToolbarContent
+        </div>
+    </div>
+    <div class="content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? LeftToolbarContent { get; set; }
+    [Parameter] public RenderFragment? CenterToolbarContent { get; set; }
+    [Parameter] public RenderFragment? RightToolbarContent { get; set; }
+}

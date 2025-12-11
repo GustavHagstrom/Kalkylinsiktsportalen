@@ -1,4 +1,5 @@
-﻿using BlazorServer.Shared.Abstractions;
+﻿using BlazorServer.Features.BidconBrowser.Components;
+using BlazorServer.Shared.Abstractions;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Registration;
 
@@ -16,7 +17,7 @@ public class BidconBrowserFeature : IFeature
         collection.AddAccessClaimInfo(new AccessClaimInfo 
         { 
             Name = "Bidconutforskaren", 
-            Description = "Rättighet att bläddra bland klakyler i kalkylutforskaren", 
+            Description = "Använda kalkylutforskaren", 
             Value = FeatureConstants.Authorization.AccessClaimValue
         });
     }
@@ -28,6 +29,6 @@ public class BidconBrowserFeature : IFeature
 
     public void RegisterServices(IServiceCollection services)
     {
-
+        services.AddScoped<EstimationListState>();
     }
 }

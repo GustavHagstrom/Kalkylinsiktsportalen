@@ -24,7 +24,7 @@ public class BidconAccessFeature : IFeature
         {
             Name = "BidconApiAccess",
             Value = FeatureConstants.Authorization.AccessClaimValue,
-            Description = "Rättigheter att ändra Api-nyckel och hemlighet."
+            Description = "Ändra Api-nyckel och hemlighet."
         });
     }
 
