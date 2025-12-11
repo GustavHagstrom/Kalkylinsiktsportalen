@@ -1,9 +1,16 @@
+
+
 h1:focus {
     outline: none;
 }
 * {
     border-color: var(--mud-palette-lines-inputs);
+    caret-color: transparent;
 }
+input, textarea, [contenteditable="true"] {
+    caret-color: auto; /* eller en färg du vill använda */
+}
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
