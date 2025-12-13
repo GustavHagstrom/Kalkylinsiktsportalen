@@ -2,6 +2,7 @@
 using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
 using BlazorServer.Features.Settings;
+using BlazorServer.Features.ViewSettings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
@@ -65,6 +66,7 @@ public static class ServiceAndFeatureRegistrations
             config.AddFeature<AccessFeature>();
             config.AddFeature<BidconAccessFeature>();
             config.AddFeature<BidconBrowserFeature>();
+            config.AddFeature<ViewSettingsFeature>();
 
             if (builder.Environment.IsDevelopment())
             {

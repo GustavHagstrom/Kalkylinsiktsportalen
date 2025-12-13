@@ -1,4 +1,7 @@
 ﻿<div class="container">
+    <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
+        <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+    </MudOverlay>
     <div class="toolbar">
         <div>
             @LeftToolbarContent
@@ -20,4 +23,5 @@
     [Parameter] public RenderFragment? LeftToolbarContent { get; set; }
     [Parameter] public RenderFragment? CenterToolbarContent { get; set; }
     [Parameter] public RenderFragment? RightToolbarContent { get; set; }
+    [Parameter] public bool IsLoading { get; set; } = false;
 }

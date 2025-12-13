@@ -1,0 +1,40 @@
+﻿@page "/settings/views/{ViewId}"
+@using BlazorServer.Shared.DTOs.Views
+@layout SettingsLayout
+<ToolbarPage IsLoading="isLoading">
+    <ChildContent>
+        @if(View is not null)
+        {
+            <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+        }
+    </ChildContent>
+</ToolbarPage>
+
+@inject IStringLocalizer<EditViewPage> Localizer
+@inject IViewStore ViewStore
+
+@code {
+    [Parameter] public string? ViewId { get; set; }
+
+    ViewDto? View { get; set; }
+    bool isLoading = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadDataAsync();
+    }
+
+    async Task LoadDataAsync()
+    {
+        if (ViewId is null) return;
+        SetLoading(true);
+        View = await ViewStore.GetAsync(ViewId);
+
+        SetLoading(false);
+    }
+    void SetLoading(bool loading)
+    {
+        isLoading = loading;
+        StateHasChanged();
+    }
+}

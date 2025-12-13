@@ -1,0 +1,27 @@
+﻿@using BlazorServer.Shared.DTOs.Views
+<MudSimpleTable Hover="false" Dense="true" Bordered="false">
+    <tbody>
+        @foreach (var view in Views)
+        {
+            <tr>
+                <td class="pl-2">
+                    <MudText Typo="Typo.body2">@view.Name</MudText>
+                </td>
+                <td>
+                    <MudText Typo="Typo.body2">@view.Description</MudText>
+                </td>
+                <td>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" Href="@FeatureConstants.Routes.EditViewPage(view.Id)" Size="Size.Small" />
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+
+
+@code {
+    [Parameter] public List<ViewDto> Views { get; set; } = new();
+}
