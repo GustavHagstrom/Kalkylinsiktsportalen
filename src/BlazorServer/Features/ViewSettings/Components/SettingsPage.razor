@@ -7,8 +7,10 @@
         <MudIconButton Icon="@Icons.Material.Sharp.Add" Color="Color.Primary"  OnClick="@NewView" Class="pa-1"/>
     </LeftToolbarContent>
     <ChildContent>
-        <div class="d-flex pa-4">
-            <ViewList Views="Views" />
+        <div class="d-flex full-height pa-4">
+            <MudPaper Class="full-height" Style="overflow: auto; min-width: 300px;">
+                <ViewList Views="Views" />
+            </MudPaper>
             <MudSpacer />
         </div>
         

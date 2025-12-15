@@ -5,7 +5,15 @@
     <ChildContent>
         @if(View is not null)
         {
-            <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+            <div class="full-height pa-4 d-flex gap-4">
+                <MudPaper Class="full-height flex-grow-1" Style="overflow: auto; min-width: 300px;">
+                    <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+                </MudPaper>
+                <MudPaper Class="full-height flex-grow-1" Style="overflow: auto; min-width: 300px;">
+                    <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+                </MudPaper>
+            </div>
+            
         }
     </ChildContent>
 </ToolbarPage>
