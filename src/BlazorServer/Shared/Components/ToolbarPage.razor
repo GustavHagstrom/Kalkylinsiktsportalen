@@ -2,7 +2,7 @@
     <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
         <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
     </MudOverlay>
-    <div class="toolbar">
+    <div class="toolbar" style="height: @Height">
         <div>
             @LeftToolbarContent
         </div>
@@ -13,7 +13,7 @@
             @RightToolbarContent
         </div>
     </div>
-    <div class="content">
+    <div class="content" style="height: @($"calc(100% - {Height})")">
         @ChildContent
     </div>
 </div>
@@ -23,5 +23,6 @@
     [Parameter] public RenderFragment? LeftToolbarContent { get; set; }
     [Parameter] public RenderFragment? CenterToolbarContent { get; set; }
     [Parameter] public RenderFragment? RightToolbarContent { get; set; }
+    [Parameter] public string Height { get; set; } = "48px";
     [Parameter] public bool IsLoading { get; set; } = false;
 }
