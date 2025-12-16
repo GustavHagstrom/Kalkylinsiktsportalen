@@ -4,7 +4,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudStack Spacing="2" Row="true">
+        <MudStack Spacing="2" Row="true" Class="pa-4">
             <div>
                 <CurrentSession />
             </div>
@@ -12,6 +12,7 @@
                 <MudStack Spacing="2">
                     <MudButton OnClick="GetAllEstimationsFlat">Get Estimations flat</MudButton>
                     <MudButton Onclick="@(() => GetEstimationById("2db38e0e-aaa3-413e-80b6-e9a97d4c861e"))">Get "2db38e0e-aaa3-413e-80b6-e9a97d4c861e"</MudButton>
+                    <A4Page/>
                 </MudStack>
             </div>
             
