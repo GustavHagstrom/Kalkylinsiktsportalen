@@ -11,7 +11,7 @@
     body * {
         visibility: hidden;
     }
-    .page-root, .page-root * {
+    .page, .page * {
         visibility: visible;
         margin: 0;
         padding: 0;
@@ -31,7 +31,7 @@
     display: flex;
     flex-direction: column;
     page-break-after: always;
-    background-color: pink;
+   /* background-color: pink;*/
 }
 
 .A4 {
@@ -40,11 +40,11 @@
 }
 
 .page .header {
-    background-color: yellow;
+   /* background-color: yellow;*/
 }
 
 .page .footer {
-    background-color: lightblue;
+   /* background-color: lightblue;*/
 }
 
 .page .body {

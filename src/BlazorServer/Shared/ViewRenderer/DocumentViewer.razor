@@ -1,10 +1,35 @@
-﻿<script src="@Assets["PaginationEngine.js"]"></script>
-<link href="@Assets["PaginationEngine.css"]" rel="stylesheet" />
+﻿<script src="@Assets["Pageination/engine.js"]"></script>
+<HeadContent>
+    <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
+</HeadContent>
+
 <div class="full-height">
     <MudButton OnClick="Print">Skriv ut</MudButton>
     <div id="print-root" class="d-flex gap-3" style="flex-direction: column;">
-        <A4Page />
-        <A4Page />
+        <div class="footer-block" style="background-color: yellow; height: 50mm;"> jag är en footer 1</div>
+        <div class="header-block" style="background-color: pink; height: 50mm;"> jag är en header 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
+        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        @* <A4Page />
+        <A4Page /> *@
     </div>
 </div>
 
@@ -12,21 +37,22 @@
 
 @inject IJSRuntime JS
 @code {
-    void Print()
+    async Task Print()
     {
-        JS.InvokeVoidAsync("printWindow");
+        await JS.InvokeVoidAsync("lol");
     }
     bool IsPaginated { get; set; } = false;
-    protected override void OnAfterRender(bool firstRender)
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(!IsPaginated)
+        if (!IsPaginated)
         {
-            Paginate();
+            await Paginate();
         }
     }
-    void Paginate()
+    async Task Paginate()
     {
-        
+        await JS.InvokeVoidAsync("pageinate");
         IsPaginated = true;
         StateHasChanged();
     }
