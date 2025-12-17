@@ -31,7 +31,7 @@ public class BidconApiAccess
     }
 
 
-    public async Task<List<EstimationDto>> GetAllEstimationsFlat(string userEmail, string orgId)
+    public async Task<List<EstimationDto>> GetAllEstimationsFlatAsync(string userEmail, string orgId)
     {
         using var client = await GetClientAsync(orgId);
         var response = await client.GetAsync($"Estimations/{userEmail}");

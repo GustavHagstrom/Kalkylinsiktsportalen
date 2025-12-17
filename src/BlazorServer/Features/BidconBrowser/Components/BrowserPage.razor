@@ -60,7 +60,7 @@
     {
         SetIsLoading(true);
         if (AuthService.UserEmail is null || AuthService.OrganizationId is null) return;
-        var estimations = await BidconAccess.GetAllEstimationsFlat(AuthService.UserEmail, AuthService.OrganizationId);
+        var estimations = await BidconAccess.GetAllEstimationsFlatAsync(AuthService.UserEmail, AuthService.OrganizationId);
         EstimationListState.Estimations = estimations.Select(e => DtoToModel(e)).OrderBy(x => x.Name).ToList();
         EstimationListState.HasLoaded = true;
         SetIsLoading(false);

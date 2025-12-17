@@ -1,6 +1,8 @@
 ﻿@page "/"
 
-
+@using BlazorServer.Shared.Helpers
+@using System.Text
+@using Microsoft.JSInterop
 
 <AuthorizeView>
     <Authorized>
@@ -12,6 +14,7 @@
                 <MudStack Spacing="2">
                     <MudButton OnClick="GetAllEstimationsFlat">Get Estimations flat</MudButton>
                     <MudButton Onclick="@(() => GetEstimationById("2db38e0e-aaa3-413e-80b6-e9a97d4c861e"))">Get "2db38e0e-aaa3-413e-80b6-e9a97d4c861e"</MudButton>
+                    <MudButton OnClick="ExportEstimationsToCsv" Color="Color.Primary">Export Estimations to CSV</MudButton>
                     <A4Page/>
                 </MudStack>
             </div>
@@ -21,20 +24,58 @@
 </AuthorizeView>
 
 
-@inject BidconApiAccess BidconAccess
+@inject BidconApiAccess BidconApiAccess
 @inject IAuthService AuthService
+@inject IJSRuntime JSRuntime
 
 @code{
     string output = "";
     async Task GetAllEstimationsFlat()
     {
         if (AuthService.OrganizationId is null || AuthService.UserEmail is null) return;
-        var estimations = await BidconAccess.GetAllEstimationsFlat(AuthService.UserEmail, AuthService.OrganizationId);
+        var estimations = await BidconApiAccess.GetAllEstimationsFlatAsync(AuthService.UserEmail, AuthService.OrganizationId);
     }
     async Task GetEstimationById(string estimationId)
     {
         if (AuthService.OrganizationId is null) return;
-        var estimation = await BidconAccess.GetEstimationAsync(estimationId, AuthService.OrganizationId);
+        var estimation = await BidconApiAccess.GetEstimationAsync(estimationId, AuthService.OrganizationId);
     }
 
+
+    private record Data(string Name, string Description, string Customer, string HandlingOfficer, string CreateDate);
+
+    async Task ExportEstimationsToCsv()
+    {
+        if (AuthService.OrganizationId is null || AuthService.UserEmail is null) return;
+        
+        var estimations = await BidconApiAccess.GetAllEstimationsFlatAsync(AuthService.UserEmail, AuthService.OrganizationId);
+        List<Data> datas = estimations.Select(x => new Data(
+            x.Name,
+            x.Description,
+            x.Customer ?? "No Customer",
+            x.HandlingOfficer ?? "No Handling Officer",
+            x.CreateDate.ToString("yyyy-MM-dd")
+        )).ToList();
+
+        var csvContent = CsvExporter.ToCsv(datas);
+        var bytes = Encoding.UTF8.GetBytes(csvContent);
+        var fileName = $"Estimations_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
+    }
 }
+
+<script>
+    window.downloadFile = function(filename, contentType, data) {
+        const blob = new Blob([new Uint8Array(data)], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
