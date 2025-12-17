@@ -1,22 +1,37 @@
-﻿<div class="a4-page">
-    <div class="page-header">
-        @Header
-        HEADER
-    </div>
+﻿<MudPaper Elevation="2">
+    <div class="page page-root">
+        <div class="header">
+            @Header
+            HEADER
+        </div>
 
-    <div class="page-body">
-        @ChildContent
-        BODY
-    </div>
+        <div class="body">
+            @ChildContent
+            <div class="block">
+                ssss
+                <div class="print-hide">FML</div>
+            </div>
+            <div class="block">
+                fasd
+            </div>
+            <div class="block" style="background-color: black">
+                asdfasdf
+            </div>
+            <div class="block">
+            </div>
+        </div>
 
-    <div class="page-footer">
-        @Footer
-        FOOTER
+        <div class="footer">
+            @Footer
+            FOOTER
+        </div>
     </div>
-</div>
+</MudPaper>
+
 
 @code {
     [Parameter] public RenderFragment? Header { get; set; }
     [Parameter] public RenderFragment? Footer { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
 }

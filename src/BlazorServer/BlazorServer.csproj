@@ -20,4 +20,8 @@
     <Folder Include="Shared\Services\Bidcon\" />
   </ItemGroup>
 
+<ItemGroup>
+  <None Include="wwwroot\PaginationEngine.js" />
+</ItemGroup>
+	
 </Project>

@@ -1,0 +1,33 @@
+﻿<script src="@Assets["PaginationEngine.js"]"></script>
+<link href="@Assets["PaginationEngine.css"]" rel="stylesheet" />
+<div class="full-height">
+    <MudButton OnClick="Print">Skriv ut</MudButton>
+    <div id="print-root" class="d-flex gap-3" style="flex-direction: column;">
+        <A4Page />
+        <A4Page />
+    </div>
+</div>
+
+
+
+@inject IJSRuntime JS
+@code {
+    void Print()
+    {
+        JS.InvokeVoidAsync("printWindow");
+    }
+    bool IsPaginated { get; set; } = false;
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(!IsPaginated)
+        {
+            Paginate();
+        }
+    }
+    void Paginate()
+    {
+        
+        IsPaginated = true;
+        StateHasChanged();
+    }
+}
