@@ -7,56 +7,59 @@ function pageinate() {
     const headerBlocks = root.getElementsByClassName("header-block");
     const footerBlocks = root.getElementsByClassName("footer-block");
     const bodyBlocks = root.getElementsByClassName("body-block");
+    const PX_PER_MM = 96 / 25.4; // ≈ 3.7795
+    const A4_HEIGHT_PX = 297 * PX_PER_MM;
 
-    let [page, bodyContainer] = createPage(headerBlocks, footerBlocks);
-    root.append(page);
 
-    console.log(root);
-    console.log(page);
-    console.log(bodyContainer);
+    let headerHeight = 0;
+    Array.from(headerBlocks).forEach(block => {
+        headerHeight += block.getBoundingClientRect().height;
+    });
+    let footerHeight = 0;
+    Array.from(footerBlocks).forEach(block => {
+        footerHeight += block.getBoundingClientRect().height;
+    });
+    const availableHeight = A4_HEIGHT_PX - headerHeight - footerHeight;
+    console.log("availableHeight: " + availableHeight);
+
     
 
-    
+    //dictionary, key is page number, value is array of body blocks
+    const map = new Map();
+    let currentBodyHeight = 0;
+    let currentPage = 1;
+    let warnings = [];
 
     Array.from(bodyBlocks).forEach(block => {
-        bodyContainer.append(block);
-
-        if (page.scrollHeight > page.clientHeight) {
-            [page, bodyContainer] = createPage(headerBlocks, footerBlocks);
-            root.append(page);
-            bodyContainer.append(block);
-            console.log(root);
-            console.log(page);
-            console.log(bodyContainer);
+        currentBodyHeight += block.getBoundingClientRect().height;
+        if (block.getBoundingClientRect().height > availableHeight) {
+            warnings.push("Block ID: " + block.dataset.id + " is too tall to fit on a single page.");
         }
+        if (currentBodyHeight > availableHeight) {
+            currentPage += 1;
+            currentBodyHeight = block.getBoundingClientRect().height;
+        }
+        let blockId = block.dataset.id;
+        console.log("Block ID: " + blockId + " goes to page " + currentPage);
+        console.log(block);
+
+        addToMap(map, currentPage, blockId);
     });
-    console.log("success?");
+    
+    const json = Object.fromEntries(map);
+    console.log(map);
+    console.log(json);
+
+    return json;
+  /*  return (map, warnings);*/
+    
 }
 
-function createPage(headerBlocks, footerBlocks) {
-    console.log("skapar ny sida"); 
-    const page = createDiv(["page", "A4"]);
-    const headerContainer = createDiv(["header"]);
-    const footerContainer = createDiv(["footer"]);
-    const bodyContainer = createDiv(["body"]);
 
-    page.append(headerContainer);
-    page.append(bodyContainer);
-    page.append(footerContainer);
+function addToMap(map, key, value) {
+    if (!map.has(key)) {
+        map.set(key, []);
+    }
 
-    cloneBlockesIntoContainer(headerBlocks, headerContainer);
-    cloneBlockesIntoContainer(footerBlocks, footerContainer);
-
-    return [page, bodyContainer];
-}
-
-function createDiv(classList) {
-    const div = document.createElement("div");
-    classList.forEach(c => div.classList.add(c));
-    return div;
-}
-
-function cloneBlockesIntoContainer(blocks, container) {
-    clones = Array.from(blocks).map(block => block.cloneNode(true));
-    Array.from(clones).forEach(block => container.append(block));
+    map.get(key).push(value);
 }

@@ -5,29 +5,13 @@
 
 <div class="full-height">
     <MudButton OnClick="Print">Skriv ut</MudButton>
-    <div id="print-root" class="d-flex gap-3" style="flex-direction: column;">
+    <div id="print-root" class="d-flex flex-column gap-3" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
         <div class="footer-block" style="background-color: yellow; height: 50mm;"> jag är en footer 1</div>
         <div class="header-block" style="background-color: pink; height: 50mm;"> jag är en header 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 1</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 2</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 3</div>
-        <div class="body-block" style="background-color: deepskyblue; height: 30mm;"> jag är body 4</div>
+        @for (int i = 0; i < 25; i++)
+        {
+            <div class="body-block" data-id="@i" style="background-color: deepskyblue; height: 30mm;"> jag är body @i</div>
+        }
         @* <A4Page />
         <A4Page /> *@
     </div>
@@ -37,6 +21,20 @@
 
 @inject IJSRuntime JS
 @code {
+
+    PageSizeFormat PageFormat { get; set; } = PageSizeFormat.A4;
+    enum PageSizeFormat
+    {
+        A4,
+        A3,
+    }
+    Dictionary<PageSizeFormat, (double widthMm, double heightMm)> PageSizes = new()
+    {
+        { PageSizeFormat.A4, (210, 297) },
+        { PageSizeFormat.A3, (297, 420) },
+    };
+
+
     async Task Print()
     {
         await JS.InvokeVoidAsync("lol");
@@ -50,10 +48,13 @@
             await Paginate();
         }
     }
+
     async Task Paginate()
     {
-        await JS.InvokeVoidAsync("pageinate");
         IsPaginated = true;
+        var result = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate");
         StateHasChanged();
+
     }
+    
 }
