@@ -1,24 +1,31 @@
-﻿@media print{
+﻿@media print {
     @page {
         margin: 0;
         padding: 0;
         margin-right: -1mm;
     }
-    .print-hide {
-        display: none !important;
-    }
-    
+
     body * {
         visibility: hidden;
     }
-    .page, .page * {
-        visibility: visible;
-        margin: 0;
-        padding: 0;
+
+    #print-wrapper,
+    #print-wrapper * {
+        visibility: visible !important;
+    }
+
+    #print-wrapper {
+        position: absolute; /* Behöver absolute för att hamna i print-vyn */
+        top: 0;
+        left: 0;
+        right: 0;
+        
     }
     #print-root {
-        position: absolute;
-        inset: 0;
+        gap: 0 !important;
+    }
+    .print-hide {
+        display: none !important;
     }
 }
 
@@ -27,11 +34,9 @@
     box-sizing: border-box;
     background-color: white;
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     page-break-after: always;
-   /* background-color: pink;*/
 }
 
 .A4 {
@@ -40,23 +45,11 @@
 }
 
 .page .header {
-   /* background-color: yellow;*/
-}
-
-.page .footer {
-   /* background-color: lightblue;*/
 }
 
 .page .body {
     flex-grow: 1;
 }
 
-.header-block {
-    break-inside: avoid;
-}
-.footer-block {
-    break-inside: avoid;
-}
-.body-block {
-    break-inside: avoid;
+.page .footer {
 }

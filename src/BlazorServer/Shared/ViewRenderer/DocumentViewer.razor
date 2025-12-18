@@ -3,24 +3,113 @@
     <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
 </HeadContent>
 
-<div class="full-height">
-    <MudButton OnClick="Print">Skriv ut</MudButton>
-    <div id="print-root" class="d-flex flex-column gap-3" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
-        <div class="footer-block" style="background-color: yellow; height: 50mm;"> jag är en footer 1</div>
-        <div class="header-block" style="background-color: pink; height: 50mm;"> jag är en header 1</div>
-        @for (int i = 0; i < 25; i++)
+
+<MudButton OnClick="Print">Skriv ut</MudButton>
+<div id="print-wrapper">
+    <div id="print-root" class="d-flex flex-column gap-4" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
+        @if (!IsPaginated)
         {
-            <div class="body-block" data-id="@i" style="background-color: deepskyblue; height: 30mm;"> jag är body @i</div>
+            BodyComponentId = 0;
+            IdComponentMap.Clear();
+            foreach (var component in headerComponents)
+            {
+                <div class="header-block">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
+            foreach (var component in bodyComponents)
+            {
+                BodyComponentId += 1;
+                IdComponentMap.Add(BodyComponentId, component);
+                <div class="body-block" data-id="@BodyComponentId">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
+            foreach (var component in footerComponents)
+            {
+                <div class="footer-block">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
         }
-        @* <A4Page />
-        <A4Page /> *@
+        else
+        {
+            foreach (var page in PageMap.Keys.Order())
+            {
+                <A4Page>
+                    <Header>
+                        @foreach (var component in headerComponents)
+                        {
+                            @RenderService.Render(component.ComponentType, component.Parameters)
+                        }
+                    </Header>
+                    <Body>
+                        @foreach (var id in PageMap[page])
+                        {
+                            @RenderService.Render(IdComponentMap[int.Parse(id)].ComponentType, IdComponentMap[int.Parse(id)].Parameters)
+                        }
+                    </Body>
+                    <Footer>
+                        @foreach (var component in footerComponents)
+                        {
+                            @RenderService.Render(component.ComponentType, component.Parameters)
+                        }
+                    </Footer>
+                </A4Page>
+
+            }
+        }
     </div>
 </div>
+
+   
 
 
 
 @inject IJSRuntime JS
+@inject RenderService RenderService
 @code {
+
+    int BodyComponentId = 1;
+
+    /// <summary>
+    /// key: Id value, value: list of components on that page
+    /// </summary>
+    Dictionary<int, (Type ComponentType, Dictionary<string, object> Parameters)> IdComponentMap = new();
+
+    /// <summary>
+    /// key: page number, value: array of component ids on that page
+    /// </summary>
+    Dictionary<int, string[]> PageMap = new();
+
+
+    List<(Type ComponentType, Dictionary<string, object> Parameters)> bodyComponents =
+    [
+        //10 st components
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 1" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 2" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 3" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 4" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Komponent 5" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Komponent 6" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 7" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Komponent 8" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Komponent 9" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Komponent 10" } }),
+    ];
+    List<(Type ComponentType, Dictionary<string, object> Parameters)> headerComponents =
+    [
+        //2 headers
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Header Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Header Komponent 2" } }),
+
+    ];
+    List<(Type ComponentType, Dictionary<string, object> Parameters)> footerComponents =
+    [
+        //2 footers
+        new (typeof(Demo), new Dictionary<string, object>() { { "Test", "Footer Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { "Test", "Footer Komponent 2" } }),    
+    ];
 
     PageSizeFormat PageFormat { get; set; } = PageSizeFormat.A4;
     enum PageSizeFormat
@@ -37,7 +126,7 @@
 
     async Task Print()
     {
-        await JS.InvokeVoidAsync("lol");
+        await JS.InvokeVoidAsync("window.print");
     }
     bool IsPaginated { get; set; } = false;
 
@@ -52,7 +141,7 @@
     async Task Paginate()
     {
         IsPaginated = true;
-        var result = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate");
+        PageMap = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate");
         StateHasChanged();
 
     }

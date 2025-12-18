@@ -1,8 +1,4 @@
-﻿function lol() {
-    window.print();
-}
-
-function pageinate() {
+﻿function pageinate() {
     const root = document.getElementById("print-root");
     const headerBlocks = root.getElementsByClassName("header-block");
     const footerBlocks = root.getElementsByClassName("footer-block");
