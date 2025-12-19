@@ -9,7 +9,6 @@ using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
-using BlazorServer.Shared.ViewRenderer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Graph;
@@ -48,7 +47,6 @@ public static class ServiceAndFeatureRegistrations
                         var section = builder.Configuration.GetSection("AzureAd");
                         section.Bind(options);
                         options.Scope.Add("email");
-                        options.Events.OnTokenValidated += OnTokenValidatedFunc;
                     })
                     .EnableTokenAcquisitionToCallDownstreamApi()
                     .AddInMemoryTokenCaches();
@@ -107,26 +105,5 @@ public static class ServiceAndFeatureRegistrations
             }
         });
     }
-
-
-    static async Task OnTokenValidatedFunc(TokenValidatedContext context)
-    {
-        //implement access claims retrieval here
-
-        //var userId = context.Principal?.GetUserId();
-        //var orgId = context.Principal?.GetOrganizationId();
-        //if (userId is null || orgId is null) return;
-
-        //var roleService = context.HttpContext.RequestServices.GetRequiredService<IRoleService>();
-        //if (roleService is null) return;
-
-        //var isAdmin = await roleService.IsAdminAsync(userId, orgId);
-        //if (isAdmin)
-        //{
-        //    ((ClaimsIdentity)context.Principal?.Identity!).AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
-        //}
-
-    }
-
 }
 

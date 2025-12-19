@@ -53,7 +53,7 @@
                     </div>
 
                     <div class="footer">
-                        @foreach (var component in HeaderComponents)
+                        @foreach (var component in FooterComponents)
                         {
                             @RenderService.Render(component.ComponentType, component.Parameters)
                         }
@@ -65,14 +65,37 @@
     </div>
 </div>
 
-   
-
-
 
 @inject IJSRuntime JS
 @inject RenderService RenderService
 
 @code {
+
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 2" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 3" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 4" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 5" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 6" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 7" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 8" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 9" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 10" } }),
+    ];
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> HeaderComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Header Komponent 2" } }),
+
+    ];
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> FooterComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Footer Komponent 2" } }),
+    ];
+
 
     string PageClass => $"page {FormatClass}";
     string FormatClass => PageFormat switch
@@ -104,47 +127,25 @@
     Dictionary<int, string[]> PageMap { get; set; } = new();
 
 
-    List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 2" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 3" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 4" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 5" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 6" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 7" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 8" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 9" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 10" } }),
-    ];
-    List<(Type ComponentType, Dictionary<string, object> Parameters)> HeaderComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 1" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 2" } }),
-
-    ];
-    List<(Type ComponentType, Dictionary<string, object> Parameters)> FooterComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 1" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 2" } }),
-    ];
-
-   
-
     async Task Print()
     {
         await JS.InvokeVoidAsync("window.print");
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (!IsPaginated)
         {
-            await Paginate();
+            return Paginate();
         }
+        // else
+        // {
+        //     IsPaginated = false;
+        // }
+        return Task.CompletedTask;
     }
 
-    async Task Paginate()
+    public async Task Paginate()
     {
         IsPaginated = true;
         PageMap = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate");

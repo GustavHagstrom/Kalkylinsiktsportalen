@@ -1,5 +1,6 @@
 ﻿@page "/"
 
+@using BlazorServer.Shared.Components.PrintPreview
 @using BlazorServer.Shared.Helpers
 @using System.Text
 @using Microsoft.JSInterop
@@ -14,7 +15,7 @@
             <div class="full-height" style="overflow: auto;">
                 <MudStack Spacing="2">
                     <MudButton OnClick="ExportEstimationsToCsv" Color="Color.Primary">Export Estimations to CSV</MudButton>
-                    <DocumentViewer/>
+                    <PrintableDocument />
                 </MudStack>
             </div>
            

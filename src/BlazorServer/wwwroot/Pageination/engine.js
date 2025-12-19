@@ -46,9 +46,7 @@
     console.log(map);
     console.log(json);
 
-    return json;
-  /*  return (map, warnings);*/
-    
+    return json;    
 }
 
 
