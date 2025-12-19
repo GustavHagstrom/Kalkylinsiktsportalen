@@ -57,3 +57,13 @@
 
 .page .footer {
 }
+
+.footer-block {
+    visibility: hidden;
+}
+.header-block {
+    visibility: hidden;
+}
+.body-block {
+    visibility: hidden;
+}

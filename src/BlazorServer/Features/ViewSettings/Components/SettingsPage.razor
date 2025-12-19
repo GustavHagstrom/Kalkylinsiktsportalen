@@ -1,4 +1,4 @@
-﻿@page "/settings/views"
+﻿@page "/Settings/views"
 @using BlazorServer.Shared.DTOs.Views
 @layout SettingsLayout
 
@@ -6,6 +6,24 @@
     <LeftToolbarContent>
         <MudIconButton Icon="@Icons.Material.Sharp.Add" Color="Color.Primary"  OnClick="@NewView" Class="pa-1"/>
     </LeftToolbarContent>
+
+    <CenterToolbarContent>
+
+        <NavButton IsActive="true">
+            @Localizer["test1"]
+        </NavButton>
+        <NavButton IsActive="false">
+            @Localizer["test2"]
+        </NavButton>
+        <NavButton IsActive="true" Href="/Settings/views">
+            @Localizer["test3"]
+        </NavButton>
+        <NavButton IsActive="false" Href="/Settings/views">
+            @Localizer["test4"]
+        </NavButton>
+
+    </CenterToolbarContent>
+
     <ChildContent>
         <div class="d-flex full-height pa-4">
             <MudPaper Class="full-height" Style="overflow: auto; min-width: 300px;">

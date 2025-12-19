@@ -3,10 +3,13 @@
     <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
 </HeadContent>
 
-
-<MudButton OnClick="Print">Skriv ut</MudButton>
+    
 <div id="print-wrapper">
-    <div id="print-root" class="d-flex flex-column gap-4" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
+    
+    <div id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
+        <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        </MudOverlay>
         @if (!IsPaginated)
         {
             int BodyComponentId = 0;
@@ -64,6 +67,8 @@
         }
     </div>
 </div>
+
+
 
 
 @inject IJSRuntime JS
@@ -125,12 +130,6 @@
     /// key: page number, value: array of component ids on that page
     /// </summary>
     Dictionary<int, string[]> PageMap { get; set; } = new();
-
-
-    async Task Print()
-    {
-        await JS.InvokeVoidAsync("window.print");
-    }
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

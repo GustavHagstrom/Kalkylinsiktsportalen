@@ -1,0 +1,24 @@
+﻿<a href="@Href" class="@Class" style="@Style" @onclick="@OnClick">
+    @ChildContent
+</a>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public bool IsActive { get; set; } = false;
+    [Parameter] public Func<bool>? IsActiveFunc { get; set; }
+
+    string Style => string.Empty;
+    string Class => GetClass();
+
+    string GetClass()
+    {
+        List<string> classes = ["mud-ripple"];
+        if (IsActive || IsActiveFunc?.Invoke() == true)
+        {
+            classes.Add("active");
+        }
+        return string.Join(" ", classes);
+    }
+}

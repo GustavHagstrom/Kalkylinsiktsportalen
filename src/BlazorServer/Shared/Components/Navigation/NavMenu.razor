@@ -7,9 +7,9 @@
 {
     <MudMenu Dense="true">
         <ActivatorContent>
-            <MudText Style="@MenuStyle(FeatureRoute, Match)" Class="mud-button" Typo="Typo.body2">
+            <NavButton IsActiveFunc="() => IsActive(FeatureRoute, Match)">
                 @MenuTitle
-            </MudText>
+            </NavButton>
         </ActivatorContent>
         <ChildContent>
             @foreach (var link in MenuLinks)
@@ -22,12 +22,10 @@
 }
 else
 {
-    <a href="@FeatureRoute">
-        <MudText Typo="Typo.body2" Style="@($"{MenuStyle(FeatureRoute, Match)}")" Class="mud-button">
-            @MenuTitle
-        </MudText>
-    </a>
-    
+    <NavButton Href="@FeatureRoute" IsActiveFunc="() => IsActive(FeatureRoute, Match)">
+        @MenuTitle
+    </NavButton>
+ 
 }
 
 
@@ -51,11 +49,7 @@ else
         NavigationManager.LocationChanged -= (s, e) => StateHasChanged();        
     }
 
-    string MenuStyle(string? href, NavLinkMatch? match)
-    {
-        string baseStyle = "align-content: center; padding-left: 12px; padding-right: 12px;";
-        return $"{baseStyle} {GetActiveStyle(href, match)}";
-    }
+  
     string MenuItemStyle(string? href, NavLinkMatch? match)
     {
         string baseStyle = "";
