@@ -5,7 +5,7 @@
     <div>
         <div class="d-flex" style="padding: 2px 2px 0px 2px">
             <MudCheckBox T="bool" Value="@Estimations.All(x => x.IsSelected)" ValueChanged="ToggleSelecedOnAllFilterd" Dense="true" />
-            <input placeholder="Sökfilter" class="pa-2 flex-grow-1" style="outline: none; background-color: var(--mud-palette-background); color: var(--mud-palette-text-primary)" @bind="Filter" @bind:event="oninput" />
+            <input placeholder="@Localizer["Sök"]" class="pa-2 flex-grow-1" style="outline: none; background-color: var(--mud-palette-background); color: var(--mud-palette-text-primary)" @bind="Filter" @bind:event="oninput" />
         </div>
         <MudDivider Light="true"/>
     </div>

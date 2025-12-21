@@ -1,0 +1,32 @@
+﻿button, a, div {
+    cursor: pointer;
+    padding: 6px 6px 6px 6px;
+    transition: background-color ease 0.25s;
+    display: inline-block;
+}
+    button:hover, a:hover, div:hover {
+        background-color: var(--mud-palette-action-default-hover);
+    }
+.active {
+    color: var(--mud-palette-primary);
+    background-color: var(--mud-palette-primary-hover);
+}
+    .active:hover {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+    }
+
+svg path {
+    pointer-events: none;
+}
+.small {
+    height: 32px;
+    width: 32px;
+}
+.medium {
+    height: 36px;
+    width: 36px;
+}
+.large {
+    height: 48px;
+    width: 48px;
+}

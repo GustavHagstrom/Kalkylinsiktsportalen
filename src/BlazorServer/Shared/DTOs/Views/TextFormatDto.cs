@@ -15,6 +15,7 @@ public class TextFormatDto
 
     //DateTime properties
     public bool DoesIncludeTimeOfDay { get; set; } = false;
+
     // Number properties
     public int DecimalCount { get; set; } = 2;
     public bool HasThoasandsSeparator { get; set; } = true;

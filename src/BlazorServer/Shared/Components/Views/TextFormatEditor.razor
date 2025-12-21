@@ -1,0 +1,51 @@
+﻿@inject IStringLocalizer<TextFormatEditor> Localizer
+
+@if(FormatDto is null)
+{
+    
+}
+else
+{
+    <div class="main-container">
+       <div class="row">
+            <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.Start" 
+                                Icon="@Icons.Material.Sharp.VerticalAlignTop" 
+                                OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.Start" 
+                                Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.Center" 
+                                Icon="@Icons.Material.Sharp.VerticalAlignCenter" 
+                                OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.Center" 
+                                Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.End" 
+                                Icon="@Icons.Material.Sharp.VerticalAlignBottom" 
+                                OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.End" 
+                                Class="border border-solid" />
+            <input @bind="FormatDto!.FontFamily" placeholder="@Localizer["Teckensnitt"]" />
+       </div>
+        <div class="row">
+            <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.Start" 
+                                Icon="@Icons.Material.Sharp.AlignHorizontalLeft" 
+                                OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.Start" 
+                                Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.Center" 
+                                Icon="@Icons.Material.Sharp.AlignHorizontalCenter" 
+                                OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.Center" 
+                                Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.End" 
+                                Icon="@Icons.Material.Sharp.AlignHorizontalRight" 
+                                OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.End" 
+                                Class="border border-solid" />
+
+            <IsActiveIconButton IsActive="FormatDto!.IsBold" Icon="@Icons.Material.Sharp.FormatBold" OnClick="() => FormatDto.IsBold = !FormatDto.IsBold" Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.IsItalic" Icon="@Icons.Material.Sharp.FormatItalic" OnClick="() => FormatDto.IsItalic = !FormatDto.IsItalic" Class="border border-solid" />
+            <IsActiveIconButton IsActive="FormatDto!.IsUnderline" Icon="@Icons.Material.Sharp.FormatUnderlined" OnClick="() => FormatDto.IsUnderline = !FormatDto.IsUnderline" Class="border border-solid" />
+            
+        </div>
+    </div>
+}
+
+
+
+@code {
+    [Parameter] public TextFormatDto? FormatDto { get; set; }
+}

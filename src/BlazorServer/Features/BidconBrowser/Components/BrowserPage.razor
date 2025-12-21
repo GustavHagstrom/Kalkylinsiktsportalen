@@ -11,9 +11,9 @@
     </LeftToolbarContent>
     <CenterToolbarContent>
         <MudStack Spacing="2" Row="true">
-            <MudIconButton Size="Size.Medium" Color="Color.Primary" OnClick="LoadData" Icon="@Icons.Material.Sharp.Refresh" Class="pa-1" />@* @Localizer["Uppdatera"]</MudIconButton> *@
-            <MudButton Size="Size.Small" Variant="@GetTabVariant(1)" Color="Color.Primary" OnClick="@(() => ActiveTab = 1)">@Localizer["Sök"]</MudButton>
-            <MudButton Size="Size.Small" Variant="GetTabVariant(2)" Color="Color.Primary" OnClick="@(() => ActiveTab = 2)">@($"{Localizer["Valda"]} ({EstimationListState.SelectedEstimations.Count})")</MudButton>
+            <MudIconButton Size="Size.Medium" Color="Color.Primary" OnClick="LoadData" Icon="@Icons.Material.Sharp.Refresh" Class="pa-1" />
+            <NavButton IsActive="ActiveTab == 1" OnClick="@(() => ActiveTab = 1)">@Localizer["Sök"]</NavButton>
+            <NavButton IsActive="ActiveTab == 2" OnClick="@(() => ActiveTab = 2)">@($"{Localizer["Valda"]} ({EstimationListState.SelectedEstimations.Count})")</NavButton>
 
         </MudStack>
     </CenterToolbarContent>

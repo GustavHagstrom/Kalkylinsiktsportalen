@@ -1,23 +1,29 @@
 ﻿@page "/Settings/views/{ViewId}"
 
-@using BlazorServer.Shared.DTOs.Views
+
 @layout SettingsLayout
-<ToolbarPage IsLoading="isLoading">
-    <ChildContent>
-        @if(View is not null)
-        {
+
+    
+@if(View is not null)
+{
+    <ToolbarPage IsLoading="isLoading" Height="88px">
+        <LeftToolbarContent>
+            <TextFormatEditor FormatDto="new()" />
+        </LeftToolbarContent>
+        <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
                 <MudPaper Class="full-height flex-grow-1" Style="overflow: auto; min-width: 300px;">
                     <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
                 </MudPaper>
-                <div class="full-height overflow-auto">
+                <div class="full-height overflow-auto pr-4">
                     <PrintableDocument />
                 </div>
             </div>
-            
-        }
-    </ChildContent>
-</ToolbarPage>
+        </ChildContent>
+    </ToolbarPage>
+}
+    
+
 
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IViewStore ViewStore

@@ -76,6 +76,9 @@
 
 @code {
 
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
     [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
     [
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
@@ -89,12 +92,18 @@
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 9" } }),
         new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 10" } }),
     ];
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
     [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> HeaderComponents { get; set; } =
     [
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 1" } }),
         new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Header Komponent 2" } }),
 
     ];
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
     [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> FooterComponents { get; set; } =
     [
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 1" } }),
