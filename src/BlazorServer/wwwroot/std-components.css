@@ -1,0 +1,20 @@
+﻿.kip-input {
+    outline: 1px solid var(--mud-palette-lines-inputs);
+    outline-offset: -1px;
+    padding: 4px 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--mud-palette-text-primary);
+    background-color: inherit;
+    transition: outline-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kip-input:hover {
+    outline-color: var(--mud-palette-action-default);
+}
+
+.kip-input:focus {
+    outline-width: 2px;
+    outline-offset: -2px;
+    outline-color: var(--mud-palette-primary);
+}
