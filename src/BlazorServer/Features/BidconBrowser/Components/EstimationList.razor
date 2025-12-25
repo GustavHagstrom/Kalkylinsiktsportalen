@@ -50,11 +50,11 @@
         estimation.IsSelected = value;
         return SelectionChanged.InvokeAsync();
     }
-    Task ToggleSelecedOnAllFilterd()
+    Task ToggleSelecedOnAllFilterd(bool value)
     {
         foreach (var estimation in GetFilteredEstimations())
         {
-            estimation.IsSelected = !estimation.IsSelected;
+            estimation.IsSelected = value;
         }
         return SelectionChanged.InvokeAsync();
     }
