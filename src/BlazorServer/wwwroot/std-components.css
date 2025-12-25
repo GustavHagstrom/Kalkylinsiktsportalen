@@ -18,3 +18,8 @@
     outline-offset: -2px;
     outline-color: var(--mud-palette-primary);
 }
+.kip-input.active {
+    outline-width: 2px;
+    outline-offset: -2px;
+    outline-color: var(--mud-palette-primary);
+}

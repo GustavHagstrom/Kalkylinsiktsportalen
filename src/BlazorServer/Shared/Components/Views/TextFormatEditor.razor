@@ -1,5 +1,7 @@
 ﻿@inject IStringLocalizer<TextFormatEditor> Localizer
 
+<MudOverlay Visible="ShowOverlay" OnClick="OnOverlayClicked" />
+
 @if(FormatDto is null)
 {
     
@@ -22,10 +24,26 @@ else
                                 Class="border border-solid" />
             <input class="kip-input" @bind="FormatDto!.FontFamily" placeholder="@Localizer["Teckensnitt"]" />
             <input class="kip-input" style="width: 36px;" @bind="FormatDto!.FontSize" />
-          @*   <div class="kip-input d-flex">
-                <input style="outline: none; width: 30px;"/>
-                <MudIcon Icon="@Icons.Material.Sharp.FormatSize" Size="Size.Small"/>
-            </div> *@
+
+            <div class="relative">
+                <div class="@TypePickerClass" @onclick="@ShowFormatTypeDropdown">
+                    <input style="width: 60px; outline: none; color: var(--mud-palette-text-primary);" readonly value="@TypeString" />
+                    <MudIcon Icon="@Icons.Material.Sharp.ArrowDropDown" Size="Size.Small"  />
+                </div>
+                <div class="@(ShowFormatOptions ? "drop-down active z-10" : "drop-down")" style="width: 100%;">
+                    <div class="drop-down-item mud-ripple" @onclick="@(() => SetTextType(TextType.PlainText))">
+                        @Localizer["Text"]
+                    </div>
+                    <div class="drop-down-item mud-ripple" @onclick="@(() => SetTextType(TextType.Number))">
+                        @Localizer["Tal"]
+                    </div>
+                    <div class="drop-down-item mud-ripple" @onclick="@(() => SetTextType(TextType.DateTime))">
+                        @Localizer["Datum"]
+                    </div>
+                </div>
+                
+            </div>
+            
        </div>
         <div class="row">
             <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.Start" 
@@ -57,7 +75,7 @@ else
                                 ShowAlpha="false"
                                 ShowModeSwitch="true" 
                                 @onkeypress="@OnOverlayKeypress" />
-                <MudOverlay Visible="ShowColorPicker" OnClick="() => ShowColorPicker = false" />
+                
             </div>
             
             
@@ -70,9 +88,34 @@ else
 @code {
     [Parameter] public TextFormatDto? FormatDto { get; set; }
     bool ShowColorPicker = false;
+    bool ShowFormatOptions = false;
+    bool ShowOverlay => ShowColorPicker || ShowFormatOptions;
+    string TypeString => (FormatDto?.Type) switch
+    {  
+        TextType.PlainText => Localizer["Text"],
+        TextType.Number => Localizer["Tal"],
+        TextType.DateTime => Localizer["Datum"],
+        _ => Localizer["Text"]
+    };
+    string TypePickerClass => ShowFormatOptions ? "kip-input format-picker active" : "kip-input format-picker";
 
-
-
+    void SetTextType(TextType type)
+    {
+        if (FormatDto is not null)
+        {
+            FormatDto.Type = type;
+        }
+        ShowFormatOptions = false;
+    }
+    void ShowFormatTypeDropdown()
+    {
+        ShowFormatOptions = !ShowFormatOptions;
+    }
+    void OnOverlayClicked()
+    {
+        ShowColorPicker = false;
+        ShowFormatOptions = false;
+    }
     string ColorPickerStyle()
     {
         List<string> styles = new();
