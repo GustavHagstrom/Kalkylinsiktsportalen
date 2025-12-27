@@ -1,0 +1,71 @@
+﻿@typeparam TItem
+@inherits StyleComponent
+
+<MudOverlay Visible="ShowDropDown" OnClick="OnOverlayClicked" />
+<div class="relative">
+    <div class="@PickedValueClass" style="@Style" @onclick="@ShowDropdown">
+        <input value="@ToStringFunc(SelectedItem)" />
+        <MudIcon Icon="@Icons.Material.Sharp.ArrowDropDown" Size="Size.Small" />
+    </div>
+    <div class="@(ShowDropDown ? "drop-down active z-10" : "drop-down")" style="width: 100%;">
+
+        @if(ChildContent is not null)
+        {
+            foreach (var item in Items)
+            {
+                @ChildContent(item)
+            }
+        }
+        else
+        {
+            @foreach (var item in Items)
+            {
+                <div class="drop-down-item mud-ripple" @onclick="@(() => SelectItem(item))">
+                    @ToStringFunc(item) 
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool ShowDropDown { get; set; } = false;
+    [Parameter] public EventCallback<bool> ShowDropDownChanged { get; set; }
+    [Parameter] public TItem? SelectedItem { get; set; }
+    [Parameter] public EventCallback<TItem?> SelectedItemChanged { get; set; }
+    [Parameter] public List<TItem> Items { get; set; } = new();
+    [Parameter] public Func<TItem, string>? ItemTextFunc { get; set; }
+    [Parameter] public RenderFragment<TItem>? ChildContent { get; set; }
+
+    string PickedValueClass => ShowDropDown ? $"kip-input format-picker active {Class}" : $"kip-input format-picker {Class}";
+
+    string ToStringFunc(TItem? item) 
+    {
+        if (item is null) return string.Empty;
+        if (ItemTextFunc is null) return item.ToString() ?? string.Empty;
+        return ItemTextFunc(item);
+    }
+    void ShowDropdown()
+    {
+        ShowDropDown = true;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+    void HideDropdown()
+    {
+        ShowDropDown = false;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+    void SelectItem(TItem item)
+    {
+        SelectedItem = item;
+        SelectedItemChanged.InvokeAsync(SelectedItem);
+        ShowDropDown = false;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+    void OnOverlayClicked()
+    {
+        ShowDropDown = false;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+}

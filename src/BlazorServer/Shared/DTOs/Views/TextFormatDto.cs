@@ -14,7 +14,7 @@ public class TextFormatDto
 
 
     //DateTime properties
-    public bool DoesIncludeTimeOfDay { get; set; } = false;
+    public string DayTimeFormat { get; set; } = "yyyy-MM-dd";
 
     // Number properties
     public int DecimalCount { get; set; } = 2;
