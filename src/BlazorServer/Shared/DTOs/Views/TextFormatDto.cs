@@ -2,7 +2,7 @@
 
 public class TextFormatDto
 {
-    public string FontFamily { get; set; } = string.Empty;
+    public string FontFamily { get; set; } = "Calibri";
     public string Color { get; set; } = "#000000";
     public int FontSize { get; set; } = 12;
     public bool IsBold { get; set; } = false;

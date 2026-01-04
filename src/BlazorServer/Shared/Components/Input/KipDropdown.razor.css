@@ -1,10 +1,10 @@
-﻿input {
+﻿/*input {
     flex-grow: 1;
     outline: none;
     color: var(--mud-palette-text-primary);
     min-width: 0;
 }
-
+*/
 .drop-down {
     position: absolute;
     display: none;
@@ -18,17 +18,17 @@
     /*gap: 4px;*/
 }
 
-.drop-down-item {
+/*.drop-down-item {
     padding: 4px 8px;
     cursor: pointer;
     transition: background-color 0.25s ease;
-}
+}*/
 
-.drop-down-item:hover {
+/*.drop-down-item:hover {
     background-color: var(--mud-palette-table-hover)
-}
+}*/
 
-.format-picker {
+.activator-container {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -36,11 +36,11 @@
     height: 36px;
 }
 
-.format-picker > input {
+/*.format-picker > input {
     cursor: pointer;
 }
-
-.format-picker.active {
+*/
+.activator-container.active {
     outline-width: 2px;
     outline-offset: -2px;
     outline-color: var(--mud-palette-primary);

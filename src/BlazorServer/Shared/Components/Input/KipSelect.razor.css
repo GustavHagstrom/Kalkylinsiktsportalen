@@ -1,0 +1,45 @@
+﻿input {
+    flex-grow: 1;
+    outline: none;
+    color: var(--mud-palette-text-primary);
+    min-width: 0;
+    background-color: inherit;
+}
+
+.drop-down {
+    position: absolute;
+    display: none;
+    box-shadow: var(--mud-elevation-3);
+    background-color: var(--mud-palette-surface);
+}
+
+.drop-down.active {
+    display: flex;
+    flex-direction: column;
+    /*gap: 4px;*/
+}
+
+.drop-down-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+}
+
+.drop-down-item:hover {
+    background-color: var(--mud-palette-table-hover)
+}
+
+.activator-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: outline-color 0.25s ease, box-shadow 0.25s ease;
+    height: 36px;
+}
+
+
+
+.activator-container * {
+    cursor: pointer;
+}
+

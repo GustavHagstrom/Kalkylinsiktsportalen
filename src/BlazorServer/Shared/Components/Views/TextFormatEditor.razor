@@ -61,14 +61,14 @@ else
                                 ShowAlpha="false"
                                 ShowModeSwitch="true"  />
             </div>
-            <KipDropdown Style="width: 80px;" TItem="TextType" Items="@([TextType.PlainText, TextType.Number, TextType.DateTime])" ItemTextFunc="TypeString" @bind-SelectedItem="FormatDto!.Type" />
+            <KipSelect Style="width: 80px;" TItem="TextType" Items="@([TextType.PlainText, TextType.Number, TextType.DateTime])" ItemTextFunc="TypeString" @bind-SelectedItem="FormatDto!.Type" />
             @if (FormatDto!.Type == TextType.Number)
             {
                 <input class="kip-input" style="width: 36px;" @bind="FormatDto!.DecimalCount" />
             }
             else if (FormatDto!.Type == TextType.DateTime)
             {
-                <KipDropdown Style="width: 170px;" TItem="string" Items="@(["yyyy-MM-dd", "yyyy-MM-dd HH:ss"])" @bind-SelectedItem="FormatDto!.DayTimeFormat" />
+                <KipSelect Style="width: 170px;" TItem="string" Items="@(["yyyy-MM-dd", "yyyy-MM-dd HH:ss"])" @bind-SelectedItem="FormatDto!.DayTimeFormat" />
             }
             
         </div>
