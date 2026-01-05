@@ -5,20 +5,6 @@
     min-width: 0;
     background-color: inherit;
 }
-
-.drop-down {
-    position: absolute;
-    display: none;
-    box-shadow: var(--mud-elevation-3);
-    background-color: var(--mud-palette-surface);
-}
-
-.drop-down.active {
-    display: flex;
-    flex-direction: column;
-    /*gap: 4px;*/
-}
-
 .drop-down-item {
     padding: 4px 8px;
     cursor: pointer;
@@ -33,13 +19,12 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    transition: outline-color 0.25s ease, box-shadow 0.25s ease;
-    height: 36px;
+    height: 100%;
 }
-
-
-
 .activator-container * {
     cursor: pointer;
 }
+
+
+
 

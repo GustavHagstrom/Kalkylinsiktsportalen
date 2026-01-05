@@ -16,7 +16,7 @@
     [Parameter] public RenderFragment? ActivatorContent { get; set; }
     [Parameter] public RenderFragment? DropdownContent { get; set; }
 
-    string ActivatorClass => ShowDropDown ? $"kip-input activator-container active {Class}" : $"kip-input activator-container {Class}";
+    string ActivatorClass => ShowDropDown ? $"activator-container active {Class}" : $"activator-container {Class}";
 
     
     void ShowDropdown()

@@ -1,4 +1,4 @@
-﻿.main-container {
+﻿.column {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -6,4 +6,12 @@
 .row {
     display: flex;
     gap: 4px;
+}
+.row-height {
+    height: 36px;
+}
+.vertical-divider {
+    border: none;
+    border-left: 1px solid var(--mud-palette-lines-inputs);
+    margin: 0 4px;
 }

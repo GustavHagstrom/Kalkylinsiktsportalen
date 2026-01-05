@@ -44,7 +44,7 @@
     bool ShowDropDown { get; set; } = false;
 
 
-    string ActivatorClass => $"activator-container {Class}";
+    string ActivatorClass => $"kip-input activator-container {Class}";
 
     string ToStringFunc(TItem? item) 
     {
@@ -65,6 +65,5 @@
         SelectedItem = item;
         SelectedItemChanged.InvokeAsync(SelectedItem);
         ShowDropDown = false;
-        // StateHasChanged();
     }
 }
