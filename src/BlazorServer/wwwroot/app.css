@@ -1,9 +1,16 @@
+
+
 h1:focus {
     outline: none;
 }
 * {
     border-color: var(--mud-palette-lines-inputs);
+    caret-color: transparent;
 }
+input, textarea, [contenteditable="true"] {
+    caret-color: auto; /* eller en färg du vill använda */
+}
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -68,13 +75,13 @@ table.table-row-border tr:nth-child(n+2) {
     border-style: solid;
 }
 
-table.striped {
+/*table.striped {
 }
 
 table.striped th {
     position: sticky;
-    top: 0; /* Don't forget this, required for the stickiness */
-}
+    top: 0;*/ /* Don't forget this, required for the stickiness */
+/*}
 
 table.striped tr:nth-child(even) {
     background-color: var(--mud-palette-background-grey);
@@ -82,4 +89,8 @@ table.striped tr:nth-child(even) {
 
 table.striped tr:nth-child(odd) {
     background-color: var(--mud-palette-background);
+}*/
+
+.full-height {
+    height: 100%;
 }

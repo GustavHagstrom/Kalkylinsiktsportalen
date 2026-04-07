@@ -1,12 +1,13 @@
 ﻿using BlazorServer.Features.Access;
 using BlazorServer.Features.BidconAccess;
+using BlazorServer.Features.BidconBrowser;
 using BlazorServer.Features.Settings;
+using BlazorServer.Features.ViewSettings;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
-using BlazorServer.Shared.Services.Bidcon;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -45,7 +46,7 @@ public static class ServiceAndFeatureRegistrations
                     {
                         var section = builder.Configuration.GetSection("AzureAd");
                         section.Bind(options);
-                        options.Events.OnTokenValidated += OnTokenValidatedFunc;
+                        options.Scope.Add("email");
                     })
                     .EnableTokenAcquisitionToCallDownstreamApi()
                     .AddInMemoryTokenCaches();
@@ -63,6 +64,8 @@ public static class ServiceAndFeatureRegistrations
             config.AddFeature<SettingsFeature>();
             config.AddFeature<AccessFeature>();
             config.AddFeature<BidconAccessFeature>();
+            config.AddFeature<BidconBrowserFeature>();
+            config.AddFeature<ViewSettingsFeature>();
 
             if (builder.Environment.IsDevelopment())
             {
@@ -79,7 +82,7 @@ public static class ServiceAndFeatureRegistrations
         });
 
         builder.UseMongoDb();
-        builder.Services.AddTransient<IBidconAccess, ApiAccess>();
+        builder.Services.AddTransient<BidconApiAccess>();
         builder.Services.AddSingleton<IClaimsCache, MemoryClaimsCache>();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
@@ -102,26 +105,5 @@ public static class ServiceAndFeatureRegistrations
             }
         });
     }
-
-
-    static async Task OnTokenValidatedFunc(TokenValidatedContext context)
-    {
-        //implement access claims retrieval here
-
-        //var userId = context.Principal?.GetUserId();
-        //var orgId = context.Principal?.GetOrganizationId();
-        //if (userId is null || orgId is null) return;
-
-        //var roleService = context.HttpContext.RequestServices.GetRequiredService<IRoleService>();
-        //if (roleService is null) return;
-
-        //var isAdmin = await roleService.IsAdminAsync(userId, orgId);
-        //if (isAdmin)
-        //{
-        //    ((ClaimsIdentity)context.Principal?.Identity!).AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
-        //}
-
-    }
-
 }
 

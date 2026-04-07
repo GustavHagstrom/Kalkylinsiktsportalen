@@ -1,0 +1,164 @@
+﻿<script src="@Assets["Pageination/engine.js"]"></script>
+<HeadContent>
+    <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
+</HeadContent>
+
+    
+<div id="print-wrapper">
+    
+    <div id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
+        <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        </MudOverlay>
+        @if (!IsPaginated)
+        {
+            int BodyComponentId = 0;
+            IdComponentMap.Clear();
+            foreach (var component in HeaderComponents)
+            {
+                <div class="header-block">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
+            foreach (var component in BodyComponents)
+            {
+                BodyComponentId += 1;
+                IdComponentMap.Add(BodyComponentId, component);
+                <div class="body-block" data-id="@BodyComponentId">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
+            foreach (var component in FooterComponents)
+            {
+                <div class="footer-block">
+                    @RenderService.Render(component.ComponentType, component.Parameters)
+                </div>
+            }
+        }
+        else
+        {
+            foreach (var pageIndex in PageMap.Keys.Order())
+            {
+                <div class="@PageClass">
+
+                    <div class="header">
+                        @foreach (var component in HeaderComponents)
+                        {
+                            @RenderService.Render(component.ComponentType, component.Parameters)
+                        }
+                    </div>
+
+                    <div class="body">
+                        @foreach (var id in PageMap[pageIndex])
+                        {
+                            @RenderService.Render(IdComponentMap[int.Parse(id)].ComponentType, IdComponentMap[int.Parse(id)].Parameters)
+                        }
+                    </div>
+
+                    <div class="footer">
+                        @foreach (var component in FooterComponents)
+                        {
+                            @RenderService.Render(component.ComponentType, component.Parameters)
+                        }
+                    </div>
+                </div>
+
+            }
+        }
+    </div>
+</div>
+
+
+
+
+@inject IJSRuntime JS
+@inject RenderService RenderService
+
+@code {
+
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 2" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 3" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 4" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 5" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 6" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 7" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 8" } }),
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 9" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 10" } }),
+    ];
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> HeaderComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Header Komponent 2" } }),
+
+    ];
+    /// <summary>
+    /// ComponentType needs to be a Blazor Component
+    /// </summary>
+    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> FooterComponents { get; set; } =
+    [
+        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 1" } }),
+        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Footer Komponent 2" } }),
+    ];
+
+
+    string PageClass => $"page {FormatClass}";
+    string FormatClass => PageFormat switch
+    {
+        PageSizeFormat.A4 => "A4",
+        PageSizeFormat.A3 => "A3",
+        _ => "A4"
+    };
+    bool IsPaginated { get; set; } = false;
+    public PageSizeFormat PageFormat { get; set; } = PageSizeFormat.A4;
+    public enum PageSizeFormat
+    {
+        A4,
+        A3,
+    }
+    Dictionary<PageSizeFormat, (double widthMm, double heightMm)> PageSizes { get; set; } = new()
+    {
+        { PageSizeFormat.A4, (210, 297) },
+        { PageSizeFormat.A3, (297, 420) },
+    };
+    /// <summary>
+    /// key: Id value, value: list of components on that page
+    /// </summary>
+    Dictionary<int, (Type ComponentType, Dictionary<string, object> Parameters)> IdComponentMap { get; set; } = new();
+
+    /// <summary>
+    /// key: page number, value: array of component ids on that page
+    /// </summary>
+    Dictionary<int, string[]> PageMap { get; set; } = new();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!IsPaginated)
+        {
+            return Paginate();
+        }
+        // else
+        // {
+        //     IsPaginated = false;
+        // }
+        return Task.CompletedTask;
+    }
+
+    public async Task Paginate()
+    {
+        IsPaginated = true;
+        PageMap = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate");
+        StateHasChanged();
+
+    }
+    
+}

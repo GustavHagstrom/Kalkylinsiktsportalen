@@ -6,6 +6,35 @@ namespace BlazorServer.Shared.Stores.MongoDb;
 
 public static class Registrations
 {
+    
+    static IServiceCollection RegisterSharedMongoCollections(this IServiceCollection services)
+    {
+        services.AddMongoCollection<MongoUserSettings>("UserSettings");
+        services.AddMongoCollection<MongoUserAccess>("UserAccess");
+        services.AddMongoCollection<MongoRoleAccess>("RoleAccess");
+        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
+        services.AddMongoCollection<MongoView>("Views");
+        return services;
+    }
+    static IServiceCollection RegisterSharedMongoStores(this IServiceCollection services)
+    {
+        services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
+        services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
+        services.AddSingleton<IAccessStore, MongoAccessStore>();
+        services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
+        services.AddSingleton<IViewStore, MongoViewStore>();
+        return services;
+    }
+
+
+
+
+
+
+
+
+
+
     public static void UseMongoDb(this WebApplicationBuilder builder)
     {
         var mongoConnectionString = builder.Configuration.GetValue<string>("MongoDb:ConnectionString");
@@ -17,22 +46,6 @@ public static class Registrations
 
         builder.Services.RegisterSharedMongoCollections();
         builder.Services.RegisterSharedMongoStores();
-    }
-    static IServiceCollection RegisterSharedMongoCollections(this IServiceCollection services)
-    {
-        services.AddMongoCollection<MongoUserSettings>("UserSettings");
-        services.AddMongoCollection<MongoUserAccess>("UserAccess");
-        services.AddMongoCollection<MongoRoleAccess>("RoleAccess");
-        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
-        return services;
-    }
-    static IServiceCollection RegisterSharedMongoStores(this IServiceCollection services)
-    {
-        services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
-        services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
-        services.AddSingleton<IAccessStore, MongoAccessStore>();
-        services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
-        return services;
     }
     public static IServiceCollection AddMongoCollection<T>(this IServiceCollection services, string collectionName)
     {

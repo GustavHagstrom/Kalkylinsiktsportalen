@@ -1,5 +1,4 @@
-﻿using BlazorServer.Shared.Constants;
-using Microsoft.Identity.Web;
+﻿using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace BlazorServer.Shared.Extensions;
@@ -14,5 +13,8 @@ public static class ClaimsPrincipalExtensions
     {
         return principal.FindFirst(ClaimConstants.TenantId)?.Value;
     }
-
+    public static string? GetUserEmail(this ClaimsPrincipal principal)
+    {
+        return principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+    }
 }

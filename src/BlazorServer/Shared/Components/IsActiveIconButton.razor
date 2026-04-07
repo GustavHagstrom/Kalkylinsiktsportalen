@@ -1,0 +1,55 @@
+﻿@inherits StyleComponent
+
+<button class="@_class" style="@_style" @onclick="@OnClick">
+    <MudIcon Size="@Size" Icon="@Icon"/>
+</button>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public bool IsActive { get; set; } = true;
+    [Parameter] public Func<bool>? IsActiveFunc { get; set; }
+    [Parameter] public string ActiveClass { get; set; } = string.Empty;
+    [Parameter] public string ActiveStyle { get; set; } = string.Empty;
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+    [Parameter] public bool Enabled { get; set; } = true;
+
+
+
+    string _style => GetStyle();
+    string _class => GetClass();
+
+    string GetClass()
+    {
+        List<string> classes = ["mud-ripple", Class];
+        if (IsActive || IsActiveFunc?.Invoke() == true)
+        {
+            classes.Add("active");
+        }
+        var sizeClass = Size switch
+        {
+            Size.Small => "small",
+            Size.Medium => "medium",
+            Size.Large => "large",
+            _ => "medium"
+        };
+        if(!Enabled)
+        {
+            classes.Add("disabled");
+        }
+     
+        classes.Add(sizeClass);
+        return string.Join(" ", classes);
+    }
+    string GetStyle()
+    {
+        List<string> styles = [Style];
+        if (IsActive || IsActiveFunc?.Invoke() == true)
+        {
+            styles.Add(ActiveStyle);
+        }
+        return string.Join(" ", styles);
+    }
+
+}

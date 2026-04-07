@@ -1,0 +1,20 @@
+﻿.container {
+    height: 100%;
+}
+.toolbar {
+    background-color: var(--mud-palette-drawer-background);
+    box-shadow: var(--mud-elevation-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+.toolbar > div {
+    display: flex;
+    align-items: center;
+}
+.content {
+
+
+}

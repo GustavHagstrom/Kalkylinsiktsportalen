@@ -1,0 +1,69 @@
+﻿@typeparam TItem
+@inherits StyleComponent
+
+
+
+<KipDropdown ShowDropDown="@ShowDropDown"> 
+    <ActivatorContent>
+        <div class="@ActivatorClass" style="@Style">
+            <input value="@ToStringFunc(SelectedItem)" />
+            <MudIcon Icon="@Icons.Material.Sharp.ArrowDropDown" Size="Size.Small" />
+        </div>
+    </ActivatorContent>
+    <DropdownContent>
+        @if (ChildContent is not null)
+        {
+            {
+                foreach (var item in Items)
+                {
+                    @ChildContent(item)
+                }
+            }
+        }
+        else
+        {
+            @foreach (var item in Items)
+            {
+                <div class="drop-down-item mud-ripple" @onclick="@(() => SelectItem(item))">
+                    @ToStringFunc(item)
+                </div>
+            }
+        }
+    </DropdownContent>
+    
+</KipDropdown>
+
+@code {
+
+    [Parameter] public TItem? SelectedItem { get; set; }
+    [Parameter] public EventCallback<TItem?> SelectedItemChanged { get; set; }
+    [Parameter] public List<TItem> Items { get; set; } = new();
+    [Parameter] public Func<TItem, string>? ItemTextFunc { get; set; }
+    [Parameter] public RenderFragment<TItem>? ChildContent { get; set; }
+
+    bool ShowDropDown { get; set; } = false;
+
+
+    string ActivatorClass => $"kip-input activator-container {Class}";
+
+    string ToStringFunc(TItem? item) 
+    {
+        if (item is null) return string.Empty;
+        if (ItemTextFunc is null) return item.ToString() ?? string.Empty;
+        return ItemTextFunc(item);
+    }
+    void ShowDropdown()
+    {
+        ShowDropDown = true;
+    }
+    void HideDropdown()
+    {
+        ShowDropDown = false;
+    }
+    void SelectItem(TItem item)
+    {
+        SelectedItem = item;
+        SelectedItemChanged.InvokeAsync(SelectedItem);
+        ShowDropDown = false;
+    }
+}

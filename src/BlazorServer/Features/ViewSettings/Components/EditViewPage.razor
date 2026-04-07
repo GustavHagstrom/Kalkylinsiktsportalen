@@ -1,0 +1,65 @@
+﻿@page "/Settings/views/{ViewId}"
+
+
+@layout SettingsLayout
+
+    
+@if(View is not null)
+{
+    <ToolbarPage IsLoading="isLoading" Height="88px">
+        <LeftToolbarContent>
+            <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
+                                IsActive="@TextFormatIsEnabled"
+                                OnClick="@ToggleTextFormat"
+                                Class="mx-2"/>
+            <TextFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
+        </LeftToolbarContent>
+        <ChildContent>
+            <div class="full-height pa-4 d-flex gap-4">
+                <MudPaper Class="full-height flex-grow-1" Style="overflow: auto; min-width: 300px;">
+                    <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+                </MudPaper>
+                <div class="full-height overflow-auto pr-4">
+                    <PrintableDocument />
+                </div>
+            </div>
+        </ChildContent>
+    </ToolbarPage>
+}
+    
+
+
+@inject IStringLocalizer<EditViewPage> Localizer
+@inject IViewStore ViewStore
+
+@code {
+    [Parameter] public string? ViewId { get; set; }
+
+    ViewDto? View { get; set; }
+    bool isLoading = false;
+    bool TextFormatIsEnabled = true;
+
+    void ToggleTextFormat()
+    {
+        TextFormatIsEnabled = !TextFormatIsEnabled;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadDataAsync();
+    }
+
+    async Task LoadDataAsync()
+    {
+        if (ViewId is null) return;
+        SetLoading(true);
+        View = await ViewStore.GetAsync(ViewId);
+
+        SetLoading(false);
+    }
+    void SetLoading(bool loading)
+    {
+        isLoading = loading;
+        StateHasChanged();
+    }
+}

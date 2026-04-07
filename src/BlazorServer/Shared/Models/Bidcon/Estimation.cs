@@ -6,14 +6,14 @@ public class Estimation
     public string OrganizationId { get; set; } = string.Empty;
     public string BidconId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string? Customer { get; set; }
-    public string? Location { get; set; }
-    public string? HandlingOfficer { get; set; }
-    public string? ConfirmationOfficer { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string Customer { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public string HandlingOfficer { get; set; } = string.Empty;
+    public string ConfirmationOfficer { get; set; } = string.Empty;
     public double? TenderTotal { get; set; }
     public override string ToString()
     {
-        return Description is null ? Name : $"{Name} - {Description}";
+        return string.IsNullOrWhiteSpace(Description) ? Name : $"{Name} - {Description}";
     }
 }

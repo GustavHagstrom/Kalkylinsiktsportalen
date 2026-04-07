@@ -1,0 +1,37 @@
+﻿@inherits StyleComponent
+
+<MudOverlay Visible="ShowDropDown" OnClick="OnOverlayClicked" />
+<div class="relative">
+    <div class="@ActivatorClass" style="@Style" @onclick="@ShowDropdown">
+        @ActivatorContent
+    </div>
+    <div class="@(ShowDropDown ? "drop-down active z-10" : "drop-down")" style="width: 100%;">
+        @DropdownContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool ShowDropDown { get; set; } = false;
+    [Parameter] public EventCallback<bool> ShowDropDownChanged { get; set; }
+    [Parameter] public RenderFragment? ActivatorContent { get; set; }
+    [Parameter] public RenderFragment? DropdownContent { get; set; }
+
+    string ActivatorClass => ShowDropDown ? $"activator-container active {Class}" : $"activator-container {Class}";
+
+    
+    void ShowDropdown()
+    {
+        ShowDropDown = true;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+    void HideDropdown()
+    {
+        ShowDropDown = false;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+    void OnOverlayClicked()
+    {
+        ShowDropDown = false;
+        ShowDropDownChanged.InvokeAsync(ShowDropDown);
+    }
+}

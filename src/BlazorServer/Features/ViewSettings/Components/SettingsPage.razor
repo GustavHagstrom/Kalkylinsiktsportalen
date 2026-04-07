@@ -1,0 +1,75 @@
+﻿@page "/Settings/views"
+@using BlazorServer.Shared.DTOs.Views
+@layout SettingsLayout
+
+<ToolbarPage IsLoading="isLoading">
+    <LeftToolbarContent>
+        <MudIconButton Icon="@Icons.Material.Sharp.Add" Color="Color.Primary"  OnClick="@NewView" Class="pa-1"/>
+    </LeftToolbarContent>
+
+    <CenterToolbarContent>
+        
+    </CenterToolbarContent>
+
+    <ChildContent>
+        <div class="d-flex full-height pa-4">
+            <MudPaper Class="full-height" Style="overflow: auto; min-width: 300px;">
+                <ViewList Views="Views" />
+            </MudPaper>
+            <MudSpacer />
+        </div>
+        
+    </ChildContent>
+</ToolbarPage>
+
+@inject IViewStore ViewStore
+@inject IDialogService DialogService
+@inject IStringLocalizer<SettingsPage> Localizer
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@code {
+    bool isLoading = false;
+    List<ViewDto> Views = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadDataAsync();
+    }
+
+    async Task NewView()
+    {
+        if(AuthService.OrganizationId is null) return;
+
+        var parameters = new DialogParameters<StringInputDialog>()
+        {
+            { x => x.InputLabel, Localizer["Namn"] }
+        };
+        var dialog = await DialogService.ShowAsync<StringInputDialog>(Localizer["Ny vy"], parameters);
+        var result = await dialog.Result;
+        if (result != DialogResult.Cancel() && result?.Data is not null && result.Data is string name)
+        {
+            var view = new ViewDto()
+            {
+                Name = name,
+                OrganizationId = AuthService.OrganizationId
+            };
+            await ViewStore.UpsertAsync(view);
+            Navigation.NavigateTo(FeatureConstants.Routes.EditViewPage(view.Id));
+        }
+        
+    }
+
+    async Task LoadDataAsync()
+    {
+        if (AuthService.OrganizationId is null) return;
+        SetLoading(true);
+        var views = await ViewStore.GetAllAsync(AuthService.OrganizationId);
+        Views = views;
+        SetLoading(false);
+    }
+    void SetLoading(bool loading)
+    {
+        isLoading = loading;
+        StateHasChanged();
+    }
+}

@@ -64,6 +64,8 @@ public class AuthService : IAuthService, IDisposable
 
     public User? User => _cachedUser;
 
+    public string? UserEmail => _cachedAuthState?.User.GetUserEmail();
+
     public async Task LoginAsync()
     {
         _navigationManager.NavigateTo($"/auth/login", true);
