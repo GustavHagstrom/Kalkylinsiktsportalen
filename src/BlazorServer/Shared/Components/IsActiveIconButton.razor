@@ -13,6 +13,7 @@
     [Parameter] public string ActiveStyle { get; set; } = string.Empty;
     [Parameter] public string? Icon { get; set; }
     [Parameter] public Size Size { get; set; } = Size.Medium;
+    [Parameter] public bool Enabled { get; set; } = true;
 
 
 
@@ -33,6 +34,10 @@
             Size.Large => "large",
             _ => "medium"
         };
+        if(!Enabled)
+        {
+            classes.Add("disabled");
+        }
      
         classes.Add(sizeClass);
         return string.Join(" ", classes);
