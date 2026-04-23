@@ -8,25 +8,36 @@
 }
 else
 {
-    <div class="row">
+    <div class="@baseRowClass">
 
         <div class="column">
             <div class="row">
                 <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.Start"
                                     Icon="@Icons.Material.Sharp.VerticalAlignTop"
                                     OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.Start"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled"/>
                 <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.Center"
                                     Icon="@Icons.Material.Sharp.VerticalAlignCenter"
                                     OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.Center"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
                 <IsActiveIconButton IsActive="FormatDto!.VerticalAlign == DTOs.Views.Align.End"
                                     Icon="@Icons.Material.Sharp.VerticalAlignBottom"
                                     OnClick="() => FormatDto.VerticalAlign = DTOs.Views.Align.End"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
 
-                <IsActiveIconButton IsActive="FormatDto!.IsBold" Icon="@Icons.Material.Sharp.FormatBold" OnClick="() => FormatDto.IsBold = !FormatDto.IsBold" Class="border border-solid" />
-                <IsActiveIconButton IsActive="FormatDto!.IsItalic" Icon="@Icons.Material.Sharp.FormatItalic" OnClick="() => FormatDto.IsItalic = !FormatDto.IsItalic" Class="border border-solid" />
+                <IsActiveIconButton IsActive="FormatDto!.IsBold"
+                                    Icon="@Icons.Material.Sharp.FormatBold" 
+                                    OnClick="() => FormatDto.IsBold = !FormatDto.IsBold" 
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="FormatDto!.IsItalic" 
+                                    Icon="@Icons.Material.Sharp.FormatItalic" 
+                                    OnClick="() => FormatDto.IsItalic = !FormatDto.IsItalic"
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
 
 
 
@@ -37,20 +48,33 @@ else
                 <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.Start"
                                     Icon="@Icons.Material.Sharp.AlignHorizontalLeft"
                                     OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.Start"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
                 <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.Center"
                                     Icon="@Icons.Material.Sharp.AlignHorizontalCenter"
                                     OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.Center"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
                 <IsActiveIconButton IsActive="FormatDto!.HorizontalAlign == DTOs.Views.Align.End"
                                     Icon="@Icons.Material.Sharp.AlignHorizontalRight"
                                     OnClick="() => FormatDto.HorizontalAlign = DTOs.Views.Align.End"
-                                    Class="border border-solid" />
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
 
-                <IsActiveIconButton IsActive="FormatDto!.IsUnderline" Icon="@Icons.Material.Sharp.FormatUnderlined" OnClick="() => FormatDto.IsUnderline = !FormatDto.IsUnderline" Class="border border-solid" />
+                <IsActiveIconButton IsActive="FormatDto!.IsUnderline" 
+                                    Icon="@Icons.Material.Sharp.FormatUnderlined" 
+                                    OnClick="() => FormatDto.IsUnderline = !FormatDto.IsUnderline" 
+                                    Class="border border-solid" 
+                                    Enabled="@Enabled" />
 
                 <div class="relative">
-                    <IsActiveIconButton IsActive="false" Icon="@Icons.Material.Sharp.FormatColorText" OnClick="() => ShowColorPicker = !ShowColorPicker" Class="border border-solid" Style="@($"color: {FormatDto.Color}; border-color: var(--mud-palette-text-primary);")" />
+                    <IsActiveIconButton IsActive="false" 
+                                        Icon="@Icons.Material.Sharp.FormatColorText" 
+                                        OnClick="() => ShowColorPicker = !ShowColorPicker" 
+                                        Class="border border-solid" 
+                                        Style="@($"color: {FormatDto.Color}; border-color: var(--mud-palette-text-primary);")" 
+                                        Enabled="@Enabled" />
+
                     <MudOverlay Visible="ShowColorPicker" OnClick="OnOverlayClicked" />
                     <MudColorPicker PickerVariant="PickerVariant.Static"
                                     Class="absolute z-10"
@@ -74,7 +98,7 @@ else
                 <input class="kip-input row-height" style="width: 150px;" @bind="FormatDto!.FontFamily" placeholder="@Localizer["Teckensnitt"]" />
             </div>
             <div class="row">
-                <input class="kip-input row-height" style="width: 36px;" @bind="FormatDto!.FontSize" />
+                    <input class="kip-input row-height" style="width: 36px;" @bind="FormatDto!.FontSize" />
             </div>
         </div>
         
@@ -103,7 +127,10 @@ else
 
 @code {
     [Parameter] public TextFormatDto? FormatDto { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+
     bool ShowColorPicker = false;
+    string baseRowClass => Enabled ? "row" : "row disabled";
 
     string TypeString(TextType type)
     {

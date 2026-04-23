@@ -1,8 +1,0 @@
-<div style="height: @Height; background-color: var(--mud-palette-table-lines); width: 100%;" class="d-flex justify-center align-stretch mud-elevation-1">
-    @ChildContent
-</div>
-
-@code{
-    [Parameter] public string Height { get; set; } = "0px";
-    [Parameter] public RenderFragment? ChildContent { get; set; }
-}

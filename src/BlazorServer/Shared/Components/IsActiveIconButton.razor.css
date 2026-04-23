@@ -30,3 +30,7 @@ svg path {
     height: 48px;
     width: 48px;
 }
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}

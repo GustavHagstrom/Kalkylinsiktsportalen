@@ -1,9 +1,0 @@
-﻿.text-container {
-    padding-left: 8px;
-}
-
-@media (width <= 960px) {
-    .text-container {
-        display: none;
-    }
-}

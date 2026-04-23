@@ -8,7 +8,11 @@
 {
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
-            <TextFormatEditor FormatDto="new()" />
+            <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
+                                IsActive="@TextFormatIsEnabled"
+                                OnClick="@ToggleTextFormat"
+                                Class="mx-2"/>
+            <TextFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
         </LeftToolbarContent>
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
@@ -33,6 +37,12 @@
 
     ViewDto? View { get; set; }
     bool isLoading = false;
+    bool TextFormatIsEnabled = true;
+
+    void ToggleTextFormat()
+    {
+        TextFormatIsEnabled = !TextFormatIsEnabled;
+    }
 
     protected override Task OnInitializedAsync()
     {
