@@ -1,0 +1,17 @@
+﻿.edit-mode {
+
+}
+.data-cell {
+    transition: background-color ease 0.25s;
+}
+
+.edit-mode:hover {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+}
+.edit-mode .selected {
+    outline: 2px solid var(--mud-palette-primary);
+}
+.edit-mode .selected > div {
+    background-color: lightsalmon;
+}
+

@@ -44,6 +44,10 @@ public class BidconApiAccess
     }
     private async Task<HttpClient> GetClientAsync(string orgId)
     {
+        //TODO 
+        // Hantera tomma credentials
+        // Hantera Unauthorized
+        // Hantera ogiltiga credentials/failade 
         var client = _httpClientFactory.CreateClient(HttpClientNames.BidconApiClient);
         if (_cache.TryGetValue<string>($"bidconAccessToken_{orgId}", out var accessToken) && accessToken is not null)
         {

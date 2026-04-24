@@ -8,7 +8,7 @@
 }
 else
 {
-    <div class="row">
+    <div class="@baseRowClass">
 
         <div class="column">
             <div class="row">
@@ -103,6 +103,9 @@ else
 
 @code {
     [Parameter] public TextFormatDto? FormatDto { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+
+    string baseRowClass => Enabled ? "row" : "row disabled";
     bool ShowColorPicker = false;
 
     string TypeString(TextType type)

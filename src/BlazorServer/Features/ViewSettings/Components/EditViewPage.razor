@@ -1,6 +1,5 @@
 ﻿@page "/Settings/views/{ViewId}"
 
-
 @layout SettingsLayout
 
     
@@ -8,16 +7,22 @@
 {
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
+            <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+            
             <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
                                 IsActive="@TextFormatIsEnabled"
                                 OnClick="@ToggleTextFormat"
                                 Class="mx-2"/>
             <TextFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
+            <CellFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
         </LeftToolbarContent>
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
                 <MudPaper Class="full-height flex-grow-1" Style="overflow: auto; min-width: 300px;">
-                    <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+                    @foreach(var section in View.DataSections.OrderBy(x => x.SectionIndex))
+                    {
+                        <DataSectionLayout DataSectionDto="section" EditMode="true"/>
+                    }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
                     <PrintableDocument />
@@ -61,5 +66,14 @@
     {
         isLoading = loading;
         StateHasChanged();
+    }
+    void AddDataSection()
+    {
+        if (View is null) return;
+        var section = new DataSectionDto()
+        {
+             
+        };
+        View.DataSections.Add(section);
     }
 }
