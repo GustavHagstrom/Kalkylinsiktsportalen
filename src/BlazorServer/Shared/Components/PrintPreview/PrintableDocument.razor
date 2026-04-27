@@ -82,7 +82,7 @@
     [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
     [
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 2" } }),
+        new (typeof(Demo3), new()),
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 3" } }),
         new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 4" } }),
         new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 5" } }),

@@ -11,6 +11,6 @@ public class DataSectionDto
     /// </summary>
     public Dictionary<string, DataCellDto> DataCells { get; set; } = new();
     public List<RowDefinition> RowDefinitions { get; set; } = new();
-    public List<ColumnDefinition> ColumnDefinitions { get; set; } = new();
+    public List<DataColumnDefinition> ColumnDefinitions { get; set; } = new();
 
 }

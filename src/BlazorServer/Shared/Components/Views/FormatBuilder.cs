@@ -8,13 +8,13 @@ public static class FormatBuilder
     {
         var borderStyles = new[]
         {
-            $"border-left: {BuildBorderStyle(cellFormat.LeftBorder)}",
-            $"border-top: {BuildBorderStyle(cellFormat.TopBorder)}",
-            $"border-right: {BuildBorderStyle(cellFormat.RightBorder)}",
-            $"border-bottom: {BuildBorderStyle(cellFormat.BottomBorder)}"
+            $"border-left: {BuildBorderStyle(cellFormat.LeftBorder)}; ",
+            $"border-top: {BuildBorderStyle(cellFormat.TopBorder)}; ",
+            $"border-right: {BuildBorderStyle(cellFormat.RightBorder)}; ",
+            $"border-bottom: {BuildBorderStyle(cellFormat.BottomBorder)}; "
         };
 
-        return $"{string.Join(" ", borderStyles)} background-color: {cellFormat.BackgroundColor}; padding: {cellFormat.PaddingTop}px {cellFormat.PaddingRight}px {cellFormat.PaddingBottom}px {cellFormat.PaddingLeft}px;";
+        return $"{string.Join("", borderStyles)} background-color: {cellFormat.BackgroundColor}; padding: {cellFormat.PaddingTop}px {cellFormat.PaddingRight}px {cellFormat.PaddingBottom}px {cellFormat.PaddingLeft}px;";
     }
 
     private static string BuildBorderStyle(BorderStyleDto borderStyle)

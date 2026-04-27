@@ -1,0 +1,13 @@
+﻿.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    transition: outline ease 0.2s;
+    transition: box-shadow ease 0.2s;
+}
+.selected {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+.data-table:hover {
+    box-shadow: 0 0 0 1px var(--mud-palette-primary-lighten);
+}

@@ -1,6 +1,6 @@
 ﻿namespace BlazorServer.Shared.DTOs.Views.SheetSection;
 
-public class ColumnDefinition
+public class SheetColumnDefinition
 {
     public ColumnType ColumnType { get; set; }
     public double Width { get; set; }

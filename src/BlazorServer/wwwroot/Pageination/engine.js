@@ -38,8 +38,17 @@
         let blockId = block.dataset.id;
         console.log("Block ID: " + blockId + " goes to page " + currentPage);
         console.log(block);
+        console.log(block.dataset.pagebreak);
 
         addToMap(map, currentPage, blockId);
+
+        let pageBreaks = block.querySelectorAll("[data-pagebreak]");
+        console.log(pageBreaks);
+       
+        if (pageBreaks.length > 0) {
+            currentPage += 1;
+            currentBodyHeight = 0;
+        }
     });
     
     const json = Object.fromEntries(map);
