@@ -2,8 +2,10 @@
     cursor: cell;
 }
 .data-cell {
-    transition: background-color ease 0.1s;
-   /* transition: outline-color ease 0.1s;*/
+    transition: outline-color ease 0.1s;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    /* transition: outline-color ease 0.1s;*/
 }
 
 .edit-mode:hover {

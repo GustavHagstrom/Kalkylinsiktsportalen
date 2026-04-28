@@ -1,0 +1,17 @@
+﻿.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    transition: outline-color ease 0.1s;
+    outline: 1px solid var(--mud-palette-lines-default);
+    outline-offset: -1px;
+}
+table.data-table.selected{
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+.data-table:hover {
+    outline: 1px solid var(--mud-palette-primary);
+    /*outline-offset: -2px;*/
+    /*box-shadow: 0 0 0 1px var(--mud-palette-action-default-hover);*/
+    /*box-shadow: 0 0 0 1px var(--mud-palette-action-default);*/
+}

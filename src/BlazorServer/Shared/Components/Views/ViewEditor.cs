@@ -15,7 +15,7 @@ public class ViewEditor
     public ViewDto View { get; }
     public IReadOnlyList<DataSectionDto> DataSections => View.DataSections;
     public IReadOnlyList<SheetSectionDto> SheetSections => View.SheetSections;
-    public IReadOnlyList<PageBreakSection> PageBreakSections => View.PageBreakSections;
+    public IReadOnlyList<PageBreakSectionDto> PageBreakSections => View.PageBreakSections;
     public int SectionCount => View.DataSections.Count + View.SheetSections.Count + View.PageBreakSections.Count;
 
     public DataSectionDto AddDataSection()
@@ -43,9 +43,9 @@ public class ViewEditor
         return section;
     }
 
-    public PageBreakSection AddPageBreakSection()
+    public PageBreakSectionDto AddPageBreakSection()
     {
-        var section = new PageBreakSection
+        var section = new PageBreakSectionDto
         {
             SectionIndex = SectionCount
         };
@@ -74,7 +74,7 @@ public class ViewEditor
         CollapseSectionIndexesAfter(section.SectionIndex);
     }
 
-    public void RemovePageBreakSection(PageBreakSection section)
+    public void RemovePageBreakSection(PageBreakSectionDto section)
     {
         ArgumentNullException.ThrowIfNull(section);
 
@@ -96,7 +96,7 @@ public class ViewEditor
     {
         View.DataSections ??= new List<DataSectionDto>();
         View.SheetSections ??= new List<SheetSectionDto>();
-        View.PageBreakSections ??= new List<PageBreakSection>();
+        View.PageBreakSections ??= new List<PageBreakSectionDto>();
 
         var orderedSections = GetSectionHandles()
             .OrderBy(x => x.SectionIndex)
@@ -130,7 +130,7 @@ public class ViewEditor
         {
             DataSectionDto dataSection => dataSection.SectionIndex,
             SheetSectionDto sheetSection => sheetSection.SectionIndex,
-            PageBreakSection pageBreakSection => pageBreakSection.SectionIndex,
+            PageBreakSectionDto pageBreakSection => pageBreakSection.SectionIndex,
             _ => throw new ArgumentException("Unknown section type.", nameof(section))
         };
     }

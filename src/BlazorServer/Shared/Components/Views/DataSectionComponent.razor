@@ -12,7 +12,7 @@
                 @foreach(var column in DataSectionDto.ColumnDefinitions.OrderBy(x => x.ColumnIndex))
                 {
                     var cellDto = GetDataCellDto(row, column);
-                    <DataCell DataCellDto="cellDto" EditMode="@EditMode" IsSelected="cellDto == SelectedDataCellDto" OnClick="() => OnCellClick.InvokeAsync(new DataSectionSelection(DataSectionDto, cellDto))"/>
+                    <DataCellComponent DataCellDto="cellDto" EditMode="@EditMode" IsSelected="cellDto == SelectedDataCellDto" OnClick="() => OnCellClick.InvokeAsync(new DataSectionSelection(DataSectionDto, cellDto))"/>
                 }
             </tr>
         }

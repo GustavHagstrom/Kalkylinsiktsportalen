@@ -26,7 +26,7 @@
                     @foreach(var section in View.DataSections.OrderBy(x => x.SectionIndex))
                     {
                         var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSectionDto == section ? selection.DataCellDto : null;
-                        <DataSection DataSectionDto="section" EditMode="true" SelectedDataCellDto="selectedCell" OnCellClick="x => SelectedItem = x"/>
+                        <DataSectionComponent DataSectionDto="section" EditMode="true" SelectedDataCellDto="selectedCell" OnCellClick="x => SelectedItem = x"/>
                        
                     }
                 </MudPaper>
