@@ -93,22 +93,10 @@ else
        
         <hr class="vertical-divider" />
 
-        <div class="column">
-            <div class="row">
-                <input class="kip-input row-height" style="width: 150px;" @bind="FormatDto!.FontFamily" placeholder="@Localizer["Teckensnitt"]" />
-            </div>
-            <div class="row">
-                    <input class="kip-input row-height" style="width: 36px;" @bind="FormatDto!.FontSize" />
-            </div>
-        </div>
-        
-        <hr class="vertical-divider" />
-
-        <div class="column">
+        <div class="column" style="min-width: 255px;">
+            
             <div class="row">
                 <KipSelect Style="width: 80px; height: 36px;" TItem="TextType" Items="@([TextType.PlainText, TextType.Number, TextType.DateTime])" ItemTextFunc="TypeString" @bind-SelectedItem="FormatDto!.Type" />
-            </div>
-            <div class="row">
                 @if (FormatDto!.Type == TextType.Number)
                 {
                     <input class="kip-input" style="width: 36px;" @bind="FormatDto!.DecimalCount" />
@@ -118,7 +106,22 @@ else
                     <KipSelect Style="width: 170px;" TItem="string" Items="@(["yyyy-MM-dd", "yyyy-MM-dd HH:ss"])" @bind-SelectedItem="FormatDto!.DayTimeFormat" />
                 }
             </div>
+            <div class="row">
+                <input class="kip-input row-height" style="width: 150px;" @bind="FormatDto!.FontFamily" placeholder="@Localizer["Teckensnitt"]" />
+                <input class="kip-input row-height" style="width: 36px;" @bind="FormatDto!.FontSize" />
+            </div>
         </div>
+        
+        @* <hr class="vertical-divider" />
+
+        <div class="column">
+            <div class="row">
+                
+            </div>
+            <div class="row">
+                
+            </div>
+        </div> *@
 
     </div>
 }

@@ -11,11 +11,11 @@
 .edit-mode:hover {
     /*background-color: rgba(var(--mud-palette-primary-rgb), 0.12);*/
     outline: 1px solid var(--mud-palette-primary-lighten);
-    outline-offset: -1px;
+    outline-offset: -2px;
 }
 .edit-mode .selected {
     outline: 2px solid var(--mud-palette-primary);
-    outline-offset: -2px;
+    outline-offset: -3px;
 }
 .edit-mode .selected > div {
     background-color: lightsalmon;

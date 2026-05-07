@@ -7,18 +7,27 @@
 {
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
+            
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["Lägg till sidbrytning"]</MudButton>
 
             <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
             
-            <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
-                                IsActive="@TextFormatIsEnabled"
-                                OnClick="@ToggleTextFormat"
-                                Class="mx-2"/>
-            <TextFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
-            <CellFormatEditor FormatDto="new()" Enabled="@TextFormatIsEnabled" />
+            
+            @if (SelectedItem is DataSectionSelection selection)
+            {
+                <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
+                                    IsActive="@TextFormatIsEnabled"
+                                    OnClick="@ToggleTextFormat"
+                                    Class="mx-2" />
+                
+                <CellFormatEditor FormatDto="selection.DataCellDto.CellFormat" Enabled="@TextFormatIsEnabled" />
+                <MudDivider Vertical="true" FlexItem="true" Class="mx-2"/>
+                <TextFormatEditor FormatDto="selection.DataCellDto.TextFormat" Enabled="@TextFormatIsEnabled" />
+                
+            }
+            
         </LeftToolbarContent>
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
