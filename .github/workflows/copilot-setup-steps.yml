@@ -17,12 +17,6 @@ jobs:
     permissions:
       contents: read
 
-    services:
-      mongodb:
-        image: mongo:8
-        ports:
-          - 27017:27017
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
