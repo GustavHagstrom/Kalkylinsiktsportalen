@@ -6,5 +6,5 @@ public class DataCellDto
     public int ColumnIndex { get; set; }
     public TextFormatDto TextFormat { get; set; } = new TextFormatDto();
     public CellFormatDto CellFormat { get; set; } = new CellFormatDto();
-    public string Value { get; set; } = string.Empty;
+    public string RawValue { get; set; } = string.Empty;
 }

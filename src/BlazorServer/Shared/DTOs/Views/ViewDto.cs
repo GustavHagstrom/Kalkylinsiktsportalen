@@ -11,5 +11,5 @@ public class ViewDto
     public string Description { get; set; } = string.Empty;
     public List<DataSectionDto> DataSections { get; set; } = new();
     public List<SheetSectionDto> SheetSections { get; set; } = new();
-    public List<PageBreakSection> PageBreakSections { get; set; } = new();
+    public List<PageBreakSectionDto> PageBreakSections { get; set; } = new();
 }

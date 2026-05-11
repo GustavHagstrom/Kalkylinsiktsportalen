@@ -1,4 +1,5 @@
-﻿namespace BlazorServer.Shared.DTOs.Views.DataSection;
+﻿
+using BlazorServer.Shared.DTOs.Views.DataSection;
 
 public class DataSectionDto
 {
@@ -9,4 +10,7 @@ public class DataSectionDto
     /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
     /// </summary>
     public Dictionary<string, DataCellDto> DataCells { get; set; } = new();
+    public List<RowDefinition> RowDefinitions { get; set; } = new();
+    public List<DataColumnDefinition> ColumnDefinitions { get; set; } = new();
+
 }

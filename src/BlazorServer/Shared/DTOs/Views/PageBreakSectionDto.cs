@@ -1,6 +1,6 @@
 ﻿namespace BlazorServer.Shared.DTOs.Views;
 
-public class PageBreakSection
+public class PageBreakSectionDto
 {
     public int SectionIndex { get; set; } = 0;
 }
