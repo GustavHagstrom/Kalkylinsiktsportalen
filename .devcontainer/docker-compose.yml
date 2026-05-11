@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/dotnet:1-10.0
+    volumes:
+      - ../..:/workspaces:cached
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      # Overrides appsettings.json so MongoDB is reachable via the compose service hostname
+      MongoDb__ConnectionString: mongodb://mongodb:27017
+    command: sleep infinity
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:8
+    restart: unless-stopped
+    volumes:
+      - mongodb-data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodb-data:
