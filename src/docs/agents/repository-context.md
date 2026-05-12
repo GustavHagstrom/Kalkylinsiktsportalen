@@ -16,7 +16,6 @@ Detta repo innehåller en **Blazor Server-applikation på .NET 10** med **MudBla
 - Auth skiljer sig mellan development och production
 - Extern integration mot Bidcon sker via tjänst och namngiven `HttpClient`
 - Tester finns i `Tests/BlazorServer.Tests`
-- Det finns även ett separat utility-projekt: `PwCracker`
 
 ## Repo-specifika arbetssätt att föredra
 

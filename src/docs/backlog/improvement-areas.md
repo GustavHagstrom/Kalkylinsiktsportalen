@@ -180,16 +180,16 @@ Nuvarande testtäckning verkar vara smal och fokuserad kring `DataCellFormulaEva
 **MVP-beslut:** Efter MVP
 
 ### Problem
-`PwCracker` sticker ut från repoets huvudsakliga fokus.
+Det finns sidospår i lösningen som riskerar att göra repoets huvudsakliga fokus mindre tydligt.
 
 ### Varför detta bör åtgärdas
 - gör repoets syfte mindre tydligt
 - ökar risken för blandade ansvar i samma lösning
 
 ### Rekommenderad åtgärd
-- besluta om `PwCracker` ska vara kvar
-- om ja: dokumentera varför
-- om nej: flytta ut eller separera tydligare
+- besluta vilka projekt som hör till repoets kärnfokus
+- dokumentera varför övriga projekt finns kvar om de ska ligga kvar i lösningen
+- flytta ut eller separera sådant som inte hör till huvudprodukten
 
 ### Definition of done
 - det finns ett tydligt beslut om varför projektet finns kvar eller inte
