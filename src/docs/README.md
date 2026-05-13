@@ -9,6 +9,12 @@ Målet är att dokumentationen ska hjälpa både utvecklare och agenter att svar
 
 ## Struktur
 
+### Domän
+- [domain/overview.md](domain/overview.md) — begrepp, affärssyfte och domänmodell på övergripande nivå
+- [domain/glossary.md](domain/glossary.md) — begreppslista med arbetsdefinitioner
+- [domain/domain-map.md](domain/domain-map.md) — relationer mellan centrala domänobjekt
+- [domain/product-description-draft.md](domain/product-description-draft.md) — första utkast till mer officiell produktbeskrivning
+
 ### Arkitektur
 - [architecture/overview.md](architecture/overview.md) — systembild, beroenden och huvudflöden
 - [architecture/features-and-modules.md](architecture/features-and-modules.md) — genomgång av feature- och modulindelning
@@ -39,6 +45,7 @@ Dokumentation som blir inaktuell är värre än ingen dokumentation alls.
 ## Definition of done för dokumentationsändringar
 
 När du lägger till eller ändrar en feature bör du i normalfallet överväga om följande behöver uppdateras:
+- domänbeskrivning
 - arkitekturöversikt
 - featurebeskrivning
 - lokal utvecklingsguide
