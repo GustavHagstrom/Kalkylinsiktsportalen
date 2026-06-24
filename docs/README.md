@@ -27,7 +27,7 @@ Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som
 - [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis plan från nuvarande struktur till målarkitekturen
 - [architecture/current-state.md](architecture/current-state.md) — nuläge, runtime-flöden, infrastruktur och feature-mapping
 - [development.md](development.md) — lokal setup, arbetsflöde, kodriktlinjer och Definition of Done
-- [backlog.md](backlog.md) — prioriterade förbättringar och öppna frågor
+- [planning.md](planning.md) — planeringsprinciper och öppna frågor som ännu inte blivit issues eller ADR:er
 - [agent-guide.md](agent-guide.md) — kort agentkontext och uppgiftsmall
 - [adr/README.md](adr/README.md) — hur arkitekturbeslut dokumenteras
 
@@ -40,15 +40,15 @@ Primära styrdokument ska vara korta, aktiva och hållas uppdaterade när riktni
 - produkt och domän
 - målarkitektur och migrationsplan
 - utvecklingsriktlinjer
-- backlog och öppna frågor
+- planeringsprinciper och öppna frågor
 
 ### Nulägesdokument
 
 Nulägesdokument beskriver observerad kod. De får vara mer deskriptiva, men ska inte styra nya större vägval om de krockar med målarkitekturen.
 
-### Backlog och öppna frågor
+### Planering och öppna frågor
 
-Backlog-dokument ska samla sådant som behöver göras eller beslutas. De ska inte duplicera hela målarkitekturen.
+Konkreta uppgifter bör hanteras som GitHub Issues. Docs ska bara samla planeringsprinciper och frågor som ännu inte är issues eller ADR:er.
 
 ## Principer för dokumentation
 
@@ -66,5 +66,5 @@ När du lägger till eller ändrar en feature bör du i normalfallet överväga 
 - målarkitektur eller migrationsplan
 - nuläge
 - utvecklingsriktlinjer
-- backlog
+- planering eller öppna frågor
 - ADR om beslutet är långlivat eller svårt att backa ur

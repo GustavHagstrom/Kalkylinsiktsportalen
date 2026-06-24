@@ -29,7 +29,7 @@ Testytan är fortfarande smal och bör byggas ut i takt med att kärnflödena f�
 
 ### `docs`
 
-Repoets långlivade kontextlager för domän, arkitektur, utvecklingssätt, backlog och agentarbete.
+Repoets långlivade kontextlager för domän, arkitektur, utvecklingssätt, planering och agentarbete.
 
 ## Läs Detta Först
 
@@ -40,7 +40,7 @@ Rekommenderad läsordning:
 3. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
 4. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
 5. [docs/development.md](docs/development.md)
-6. [docs/backlog.md](docs/backlog.md)
+6. [docs/planning.md](docs/planning.md)
 
 För en komplett dokumentationskarta, se [docs/README.md](docs/README.md).
 
@@ -65,7 +65,7 @@ Detaljer hör hemma i `docs/`:
 - produkt och domän i `docs/product-and-domain.md`
 - nuläge och målarkitektur i `docs/architecture/`
 - lokalt arbete och kodriktlinjer i `docs/development.md`
-- förbättringsområden och öppna frågor i `docs/backlog.md`
+- planeringsprinciper och öppna frågor i `docs/planning.md`
 - återanvändbar agentkontext i `docs/agent-guide.md`
 
 ## Status
