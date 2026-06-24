@@ -15,8 +15,9 @@ För de flesta ändringar räcker den här ordningen:
 1. [product-and-domain.md](product-and-domain.md) — produktens syfte, domänmodell och begrepp
 2. [architecture/target-architecture.md](architecture/target-architecture.md) — långsiktig målbild
 3. [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis väg dit
-4. [architecture/current-state.md](architecture/current-state.md) — nuläge och mapping från features till målmoduler
-5. [development.md](development.md) — lokal utveckling och kodriktlinjer
+4. [architecture/next-phase-plan.md](architecture/next-phase-plan.md) — konkret plan för nästa migrationsfas
+5. [architecture/current-state.md](architecture/current-state.md) — nuläge och mapping från features till målmoduler
+6. [development.md](development.md) — lokal utveckling och kodriktlinjer
 
 Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som riktning, medan nulägesdokumenten beskriver hur koden ser ut idag.
 
@@ -25,6 +26,7 @@ Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som
 - [product-and-domain.md](product-and-domain.md) — produktbeskrivning, domänkarta, huvudflöden och begrepp
 - [architecture/target-architecture.md](architecture/target-architecture.md) — målarkitektur för modulär monolit, snapshots och utbytbar frontend
 - [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis plan från nuvarande struktur till målarkitekturen
+- [architecture/next-phase-plan.md](architecture/next-phase-plan.md) — aktuell plan för nästa migrationsfas
 - [architecture/current-state.md](architecture/current-state.md) — nuläge, runtime-flöden, infrastruktur och feature-mapping
 - [development.md](development.md) — lokal setup, arbetsflöde, kodriktlinjer och Definition of Done
 - [planning.md](planning.md) — planeringsprinciper och öppna frågor som ännu inte blivit issues eller ADR:er
