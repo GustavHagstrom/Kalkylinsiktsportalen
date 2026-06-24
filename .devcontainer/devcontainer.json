@@ -1,0 +1,51 @@
+{
+  "name": "Kalkylinsiktsportalen",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // C# Dev Kit – ger IntelliSense, debugging, test-runner för .NET
+        "ms-dotnettools.csdevkit",
+        // Ingår i Dev Kit men listas explicit för säkerhets skull
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        // MongoDB-utforskare direkt i VS Code
+        "mongodb.mongodb-vscode",
+        // GitHub Copilot + Copilot Chat – AI-kodassistans
+        "github.copilot",
+        "github.copilot-chat",
+        // GitLens – bra för git-historik, speciellt på mobil
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "src/Kalkylinsiktsportalen.sln",
+        // Öppna terminalerna i /workspaces/... direkt
+        "terminal.integrated.cwd": "/workspaces/${localWorkspaceFolderBasename}"
+      }
+    }
+  },
+
+  // Porta vidare Blazor-appen och MongoDB till din webbläsare / Codespaces-URL
+  "forwardPorts": [5000, 5001, 27017],
+  "portsAttributes": {
+    "5000": {
+      "label": "Blazor HTTP",
+      "onAutoForward": "openBrowserOnce"
+    },
+    "5001": {
+      "label": "Blazor HTTPS"
+    },
+    "27017": {
+      "label": "MongoDB",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Återställ NuGet-paket direkt när containern skapas
+  "postCreateCommand": "dotnet restore src/Kalkylinsiktsportalen.sln",
+
+  "remoteUser": "vscode"
+}
