@@ -1,271 +1,349 @@
-# Repoanalys: Kalkylinsiktsportalen
+# Repoanalys: Kalkylinspektionsportalen
 
 Datum: 2026-06-24
 
-Det här dokumentet är ett arbetsunderlag för framtida dokumentation om repots mål,
-arkitektur, domän, ADR:er, vision och development guidelines.
+Det här dokumentet är ett arbetsunderlag efter en ny genomgång av den uppdaterade
+lokala koden. Syftet är att samla observationer som kan användas när de mer
+långlivade dokumenten i `src/docs/` utvecklas vidare.
 
-## Kort sammanfattning
+## Sammanfattning
 
-Kalkylinsiktsportalen är en Blazor Server-applikation som verkar byggas som en
-intern portal för att hämta, välja, administrera och visualisera Bidcon-kalkyler.
-Systemet kombinerar Microsoft Identity-baserad inloggning, claims-baserad intern
-åtkomststyrning, MongoDB-persistens och en feature-baserad modulstruktur.
+Repot har gått från att vara relativt odokumenterat till att redan ha en tydlig
+dokumentationsstruktur under `src/docs/`. Det finns nu dokument för produkt,
+domän, arkitektur, utvecklingsriktlinjer, agentarbete och förbättringsområden.
 
-Repot är fortfarande tidigt i sin dokumentationsmognad. README beskriver appen
-generiskt som "App platform for personal projects", medan kod och filstruktur
-tydligt pekar mot en mer specifik produkt: Kalkylinsiktsportalen.
+Den aktuella koden och dokumentationen pekar mot ett tydligare produktnamn och
+syfte: **Kalkylinspektionsportalen**, en Blazor Server-applikation för att hämta,
+strukturera och presentera Bidcon-kalkyldata i anpassningsbara rapportvyer.
 
-## Lösningsstruktur
+Den största skillnaden mot tidigare analys är att repoet nu redan innehåller:
 
-- `src/Kalkylinsiktsportalen.sln` är Visual Studio-lösningen.
-- `src/BlazorServer` är huvudapplikationen.
-- `src/PwCracker` är ett separat konsolprojekt i samma lösning.
-- `docs` innehåller dokumentationsmaterial.
+- README-filer som beskriver produkten och dokumentationsprincipen.
+- Ett `src/docs/`-lager med arkitektur-, domän- och utvecklingsdokument.
+- Ett testprojekt: `src/Tests/BlazorServer.Tests`.
+- Mer utvecklad view-/rapportlogik, inklusive editor-klasser och formelutvärdering.
+- En säkrare placeholder för `AzureAd:ClientSecret` i `appsettings.json`.
 
-Huvudappen använder:
+## Nuvarande repoidentitet
 
-- .NET / Blazor Server
-- MudBlazor för UI
-- Microsoft Identity Web och Microsoft Graph för autentisering och Graph-integration
-- MongoDB.Driver för persistens
-- Razor components med interactive server render mode
+### Produktnamn
+
+De senaste README- och domändokumenten använder **Kalkylinspektionsportalen**.
+Det bör ses som nuvarande arbetsnamn.
+
+Tidigare namn och repo-/lösningsnamn innehåller fortfarande variationer:
+
+- `Kalkylinsiktsportalen`
+- `Kalkylinspektionsportalen`
+- Git-remote/reponamn: `AppPlatform`
+
+Det här är värt ett litet namn-/identitetsbeslut längre fram, så att repo,
+produkt, solution och dokumentation inte driver åt olika håll.
+
+### Lösningsstruktur
+
+Nuvarande huvuddelar:
+
+- `src/BlazorServer` - huvudapplikationen.
+- `src/Tests/BlazorServer.Tests` - NUnit-testprojekt för huvudappen.
+- `src/PwCracker` - separat konsolprojekt i samma lösning.
+- `src/docs` - långlivat dokumentationslager.
+- `docs/repo-analysis-notes.md` - denna tillfälliga/metaanalytiska arbetsfil.
 
 ## Produkt- och domänbild
 
-Den domän som framträder i koden består av:
+Den dokumenterade produkten handlar om att göra kalkylinformation från Bidcon
+användbar utanför källsystemet.
 
-- Organisationer
-- Användare
-- Roller
-- Åtkomstclaims
-- Bidcon API-credentials
-- Bidcon-kalkyler / estimations
-- Vyer och rapportmallar
-- Data-, sheet- och page break-sektioner i vyer
+Kärnan är:
 
-Det troliga produktmålet är att ge användare insikt i Bidcon-kalkyler genom en
-portal där man kan:
+- Bidcon som extern datakälla.
+- Egna views/rapportvyer som presentationslager.
+- Organisationsbunden konfiguration.
+- Rättighetsstyrd administration och användning.
 
-- Logga in via Microsoft Identity.
-- Hämta kalkyler från Bidcon per användare och organisation.
-- Välja kalkyler att arbeta vidare med.
-- Administrera användar- och rollbaserade rättigheter.
-- Administrera Bidcon API-åtkomst per organisation.
-- Skapa eller ändra vy-/rapportmallar för hur kalkyldata ska presenteras.
+Den långsiktiga målbilden är bredare än en ren rapportportal. Dokumentationen
+beskriver en framtida riktning med projekt, flera kalkyler per projekt,
+versionshistorik, delning och jämförelse mellan versioner.
+
+Det gör att produkten bör beskrivas som ett verksamhetsnära
+presentations-, styrnings- och analyslager ovanpå kalkyldata, inte som ett
+ersättningssystem för Bidcon.
 
 ## Arkitektoniska mönster
 
-### Feature-baserad modulstruktur
+### Feature-baserad struktur
 
-Applikationen organiseras runt features. Varje feature implementerar ett gemensamt
-interface med fyra ansvar:
+Applikationen organiseras fortfarande runt features. Varje feature implementerar
+`IFeature` och kan bidra med:
 
-- Registrera services.
-- Registrera renderbara UI-objekt.
-- Registrera claims.
-- Registrera authorization policies.
+- services
+- renderbara komponenter
+- claims
+- authorization policies
 
-Detta gör features till självbeskrivande moduler som kan bidra med både backend-
-och UI-beteende.
+Observerade features:
 
-Existerande features:
+- `Settings`
+- `Access`
+- `BidconAccess`
+- `BidconBrowser`
+- `ViewSettings`
 
-- `SettingsFeature`
-- `AccessFeature`
-- `BidconAccessFeature`
-- `BidconBrowserFeature`
-- `ViewSettingsFeature`
+Detta är ett starkt mönster i repot och bör fortsätta dokumenteras som
+standardvägen för ny produktfunktionalitet.
 
 ### Central composition root
 
-`ServiceAndFeatureRegistrations` fungerar som applikationens composition root.
-Där kopplas autentisering, features, HTTP-klienter, MongoDB, MudBlazor,
-localization och gemensamma services ihop.
+`ServiceAndFeatureRegistrations.cs` fungerar som composition root för:
 
-Det finns en tydlig skillnad mellan development och övriga miljöer:
+- auth-läge per environment
+- feature-registrering
+- HTTP-klient för Bidcon
+- MongoDB-registrering
+- claims/cache/auth-services
+- MudBlazor och localization
 
-- Development använder mockad autentisering och mockade user/role-services.
-- Övriga miljöer använder Microsoft Identity Web, OpenID Connect och Graph.
+`Program.cs` är relativt tunn och delegerar huvuddelen av appens sammansättning
+till denna registreringsfil.
 
 ### UI-komposition via RenderCollection
 
-Features hårdkodar inte global navigation direkt i layouten. De registrerar i
-stället komponenttyper i `RenderCollection`, som sedan renderas av layout och
-settings-skal.
+Features registrerar komponenttyper i `RenderCollection`, som sedan används av
+layout och settings-skal. Det ger en modulär navigation och gör att features kan
+exponera UI utan att layouten känner till varje feature direkt.
 
-Detta mönster används för:
+Det här är ett viktigt repo-mönster och bör beskrivas i
+`src/docs/architecture/features-and-modules.md`.
 
-- Appbar-navigation
-- Settings-navigation
-- Login display-komponent
-- Potentiellt delade settings-komponenter
+### Auth och access
 
-### Claims-baserad åtkomststyrning
+Auth-modellen har två driftlägen:
 
-Åtkomstmodellen bygger på applikationsclaims. Features registrerar vilka claims
-de kräver, och policies kontrollerar om användaren har rätt claim eller admin-roll.
+- Development: mockad auth, mockade user/role-services.
+- Production: Microsoft Identity Web, OpenID Connect och Microsoft Graph.
 
-Claims laddas per request via middleware och transformeras med hjälp av en store
-och en cache. Admin markeras som en särskild role-claim.
+Intern åtkomst styrs med application claims. Features kan registrera claim-info
+och policies. Claims laddas/transformeras via middleware och cache.
 
-### Store- och mapper-mönster för persistens
+Denna modell är central nog för en egen arkitektursektion eller ADR.
 
-Persistens abstraheras via interface i `Shared/Stores`.
+### Persistens med stores och MongoDB
 
-MongoDB-specifik kod ligger under `Shared/Stores/MongoDb` och delas upp i:
+Persistens går via store-interface i `Shared/Stores` och MongoDB-implementationer
+i `Shared/Stores/MongoDb`.
 
-- `Stores`
-- `Enteties`
-- `Mappers`
-- Mongo-registrering
+Mönstret är:
 
-Exempel: `IViewStore` implementeras av `MongoViewStore`, som använder
-`MongoViewMapper` för att översätta mellan Mongo-entitet och `ViewDto`.
+- store-interface
+- Mongo-store
+- Mongo-entitet
+- mapper mellan DTO/modell och Mongo-entitet
+- Mongo collection-registrering i `Registrations.cs`
 
-### Bidcon som extern integration
+Detta är tydligt och dokumentationsvärt, men `Shared/Stores/MongoDb/Enteties`
+har fortfarande stavfel i namn och namespace.
 
-Bidcon API hanteras via en namngiven HTTP-klient och `BidconApiAccess`.
-Access token cachas per organisation. API-credentials hämtas via store.
+## View- och rapportmönster
 
-Detta är en tydlig integrationsgräns som bör dokumenteras separat.
+Den största kodmässiga utvecklingen i senaste versionen ligger runt views och
+rapportredigering.
 
-## Kod- och namngivningsmönster
+Nya eller tydligare byggblock:
 
-Positiva mönster:
+- `ViewEditor`
+- `DataSectionEditor`
+- `DataCellFormulaEvaluator`
+- `FormatBuilder`
+- `DataSectionComponent`
+- `DataCellComponent`
+- `CellFormatEditor`
+- `TextFormatEditor`
 
-- Features är lätta att hitta och avgränsa.
-- Behörighetskrav ligger nära respektive feature.
-- Stores gör persistens åtkomlig bakom interface.
-- Mongo-mappning är explicit.
-- UI-skal och navigation är modulärt uppbyggda.
-- Development-auth är separerad från produktionsauth.
+### ViewEditor
 
-Mönster som bör stabiliseras:
+`ViewEditor` hanterar en `ViewDto` och ansvarar för att:
 
-- Svenska används i UI-texter och vissa descriptions.
-- Engelska används i kodnamn.
-- Domäntermer från Bidcon används direkt i DTO:er och komponenter.
+- normalisera sektioner
+- lägga till data-, sheet- och page break-sektioner
+- ta bort sektioner
+- hålla `SectionIndex` konsekvent
+- returnera sektioner i ordning
 
-Rekommenderad guideline:
+Det visar att view-modellen börjar få domänliknande beteende, även om klassen
+just nu ligger under `Shared/Components/Views`.
 
-- Använd svenska för produkttext och användarvända labels.
-- Använd engelska för kodsymboler.
-- Dokumentera centrala domäntermer i en ordlista så att svenska och engelska namn
-  inte glider isär.
+### DataSectionEditor
 
-## Identifierad teknisk skuld
+`DataSectionEditor` kapslar grid-/tabellbeteende för datasektioner:
 
-### Testprojekt saknas
+- initiering av rader och kolumner
+- tillägg/borttag av rader och kolumner
+- cellskapande
+- normalisering av celler och definitioner
+- stabila cellnycklar som `R{row}C{column}`
 
-Det finns inga uppenbara testprojekt i lösningen. Det gör framtida refaktorering
-av auth, features, stores och Bidcon-integration mer riskfylld.
+Detta är testbar logik och bör på sikt få mer testtäckning.
 
-### PwCracker ligger i produktlösningen
+### DataCellFormulaEvaluator
 
-`PwCracker` är ett separat konsolprojekt som skriver dekrypterat lösenord till
-console. Det bör dokumenteras som ett lokalt utvecklingsverktyg, flyttas till en
-tydligare plats, eller tas bort från produktlösningen.
+`DataCellFormulaEvaluator` gör cellvärden mer uttrycksfulla:
 
-### Hemligheter i appsettings
+- råvärden kan vara vanliga strängar
+- formler börjar med `=`
+- referenser till `Estimation.*` kan slås upp via reflection
+- enklare aritmetik utvärderas med `DataTable.Compute`
+- strängkonkatenering stöds
+- tal och datum formateras via `TextFormatDto`
 
-`appsettings.json` innehåller en `ClientSecret` med kommentar om development-only.
-Även om den är avsedd för utveckling bör riktlinjen vara att hemligheter inte
-checkas in.
+Den här klassen är idag den tydligaste testade domän-/presentationslogiken.
+Den bör behandlas som kritisk, eftersom formler lätt blir en egen liten DSL.
 
-### Async-blockering
+## Tester
 
-`BidconApiAccess` innehåller `.Result` inne i ett async-flöde vid tokenhämtning.
-Det bör ersättas med full `await`-kedja.
+Det finns nu ett testprojekt:
 
-### Stavfel i kodnamn och mappar
+- `src/Tests/BlazorServer.Tests`
+- NUnit
+- referens till `BlazorServer`
+- testtäckning för `DataCellFormulaEvaluator`
 
-Flera namn innehåller stavfel, till exempel:
+Detta är en viktig förbättring jämfört med tidigare läge. Testytan är dock smal.
+Nästa rimliga testkandidater är:
+
+- `DataSectionEditor`
+- `ViewEditor`
+- Mongo-mappers
+- authorization policies
+- access- och claimlogik
+- formatbyggande om CSS-output blir affärskritisk
+
+## Befintligt dokumentationslager
+
+`src/docs/` är nu den primära platsen för långlivad dokumentation.
+
+Viktiga filer:
+
+- `src/docs/domain/product-description-draft.md`
+- `src/docs/domain/overview.md`
+- `src/docs/domain/glossary.md`
+- `src/docs/domain/domain-map.md`
+- `src/docs/architecture/overview.md`
+- `src/docs/architecture/features-and-modules.md`
+- `src/docs/development/coding-guidelines.md`
+- `src/docs/development/local-development.md`
+- `src/docs/backlog/improvement-areas.md`
+- `src/docs/backlog/open-questions.md`
+- `src/docs/agents/repository-context.md`
+
+Dokumentationsprincipen är redan beskriven: README ska vara korta ingångar,
+medan produkt, domän, arkitektur, utveckling och backlog bor i separata
+underkataloger.
+
+Det här analysdokumentet bör därför inte bli en permanent parallell sanning.
+När punkterna är genomarbetade bör de flyttas in i rätt `src/docs/`-dokument.
+
+## Kvarvarande risker och förbättringsområden
+
+Många förbättringsområden finns redan i
+`src/docs/backlog/improvement-areas.md`. Nedan är en uppdaterad tolkning efter
+senaste kodgenomgången.
+
+### 1. Produktnamn och repoidentitet
+
+Det finns fortfarande flera namn i omlopp. Bestäm gärna ett officiellt namn och
+hur repo-/solutionnamn ska förhålla sig till det.
+
+### 2. Secrets och konfiguration
+
+`appsettings.json` innehåller nu placeholdern `__SET_IN_USER_SECRETS_OR_ENV__`,
+vilket är bättre än en faktisk hemlighet. Eftersom nyckeln fortfarande finns i
+filen bör setupen dokumenteras tydligt i local development-dokumentet.
+
+### 3. `.Result` i async-flöde
+
+`BidconApiAccess` innehåller fortfarande `.Result` i tokenhämtningen. Det bör
+ersättas med en ren `await`-kedja.
+
+### 4. Feature-specifik logik i Shared
+
+`Shared/Components/Views` innehåller mycket view-/rapport-specifik logik.
+Det kan vara rimligt under MVP, men långsiktigt bör man besluta om detta är ett
+verkligt shared område eller egentligen tillhör `ViewSettings` eller en framtida
+`Reports`/`Views`-feature.
+
+### 5. Formelspråkets säkerhet och avgränsning
+
+`DataCellFormulaEvaluator` använder `DataTable.Compute` och reflection mot
+`EstimationDto`. Det fungerar för nuvarande behov men bör få tydliga
+begränsningar:
+
+- vilka uttryck är tillåtna?
+- vilka `Estimation`-fält får refereras?
+- hur ska fel visas för användaren?
+- ska formler valideras vid inmatning eller bara vid rendering?
+- ska detta vara kompatibelt med ett framtida export-/printflöde?
+
+Detta är en bra ADR-kandidat.
+
+### 6. FeatureRegistrator bygger temporär service provider
+
+`FeatureRegistrator` bygger en service provider under registrering. Det är
+dokumenterat i backloggen och bör ses över efter MVP eller när DI-livscykler
+börjar bli svåra att resonera om.
+
+### 7. Namngivning och stavning
+
+Kvarvarande exempel:
 
 - `IFreature`
 - `Enteties`
 - `MongoRoleAccssMapper`
 - `Pageination`
 - `AppNavMenue`
-- `Compoenents`
-- `ClaimsTransofmation`
+- `HasThoasandsSeparator`
+- `claimsTransofmation`
+- interna fält som `__sharedSettingsCompoenents`
 
-Det påverkar läsbarhet, onboarding och framtida dokumentation. Bör hanteras med
-kontrollerade refaktoreringar, inte som spontan sidostädning.
+Det här är inte nödvändigtvis MVP-blockerande men påverkar onboarding,
+sökbarhet och agentarbete.
 
-### Nullability-kontrakt
+### 8. PwCracker i lösningen
 
-Vissa mapper-metoder och stores signalerar nullable i anrop men har signaturer
-som inte alltid uttrycker det tydligt. Exempel: mapper från Mongo-entitet till DTO
-bör antingen hantera null explicit eller kräva non-null.
+`PwCracker` ligger kvar som separat konsolprojekt. Det bör finnas ett tydligt
+beslut om det är ett legitimt utvecklingsverktyg i repot eller om det ska bort.
 
 ## ADR-kandidater
 
-Följande beslut är värda egna ADR:er:
+Följande ADR:er är mest relevanta efter senaste genomgång:
 
-1. Varför Blazor Server används som applikationsmodell.
-2. Varför MudBlazor är valt som UI-komponentbibliotek.
-3. Varför applikationen använder feature-registrering via `IFeature`.
-4. Varför MongoDB används som primär persistens.
-5. Varför intern behörighet modelleras med claims ovanpå Microsoft Identity.
-6. Hur development-auth ska fungera och vilka garantier mock-läget ska ge.
-7. Hur Bidcon API-credentials ska lagras, roteras och användas.
-8. Om `PwCracker` ska ingå i produktlösningen eller hanteras separat.
-9. Om `ViewDto` ska fungera som intern modell eller om en tydligare domänmodell
-   ska introduceras.
-10. Hur lokalisering och språkgränser ska hanteras i kod, UI och dokumentation.
+1. Använd Blazor Server som applikationsmodell.
+2. Använd feature-registrering via `IFeature`.
+3. Använd claims-baserad intern accessmodell ovanpå Microsoft Identity.
+4. Använd MongoDB och store/mapping-mönster för persistens.
+5. Behandla Bidcon som externt källsystem och portalen som presentationslager.
+6. Definiera view/rapportmodellen som produktens interna presentationsmodell.
+7. Avgränsa cellformler: syntax, säkerhet, felhantering och framtida DSL-riktning.
+8. Bestäm om view-/rapportlogik ska ligga i `Shared/Components/Views` eller i en egen feature.
+9. Bestäm repo-/produktnamn och hur gammalt `AppPlatform`-arv ska hanteras.
+10. Bestäm om `PwCracker` ska ligga kvar i lösningen.
 
-## Förslag till dokumentstruktur
+## Rekommenderade nästa steg
 
-En framtida dokumentationsyta kan börja med:
+1. Flytta in relevanta observationer från detta dokument i rätt `src/docs/`-fil.
+2. Uppdatera `src/docs/architecture/features-and-modules.md` med view-editor/formel-mönstret.
+3. Lägg till tester för `ViewEditor` och `DataSectionEditor`.
+4. Ersätt `.Result` i `BidconApiAccess` med full async/await.
+5. Skriv en kort ADR om cellformler innan formelspråket växer.
+6. Bestäm produkt-/repo-namngivning.
+7. Besluta om `PwCracker` ska dokumenteras, flyttas eller tas bort.
 
-- `docs/product-vision.md`
-- `docs/domain.md`
-- `docs/architecture.md`
-- `docs/development-guidelines.md`
-- `docs/adr/0001-use-blazor-server.md`
-- `docs/adr/0002-feature-registration.md`
-- `docs/adr/0003-claims-based-access.md`
-- `docs/adr/0004-mongodb-persistence.md`
-- `docs/adr/0005-bidcon-integration.md`
+## Kort slutsats
 
-## Förslag till architecture.md
+Repot är nu mycket mer moget än vid första analysen. Det har en tydlig
+dokumentationsstruktur, ett första testprojekt och en mer konkret produktvision.
 
-Arkitekturdokumentet bör beskriva följande lager:
-
-- Startup och composition root
-- Feature-moduler
-- Shared UI-komponenter
-- Services och externa integrationer
-- Stores och persistensadaptrar
-- DTO:er och modeller
-- Auth, claims och policies
-- Konfiguration och miljöskillnader
-
-## Förslag till development-guidelines.md
-
-Guidelines bör minst täcka:
-
-- Hur man lägger till en ny feature.
-- Hur man lägger till navigation.
-- Hur man lägger till settings-sidor.
-- Hur man definierar en ny access claim.
-- Hur man skriver en ny store.
-- Hur Mongo-entiteter och mappers ska struktureras.
-- Hur komponenter bör använda services och stores.
-- Hur localization ska användas.
-- Hur secrets ska hanteras.
-- Hur async-kod ska skrivas.
-- Hur testprojekt bör namnges och placeras.
-
-## Nästa steg
-
-Rekommenderade nästa steg:
-
-1. Uppdatera README så det beskriver Kalkylinsiktsportalen, inte en generisk app-plattform.
-2. Skapa `architecture.md` baserat på mönstren ovan.
-3. Skapa en enkel domänordlista för Bidcon, kalkyler, vyer, claims och organisationer.
-4. Skapa de första ADR:erna för Blazor Server, feature-registrering, MongoDB och claims.
-5. Bestäm om `PwCracker` ska vara kvar i lösningen.
-6. Flytta secrets ur `appsettings.json`.
-7. Lägg till ett testprojekt innan större refaktoreringar görs.
+Den viktigaste arkitektoniska frågan framåt är inte längre "vad är systemet?",
+utan hur produktens kärnmodell ska stabiliseras: views, rapporter, celler,
+formler, Bidcon-data, projekt och versioner. Det är där nästa dokumentations- och
+designarbete bör lägga mest energi.
