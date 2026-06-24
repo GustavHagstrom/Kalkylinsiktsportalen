@@ -1,63 +1,73 @@
-# Kalkylinspektionsportalen
+# Kalkylinsiktsportalen
 
-Detta repo innehåller i nuläget främst en **Blazor Server-applikation på .NET 10** för att presentera och distribuera data från **Bidcon** i anpassningsbara rapporter.
+Kalkylinsiktsportalen är en .NET 10 och Blazor Server-applikation för att hämta, spara och presentera kalkylinformation från Bidcon i anpassningsbara rapportvyer.
 
-Repoet innehåller också dokumentation för arkitektur, utvecklingsprinciper och agentarbete, så att både människor och AI-agenter kan arbeta mer konsekvent i lösningen.
+Produkten är främst en rapportportal. På sikt ska den även stödja projekt där en organisation kan samla ett eller flera Bidcon-estimat, skapa oföränderliga snapshots vid olika tillfällen, granska versioner genom egna rapportvyer och styra åtkomst per funktion och view.
 
-## Syfte
+Blazor Server används som första UI-host för snabb utveckling, men arkitekturen ska stegvis röra sig mot en modulär monolit där produktlogik, use cases och kontrakt kan återanvändas av en framtida Blazor WASM-, React- eller annan frontend.
 
-Applikationens mål är i nuläget att:
-- presentera data från kalkylprogrammet Bidcon från Elecosoft i anpassningsbara rapporter
-- koppla mot Bidcons webb-API
-- distribuera rapporter utifrån rättigheter
-- stödja både interaktiva och readonly-rapporter
-- låta användare anpassa rapporter för internt bruk eller exempelvis säljunderlag
-
-## Projektöversikt
+## Repoöversikt
 
 ### `src/BlazorServer`
-Huvudapplikationen i lösningen.
 
-Nuvarande observationer:
-- bygger på **Blazor Server** och **.NET 10**
-- använder **MudBlazor** för UI
-- använder en **feature-baserad struktur** via `IFeature`
-- använder **MongoDB** för bland annat användarinställningar, åtkomst och vyer
-- integrerar mot ett externt **Bidcon API** via `HttpClient`
-- har olika auth-flöden för development och production
+Huvudapplikationen.
+
+Nuvarande teknik och mönster:
+- Blazor Server och .NET 10
+- MudBlazor för UI
+- MongoDB för bland annat användarinställningar, åtkomst, credentials och views
+- Microsoft Identity / OpenID Connect i production
+- mockad auth i development
+- Bidcon API via `HttpClient`
+- feature-baserad struktur via `IFeature`
 
 ### `src/Tests/BlazorServer.Tests`
+
 Testprojekt för huvudapplikationen.
 
-## Komma igång
+Testytan är fortfarande smal och bör byggas ut i takt med att kärnflödena för snapshots, rapportvyer och access blir tydligare.
 
-Se dokumentationen i `docs/` för mer detaljer.
+### `docs`
+
+Repoets långlivade kontextlager för domän, arkitektur, utvecklingssätt, backlog och agentarbete.
+
+## Läs Detta Först
 
 Rekommenderad läsordning:
-- [src/README.md](src/README.md)
-- [docs/README.md](docs/README.md)
-- [docs/architecture/overview.md](docs/architecture/overview.md)
-- [docs/development/local-development.md](docs/development/local-development.md)
-- [docs/agents/repository-context.md](docs/agents/repository-context.md)
 
-## Dokumentation
+1. [docs/domain/product-description-draft.md](docs/domain/product-description-draft.md)
+2. [docs/architecture/overview.md](docs/architecture/overview.md)
+3. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
+4. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
+5. [docs/development/local-development.md](docs/development/local-development.md)
+6. [docs/backlog/improvement-areas.md](docs/backlog/improvement-areas.md)
 
-Dokumentationen i `docs/` är tänkt att vara repoets långlivade kontextlager.
+För en komplett dokumentationskarta, se [docs/README.md](docs/README.md).
 
-Den används för att beskriva:
-- mål och domän
-- arkitektur och ansvarsfördelning
-- kodriktlinjer
-- förbättringsområden
-- hur agenter bör få kontext och arbeta i repoet
+## Arkitekturriktning
 
-## Förbättringar och backlog
+Målbilden är en modulär monolit med tydliga produktmoduler:
 
-Identifierade förbättringsområden finns dokumenterade här:
-- [docs/backlog/improvement-areas.md](docs/backlog/improvement-areas.md)
+- `Projects` för projekt, estimatkopplingar och snapshotversioner
+- `Reports` för views, rapportmallar, rendering och PDF/WYSIWYG
+- `Bidcon` för extern integration, credentials och import
+- `Access` för funktions- och view-rättigheter
+- `Organizations` för tenant-kontext och organisationsisolering
+
+Nuvarande `Shared` ska på sikt krympas och bara innehålla verkligt delade byggblock, exempelvis små kernel-typer, generiska UI-primitiver och teknisk infrastruktur.
+
+## Dokumentationsprincip
+
+`README.md` ska vara kort och fungera som ingång till repoet.
+
+Detaljer hör hemma i `docs/`:
+
+- produkt och domän i `docs/domain/`
+- nuläge och målarkitektur i `docs/architecture/`
+- lokalt arbete och kodriktlinjer i `docs/development/`
+- förbättringsområden och öppna frågor i `docs/backlog/`
+- återanvändbar agentkontext i `docs/agents/`
 
 ## Status
 
-Repoet är under aktiv utveckling och dokumentationen är fortfarande under uppbyggnad.
-
-Målet är att successivt göra både kodstruktur och dokumentation mer konsekvent, utan att stoppa leveransen av MVP-funktionalitet.
+Repoet är under aktiv utveckling. Dokumentation och kodstruktur utvecklas löpande mot målarkitekturen, med fokus på att hitta rätt plats för ny kod och undvika att `Shared` växer som defaultyta.
