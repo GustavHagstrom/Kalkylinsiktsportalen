@@ -63,7 +63,14 @@ Följ målarkitekturen för ny produktkod:
 - `Modules/Access` för funktions- och view-rättigheter
 - `Modules/Organizations` för tenant-kontext och organisationsinställningar
 
-`Shared` är inte default. Använd bara shared när flera områden faktiskt delar samma ansvar.
+Strukturera ny modulär produktlogik som feature/use case-slices inom modulen. Använd interna mappar som `Domain`, `Infrastructure` och `Components` när de löser ett konkret behov, men skapa inte lager bara för symmetri.
+
+`Shared` är inte default. Använd bara shared när flera områden faktiskt delar samma ansvar:
+- `Shared/UI` för generiska UI-primitiver utan produktspecifik logik
+- `Shared/Kernel` för små stabila gemensamma typer
+- `Shared/Infrastructure` för teknisk implementation som delas av flera moduler
+
+Befintlig kod i äldre `Shared/*` flyttas stegvis när den ändå berörs eller blockerar en modulgräns.
 
 ## Blazor Och UI
 

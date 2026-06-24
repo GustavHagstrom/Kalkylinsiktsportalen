@@ -36,6 +36,15 @@ Varje modul får ha interna lager om det hjälper, till exempel:
 
 Men hela lösningen ska inte drivas av en global lagerstruktur där all domänlogik, all applikationslogik och all infrastruktur blandas per tekniskt lager.
 
+Inom varje modul är feature/use case-slices den primära arbetsformen. Modulen är ägarskapsgränsen, och varje större användningsfall kan samla request/response-modeller, handler/service, validering, mappning och tester nära varandra.
+
+Moduler får samtidigt ha interna mappar som `Domain`, `Infrastructure` och `Components` när det finns ett konkret behov:
+- `Domain` för stabila modulbegrepp och regler
+- `Infrastructure` för modulunik persistence, externa klienter och tekniska adapters
+- `Components` för modulnära UI som inte är generell shared UI
+
+Skapa inte tomma lager bara för symmetri. Clean architecture används som riktning för beroenden, medan vertical slices används som praktisk struktur för ny produktlogik.
+
 ### 3. UI är utbytbart
 
 Blazor-komponenter ska inte vara platsen där central produktlogik bor.

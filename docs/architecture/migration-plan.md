@@ -20,7 +20,7 @@ Prioriteten är:
 
 ## Fas 1: Dokumentera och namnge målstrukturen
 
-Status: kan göras direkt.
+Status: genomförd.
 
 Åtgärder:
 - lägg till målarkitekturdokument
@@ -34,7 +34,7 @@ Definition of done:
 
 ## Fas 2: Inför modulmappar utan att flytta allt
 
-Status: nästa praktiska kodsteg.
+Status: genomförd.
 
 Rekommenderad struktur i Blazor-projektet:
 
@@ -63,6 +63,7 @@ Regel:
 Definition of done:
 - det finns en fysisk plats för målmodulerna
 - ny kod behöver inte hamna i gamla `Shared`
+- befintlig kod har inte flyttats som del av fasen
 
 ## Fas 3: Etablera use cases för kärnflödet
 
