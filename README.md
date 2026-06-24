@@ -35,12 +35,12 @@ Repoets långlivade kontextlager för domän, arkitektur, utvecklingssätt, back
 
 Rekommenderad läsordning:
 
-1. [docs/domain/product-description-draft.md](docs/domain/product-description-draft.md)
-2. [docs/architecture/overview.md](docs/architecture/overview.md)
+1. [docs/product-and-domain.md](docs/product-and-domain.md)
+2. [docs/architecture/current-state.md](docs/architecture/current-state.md)
 3. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
 4. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
-5. [docs/development/local-development.md](docs/development/local-development.md)
-6. [docs/backlog/improvement-areas.md](docs/backlog/improvement-areas.md)
+5. [docs/development.md](docs/development.md)
+6. [docs/backlog.md](docs/backlog.md)
 
 För en komplett dokumentationskarta, se [docs/README.md](docs/README.md).
 
@@ -62,11 +62,11 @@ Nuvarande `Shared` ska på sikt krympas och bara innehålla verkligt delade bygg
 
 Detaljer hör hemma i `docs/`:
 
-- produkt och domän i `docs/domain/`
+- produkt och domän i `docs/product-and-domain.md`
 - nuläge och målarkitektur i `docs/architecture/`
-- lokalt arbete och kodriktlinjer i `docs/development/`
-- förbättringsområden och öppna frågor i `docs/backlog/`
-- återanvändbar agentkontext i `docs/agents/`
+- lokalt arbete och kodriktlinjer i `docs/development.md`
+- förbättringsområden och öppna frågor i `docs/backlog.md`
+- återanvändbar agentkontext i `docs/agent-guide.md`
 
 ## Status
 
