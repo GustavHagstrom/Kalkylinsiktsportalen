@@ -4,12 +4,12 @@ Datum: 2026-06-24
 
 Det här dokumentet är ett arbetsunderlag efter en ny genomgång av den uppdaterade
 lokala koden. Syftet är att samla observationer som kan användas när de mer
-långlivade dokumenten i `src/docs/` utvecklas vidare.
+långlivade dokumenten i `docs/` utvecklas vidare.
 
 ## Sammanfattning
 
 Repot har gått från att vara relativt odokumenterat till att redan ha en tydlig
-dokumentationsstruktur under `src/docs/`. Det finns nu dokument för produkt,
+dokumentationsstruktur under `docs/`. Det finns nu dokument för produkt,
 domän, arkitektur, utvecklingsriktlinjer, agentarbete och förbättringsområden.
 
 Den aktuella koden och dokumentationen pekar mot ett tydligare produktnamn och
@@ -19,7 +19,7 @@ strukturera och presentera Bidcon-kalkyldata i anpassningsbara rapportvyer.
 Den största skillnaden mot tidigare analys är att repoet nu redan innehåller:
 
 - README-filer som beskriver produkten och dokumentationsprincipen.
-- Ett `src/docs/`-lager med arkitektur-, domän- och utvecklingsdokument.
+- Ett `docs/`-lager med arkitektur-, domän- och utvecklingsdokument.
 - Ett testprojekt: `src/Tests/BlazorServer.Tests`.
 - Mer utvecklad view-/rapportlogik, inklusive editor-klasser och formelutvärdering.
 - En säkrare placeholder för `AzureAd:ClientSecret` i `appsettings.json`.
@@ -46,8 +46,7 @@ Nuvarande huvuddelar:
 
 - `src/BlazorServer` - huvudapplikationen.
 - `src/Tests/BlazorServer.Tests` - NUnit-testprojekt för huvudappen.
-- `src/PwCracker` - separat konsolprojekt i samma lösning.
-- `src/docs` - långlivat dokumentationslager.
+- `docs` - långlivat dokumentationslager.
 - `docs/repo-analysis-notes.md` - denna tillfälliga/metaanalytiska arbetsfil.
 
 ## Produkt- och domänbild
@@ -114,7 +113,7 @@ layout och settings-skal. Det ger en modulär navigation och gör att features k
 exponera UI utan att layouten känner till varje feature direkt.
 
 Det här är ett viktigt repo-mönster och bör beskrivas i
-`src/docs/architecture/features-and-modules.md`.
+`docs/architecture/features-and-modules.md`.
 
 ### Auth och access
 
@@ -220,33 +219,33 @@ Nästa rimliga testkandidater är:
 
 ## Befintligt dokumentationslager
 
-`src/docs/` är nu den primära platsen för långlivad dokumentation.
+`docs/` är nu den primära platsen för långlivad dokumentation.
 
 Viktiga filer:
 
-- `src/docs/domain/product-description-draft.md`
-- `src/docs/domain/overview.md`
-- `src/docs/domain/glossary.md`
-- `src/docs/domain/domain-map.md`
-- `src/docs/architecture/overview.md`
-- `src/docs/architecture/features-and-modules.md`
-- `src/docs/development/coding-guidelines.md`
-- `src/docs/development/local-development.md`
-- `src/docs/backlog/improvement-areas.md`
-- `src/docs/backlog/open-questions.md`
-- `src/docs/agents/repository-context.md`
+- `docs/domain/product-description-draft.md`
+- `docs/domain/overview.md`
+- `docs/domain/glossary.md`
+- `docs/domain/domain-map.md`
+- `docs/architecture/overview.md`
+- `docs/architecture/features-and-modules.md`
+- `docs/development/coding-guidelines.md`
+- `docs/development/local-development.md`
+- `docs/backlog/improvement-areas.md`
+- `docs/backlog/open-questions.md`
+- `docs/agents/repository-context.md`
 
 Dokumentationsprincipen är redan beskriven: README ska vara korta ingångar,
 medan produkt, domän, arkitektur, utveckling och backlog bor i separata
 underkataloger.
 
 Det här analysdokumentet bör därför inte bli en permanent parallell sanning.
-När punkterna är genomarbetade bör de flyttas in i rätt `src/docs/`-dokument.
+När punkterna är genomarbetade bör de flyttas in i rätt `docs/`-dokument.
 
 ## Kvarvarande risker och förbättringsområden
 
 Många förbättringsområden finns redan i
-`src/docs/backlog/improvement-areas.md`. Nedan är en uppdaterad tolkning efter
+`docs/backlog/improvement-areas.md`. Nedan är en uppdaterad tolkning efter
 senaste kodgenomgången.
 
 ### 1. Produktnamn och repoidentitet
@@ -308,11 +307,6 @@ Kvarvarande exempel:
 Det här är inte nödvändigtvis MVP-blockerande men påverkar onboarding,
 sökbarhet och agentarbete.
 
-### 8. PwCracker i lösningen
-
-`PwCracker` ligger kvar som separat konsolprojekt. Det bör finnas ett tydligt
-beslut om det är ett legitimt utvecklingsverktyg i repot eller om det ska bort.
-
 ## ADR-kandidater
 
 Följande ADR:er är mest relevanta efter senaste genomgång:
@@ -326,17 +320,14 @@ Följande ADR:er är mest relevanta efter senaste genomgång:
 7. Avgränsa cellformler: syntax, säkerhet, felhantering och framtida DSL-riktning.
 8. Bestäm om view-/rapportlogik ska ligga i `Shared/Components/Views` eller i en egen feature.
 9. Bestäm repo-/produktnamn och hur gammalt `AppPlatform`-arv ska hanteras.
-10. Bestäm om `PwCracker` ska ligga kvar i lösningen.
-
 ## Rekommenderade nästa steg
 
-1. Flytta in relevanta observationer från detta dokument i rätt `src/docs/`-fil.
-2. Uppdatera `src/docs/architecture/features-and-modules.md` med view-editor/formel-mönstret.
+1. Flytta in relevanta observationer från detta dokument i rätt `docs/`-fil.
+2. Uppdatera `docs/architecture/features-and-modules.md` med view-editor/formel-mönstret.
 3. Lägg till tester för `ViewEditor` och `DataSectionEditor`.
 4. Ersätt `.Result` i `BidconApiAccess` med full async/await.
 5. Skriv en kort ADR om cellformler innan formelspråket växer.
 6. Bestäm produkt-/repo-namngivning.
-7. Besluta om `PwCracker` ska dokumenteras, flyttas eller tas bort.
 
 ## Kort slutsats
 

@@ -51,9 +51,6 @@ Kör från lösningens rot om du arbetar via terminal.
 ### Köra tester
 `dotnet test Tests/BlazorServer.Tests`
 
-### Köra konsolverktyget
-`dotnet run --project PwCracker`
-
 ## Rekommenderat utvecklingsflöde
 
 1. Starta `BlazorServer`

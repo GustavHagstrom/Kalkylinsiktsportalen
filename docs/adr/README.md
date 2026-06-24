@@ -47,4 +47,3 @@ Vilka andra vägar fanns?
 - Hur `Shared` ska användas och begränsas
 - Strategi för auth i development respektive production
 - Strategi för hemlighetshantering och konfiguration
-- Om `PwCracker` ska vara kvar i samma repo

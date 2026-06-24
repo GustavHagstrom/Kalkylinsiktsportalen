@@ -31,18 +31,18 @@ Testprojekt för huvudapplikationen.
 
 ## Komma igång
 
-Se dokumentationen i `src/docs/` för mer detaljer.
+Se dokumentationen i `docs/` för mer detaljer.
 
 Rekommenderad läsordning:
 - [src/README.md](src/README.md)
-- [src/docs/README.md](src/docs/README.md)
-- [src/docs/architecture/overview.md](src/docs/architecture/overview.md)
-- [src/docs/development/local-development.md](src/docs/development/local-development.md)
-- [src/docs/agents/repository-context.md](src/docs/agents/repository-context.md)
+- [docs/README.md](docs/README.md)
+- [docs/architecture/overview.md](docs/architecture/overview.md)
+- [docs/development/local-development.md](docs/development/local-development.md)
+- [docs/agents/repository-context.md](docs/agents/repository-context.md)
 
 ## Dokumentation
 
-Dokumentationen i `src/docs/` är tänkt att vara repoets långlivade kontextlager.
+Dokumentationen i `docs/` är tänkt att vara repoets långlivade kontextlager.
 
 Den används för att beskriva:
 - mål och domän
@@ -54,7 +54,7 @@ Den används för att beskriva:
 ## Förbättringar och backlog
 
 Identifierade förbättringsområden finns dokumenterade här:
-- [src/docs/backlog/improvement-areas.md](src/docs/backlog/improvement-areas.md)
+- [docs/backlog/improvement-areas.md](docs/backlog/improvement-areas.md)
 
 ## Status
 
