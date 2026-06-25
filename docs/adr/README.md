@@ -69,6 +69,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0034 - Defer domain events during initial migration](global/0034-defer-domain-events-during-initial-migration.md)
 - [0035 - Let Web orchestrate Projects and Reports initially](global/0035-let-web-orchestrate-projects-and-reports-initially.md)
 - [0036 - Pass identity and time into domain factories](global/0036-pass-identity-and-time-into-domain-factories.md)
+- [0037 - Use pragmatic CQRS feature slices](global/0037-use-pragmatic-cqrs-feature-slices.md)
 
 ### Bidcon
 
