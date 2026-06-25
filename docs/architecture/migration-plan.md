@@ -79,6 +79,7 @@ Reports/RenderViewForSnapshot
 Reports/UpdateViewDefinition
 Access/GrantViewAccess
 Bidcon/FetchCompleteEstimation
+Projects/BuildRenderableSnapshotState
 ```
 
 Blazor-komponenter ska anropa dessa use cases i stället för att själva orkestrera stores, Bidcon-klienter och mappning.
@@ -105,6 +106,7 @@ Målet är inte bara att flytta filer, utan att göra Reports ansvar tydligt:
 ```text
 ViewDefinition
 ViewSection
+View.EnableChanges
 ReportRenderModel
 FormulaEvaluation
 PdfExport
@@ -113,6 +115,7 @@ PdfExport
 Definition of done:
 - view-/rapportlogik ligger inte längre som oägd shared-kod
 - Reports har tydliga use cases för redigering och rendering
+- View-definitionen kan uttrycka om view-lokala ändringar är aktiverade
 - befintliga tester för formelutvärdering pekar mot Reports
 
 ## Fas 5: Ge Bidcon-modulen ägarskap över integration och import
@@ -145,7 +148,8 @@ Nya begrepp:
 - `Project`
 - `ProjectEstimation`
 - `EstimationSnapshot`
-- `SnapshotChangeSet`
+- `ViewScopedChangeSet`
+- `Ersättningspolicy`
 
 Första viktiga flödet:
 
@@ -157,9 +161,63 @@ Första viktiga flödet:
 5. användaren väljer view för att inspektera snapshotet
 ```
 
+Första vertikala slice som bör bevisa View/ChangeSet-modellen:
+
+```text
+1. användaren öppnar en projektversion
+2. användaren öppnar ett snapshot i projektversionen
+3. användaren väljer en view med EnableChanges = true
+4. systemet visar kalkylrader från snapshotet
+5. systemet hittar ersättningsbara rader via Remark-taggar
+6. användaren byter en rad mot ett tillåtet alternativ
+7. Projects sparar ett ViewScopedChangeSet för View + Projektversion + Snapshot
+8. Reports renderar vyn med ändringen applicerad
+9. användaren exporterar PDF och ändringen följer med
+```
+
+Denna slice får börja med ett sparat eller seedat `EstimationSnapshot` som redan innehåller rader, nivåer, mängder och `Remark`-taggar. Syftet är att bevisa `View + ProjectVersion + EstimationSnapshot + ViewScopedChangeSet + ReplacementPolicy + Render + PDF` utan att samtidigt behöva lösa riktig Bidcon-import, autentisering och externa API-fel.
+
+Första slicen bör återanvända befintlig view-rendering och formelutvärdering så långt det går. Ny kod bör framför allt lägga `Projects/BuildRenderableSnapshotState` framför renderingen, så att befintlig Reports/view-motor får ett aktivt snapshotläge med applicerade view-lokala ändringar i stället för att en parallell renderingsmotor byggs.
+
+Nuvarande `PrintableDocument.razor` matas med komponenter uppdelade i `BodyComponents`, `HeaderComponents` och `FooterComponents`. Komponenterna definieras och komponeras av vyn, men datamatningen till vyn är ännu inte färdig. Första slicen kan därför välja ett explicit `RenderableSnapshotState`-kontrakt i stället för att behöva bakåtanpassas till ett färdigt datakontrakt.
+
+`RenderableSnapshotState` bör vara en generell aktiv kalkylmodell, inte en färdig dokumentkomponentmodell. Den bör innehålla rader/poster, trädposition, mängd, värden, `Remark`-taggar och ersättningsstatus. Reports ansvarar för att mappa denna modell till `HeaderComponents`, `BodyComponents` och `FooterComponents`.
+
+När en rad är ersatt bör `RenderableRow` bära både originalrad och aktiv ersättningsrad, plus ersättningsmetadata. Då kan Reports/PDF visa aktivt läge medan UI fortfarande kan förklara vad som ersattes.
+
+`RenderableRow` bör bevara ersättningsradens egen ursprungsmängd men exponera en separat `RenderedQuantity`. Vid ersättning kommer `RenderedQuantity` från originalradens mängd.
+
+Renderade totalvärden bör räknas om med `RenderedQuantity` där enhetsvärden är tydliga, till exempel `RenderedTotal = ReplacementUnitPrice * RenderedQuantity`. Där Bidcon-värden bygger på mer komplexa summeringar, påslag eller formler ska första slicen inte försöka återskapa hela Bidcon-logiken utan bevara eller exponera aktiv rad-värden tills reglerna är tydliga.
+
 Definition of done:
 - snapshot är separat från live-Bidcon-data
+- snapshot innehåller en komplett import av Bidcon-estimationen, inte bara data för en viss view
 - snapshot kan sparas och hämtas
+- snapshotändringar kan uttrycka kontrollerade ersättningar enligt en modulär ersättningspolicy
+- initial ersättningspolicy matchar rader på samma Bidcon-trädnivå med minst en gemensam `Remark`-tagg och behåller originalradens mängd
+- initial ersättningspolicy kräver inte samma tekniska radtyp/posttyp
+- MVP-ersättningar kräver tillräcklig data för säker rendering, till exempel mängd och enhetspris på original och alternativ
+- MVP visar bara säkra ersättningsalternativ som valbara; taggade kandidater som saknar nödvändig data filtreras bort men bör vara diagnostiserbara
+- initial taggparser räknar alla `{tagg}`-värden i `Remark` som ersättningstaggar
+- ersättningar sparas som val av originalrad och ersättningsrad, inte som materialiserade kalkylresultat
+- ersättningsval sparar vilken gemensam tagg som användes som matchningsgrund
+- ett `ViewScopedChangeSet` tillåter högst ett aktivt ersättningsval per originalrad
+- aktivt ersättningsval sparar stabilt användar-ID, visningsnamn/e-post och ändringstid, men full historik över tidigare val krävs inte initialt
+- ersättningsval gäller bara det snapshotläge eller den projektversion där valet gjordes
+- Projects äger validering och lagring av `ViewScopedChangeSet`; Reports konsumerar ett renderbart view/snapshotläge
+- `ViewScopedChangeSet` delas av användare för samma view och version/snapshotläge, med användarmetadata på aktiva ersättningsval
+- `ViewScopedChangeSet` är unikt per `View`, `Projektversion` och `EstimationSnapshot`
+- delade ersättningsval använder optimistisk konfliktkontroll så samtidiga ändringar inte skrivs över tyst
+- Projects kan bygga ett renderbart snapshotläge för en View genom att applicera `ViewScopedChangeSet`
+- Projects tar emot ett litet view change settings-kontrakt, inte hela Reports `ViewDefinition`
+- `EnableChanges = false` blockerar nya ändringar men befintliga `ViewScopedChangeSet` fortsätter appliceras vid rendering/export
+- duplicering av view kopierar inte befintliga `ViewScopedChangeSet`
+- views med historik, exporter eller `ViewScopedChangeSet` arkiveras i stället för att hårdraderas
+- arkiverade views kan rendera och PDF-exportera historiska versioner read-only men används inte för nya ändringar eller normala nya flöden
+- PDF-export i MVP exporterar ett öppnat snapshot med vald view och använder aktivt renderat view-läge inklusive `ViewScopedChangeSet`
+- MVP genererar PDF på begäran och behöver inte spara PDF-exporter som historiska artefakter
+- ändringar kan rensas separat med bekräftad `ClearViewScopedChanges` som tar bort alla aktiva ersättningsval för den aktuella vyn, versionen och snapshotet
+- MVP kräver inte undo/redo; framtida undo/redo bör byggas som operation log för `ViewScopedChangeSet`
 - minst ett snapshot kan renderas via en view
 
 ## Fas 7: Förtydliga Access
@@ -248,5 +306,6 @@ Undvik att börja med:
 - flera deploybara tjänster
 - en generell pluginarkitektur
 - global lagerarkitektur över hela lösningen
+- automatisk återanvändning eller förslag av ersättningsval mellan projektversioner
 
 Det viktigaste är att etablera rätt produktmoduler och låta koden börja växa åt rätt håll.

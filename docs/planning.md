@@ -18,11 +18,6 @@ Docs ska inte vara en parallell ärendelista. Den här filen används bara för 
 - Ska WYSIWYG/PDF vara en intern del av `Reports` eller en separat renderingmodul?
 - Hur ska `SnapshotChangeSet` modelleras?
 
-## Beslutade Arkitekturfrågor
-
-- `Modules/*` och de tydligare shared-ytorna `Shared/UI`, `Shared/Kernel` och `Shared/Infrastructure` finns fysiskt i `src/BlazorServer`. Ny produktkod ska placeras i målmodulerna, medan befintlig kod i äldre `Shared/*` flyttas stegvis när den berörs.
-- Moduler struktureras i första hand runt feature/use case-slices. Interna `Domain`-, `Infrastructure`- och `Components`-mappar används bara när de behövs, inte som obligatorisk global lagerstruktur.
-
 ## Öppna Produktfrågor
 
 - Vilka användartyper är officiella?

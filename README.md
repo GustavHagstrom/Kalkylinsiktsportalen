@@ -35,12 +35,13 @@ Repoets långlivade kontextlager för domän, arkitektur, utvecklingssätt, plan
 
 Rekommenderad läsordning:
 
-1. [docs/product-and-domain.md](docs/product-and-domain.md)
-2. [docs/architecture/current-state.md](docs/architecture/current-state.md)
-3. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
-4. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
-5. [docs/development.md](docs/development.md)
-6. [docs/planning.md](docs/planning.md)
+1. [CONTEXT.md](CONTEXT.md)
+2. [docs/product-and-domain.md](docs/product-and-domain.md)
+3. [docs/architecture/current-state.md](docs/architecture/current-state.md)
+4. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
+5. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
+6. [docs/development.md](docs/development.md)
+7. [docs/planning.md](docs/planning.md)
 
 För en komplett dokumentationskarta, se [docs/README.md](docs/README.md).
 
@@ -62,11 +63,14 @@ Nuvarande `Shared` ska på sikt krympas och bara innehålla verkligt delade bygg
 
 Detaljer hör hemma i `docs/`:
 
+- kanoniskt domänspråk i `CONTEXT.md`
 - produkt och domän i `docs/product-and-domain.md`
 - nuläge och målarkitektur i `docs/architecture/`
 - lokalt arbete och kodriktlinjer i `docs/development.md`
 - planeringsprinciper och öppna frågor i `docs/planning.md`
 - återanvändbar agentkontext i `docs/agent-guide.md`
+
+Nya eller ändrade kanoniska domäntermer ska uppdateras i `CONTEXT.md`. Långlivade beslut som är svåra att backa ur och bygger på en verklig trade-off ska dokumenteras som korta ADR:er enligt `docs/adr/README.md`. `docs/planning.md` ska bara innehålla öppna frågor och planeringsprinciper.
 
 ## Status
 

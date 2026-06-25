@@ -103,8 +103,8 @@ Bidcon
 Project
 ├─ ProjectEstimations
 ├─ EstimationSnapshots
-├─ ChangeSets
-└─ Versions/history
+├─ ProjectVersions
+└─ History
 
 View
 ├─ DataSections
@@ -125,9 +125,10 @@ Domänens huvudkedja:
 2. användaren autentiseras och får portalrättigheter
 3. estimat hämtas eller väljs från Bidcon
 4. estimat kan på sikt kopplas till projekt
-5. snapshots sparas som oföränderliga kalkyllägen
-6. en view beskriver hur informationen visas
-7. rapporten renderas från `Snapshot + ChangeSet + View`
+5. snapshots sparas som oföränderliga kompletta importer av kalkyllägen
+6. projektversioner sparar vilka snapshots som ingår i ett projektläge
+7. en view beskriver hur informationen visas
+8. rapporten renderas från `Snapshot + View + ViewScopedChangeSet`
 
 ## Viktiga Gränser
 
@@ -145,34 +146,7 @@ Organisationen är tenant-gränsen för projekt, views, access, credentials och 
 
 ## Begrepp
 
-| Begrepp | Arbetsdefinition |
-|---|---|
-| Bidcon | Externt system som portalen hämtar kalkyl- och estimationsdata från. |
-| Bidcon API | API för autentisering och läsning av Bidcon-data. |
-| Organisation | Tenant-/avgränsningsnivå för data, rättigheter, views och credentials. |
-| Användare | Identifierad person, typiskt via Microsoft Identity / Graph. |
-| Roll | Gruppering av användare som används tillsammans med portalens accessregler. |
-| Access claim | Funktionellt rättighetsvärde som styr vad användare eller roller får göra. |
-| UserAccess | Direkta rättigheter för en användare inom en organisation. |
-| RoleAccess | Rättigheter för en roll inom en organisation. |
-| Bidcon API credentials | Organisationsbundna uppgifter för anslutning till Bidcon API. |
-| Estimation / kalkyl / estimat | Centralt affärsobjekt från Bidcon med kalkylinformation och metadata. |
-| Projekt | Portalägt arbetsobjekt som samlar en eller flera Bidcon-kalkyler. |
-| ProjectEstimation | Koppling mellan ett projekt och en Bidcon-estimation-identitet. |
-| EstimationSnapshot | Oföränderligt sparat kalkylläge från Bidcon. |
-| SnapshotChangeSet | Ändringar eller kommentarer ovanpå ett snapshot, utan att mutera snapshotet. |
-| Projektversion | Sparat läge för projektets kalkyler vid en viss tidpunkt. |
-| Draft / utkastversion | Arbetsversion som ännu inte är en publicerad eller definitiv version. |
-| View | Organisationsägd rapportmall som beskriver hur kalkyldata ska visas. |
-| Rapportvy | Verksamhetsnära ord för en `View` använd som rapport. |
-| DataSection | Sektion där data visas i cell- eller tabellnära format. |
-| SheetSection | Sektion som representerar ett blad eller särskild dokumentdel. |
-| PageBreakSection | Sektion som representerar sidbrytning eller utskriftsuppdelning. |
-| Data cell | En cell med råvärde, formel, estimation-referens eller format. |
-| Rapportanpassning | Förmågan att strukturera och formatera kalkylinformation för olika syften. |
-| Kalkylutforskare | Yta där användaren söker, filtrerar och väljer estimat från Bidcon. |
-| Jämförelse | Användningsfall där versioner ställs mot varandra för att visa skillnader. |
-| Historik | Spårbar följd av tidigare versioner av projekt eller kalkyllägen. |
+Den kanoniska ordlistan finns i [../CONTEXT.md](../CONTEXT.md). Uppdatera `CONTEXT.md` när ett domänbegrepp byter namn, får en skarpare definition eller när ett nytt begrepp blir etablerat.
 
 ## Antaganden Att Bekräfta
 

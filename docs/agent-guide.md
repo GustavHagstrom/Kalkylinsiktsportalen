@@ -8,6 +8,8 @@ Repoet innehåller en Blazor Server-applikation på .NET 10 med MudBlazor, Mongo
 
 Arkitekturriktningen är en modulär monolit enligt [architecture/target-architecture.md](architecture/target-architecture.md), med stegvis migrering enligt [architecture/migration-plan.md](architecture/migration-plan.md).
 
+Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbeskrivning, domänmodell och huvudflöden finns i [product-and-domain.md](product-and-domain.md).
+
 ## Viktigt Att Veta
 
 - Huvudprojektet är `src/BlazorServer`.
@@ -28,6 +30,9 @@ Arkitekturriktningen är en modulär monolit enligt [architecture/target-archite
 - lägg ny produktkod i `Modules/*` när det passar migrationsplanen
 - lägg inte saker i `Shared` i onödan
 - undvik nya paket om de inte behövs
+- uppdatera [../CONTEXT.md](../CONTEXT.md) när ett kanoniskt domänbegrepp ändras eller etableras
+- skriv en kort ADR enligt [adr/README.md](adr/README.md) när ett beslut är långlivat, svårt att backa ur och resultatet av en verklig trade-off
+- använd [planning.md](planning.md) för öppna frågor, inte för beslut som redan är fattade
 - uppdatera docs när ansvar, regler eller arkitektur påverkas
 - verifiera med relevanta tester eller annan rimlig kontroll
 
