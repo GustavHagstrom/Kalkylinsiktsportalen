@@ -57,6 +57,18 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0002 - Limit Shared to stable cross-cutting building blocks](global/0002-limit-shared-to-stable-cross-cutting-building-blocks.md)
 - [0018 - Split active state building from report rendering](global/0018-split-active-state-building-from-report-rendering.md)
 - [0019 - Pass view change settings to Projects](global/0019-pass-view-change-settings-to-projects.md)
+- [0025 - Use encapsulated domain models in target modules](global/0025-use-encapsulated-domain-models-in-target-modules.md)
+- [0026 - Design domain models around aggregate roots](global/0026-design-domain-models-around-aggregate-roots.md)
+- [0027 - Keep domain models persistence-independent](global/0027-keep-domain-models-persistence-independent.md)
+- [0028 - Reuse code under the right module ownership](global/0028-reuse-code-under-the-right-module-ownership.md)
+- [0029 - Migrate code directly into clean target shape](global/0029-migrate-code-directly-into-clean-target-shape.md)
+- [0030 - Use strong ID types in domain code](global/0030-use-strong-id-types-in-domain-code.md)
+- [0031 - Use validation results at boundaries and exceptions for domain invariants](global/0031-use-validation-results-at-boundaries-and-exceptions-for-domain-invariants.md)
+- [0032 - Use factories for aggregate creation](global/0032-use-factories-for-aggregate-creation.md)
+- [0033 - Use controlled internal mutation for aggregates](global/0033-use-controlled-internal-mutation-for-aggregates.md)
+- [0034 - Defer domain events during initial migration](global/0034-defer-domain-events-during-initial-migration.md)
+- [0035 - Let Web orchestrate Projects and Reports initially](global/0035-let-web-orchestrate-projects-and-reports-initially.md)
+- [0036 - Pass identity and time into domain factories](global/0036-pass-identity-and-time-into-domain-factories.md)
 
 ### Bidcon
 
@@ -78,6 +90,10 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0017 - Keep view-scoped change sets in Projects](modules/projects/0017-keep-view-scoped-change-sets-in-projects.md)
 - [0020 - Keep existing view changes active when changes are disabled](modules/projects/0020-keep-existing-view-changes-active-when-disabled.md)
 - [0024 - Use a general renderable snapshot state](modules/projects/0024-use-general-renderable-snapshot-state.md)
+- [0025 - Start Projects slices with domain and in-memory stores](modules/projects/0025-start-projects-slices-with-domain-and-in-memory-stores.md)
+- [0026 - Treat estimation snapshots as immutable source of truth](modules/projects/0026-treat-estimation-snapshots-as-immutable-source-of-truth.md)
+- [0027 - Use seeded snapshots before real Bidcon import](modules/projects/0027-use-seeded-snapshots-before-real-bidcon-import.md)
+- [0028 - Model renderable snapshot state as an application contract](modules/projects/0028-model-renderable-snapshot-state-as-an-application-contract.md)
 
 ### Reports
 

@@ -36,6 +36,22 @@ Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbeskrivnin
 - uppdatera docs när ansvar, regler eller arkitektur påverkas
 - verifiera med relevanta tester eller annan rimlig kontroll
 
+## Skills-Arbetsflöde Från Idé Till Handoff
+
+Använd det här flödet när en ny idé behöver förfinas, brytas ned, byggas och lämnas vidare på ett spårbart sätt:
+
+1. Ny idé
+2. `/grill-with-docs`
+3. `/to-prd`
+4. `/to-issues`
+5. Välj ett issue
+6. `/tdd`
+7. Implementera
+8. Tester gröna
+9. `/improve-codebase-architecture` vid behov
+10. Commit
+11. `/handoff` om du byter session
+
 ## Kontrollfrågor Innan Ändring
 
 1. Vilken feature äger problemet idag?
