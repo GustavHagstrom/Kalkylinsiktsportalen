@@ -1,12 +1,13 @@
 # Produkt och domän
 
-Det här dokumentet samlar produktbeskrivning, domänbild och centrala begrepp för Kalkylinsiktsportalen.
+Det här dokumentet samlar produktbeskrivning, övergripande domänbild och centrala huvudflöden för Kalkylinsiktsportalen.
 
 ## Kort Beskrivning
 
 Kalkylinsiktsportalen är en portal för att hämta, välja ut, strukturera och presentera kalkylinformation från Bidcon i anpassningsbara rapportvyer.
 
 Produkten kombinerar:
+
 - Bidcon som extern datakälla
 - egna views som presentations- och rapportlager
 - organisationsbunden konfiguration
@@ -19,6 +20,7 @@ Produkten är inte ett nytt kalkylsystem och ska inte ersätta Bidcon. Den är e
 Produktens syfte är att göra kalkylinformation mer användbar än om den enbart konsumeras i källsystemet.
 
 Det innebär att portalen ska stödja:
+
 - att rätt information visas för rätt målgrupp
 - att samma underliggande kalkyldata kan presenteras på olika sätt
 - att rapportupplägg kan återanvändas
@@ -31,6 +33,7 @@ Kärnvärdet är kombinationen av extern kalkyldata, anpassningsbara rapportvyer
 Den nuvarande kärnan är att hämta kalkylinformation från Bidcon och presentera den genom anpassningsbara views.
 
 Den långsiktiga målbilden är att användare också ska kunna:
+
 - skapa projekt i portalen
 - koppla ett projekt till en eller flera kalkyler från Bidcon
 - hämta nya versioner över tid
@@ -52,26 +55,31 @@ Det gör produkten till mer än en rapportportal på sikt: den ska kunna samla, 
 ## Funktionella Områden
 
 **Åtkomst och administration**
+
 - rättigheter på användare och roller
 - skyddade administrativa funktioner
 - separata ansvarsnivåer för användning, redigering och administration
 
 **Integration mot Bidcon**
+
 - organisationsbunden konfiguration av Bidcon API-åtkomst
 - autentisering mot Bidcon
 - inläsning av estimatdata
 
 **Kalkylutforskare**
+
 - läsa in tillgängliga estimat
 - söka och filtrera
 - välja relevanta objekt för fortsatt arbete
 
 **Rapporter och views**
+
 - skapa och redigera views
 - styra sektioner, layout, format och formler
 - rendera rapporter från kalkyldata
 
 **Projekt och versioner**
+
 - samla en eller flera Bidcon-kalkyler i projekt
 - skapa snapshots och versioner
 - följa historik och jämföra lägen
@@ -88,36 +96,17 @@ En rimlig MVP är att en organisation kan:
 
 MVP:n bevisar att data kommer in från rätt källa, att rätt användare kommer åt rätt funktioner och att informationen kan presenteras i en domänanpassad vy.
 
-## Domänmodell
+## Övergripande Domänkarta
 
-```text
-Organization
-├─ Users, roles and access
-├─ Bidcon API credentials
-├─ Views
-└─ Projects
+Den detaljerade levande domänmodellen finns i [domain/README.md](domain/README.md) och de modulvisa dokumenten under `docs/domain/`.
 
-Bidcon
-└─ Estimations
+På global nivå består domänbilden av följande huvuddelar:
 
-Project
-├─ ProjectEstimations
-├─ EstimationSnapshots
-├─ ProjectVersions
-└─ History
-
-View
-├─ DataSections
-├─ SheetSections
-└─ PageBreakSections
-
-DataSection
-└─ DataCells
-   ├─ raw values
-   ├─ formulas
-   ├─ estimation references
-   └─ formatting
-```
+- `Organization` som tenantgräns för data, views, access och credentials
+- `Bidcon` som extern källa för estimationsdata
+- `Projects` som portalens arbetsmodell för projekt, versioner, snapshots och delade ändringar
+- `Reports` som portalens modell för views, rapportstruktur, rendering och export
+- `Access` som portalens behörighetsmodell
 
 Domänens huvudkedja:
 
@@ -128,7 +117,12 @@ Domänens huvudkedja:
 5. snapshots sparas som oföränderliga kompletta importer av kalkyllägen
 6. projektversioner sparar vilka snapshots som ingår i ett projektläge
 7. en view beskriver hur informationen visas
-8. rapporten renderas från `Snapshot + View + ViewScopedChangeSet`
+8. rapporten renderas från aktiv state som Projects bygger och Reports presenterar
+
+Fördjupning:
+
+- [domain/projects.md](domain/projects.md)
+- [domain/reports.md](domain/reports.md)
 
 ## Viktiga Gränser
 
@@ -148,6 +142,8 @@ Organisationen är tenant-gränsen för projekt, views, access, credentials och 
 
 Den kanoniska ordlistan finns i [../CONTEXT.md](../CONTEXT.md). Uppdatera `CONTEXT.md` när ett domänbegrepp byter namn, får en skarpare definition eller när ett nytt begrepp blir etablerat.
 
+Aggregate-struktur, relationer, invariants och modulnära policyer ska dokumenteras i `docs/domain/*`, inte här.
+
 ## Antaganden Att Bekräfta
 
 - Views är ett kärnbegrepp i produkten, inte bara en teknisk detalj.
@@ -157,4 +153,3 @@ Den kanoniska ordlistan finns i [../CONTEXT.md](../CONTEXT.md). Uppdatera `CONTE
 - Versionshantering av kalkyler inom projekt är central i målbilden.
 - Skillnaden mellan view, rapport, mall och dokument behöver beslutas tydligare.
 - Skillnaden mellan projekt, kalkyl, snapshot, version och draft behöver förankras i användarspråket.
-

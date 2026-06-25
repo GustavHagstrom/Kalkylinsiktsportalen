@@ -37,11 +37,12 @@ Rekommenderad läsordning:
 
 1. [CONTEXT.md](CONTEXT.md)
 2. [docs/product-and-domain.md](docs/product-and-domain.md)
-3. [docs/architecture/current-state.md](docs/architecture/current-state.md)
-4. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
-5. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
-6. [docs/development.md](docs/development.md)
-7. [docs/planning.md](docs/planning.md)
+3. [docs/domain/README.md](docs/domain/README.md)
+4. [docs/architecture/current-state.md](docs/architecture/current-state.md)
+5. [docs/architecture/target-architecture.md](docs/architecture/target-architecture.md)
+6. [docs/architecture/migration-plan.md](docs/architecture/migration-plan.md)
+7. [docs/development.md](docs/development.md)
+8. [docs/planning.md](docs/planning.md)
 
 För en komplett dokumentationskarta, se [docs/README.md](docs/README.md).
 
@@ -65,6 +66,7 @@ Detaljer hör hemma i `docs/`:
 
 - kanoniskt domänspråk i `CONTEXT.md`
 - produkt och domän i `docs/product-and-domain.md`
+- levande modulägd domänmodell i `docs/domain/`
 - nuläge och målarkitektur i `docs/architecture/`
 - lokalt arbete och kodriktlinjer i `docs/development.md`
 - planeringsprinciper och öppna frågor i `docs/planning.md`

@@ -13,19 +13,23 @@ Målet är att dokumentationen ska vara kompakt och hjälpa utvecklare och agent
 För de flesta ändringar räcker den här ordningen:
 
 1. [../CONTEXT.md](../CONTEXT.md) — kanonisk ordlista för domänspråk
-2. [product-and-domain.md](product-and-domain.md) — produktens syfte, domänmodell och huvudflöden
-3. [architecture/target-architecture.md](architecture/target-architecture.md) — långsiktig målbild
-4. [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis väg dit
-5. [architecture/next-phase-plan.md](architecture/next-phase-plan.md) — konkret plan för nästa migrationsfas
-6. [architecture/current-state.md](architecture/current-state.md) — nuläge och mapping från features till målmoduler
-7. [development.md](development.md) — lokal utveckling och kodriktlinjer
+2. [product-and-domain.md](product-and-domain.md) — produktens syfte, övergripande domänkarta och huvudflöden
+3. [domain/README.md](domain/README.md) — levande domänmodell och modulvisa domändokument
+4. [architecture/target-architecture.md](architecture/target-architecture.md) — långsiktig målbild
+5. [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis väg dit
+6. [architecture/next-phase-plan.md](architecture/next-phase-plan.md) — konkret plan för nästa migrationsfas
+7. [architecture/current-state.md](architecture/current-state.md) — nuläge och mapping från features till målmoduler
+8. [development.md](development.md) — lokal utveckling och kodriktlinjer
 
 Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som riktning, medan nulägesdokumenten beskriver hur koden ser ut idag.
 
 ## Struktur
 
 - [../CONTEXT.md](../CONTEXT.md) — kanonisk ordlista för domänspråk
-- [product-and-domain.md](product-and-domain.md) — produktbeskrivning, domänkarta och huvudflöden
+- [product-and-domain.md](product-and-domain.md) — produktbeskrivning, övergripande domänkarta och huvudflöden
+- [domain/README.md](domain/README.md) — levande domänmodell och mall för modulvisa domändokument
+- [domain/projects.md](domain/projects.md) — Projects-modulens aggregates, invariants och policyer
+- [domain/reports.md](domain/reports.md) — Reports-modulens aggregate, livscykel och policyer
 - [architecture/target-architecture.md](architecture/target-architecture.md) — målarkitektur för modulär monolit, snapshots och utbytbar frontend
 - [architecture/migration-plan.md](architecture/migration-plan.md) — stegvis plan från nuvarande struktur till målarkitekturen
 - [architecture/next-phase-plan.md](architecture/next-phase-plan.md) — aktuell plan för nästa migrationsfas
@@ -42,7 +46,8 @@ Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som
 Primära styrdokument ska vara korta, aktiva och hållas uppdaterade när riktningen ändras:
 
 - kanoniskt domänspråk
-- produkt och domän
+- produkt och övergripande domänkarta
+- levande modulägd domänmodell
 - målarkitektur och migrationsplan
 - utvecklingsriktlinjer
 - planeringsprinciper och öppna frågor
@@ -62,6 +67,7 @@ Beslut som är långlivade, svåra att backa ur och resultatet av en verklig tra
 - Skriv kort, konkret och versionsnära.
 - Dokumentera beslut och riktning, inte bara implementation.
 - Uppdatera [../CONTEXT.md](../CONTEXT.md) när kanoniska domäntermer ändras eller etableras.
+- Uppdatera `docs/domain/*.md` när aggregates, relationer, invariants eller modulnära policyer förfinas.
 - Uppdatera docs när ansvar eller riktning ändras.
 - Undvik parallella dokument som beskriver samma ansvar på olika sätt.
 - Lägg hellre en kort länk till det dokument som äger frågan.
@@ -71,7 +77,8 @@ Beslut som är långlivade, svåra att backa ur och resultatet av en verklig tra
 När du lägger till eller ändrar en feature bör du i normalfallet överväga om följande behöver uppdateras:
 
 - kanoniskt domänspråk
-- produkt/domän
+- produktbild och övergripande domänkarta
+- levande modulägd domänmodell
 - målarkitektur eller migrationsplan
 - nuläge
 - utvecklingsriktlinjer

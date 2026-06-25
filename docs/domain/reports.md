@@ -1,0 +1,91 @@
+# Reports
+
+## Syfte Och Modulgräns
+
+Reports äger rapportvyer, view-definitioner, sektioner, layout, rendering och view-livscykel.
+
+Modulen äger:
+
+- `View`
+- view-definition och sektionstyper
+- regler för när en view är ändringsbar eller arkiverad
+- översättning från renderbar state till rapportstruktur
+- PDF-export och relaterade exportbeslut
+
+Reports äger inte:
+
+- validering eller lagring av `ViewScopedChangeSet`
+- mutation av `EstimationSnapshot`
+- snapshot- och versionsmodell i Projects
+
+## Huvudaggregate
+
+### `View`
+
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas.
+
+Ansvar:
+
+- bära rapportdefinitionen
+- bära `EnableChanges` som styr om nya delade ersättningsval får göras i vyn
+- bära livscykelstatus, inklusive aktiv och arkiverad
+- vara workspace-gränsen som Projects change sets scope:as mot
+
+## Relationer
+
+- Reports konsumerar `RenderableSnapshotState` från Projects för rendering.
+- En `View` kan användas mot olika snapshot- och versionslägen, men varje `ViewScopedChangeSet` ägs fortfarande av Projects.
+- `EnableChanges` på `View` styr om användare får skapa nya view-lokala ändringar, medan Projects fortfarande äger validering, lagring och concurrency.
+- När en view dupliceras kopieras view-definitionen, men inte det change set-state som Projects äger för tidigare arbetslägen.
+
+## Invariants
+
+- `View` äger rapportdefinitionen men inte snapshotets sanning eller ersättningsvalens persistens.
+- `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
+- En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
+- Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
+
+## Nuvarande Policyer
+
+### `EnableChanges`
+
+Om en användare får använda en view och `EnableChanges` är aktiverat får användaren göra de delade ersättningsval som Projects tillåter. Detta är en view-egenskap, inte en generell projektinställning.
+
+### Duplicering
+
+Duplicering av en view kopierar:
+
+- view-definition
+- relevanta inställningar, inklusive `EnableChanges`
+
+Duplicering kopierar inte:
+
+- befintliga `ViewScopedChangeSet`
+- gammalt arbetsstate från andra vyer
+
+### Arkivering
+
+Views med historik, exportrelevans eller `ViewScopedChangeSet`-bakgrund ska kunna arkiveras i stället för att tas bort ur all historik.
+
+Arkivering betyder att vyn:
+
+- döljs från normal ny användning
+- bevaras för att förklara historiska rapporter och beslut
+- kan användas i läsläge för historik och exportförståelse
+
+## MVP-Begränsningar Och Tillfälliga Val
+
+- första PDF-exporten utgår från aktivt öppnat view-läge snarare än bredare historikhantering
+- lagrade exportartefakter är inte standard i MVP
+
+## Sannolika Framtida Variationer
+
+- tydligare skillnad mellan arbetsvyer, publicerade rapportvyer och arkiverade historikvyer
+- rikare exporthistorik
+- fler view- eller rapportnivåer för olika målgrupper eller distributionssätt
+
+## Relaterade ADR:er
+
+- [../adr/modules/reports/0015-export-active-view-state-to-pdf.md](../adr/modules/reports/0015-export-active-view-state-to-pdf.md)
+- [../adr/modules/reports/0022-archive-views-with-history.md](../adr/modules/reports/0022-archive-views-with-history.md)
+- [../adr/modules/reports/0023-generate-pdf-exports-on-demand-for-mvp.md](../adr/modules/reports/0023-generate-pdf-exports-on-demand-for-mvp.md)

@@ -8,7 +8,7 @@ Repoet innehåller en Blazor Server-applikation på .NET 10 med MudBlazor, Mongo
 
 Arkitekturriktningen är en modulär monolit enligt [architecture/target-architecture.md](architecture/target-architecture.md), med stegvis migrering enligt [architecture/migration-plan.md](architecture/migration-plan.md).
 
-Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbeskrivning, domänmodell och huvudflöden finns i [product-and-domain.md](product-and-domain.md).
+Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbild och huvudflöden finns i [product-and-domain.md](product-and-domain.md). Levande modulägd domänmodell finns i [domain/README.md](domain/README.md).
 
 ## Viktigt Att Veta
 
@@ -31,7 +31,9 @@ Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbeskrivnin
 - lägg inte saker i `Shared` i onödan
 - undvik nya paket om de inte behövs
 - uppdatera [../CONTEXT.md](../CONTEXT.md) när ett kanoniskt domänbegrepp ändras eller etableras
+- uppdatera `docs/domain/*.md` när aggregates, relationer, invariants eller modulnära policyer förfinas
 - skriv en kort ADR enligt [adr/README.md](adr/README.md) när ett beslut är långlivat, svårt att backa ur och resultatet av en verklig trade-off
+- använd inte ADR:er för löpande domänmodellering; aggregate, relationer, invariants och modulnära modellbeskrivningar hör normalt hemma i levande domändokument
 - använd [planning.md](planning.md) för öppna frågor, inte för beslut som redan är fattade
 - uppdatera docs när ansvar, regler eller arkitektur påverkas
 - verifiera med relevanta tester eller annan rimlig kontroll

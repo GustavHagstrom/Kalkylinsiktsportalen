@@ -1,49 +1,60 @@
 # ADR - Architecture Decision Records
 
-ADR:er används för att dokumentera långlivade tekniska beslut som är dyra att upptäcka i efterhand.
+ADR:er anvands for att dokumentera langlivade tekniska beslut som ar dyra att upptacka i efterhand.
 
-## När en ADR bör skrivas
+## Nar En ADR Bor Skrivas
 
-Skriv en ADR bara när alla tre kriterier är uppfyllda:
+Skriv en ADR bara nar alla tre kriterier ar uppfyllda:
 
-- beslutet är svårt eller dyrt att backa ur
-- beslutet är överraskande utan kontext
-- beslutet är resultatet av en verklig trade-off
+- beslutet ar svart eller dyrt att backa ur
+- beslutet ar overraskande utan kontext
+- beslutet ar resultatet av en verklig trade-off
 
-Exempel är arkitekturens riktning, data- eller auth-modell, integrationsmönster, gränser mellan moduler, persistensstrategi och avsiktliga avsteg från det uppenbara.
+Om nagot saknar nagon av de tre egenskaperna ska det normalt inte vara en ADR.
+
+Folande hor normalt inte hemma i ADR:er:
+
+- domanordlista och begreppsdefinitioner
+- domanmodellens lopande struktur
+- aggregate, entiteter, relationer och invariants som del av den levande modellen
+- modulnara modellbeskrivningar som forvantas forfinas iterativt
+
+Sant ska i stallet beskrivas i levande domandokument, medan ADR:er ska forklara de fa modellval som verkligen var svara att valja, dyra att andra och overraskande utan historiken.
+
+Exempel ar arkitekturens riktning, data- eller auth-modell, integrationsmonster, granser mellan moduler, persistensstrategi och avsiktliga avsteg fran det uppenbara.
 
 ## Struktur
 
-ADR:er ligger nära beslutets ägarskap:
+ADR:er ligger nara beslutets agarskap:
 
-- [global/](global/) - repoövergripande arkitektur, modulgränser och gemensamma riktlinjer
-- [modules/bidcon/](modules/bidcon/) - Bidcon-import, snapshot-källa och Bidcon-nära modellbeslut
-- [modules/projects/](modules/projects/) - projektversioner, snapshots i projekt, view-scoped change sets, ersättningspolicy och renderbar kalkylstate
-- [modules/reports/](modules/reports/) - views, report definitions, layout, formler, PDF-export och vy-livscykel
+- [global/](global/) - repoovergripande arkitektur, modulgranser och gemensamma riktlinjer
+- [modules/bidcon/](modules/bidcon/) - Bidcon-import, snapshot-kalla och Bidcon-nara modellbeslut
+- [modules/projects/](modules/projects/) - langlivade Projects-beslut som fortfarande ar verkliga trade-offs
+- [modules/reports/](modules/reports/) - langlivade Reports-beslut kring export, historik och ansvar
 
-Om ett beslut påverkar flera moduler läggs det där beslutet primärt ägs. Lägg det i `global/` när beslutet framför allt handlar om modulgränsen mellan två ägare.
+Om ett beslut paverkar flera moduler laggs det dar beslutet primart ags. Lagg det i `global/` nar beslutet framfor allt handlar om modulgransen mellan tva agare.
 
 ## Namngivning
 
-Behåll befintliga ADR-nummer när filer flyttas, så gamla hänvisningar fortsätter vara begripliga.
+Behall befintliga ADR-nummer nar filer flyttas, sa gamla hanvisningar fortsattar vara begripliga.
 
-Nya ADR:er numreras lokalt i den mapp där de skapas:
+Nya ADR:er numreras lokalt i den mapp dar de skapas:
 
 - `global/0003-kort-beskrivning.md`
 - `modules/projects/0025-kort-beskrivning.md`
 - `modules/reports/0006-kort-beskrivning.md`
 
-Använd ett kort format:
+Anvand ett kort format:
 
 ```md
 # Kort titel
 
-1-3 meningar: vilken kontext beslutet togs i, vad vi beslutade och varför.
+1-3 meningar: vilken kontext beslutet togs i, vad vi beslutade och varfor.
 ```
 
-## Valfria sektioner
+## Valfria Sektioner
 
-Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
+Lagg bara till extra sektioner nar de faktiskt hjalper en framtida lasare:
 
 - status: `proposed`, `accepted`, `deprecated` eller `superseded by ADR-NNNN`
 - considered options
@@ -57,18 +68,9 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0002 - Limit Shared to stable cross-cutting building blocks](global/0002-limit-shared-to-stable-cross-cutting-building-blocks.md)
 - [0018 - Split active state building from report rendering](global/0018-split-active-state-building-from-report-rendering.md)
 - [0019 - Pass view change settings to Projects](global/0019-pass-view-change-settings-to-projects.md)
-- [0025 - Use encapsulated domain models in target modules](global/0025-use-encapsulated-domain-models-in-target-modules.md)
-- [0026 - Design domain models around aggregate roots](global/0026-design-domain-models-around-aggregate-roots.md)
 - [0027 - Keep domain models persistence-independent](global/0027-keep-domain-models-persistence-independent.md)
-- [0028 - Reuse code under the right module ownership](global/0028-reuse-code-under-the-right-module-ownership.md)
-- [0029 - Migrate code directly into clean target shape](global/0029-migrate-code-directly-into-clean-target-shape.md)
-- [0030 - Use strong ID types in domain code](global/0030-use-strong-id-types-in-domain-code.md)
-- [0031 - Use validation results at boundaries and exceptions for domain invariants](global/0031-use-validation-results-at-boundaries-and-exceptions-for-domain-invariants.md)
-- [0032 - Use factories for aggregate creation](global/0032-use-factories-for-aggregate-creation.md)
-- [0033 - Use controlled internal mutation for aggregates](global/0033-use-controlled-internal-mutation-for-aggregates.md)
 - [0034 - Defer domain events during initial migration](global/0034-defer-domain-events-during-initial-migration.md)
 - [0035 - Let Web orchestrate Projects and Reports initially](global/0035-let-web-orchestrate-projects-and-reports-initially.md)
-- [0036 - Pass identity and time into domain factories](global/0036-pass-identity-and-time-into-domain-factories.md)
 - [0037 - Use pragmatic CQRS feature slices](global/0037-use-pragmatic-cqrs-feature-slices.md)
 
 ### Bidcon
@@ -77,29 +79,10 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 
 ### Projects
 
-- [0003 - Bind change sets to estimation snapshots](modules/projects/0003-bind-change-sets-to-estimation-snapshots.md)
-- [0004 - Model project versions as snapshot selections](modules/projects/0004-model-project-versions-as-snapshot-selections.md)
-- [0006 - Allow controlled estimation item replacements](modules/projects/0006-allow-controlled-estimation-item-replacements.md)
-- [0007 - Use a modular replacement policy for tagged rows](modules/projects/0007-use-modular-replacement-policy-for-tagged-rows.md)
-- [0008 - Store replacements as selections](modules/projects/0008-store-replacements-as-selections.md)
-- [0009 - Keep change sets version-local](modules/projects/0009-keep-change-sets-version-local.md)
-- [0010 - Allow one active replacement per original row](modules/projects/0010-allow-one-active-replacement-per-original-row.md)
-- [0011 - Scope change sets to views](modules/projects/0011-scope-change-sets-to-views.md)
-- [0013 - Share view-scoped change sets between users](modules/projects/0013-share-view-scoped-change-sets-between-users.md)
 - [0014 - Use optimistic concurrency for shared replacements](modules/projects/0014-use-optimistic-concurrency-for-shared-replacements.md)
-- [0016 - Defer undo and redo for view-scoped changes](modules/projects/0016-defer-undo-redo-for-view-scoped-changes.md)
-- [0017 - Keep view-scoped change sets in Projects](modules/projects/0017-keep-view-scoped-change-sets-in-projects.md)
-- [0020 - Keep existing view changes active when changes are disabled](modules/projects/0020-keep-existing-view-changes-active-when-disabled.md)
-- [0024 - Use a general renderable snapshot state](modules/projects/0024-use-general-renderable-snapshot-state.md)
-- [0025 - Start Projects slices with domain and in-memory stores](modules/projects/0025-start-projects-slices-with-domain-and-in-memory-stores.md)
-- [0026 - Treat estimation snapshots as immutable source of truth](modules/projects/0026-treat-estimation-snapshots-as-immutable-source-of-truth.md)
-- [0027 - Use seeded snapshots before real Bidcon import](modules/projects/0027-use-seeded-snapshots-before-real-bidcon-import.md)
-- [0028 - Model renderable snapshot state as an application contract](modules/projects/0028-model-renderable-snapshot-state-as-an-application-contract.md)
 
 ### Reports
 
-- [0012 - Use View.EnableChanges for replacement permission](modules/reports/0012-use-view-enable-changes-for-replacement-permission.md)
 - [0015 - Export active view state to PDF](modules/reports/0015-export-active-view-state-to-pdf.md)
-- [0021 - Do not copy change sets when duplicating views](modules/reports/0021-do-not-copy-change-sets-when-duplicating-views.md)
 - [0022 - Archive views with history](modules/reports/0022-archive-views-with-history.md)
 - [0023 - Generate PDF exports on demand for MVP](modules/reports/0023-generate-pdf-exports-on-demand-for-mvp.md)
