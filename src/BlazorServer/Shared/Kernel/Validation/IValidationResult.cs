@@ -1,4 +1,4 @@
-namespace BlazorServer.Shared.Kernel.Features;
+namespace BlazorServer.Shared.Kernel.Validation;
 
 public interface IValidationResult
 {

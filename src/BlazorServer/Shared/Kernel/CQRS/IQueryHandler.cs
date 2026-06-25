@@ -1,4 +1,4 @@
-namespace BlazorServer.Shared.Kernel.Features;
+namespace BlazorServer.Shared.Kernel.CQRS;
 
 public interface IQueryHandler<in TQuery, TResult>
     where TQuery : IQuery<TResult>

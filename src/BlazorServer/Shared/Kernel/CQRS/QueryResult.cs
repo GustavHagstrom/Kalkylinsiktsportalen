@@ -1,4 +1,6 @@
-namespace BlazorServer.Shared.Kernel.Features;
+using BlazorServer.Shared.Kernel.Validation;
+
+namespace BlazorServer.Shared.Kernel.CQRS;
 
 public sealed class QueryResult<T> : IValidationResult
 {

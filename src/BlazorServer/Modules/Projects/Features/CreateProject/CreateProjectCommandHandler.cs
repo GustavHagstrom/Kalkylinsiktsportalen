@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Projects.Domain;
-using BlazorServer.Shared.Kernel.Features;
+using BlazorServer.Shared.Kernel.CQRS;
+using BlazorServer.Shared.Kernel.Validation;
 
 namespace BlazorServer.Modules.Projects.Features.CreateProject;
 

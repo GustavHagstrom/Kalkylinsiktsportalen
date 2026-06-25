@@ -1,4 +1,4 @@
-namespace BlazorServer.Shared.Kernel.Features;
+namespace BlazorServer.Shared.Kernel.CQRS;
 
 public interface ICommandHandler<in TCommand, TResult>
     where TCommand : ICommand<TResult>

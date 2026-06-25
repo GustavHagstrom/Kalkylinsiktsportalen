@@ -1,8 +1,8 @@
 using BlazorServer.Modules.Projects.Domain;
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
-using BlazorServer.Shared.Kernel.Features;
 using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Shared.Kernel.Validation;
 
 namespace BlazorServer.Tests.Modules.Projects;
 

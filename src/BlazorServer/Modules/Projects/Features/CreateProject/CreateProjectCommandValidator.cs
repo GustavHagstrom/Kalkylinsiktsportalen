@@ -1,4 +1,4 @@
-using BlazorServer.Shared.Kernel.Features;
+using BlazorServer.Shared.Kernel.Validation;
 
 namespace BlazorServer.Modules.Projects.Features.CreateProject;
 
@@ -8,13 +8,13 @@ public sealed class CreateProjectCommandValidator : IValidator<CreateProjectComm
     {
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            return ValidationResult.Invalid(
+            return ValidationResult.Failure(
                 new ValidationError(
                     "project.name.required",
                     nameof(CreateProjectCommand.Name),
                     "Project name is required."));
         }
 
-        return ValidationResult.Valid();
+        return ValidationResult.Success();
     }
 }
