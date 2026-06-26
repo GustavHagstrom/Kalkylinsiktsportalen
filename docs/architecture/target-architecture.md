@@ -6,9 +6,17 @@ Det här dokumentet beskriver den övergripande målarkitekturen för Kalkylinsi
 
 Det fokuserar på arkitekturriktning, modulgränser, beroenderiktningar och ansvarsfördelning mellan större delar av systemet.
 
-Det här dokumentet äger inte den detaljerade domänmodellen. Aktuella domänbegrepp, aggregates, relationer, invariants och modulnära policyer ägs av `docs/domain/*.md`. Om detta dokument och `docs/domain/*.md` pekar i olika riktning ska domändokumenten betraktas som den mer aktuella källan. Långlivade och svårbackade trade-offs dokumenteras i ADR:er.
+Det här dokumentet äger inte den detaljerade domänmodellen. Aktuella domänbegrepp, aggregates, relationer, invariants och modulnära policyer ägs av `docs/domain/*.md`. Långlivade och svårbackade trade-offs dokumenteras i ADR:er.
 
-Den sammanfattande riktningen är: modulär monolit som systemform, vertical slices som huvudsaklig arbetsform, pragmatisk CQRS för nya use cases, clean architecture som beroendeprincip och DDD-light för domänmodellering där det ger verkligt värde.
+Det här dokumentet äger inte heller lokal setup eller dagliga arbetsregler. Praktiska kodriktlinjer och lokalt arbetssätt ägs av [../development.md](../development.md).
+
+Den sammanfattande riktningen är:
+
+- modulär monolit som systemform
+- vertical slices som huvudsaklig arbetsform
+- pragmatisk CQRS för nya use cases
+- clean architecture som beroendeprincip
+- DDD-light för domänmodellering där det ger verkligt värde
 
 Målbilden utgår från produktinriktningen:
 
@@ -20,7 +28,7 @@ Blazor Server används fortsatt som första UI-host, men backend, kontrakt och a
 
 ## Arkitekturprinciper
 
-### 1. Modulär monolit först
+### 1. Modulär Monolit Först
 
 Systemet utvecklas som en modulär monolit innan det eventuellt delas upp i fler deploybara delar.
 
@@ -31,7 +39,7 @@ Det innebär att:
 - modulgränser respekteras även innan de är separata projekt
 - externa integrationer och persistence ligger bakom avsiktliga kontrakt
 
-### 2. Produktområden och use cases före global lagerstruktur
+### 2. Produktområden Och Use Cases Före Global Lagerstruktur
 
 Lösningen ska i första hand organiseras runt produktområden och användningsfall, inte runt en global teknisk lagerindelning.
 
@@ -41,7 +49,7 @@ Vertical slices är den praktiska arbetsformen för ny produktlogik. Clean archi
 
 Pragmatisk CQRS är den föredragna formen för nya feature slices: kommandon uttrycker förändringsintention, queries uttrycker läsintention, och handlers utgör en tydlig testyta utan att lösningen för den skull behöver ett tungt mediator- eller pipeline-ramverk.
 
-### 3. UI är utbytbart
+### 3. UI Är Utbytbart
 
 Blazor-komponenter ska inte vara platsen där central produktlogik bor.
 
@@ -54,19 +62,43 @@ UI ska främst:
 
 Produktlogik ska kunna återanvändas av flera klienter, tester och andra gränssnitt.
 
-### 4. Tydliga ägargränser
+### 4. Tydliga Ägargränser
 
 Varje viktig del av produktlogiken ska ha en tydlig modulägare.
 
 Tvärgående kod ska hållas liten och stabil. `Shared` är inte en defaultplats för otydligt ägarskap.
 
-### 5. Organisation är hård systemgräns
+Modulernas detaljerade modeller och policyer ska beskrivas i domändokumenten, medan detta dokument bara anger ansvarsfördelningen på hög nivå.
+
+### 5. Organisation Är Hård Systemgräns
 
 Organisationen är den grundläggande tenant-gränsen i systemet.
 
 Data, rättigheter, integrationer och konfiguration ska utformas så att organisationsgränsen förblir tydlig och genomgående.
 
-## Shared och gemensamma byggblock
+## Målstruktur
+
+Den långsiktiga riktningen är tydliga produktmoduler med avsiktliga kontrakt mellan sig.
+
+Målmodulerna är:
+
+- `Projects`
+- `Reports`
+- `Bidcon`
+- `Access`
+- `Organizations`
+
+Detta dokument äger modulernas ansvar på översiktsnivå:
+
+- `Projects` äger projekt, versioner, snapshots och aktiv renderbar kalkylstate
+- `Reports` äger views, rapportstruktur, rendering och export
+- `Bidcon` äger extern integration, credentials och import
+- `Access` äger funktions- och view-rättigheter
+- `Organizations` äger tenant-kontext och organisationsinställningar
+
+Den detaljerade modellen inom varje modul ska beskrivas i `docs/domain/*`.
+
+## Shared Och Gemensamma Byggblock
 
 Gemensamma byggblock ska hållas små, stabila och avsiktliga.
 
@@ -80,7 +112,7 @@ SharedKernel ska vara litet och får inte bli en plats för produktflöden.
 
 Får innehålla generella UI-primitiver utan produktspecifik affärslogik.
 
-### Gemensam infrastruktur
+### Gemensam Infrastruktur
 
 Får innehålla teknisk implementation som delas av flera moduler, till exempel registrering, konfiguration och adapters.
 
@@ -116,7 +148,7 @@ Blazor Server behålls som snabbaste utvecklingsmiljö under den nuvarande fasen
 
 Komponenterna kan ligga kvar i Blazor-projektet under övergången, men de ska stegvis göras tunnare.
 
-### Senare: API och utbytbar frontend
+### Senare: API Och Utbytbar Frontend
 
 När produktmodellen stabiliserats bör use cases kunna exponeras via HTTP API eller motsvarande tydliga backend-gränssnitt.
 
@@ -126,14 +158,9 @@ Det ska möjliggöra framtida klienter som:
 - React
 - andra klienter
 
-För att stödja det redan nu:
+De praktiska kodreglerna för hur vi stödjer detta redan nu hör hemma i [../development.md](../development.md).
 
-- använd request/response-modeller för use cases när det är rimligt
-- undvik att affärslogik kräver Blazor-specifika typer
-- undvik att UI-komponenter pratar direkt med databaser eller externa API-klienter
-- låt frontend anropa applikationstjänster och use cases
-
-## Öppna arkitekturfrågor
+## Öppna Arkitekturfrågor
 
 - när lösningen, om någonsin, bör delas i fler deploybara delar
 - hur långt modulernas interna projektuppdelning ska drivas under migreringen
