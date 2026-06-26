@@ -66,62 +66,6 @@ Organisationen är den grundläggande tenant-gränsen i systemet.
 
 Data, rättigheter, integrationer och konfiguration ska utformas så att organisationsgränsen förblir tydlig och genomgående.
 
-## Huvudmoduler
-
-### Projects
-
-Projects äger projektarbetsytan och dess förändringsbara arbetsflöden.
-
-Ansvar:
-
-- projekt och versionsflöden
-- snapshots och projektbundna arbetslägen
-- aktiv kalkylstate som andra moduler kan konsumera
-- regler och use cases för projektbundna förändringar ovanpå importerad data
-
-### Reports
-
-Reports äger rapportvyer, presentation och export.
-
-Ansvar:
-
-- view-definitioner och rapportstruktur
-- rendering av rapporter från modulkontrakt
-- export och layoutrelaterade beslut
-- livscykel för rapportvyer
-
-### Bidcon
-
-Bidcon äger integrationen mot Bidcon som extern källa.
-
-Ansvar:
-
-- API-klient och autentisering
-- import av extern estimationsdata
-- översättning från externa kontrakt till interna importkontrakt
-
-### Access
-
-Access äger portalens behörighetsmodell.
-
-Ansvar:
-
-- funktionella rättigheter
-- view-rättigheter
-- roll- och användarbaserad access
-- översättning från identity till portalens accessmodell
-
-### Organizations
-
-Organizations äger tenant-kontexten.
-
-Ansvar:
-
-- aktuell organisation
-- organisationsbundna inställningar
-- tenant-isolering
-- organisationsbundna integrationsförutsättningar
-
 ## Shared och gemensamma byggblock
 
 Gemensamma byggblock ska hållas små, stabila och avsiktliga.

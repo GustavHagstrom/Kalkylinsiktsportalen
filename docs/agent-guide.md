@@ -1,25 +1,20 @@
 # Agentguide
 
-Det här dokumentet samlar stabil kontext och en enkel uppgiftsmall för AI-agenter.
+Det här dokumentet samlar agentinstruktioner och en enkel uppgiftsmall för AI-agenter.
 
-## Kort Kontext
+Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och ska inte dupliceras här:
 
-Repoet innehåller en Blazor Server-applikation på .NET 10 med MudBlazor, MongoDB, feature-baserad struktur och integration mot Bidcon API.
-
-Arkitekturriktningen är en modulär monolit enligt [architecture/target-architecture.md](architecture/target-architecture.md), med stegvis migrering enligt [architecture/migration-plan.md](architecture/migration-plan.md).
-
-Kanoniskt domänspråk finns i [../CONTEXT.md](../CONTEXT.md). Produktbild och huvudflöden finns i [product-and-domain.md](product-and-domain.md). Levande modulägd domänmodell finns i [domain/README.md](domain/README.md).
+- kanoniskt domänspråk: [../CONTEXT.md](../CONTEXT.md)
+- produktbild och huvudflöden: [product-and-domain.md](product-and-domain.md)
+- levande modulägd domänmodell: [domain/README.md](domain/README.md)
+- arkitekturriktning: [architecture/target-architecture.md](architecture/target-architecture.md)
+- migreringsriktning: [architecture/migration-plan.md](architecture/migration-plan.md)
+- dokumentägarskap: [README.md](README.md)
 
 ## Viktigt Att Veta
 
 - Huvudprojektet är `src/BlazorServer`.
-- UI byggs med Blazor Server.
-- Nuvarande struktur använder `Features/*` och `IFeature`.
-- Mycket tvärgående kod ligger idag i `Shared/*`, men `Shared` ska krympas.
-- Data lagras bland annat i MongoDB.
-- Auth skiljer sig mellan development och production.
 - Tester finns i `src/Tests/BlazorServer.Tests`.
-- Målmodulerna är `Projects`, `Reports`, `Bidcon`, `Access` och `Organizations`.
 
 ## Arbetssätt För Agenter
 
@@ -93,4 +88,3 @@ Lägg inte till nya paket.
 Uppdatera dokumentation om ansvar, regler eller arkitektur påverkas.
 Verifiera med relevanta tester eller annan lämplig validering.
 ```
-
