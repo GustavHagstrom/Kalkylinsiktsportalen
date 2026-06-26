@@ -138,11 +138,11 @@ Identity/Graph beskriver vem användaren är. Portalens accessmodell beskriver v
 **Organisation vs global nivå**  
 Organisationen är tenant-gränsen för projekt, views, access, credentials och rapportkonfiguration.
 
-## Begrepp
+## Språk Och Modellering
 
-Den kanoniska ordlistan finns i [../CONTEXT.md](../CONTEXT.md). Uppdatera `CONTEXT.md` när ett domänbegrepp byter namn, får en skarpare definition eller när ett nytt begrepp blir etablerat.
+Kanoniska termer och namngivning ägs av [../CONTEXT.md](../CONTEXT.md).
 
-Aggregate-struktur, relationer, invariants och modulnära policyer ska dokumenteras i `docs/domain/*`, inte här.
+Aggregate-struktur, relationer, invariants och modulnära policyer ägs av `docs/domain/*`.
 
 ## Antaganden Att Bekräfta
 

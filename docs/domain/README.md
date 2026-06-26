@@ -21,6 +21,8 @@ Beskriv domanmodellen har nar dokumentationen handlar om:
 - invariants och livscykler
 - nuvarande policyer som kan forfinas over tid
 
+Produktbild, malbild och huvudfloden ags av [../product-and-domain.md](../product-and-domain.md). Kanoniska termer ags av [../../CONTEXT.md](../../CONTEXT.md).
+
 Lagg inte sant i ADR:er som standard. ADR:er anvands bara nar ett modell- eller arkitekturval ocksa ar svart att backa ur, overraskande utan historiken och resultatet av en verklig trade-off.
 
 ## Karta
@@ -29,16 +31,6 @@ Lagg inte sant i ADR:er som standard. ADR:er anvands bara nar ett modell- eller 
 - [reports.md](reports.md) - Reports-modulens aggregate, livscykel, relationer och policyer
 
 Senare kan fler moduldokument laggas till, till exempel for `Bidcon`, `Access` och `Organizations`.
-
-## Global Grans
-
-Den globala domanbilden ska vara tunn:
-
-- `CONTEXT.md` ager kanoniska termer
-- [../product-and-domain.md](../product-and-domain.md) ager produktbild, malbild och huvudfloden
-- `docs/domain/*.md` ager modulernas levande domanmodell
-
-Tvargaende relationer ska bara sammanfattas har eller i oversiktsdokument. Den modul som ager modellen ska ocksa aga den detaljerade beskrivningen.
 
 ## Gemensamma Modelleringsprinciper
 

@@ -1,6 +1,6 @@
 # Kalkylinsiktsportalen
 
-Kalkylinsiktsportalen är produktkontexten för att hämta, strukturera och presentera kalkylinformation från Bidcon i organisationsbundna rapportvyer.
+Det här dokumentet är repoets kanoniska ordlista för domänspråk.
 
 ## Language
 
