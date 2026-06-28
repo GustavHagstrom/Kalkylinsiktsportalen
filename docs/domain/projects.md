@@ -1,264 +1,264 @@
 # Projects
 
-## Syfte Och Modulgrans
+## Syfte Och Modulgräns
 
-Projects ager portalens arbetsmodell for projekt, estimations, snapshots och delade view-lokala andringar ovanpa importerad Bidcon-data.
+Projects äger portalens arbetsmodell för projekt, estimations, snapshots och delade view-lokala ändringar ovanpå importerad Bidcon-data.
 
-Modulen ager:
+Modulen äger:
 
 - `Project`
 - `ProjectEstimation`
 - `EstimationVersion`
 - `EstimationSnapshot`
 - `ViewScopedChangeSet`
-- `Ersattningsval`
-- `RenderableSnapshotState` som applikationskontrakt for aktiv renderbar kalkylstate
+- `Ersättningsval`
+- `RenderableSnapshotState` som applikationskontrakt för aktiv renderbar kalkylstate
 
-Projects ager inte:
+Projects äger inte:
 
 - view-definition, layout eller PDF-rendering
 - Bidcon API-integration och importmekanik
-- accessregler utanfor de kontrakt som kravs for use cases
+- accessregler utanför de kontrakt som krävs för use cases
 
 ## Huvudaggregates
 
 ### `Project`
 
-Portalagt arbetsobjekt som samlar en eller flera Bidcon-estimations i en organisationskontext.
+Portalägt arbetsobjekt som samlar en eller flera Bidcon-estimations i en organisationskontext.
 
 Ansvar:
 
-- halla ihop projektets identitet och overgripande livscykel
+- hålla ihop projektets identitet och övergripande livscykel
 - koppla projektet till relevanta `ProjectEstimation`
-- vara referenspunkt for fristaende `ProjectEstimation`-aggregat i samma organisationskontext
+- vara referenspunkt för fristående `ProjectEstimation`-aggregat i samma organisationskontext
 
 ### `ProjectEstimation`
 
-Portalagd koppling mellan ett `Project` och en Bidcon-estimation.
+Portalägd koppling mellan ett `Project` och en Bidcon-estimation.
 
 Ansvar:
 
 - ha en egen stabil identitet inom Projects-domänen
-- vara eget aggregate root for estimationens livscykel i projektet
-- representera att en viss estimation tillhor ett visst projekt
+- vara eget aggregate root för estimationens livscykel i projektet
+- representera att en viss estimation tillhör ett visst projekt
 - referera extern estimation-identitet utan att vara identifierad av den
-- bara sin egen versionskedja over tid
-- peka ut exakt en aktiv `EstimationVersion` som standardlage for UI och use cases
-- kunna mjukavslutas utan att tappa versionshistorik eller sparade andringar
-- kunna ateraktiveras i samma `Project` utan att fa ny domanidentitet
-- aterfa sin senast aktiva `EstimationVersion` vid ateraktivering
-- aterfa den ateraktiverade versionens bundna `ViewScopedChangeSet` som aktivt arbetslage
-- avgransa versionsansvar sa att andra estimations i samma projekt inte uppdateras automatiskt
+- bära sin egen versionskedja över tid
+- peka ut exakt en aktiv `EstimationVersion` som standardläge för UI och use cases
+- kunna mjukavslutas utan att tappa versionshistorik eller sparade ändringar
+- kunna återaktiveras i samma `Project` utan att få ny domänidentitet
+- återfå sin senast aktiva `EstimationVersion` vid återaktivering
+- återfå den återaktiverade versionens bundna `ViewScopedChangeSet` som aktivt arbetsläge
+- avgränsa versionsansvar så att andra estimations i samma projekt inte uppdateras automatiskt
 
 ### `EstimationVersion`
 
-Namngiven sparad versionspunkt for en enskild `ProjectEstimation` som refererar ett bestamt `EstimationSnapshot`.
+Namngiven sparad versionspunkt för en enskild `ProjectEstimation` som refererar ett bestämt `EstimationSnapshot`.
 
 Ansvar:
 
 - vara en intern entity i `ProjectEstimation`-aggregatet
-- ha en egen stabil identitet som inte beror pa versionsordning inom ett projekt eller en estimation
-- bara ett eget versionsnummer som kan visas och anvandas i UI
-- anvanda sekventiell versionsnumrering inom sin `ProjectEstimation`
-- beskriva vilket snapshot som galler for en viss `ProjectEstimation` i en viss sparad version
-- uppsta endast nar en ny import skapar ett nytt `EstimationSnapshot`
-- vara jamforbar och sparbar over tid
-- bara sammanhanget dar `ViewScopedChangeSet` anvands
+- ha en egen stabil identitet som inte beror på versionsordning inom ett projekt eller en estimation
+- bära ett eget versionsnummer som kan visas och användas i UI
+- använda sekventiell versionsnumrering inom sin `ProjectEstimation`
+- beskriva vilket snapshot som gäller för en viss `ProjectEstimation` i en viss sparad version
+- uppstå endast när en ny import skapar ett nytt `EstimationSnapshot`
+- vara jämförbar och spårbar över tid
+- bära sammanhanget där `ViewScopedChangeSet` används
 
-`EstimationVersion` ager inte kopior av snapshotdata eller fardigrenderad state.
+`EstimationVersion` äger inte kopior av snapshotdata eller färdigrenderad state.
 
 ### `EstimationSnapshot`
 
-Oforanderlig komplett import av en Bidcon-estimation vid ett importtillfalle.
+Oföränderlig komplett import av en Bidcon-estimation vid ett importtillfälle.
 
 Ansvar:
 
-- vara separat snapshot-objekt som refereras fran `EstimationVersion`
-- vara kallsanning for importerad kalkyldata
-- kunna tolkas av Projects use cases for att bygga aktiv state
+- vara separat snapshot-objekt som refereras från `EstimationVersion`
+- vara källsanning för importerad kalkyldata
+- kunna tolkas av Projects use cases för att bygga aktiv state
 - bevara den importerade strukturen utan portalmutationer
 
-`EstimationSnapshot` ar inte ett muterbart arbetsobjekt.
+`EstimationSnapshot` är inte ett muterbart arbetsobjekt.
 
 ### `ViewScopedChangeSet`
 
-Portalagd delad andringsmangd for kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
+Portalägd delad ändringsmängd för kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
 
 Ansvar:
 
-- vara eget aggregate for delat versionsbundet arbetslage
-- ha egen stabil identitet utan att tappa den domanunika kombinationen av view, version och snapshot
-- bara delade anvandarval utan att mutera snapshotet
-- valideras mot snapshotets struktur och ersattningspolicy
-- fungera som ett workspace for en specifik rapportvy i en specifik sparad estimation-version
+- vara eget aggregate för delat versionsbundet arbetsläge
+- ha egen stabil identitet utan att tappa den domänunika kombinationen av view, version och snapshot
+- bära delade användarval utan att mutera snapshotet
+- valideras mot snapshotets struktur och ersättningspolicy
+- fungera som ett workspace för en specifik rapportvy i en specifik sparad estimation-version
 
-Projects ager `ViewScopedChangeSet` aven nar scoping sker till en `View`.
+Projects äger `ViewScopedChangeSet` även när scoping sker till en `View`.
 
-### `Ersattningsval`
+### `Ersättningsval`
 
-Sparat val i ett `ViewScopedChangeSet` som pekar ut vilken originalrad som ersatts av vilken ersattningsrad.
+Sparat val i ett `ViewScopedChangeSet` som pekar ut vilken originalrad som ersatts av vilken ersättningsrad.
 
 Ansvar:
 
-- uttrycka ett anvandarvalt byte, inte ett materialiserat kalkylresultat
-- bara metadata som behovs for sparbarhet och tolkning
+- uttrycka ett användarvalt byte, inte ett materialiserat kalkylresultat
+- bära metadata som behövs för spårbarhet och tolkning
 - vara entydigt inom ett givet `ViewScopedChangeSet`
 
 ### `RenderableSnapshotState`
 
-Applikationskontrakt som Projects producerar for att beskriva den aktiva kalkylstaten som Reports kan rendera.
+Applikationskontrakt som Projects producerar för att beskriva den aktiva kalkylstaten som Reports kan rendera.
 
 Ansvar:
 
-- representera aktivt snapshotlage efter att ersattningsval applicerats
-- visa bade originaldata och aktivt ersatt lage dar det behovs for forklaring eller rendering
-- ge Reports ett lasbart kontrakt utan att gora Reports beroende av Projects interna persistensmodell
+- representera aktivt snapshotläge efter att ersättningsval applicerats
+- visa både originaldata och aktivt ersatt läge där det behövs för förklaring eller rendering
+- ge Reports ett läsbart kontrakt utan att göra Reports beroende av Projects interna persistensmodell
 
-`RenderableSnapshotState` ar inte kallsanning och inte ett persisterat aggregate.
+`RenderableSnapshotState` är inte källsanning och inte ett persisterat aggregate.
 
 ## Relationer
 
 - Ett `Project` samlar en eller flera `ProjectEstimation`.
-- En `ProjectEstimation` kopplar en Bidcon-estimation till ett `Project` och bar sin egen versionskedja.
+- En `ProjectEstimation` kopplar en Bidcon-estimation till ett `Project` och bär sin egen versionskedja.
 - En `ProjectEstimation` har en egen stabil identitet i Projects-domänen.
-- En `ProjectEstimation` ar ett eget aggregate root och ags inte transaktionellt av `Project`.
+- En `ProjectEstimation` är ett eget aggregate root och ägs inte transaktionellt av `Project`.
 - En `ProjectEstimation` refererar en extern `BidconEstimationId`, men identifieras inte av den.
-- Samma `BidconEstimationId` far forekomma hogst en gang inom ett givet `Project`.
+- Samma `BidconEstimationId` får förekomma högst en gång inom ett givet `Project`.
 - En `ProjectEstimation` har exakt en aktiv `EstimationVersion`.
-- En `EstimationVersion` lever inom `ProjectEstimation`-aggregatet och ar inte eget aggregate root.
-- En `EstimationVersion` refererar exakt ett valt snapshot for exakt en `ProjectEstimation`.
-- En `EstimationVersion` har en egen stabil identitet och tillhor exakt en `ProjectEstimation`.
-- En `EstimationVersion` har ocksa ett eget versionsnummer som ar meningsfullt inom sin `ProjectEstimation`.
-- Versionsnumret for `EstimationVersion` ar sekventiellt inom en `ProjectEstimation`.
-- Ett `EstimationSnapshot` ligger utanfor `ProjectEstimation`-aggregatet och refereras via `EstimationSnapshotId`.
+- En `EstimationVersion` lever inom `ProjectEstimation`-aggregatet och är inte eget aggregate root.
+- En `EstimationVersion` refererar exakt ett valt snapshot för exakt en `ProjectEstimation`.
+- En `EstimationVersion` har en egen stabil identitet och tillhör exakt en `ProjectEstimation`.
+- En `EstimationVersion` har också ett eget versionsnummer som är meningsfullt inom sin `ProjectEstimation`.
+- Versionsnumret för `EstimationVersion` är sekventiellt inom en `ProjectEstimation`.
+- Ett `EstimationSnapshot` ligger utanför `ProjectEstimation`-aggregatet och refereras via `EstimationSnapshotId`.
 - Ett `EstimationSnapshot` representerar en specifik importerad estimation vid en viss tidpunkt.
-- Ett `ViewScopedChangeSet` ar eget aggregate och refererar en `EstimationVersion` i stallet for att ligga inne i `ProjectEstimation`.
+- Ett `ViewScopedChangeSet` är eget aggregate och refererar en `EstimationVersion` i stället för att ligga inne i `ProjectEstimation`.
 - Ett `ViewScopedChangeSet` har ett eget internt id.
-- Ett `ViewScopedChangeSet` ar unikt per kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
-- Ett `ViewScopedChangeSet` innehaller hogst ett aktivt `Ersattningsval` per originalrad.
-- Projects producerar `RenderableSnapshotState` fran `EstimationSnapshot` plus `ViewScopedChangeSet` i kontexten av en `View` och en `EstimationVersion`.
+- Ett `ViewScopedChangeSet` är unikt per kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
+- Ett `ViewScopedChangeSet` innehåller högst ett aktivt `Ersättningsval` per originalrad.
+- Projects producerar `RenderableSnapshotState` från `EstimationSnapshot` plus `ViewScopedChangeSet` i kontexten av en `View` och en `EstimationVersion`.
 
 ## Invariants
 
-- `EstimationSnapshot` ar oforanderlig efter import.
-- Anvandarforandringar sparas inte genom mutation av snapshotet.
+- `EstimationSnapshot` är oföränderlig efter import.
+- Användarförändringar sparas inte genom mutation av snapshotet.
 - `ProjectEstimation` identifieras inte bara av extern estimation-identitet eller sin plats i ett projekt.
 - `ProjectEstimation` har ett eget internt id i Projects-domänen.
-- `Project` och `ProjectEstimation` har separata aggregate-granser.
-- Ett `Project` kan inte innehalla flera `ProjectEstimation` med samma `BidconEstimationId`.
-- `EstimationVersion` har ingen egen aggregate-grans utanför sin `ProjectEstimation`.
-- `EstimationSnapshot` ingar inte som intern del av `ProjectEstimation`-aggregatet.
-- `ViewScopedChangeSet` har egen aggregate-grans och egen samtidighetskontroll skild fran `ProjectEstimation`.
-- `ViewScopedChangeSet` identifieras med eget internt id, men den domanunika kombinationen `View` + `EstimationVersion` + `EstimationSnapshot` far bara forekomma en gang.
-- En borttagen estimation mjukavslutas i `Project`, i stallet for att hardraderas med sin historik.
-- En mjukavslutad `ProjectEstimation` kan senare ateraktiveras i samma `Project`.
-- En ateraktiverad `ProjectEstimation` far tillbaka sin senast aktiva `EstimationVersion`.
-- En ateraktiverad `ProjectEstimation` far ocksa tillbaka den versionens bundna `ViewScopedChangeSet` som aktivt arbetslage.
+- `Project` och `ProjectEstimation` har separata aggregate-gränser.
+- Ett `Project` kan inte innehålla flera `ProjectEstimation` med samma `BidconEstimationId`.
+- `EstimationVersion` har ingen egen aggregate-gräns utanför sin `ProjectEstimation`.
+- `EstimationSnapshot` ingår inte som intern del av `ProjectEstimation`-aggregatet.
+- `ViewScopedChangeSet` har egen aggregate-gräns och egen samtidighetskontroll skild från `ProjectEstimation`.
+- `ViewScopedChangeSet` identifieras med eget internt id, men den domänunika kombinationen `View` + `EstimationVersion` + `EstimationSnapshot` får bara förekomma en gång.
+- En borttagen estimation mjukavslutas i `Project`, i stället för att hårdraderas med sin historik.
+- En mjukavslutad `ProjectEstimation` kan senare återaktiveras i samma `Project`.
+- En återaktiverad `ProjectEstimation` får tillbaka sin senast aktiva `EstimationVersion`.
+- En återaktiverad `ProjectEstimation` får också tillbaka den versionens bundna `ViewScopedChangeSet` som aktivt arbetsläge.
 - `EstimationVersion` identifieras inte av sin plats eller ordning inom ett `Project` eller inom en `ProjectEstimation`.
-- `EstimationVersion` har ett versionsnummer som kan anvandas av anvandare och support for att prata om versioner.
-- `EstimationVersion`-nummer ateranvands inte inom samma `ProjectEstimation`.
-- En ny `EstimationVersion` motsvarar alltid en ny import; versioner skapas inte genom manuell versionsmarkning.
-- En ny version i en `ProjectEstimation` skapar inte automatiskt en ny version for andra estimations i samma `Project`.
+- `EstimationVersion` har ett versionsnummer som kan användas av användare och support för att prata om versioner.
+- `EstimationVersion`-nummer återanvänds inte inom samma `ProjectEstimation`.
+- En ny `EstimationVersion` motsvarar alltid en ny import; versioner skapas inte genom manuell versionsmärkning.
+- En ny version i en `ProjectEstimation` skapar inte automatiskt en ny version för andra estimations i samma `Project`.
 - Varje `ProjectEstimation` har alltid exakt en aktiv `EstimationVersion`.
-- Nar en ny `EstimationVersion` skapas genom import blir den automatiskt aktiv for sin `ProjectEstimation`.
-- Aktiv `EstimationVersion` kan andras manuellt till en aldre version genom ett explicit anvandarval.
-- Nar aktiv version byts till en aldre `EstimationVersion` blir den versionens bundna `ViewScopedChangeSet` ater de aktiva andringarna.
-- Om en aktiv `EstimationVersion` saknar `ViewScopedChangeSet` for en viss `View` betyder det att den viewn inte har några sparade andringar i den versionen.
-- `ViewScopedChangeSet` ar alltid bundet till exakt en `View`, exakt en `EstimationVersion` och exakt ett `EstimationSnapshot`.
-- Ett `Ersattningsval` ar alltid snapshot- och vy-lokalt, inte globalt eller automatiskt ateranvant mellan versioner.
-- Ett `ViewScopedChangeSet` har hogst ett aktivt ersattningsval per originalrad.
-- `EstimationVersion` refererar snapshots, men ager inte kopierad snapshotdata eller kopierade change sets.
-- `ViewScopedChangeSet` flyttas inte automatiskt till en ny `EstimationVersion`, utan ligger kvar bundet till den version dar valet skapades.
-- `RenderableSnapshotState` ar ett laskontrakt, inte en kalla for framtida mutationer.
+- När en ny `EstimationVersion` skapas genom import blir den automatiskt aktiv för sin `ProjectEstimation`.
+- Aktiv `EstimationVersion` kan ändras manuellt till en äldre version genom ett explicit användarval.
+- När aktiv version byts till en äldre `EstimationVersion` blir den versionens bundna `ViewScopedChangeSet` åter de aktiva ändringarna.
+- Om en aktiv `EstimationVersion` saknar `ViewScopedChangeSet` för en viss `View` betyder det att den viewn inte har några sparade ändringar i den versionen.
+- `ViewScopedChangeSet` är alltid bundet till exakt en `View`, exakt en `EstimationVersion` och exakt ett `EstimationSnapshot`.
+- Ett `Ersättningsval` är alltid snapshot- och vy-lokalt, inte globalt eller automatiskt återanvänt mellan versioner.
+- Ett `ViewScopedChangeSet` har högst ett aktivt ersättningsval per originalrad.
+- `EstimationVersion` refererar snapshots, men äger inte kopierad snapshotdata eller kopierade change sets.
+- `ViewScopedChangeSet` flyttas inte automatiskt till en ny `EstimationVersion`, utan ligger kvar bundet till den version där valet skapades.
+- `RenderableSnapshotState` är ett läskontrakt, inte en källa för framtida mutationer.
 
 ## Nuvarande Policyer
 
-### Delad Andringsyta
+### Delad Ändringsyta
 
-`ViewScopedChangeSet` delas mellan anvandare som arbetar i samma view, estimation-version och snapshotlage. Senaste giltiga andring blir den aktiva, och samtidiga uppdateringar ska hanteras med optimistic concurrency.
+`ViewScopedChangeSet` delas mellan användare som arbetar i samma view, estimation-version och snapshotläge. Senaste giltiga ändring blir den aktiva, och samtidiga uppdateringar ska hanteras med optimistic concurrency.
 
-### Ersattningar Sparas Som Val
+### Ersättningar Sparas Som Val
 
-Ersattningar sparas som anvandarval, inte som fardiga omraknade resultat. Projects bygger den renderbara kalkylstaten genom att applicera valen mot snapshotet.
+Ersättningar sparas som användarval, inte som färdiga omräknade resultat. Projects bygger den renderbara kalkylstaten genom att applicera valen mot snapshotet.
 
 ### Version-Lokala Val
 
-Ersattningsval fors inte automatiskt vidare till senare importer eller andra estimation-versioner. Ett nytt snapshotlage kraver nya bekräftade val.
+Ersättningsval förs inte automatiskt vidare till senare importer eller andra estimation-versioner. Ett nytt snapshotläge kräver nya bekräftade val.
 
-### Gamla Andringar Ligger Kvar Pa Gammal Version
+### Gamla Ändringar Ligger Kvar På Gammal Version
 
-Nar en ny `EstimationVersion` importeras ligger befintliga `ViewScopedChangeSet` kvar pa den tidigare versionen. Systemet forsoker inte automatiskt flytta eller ateranvanda andringar pa den nya versionen.
+När en ny `EstimationVersion` importeras ligger befintliga `ViewScopedChangeSet` kvar på den tidigare versionen. Systemet försöker inte automatiskt flytta eller återanvända ändringar på den nya versionen.
 
 ### Versionsansvar Per Estimation
 
-Varje `ProjectEstimation` ansvarar for sin egen versionskedja. Nya importer eller sparade versioner for en estimation skapar inte automatiskt nya versioner for andra estimations i samma projekt. Ett framtida use case kan erbjuda ett bekvamlighetsflode for att skapa nya versioner for flera estimations samtidigt, men det andrar inte agarskapet for versionshistoriken.
+Varje `ProjectEstimation` ansvarar för sin egen versionskedja. Nya importer eller sparade versioner för en estimation skapar inte automatiskt nya versioner för andra estimations i samma projekt. Ett framtida use case kan erbjuda ett bekvämlighetsflöde för att skapa nya versioner för flera estimations samtidigt, men det ändrar inte ägarskapet för versionshistoriken.
 
-`ProjectEstimation` behandlas som ett eget domänobjekt, inte bara som en los koppling mellan `Project` och extern estimation.
+`ProjectEstimation` behandlas som ett eget domänobjekt, inte bara som en lös koppling mellan `Project` och extern estimation.
 
-`ProjectEstimation` ar ocksa ett eget aggregate root. `Project` bar inte estimationens versionshistorik, aktiva version eller mjukavslutningsregler inom samma transaktionsgrans.
+`ProjectEstimation` är också ett eget aggregate root. `Project` bär inte estimationens versionshistorik, aktiva version eller mjukavslutningsregler inom samma transaktionsgräns.
 
-`EstimationVersion` lever inne i detta aggregate som en entity under `ProjectEstimation`-reglerna, i stallet for som eget aggregate root.
+`EstimationVersion` lever inne i detta aggregate som en entity under `ProjectEstimation`-reglerna, i stället för som eget aggregate root.
 
-`EstimationSnapshot` halls separat som oforanderlig importerad kall-data. `EstimationVersion` pekar pa snapshotet i stallet for att bara snapshotinnehall inne i aggregatet.
+`EstimationSnapshot` hålls separat som oföränderlig importerad källdata. `EstimationVersion` pekar på snapshotet i stället för att bära snapshotinnehåll inne i aggregatet.
 
-`ViewScopedChangeSet` ar ett separat aggregate. Det delas mellan anvandare, har egen samtidighetsmodell och refererar den `EstimationVersion` som andringarna tillhor.
+`ViewScopedChangeSet` är ett separat aggregate. Det delas mellan användare, har egen samtidighetsmodell och refererar den `EstimationVersion` som ändringarna tillhör.
 
-I kod och referenser far `ViewScopedChangeSet` ett eget id, medan domanregeln om unik kombination av `View`, `EstimationVersion` och `EstimationSnapshot` fortfarande uppratthalls som invariant.
+I kod och referenser får `ViewScopedChangeSet` ett eget id, medan domänregeln om unik kombination av `View`, `EstimationVersion` och `EstimationSnapshot` fortfarande upprätthålls som invariant.
 
 ### Borttagning Bevarar Historik
 
-Nar en estimation tas bort fran ett projekt mjukavslutas dess `ProjectEstimation`. Versionshistorik, aktiv version-historik och bundna `ViewScopedChangeSet` bevaras for sparbarhet och eventuell senare analys.
+När en estimation tas bort från ett projekt mjukavslutas dess `ProjectEstimation`. Versionshistorik, aktiv version-historik och bundna `ViewScopedChangeSet` bevaras för spårbarhet och eventuell senare analys.
 
-En mjukavslutad `ProjectEstimation` kan senare ateraktiveras i samma projekt i stallet for att skapats om som ett nytt domanobjekt.
+En mjukavslutad `ProjectEstimation` kan senare återaktiveras i samma projekt i stället för att skapas om som ett nytt domänobjekt.
 
-Vid ateraktivering blir den senast aktiva `EstimationVersion` aktiv igen.
+Vid återaktivering blir den senast aktiva `EstimationVersion` aktiv igen.
 
 Den versionens egna `ViewScopedChangeSet` blir samtidigt det aktiva arbetslaget igen.
 
 ### Aktiv Version Per Estimation
 
-Varje `ProjectEstimation` har exakt en aktiv `EstimationVersion` som UI och standard-use-cases arbetar mot. Andra versioner finns kvar for historik, jamforelse eller manuell omvaljning, men ar inte aktiva samtidigt.
+Varje `ProjectEstimation` har exakt en aktiv `EstimationVersion` som UI och standard-use-cases arbetar mot. Andra versioner finns kvar för historik, jämförelse eller manuell omvaljning, men är inte aktiva samtidigt.
 
-Nar en ny import skapar en ny `EstimationVersion` blir den automatiskt den aktiva versionen for estimationen.
+När en ny import skapar en ny `EstimationVersion` blir den automatiskt den aktiva versionen för estimationen.
 
-Anvandaren kan ocksa explicit byta tillbaka aktiv version till en aldre `EstimationVersion`.
+Användaren kan också explicit byta tillbaka aktiv version till en äldre `EstimationVersion`.
 
-Nar en aldre version ater blir aktiv foljer dess egna `ViewScopedChangeSet` med tillbaka som aktiva andringar for den versionen.
+När en äldre version åter blir aktiv följer dess egna `ViewScopedChangeSet` med tillbaka som aktiva ändringar för den versionen.
 
-Om den aktiva versionen saknar `ViewScopedChangeSet` for en viss `View` visas det som att den viewn inte har några andringar i den versionen. Systemet forsoker inte arva andringar fran andra versioner.
+Om den aktiva versionen saknar `ViewScopedChangeSet` för en viss `View` visas det som att den viewn inte har några ändringar i den versionen. Systemet försöker inte ärva ändringar från andra versioner.
 
-### Ny Version Kraver Ny Import
+### Ny Version Kräver Ny Import
 
-I modellen betyder ny version alltid ny import. Anvandaren skapar inte fristaende manuella versioner utan nytt snapshotunderlag.
+I modellen betyder ny version alltid ny import. Användaren skapar inte fristående manuella versioner utan nytt snapshotunderlag.
 
-### Ersattningspolicy For Taggade Rader
+### Ersättningspolicy För Taggade Rader
 
 Den nuvarande policyn matchar befintligt portalbeteende:
 
-- Bidcon-rader pa samma tradniva far ersatta varandra nar de delar minst en klammertagg i `Remark`
-- originalradens mangd appliceras pa ersattningsraden
-- endast kandidater med tillracklig data for saker rendering ska vara valbara i forsta UI:t
-- alla `{tagg}` behandlas initialt som ersattningstaggar av kompatibilitetsskal
+- Bidcon-rader på samma trädnivå får ersätta varandra när de delar minst en klammertagg i `Remark`
+- originalradens mängd appliceras på ersättningsraden
+- endast kandidater med tillräcklig data för säker rendering ska vara valbara i första UI:t
+- alla `{tagg}` behandlas initialt som ersättningstaggar av kompatibilitetsskäl
 
-Policyn ska hallas modular sa att syntax och regler senare kan forfinas utan att andra snapshotets grundmodell.
+Policyn ska hållas modulär så att syntax och regler senare kan förfinas utan att ändra snapshotets grundmodell.
 
-### Befintliga Andringar Fortsatter Galla
+### Befintliga Ändringar Fortsätter Gälla
 
-Om `View.EnableChanges` stangs av i Reports betyder det att nya andringar inte far goras. Befintliga `ViewScopedChangeSet` fortsatter anda att paverka rendering tills de rensas eller ersatts.
+Om `View.EnableChanges` stängs av i Reports betyder det att nya ändringar inte får göras. Befintliga `ViewScopedChangeSet` fortsätter ändå att påverka rendering tills de rensas eller ersätts.
 
-## MVP-Begransningar Och Tillfalliga Val
+## MVP-Begränsningar Och Tillfälliga Val
 
-- Undo och redo for `ViewScopedChangeSet` stods inte i MVP.
-- `ClearViewScopedChanges` behandlas som en bekräftad permanent atgard.
-- Bidcon-regler som annu inte ar fullt forstadda kan behova exponeras snarare an raknas om fullt ut i den aktiva staten.
+- Undo och redo för `ViewScopedChangeSet` stöds inte i MVP.
+- `ClearViewScopedChanges` behandlas som en bekräftad permanent åtgärd.
+- Bidcon-regler som ännu inte är fullt förstådda kan behöva exponeras snarare än räknas om fullt ut i den aktiva staten.
 
 ## Sannolika Framtida Variationer
 
-- bekvamlighetsflode for att skapa nya versioner for flera estimations samtidigt
-- foreslagna ersattningsval vid ny import, med explicit anvandarbekraftelse
-- rikare audit trail for tidigare ersattningsval
+- bekvämlighetsflöde för att skapa nya versioner för flera estimations samtidigt
+- föreslagna ersättningsval vid ny import, med explicit användarbekräftelse
+- rikare audit trail för tidigare ersättningsval
 - mer namngiven eller namespacad taggsyntax, till exempel `{replace:kyla}`
-- tydligare stod for mer komplexa Bidcon-formler och aggregatregler i renderbar state
+- tydligare stöd för mer komplexa Bidcon-formler och aggregatregler i renderbar state
 - eventuell operationslogg om undo och redo blir viktigt
 
 ## Relaterade ADR:er

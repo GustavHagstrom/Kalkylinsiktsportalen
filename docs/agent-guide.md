@@ -1,4 +1,4 @@
-# Agentguide
+﻿# Agentguide
 
 Det här dokumentet samlar agentinstruktioner och en enkel uppgiftsmall för AI-agenter.
 

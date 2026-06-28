@@ -1,4 +1,4 @@
-# Reports ADRs
+﻿# Reports ADRs
 
 Här ligger bara de Reports-beslut som fortfarande är riktiga ADR:er: långlivade trade-offs kring export, historik, ansvar och tekniska vägval.
 

@@ -1,62 +1,62 @@
-# Domanmodell
+# Domänmodell
 
-Den har katalogen innehaller repoets levande domandokumentation.
+Den här katalogen innehåller repoets levande domändokumentation.
 
-Syftet ar att beskriva den faktiska modellen som modulerna ager:
+Syftet är att beskriva den faktiska modellen som modulerna äger:
 
 - aggregates och ansvar
 - relationer mellan modeller
 - invariants
 - nuvarande policyer
-- MVP-begransningar och tillfalliga val
+- MVP-begränsningar och tillfälliga val
 - sannolika framtida variationer
 
-## Nar `docs/domain/` Ska Anvandas
+## När `docs/domain/` Ska Användas
 
-Beskriv domanmodellen har nar dokumentationen handlar om:
+Beskriv domänmodellen här när dokumentationen handlar om:
 
 - begreppens struktur i en modul
-- aggregate-granser och ansvar
-- relationer mellan modulagda modeller
+- aggregate-gränser och ansvar
+- relationer mellan modulägda modeller
 - invariants och livscykler
-- nuvarande policyer som kan forfinas over tid
+- nuvarande policyer som kan förfinas över tid
 
-Produktbild, malbild och huvudfloden ags av [../product-and-domain.md](../product-and-domain.md). Kanoniska termer ags av [../../CONTEXT.md](../../CONTEXT.md).
+Produktbild, målbild och huvudflöden ägs av [../product-and-domain.md](../product-and-domain.md). Kanoniska termer ägs av [../../CONTEXT.md](../../CONTEXT.md).
 
-Lagg inte sant i ADR:er som standard. ADR:er anvands bara nar ett modell- eller arkitekturval ocksa ar svart att backa ur, overraskande utan historiken och resultatet av en verklig trade-off.
+Lägg inte sådant i ADR:er som standard. ADR:er används bara när ett modell- eller arkitekturval också är svårt att backa ur, överraskande utan historiken och resultatet av en verklig trade-off.
 
 ## Karta
 
 - [projects.md](projects.md) - Projects-modulens aggregates, relationer, invariants och policyer
 - [reports.md](reports.md) - Reports-modulens aggregate, livscykel, relationer och policyer
 
-Senare kan fler moduldokument laggas till, till exempel for `Bidcon`, `Access` och `Organizations`.
+Senare kan fler moduldokument läggas till, till exempel för `Bidcon`, `Access` och `Organizations`.
 
 ## Gemensamma Modelleringsprinciper
 
-Foljande ar levande repoovergripande modelleringsprinciper, inte ADR:er:
+Följande är levande repoövergripande modelleringsprinciper, inte ADR:er:
 
-- modulernas domanmodeller ska skydda sina invariants genom beteende, inte genom fritt muterbar state
-- aggregates ska normalt ha en tydlig aggregate root som ager mutationer och skyddar barnobjekt bakom gransen
-- aggregates och andra modeller med viktig initial state bor skapas genom tydliga fabriker eller beteendemetoder
-- domanmodeller ska formas av verksamhetsregler och ansvar, inte av MongoDB- eller DTO-form
-- centrala identiteter i domankod bor vara starka ID-typer nar det minskar risken att blanda ihop begrepp
-- use case-granser bor returnera valideringsresultat for forvantade fel, medan domanmodeller ska skydda invariants med explicita domanfel
-- IDs, tidpunkter och liknande omgivningsdata ska normalt komma in utifran use cases i stallet for att skapas inuti domanmodellen
+- modulernas domänmodeller ska skydda sina invariants genom beteende, inte genom fritt muterbar state
+- aggregates ska normalt ha en tydlig aggregate root som äger mutationer och skyddar barnobjekt bakom gränsen
+- aggregates och andra modeller med viktig initial state bör skapas genom tydliga fabriker eller beteendemetoder
+- domänmodeller ska formas av verksamhetsregler och ansvar, inte av MongoDB- eller DTO-form
+- centrala identiteter i domänkod bör vara starka ID-typer när det minskar risken att blanda ihop begrepp
+- use case-gränser bör returnera valideringsresultat för förväntade fel, medan domänmodeller ska skydda invariants med explicita domänfel
+- IDs, tidpunkter och liknande omgivningsdata ska normalt komma in utifrån use cases i stället för att skapas inuti domänmodellen
 
-De har principerna far skarpas och justeras nar modellen mognar. Om en princip blir ett verkligt langlivat, dyrt och overraskande trade-off-beslut kan den senare lyftas till en ADR.
+De här principerna får skärpas och justeras när modellen mognar. Om en princip blir ett verkligt långlivat, dyrt och överraskande trade-off-beslut kan den senare lyftas till en ADR.
 
-## Mall For Moduldokument
+## Mall För Moduldokument
 
-Varje modulfil i `docs/domain/` bor normalt innehalla foljande rubriker:
+Varje modulfil i `docs/domain/` bör normalt innehålla följande rubriker:
 
-1. Syfte och modulgrans
+1. Syfte och modulgräns
 2. Huvudaggregates
 3. Relationer
 4. Invariants
 5. Nuvarande policyer
-6. MVP-begransningar och tillfalliga val
+6. MVP-begränsningar och tillfälliga val
 7. Sannolika framtida variationer
 8. Relaterade ADR:er
 
-Dokumenten ska vara levande och far forfinas nar modellen skarps. Hall dem konkreta och modulagda, utan att gora dem till implementationstunga specifikationer.
+Dokumenten ska vara levande och får förfinas när modellen skärps. Håll dem konkreta och modulägda, utan att göra dem till implementationstunga specifikationer.

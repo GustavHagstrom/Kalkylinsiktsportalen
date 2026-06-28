@@ -1,4 +1,4 @@
-# Plan för nästa migrationsfas
+﻿# Plan för nästa migrationsfas
 
 ## Var vi är nu
 

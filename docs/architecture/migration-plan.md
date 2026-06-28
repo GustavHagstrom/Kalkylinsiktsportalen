@@ -1,4 +1,4 @@
-# Migrationsplan mot målarkitektur
+﻿# Migrationsplan mot målarkitektur
 
 ## Syfte
 

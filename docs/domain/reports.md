@@ -1,4 +1,4 @@
-# Reports
+﻿# Reports
 
 ## Syfte Och Modulgräns
 

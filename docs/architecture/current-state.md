@@ -1,4 +1,4 @@
-# Nuläge
+﻿# Nuläge
 
 Det här dokumentet beskriver hur lösningen ser ut idag och hur dagens struktur mappas mot målarkitekturen. Målbilden finns i [target-architecture.md](target-architecture.md) och vägen dit i [migration-plan.md](migration-plan.md).
 

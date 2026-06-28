@@ -1,4 +1,4 @@
-# Utveckling
+﻿# Utveckling
 
 Det här dokumentet samlar lokal utveckling, kodriktlinjer och praktiska arbetsregler.
 

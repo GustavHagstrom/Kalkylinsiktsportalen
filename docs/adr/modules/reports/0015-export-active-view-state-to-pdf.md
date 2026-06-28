@@ -1,3 +1,3 @@
-# Export active view state to PDF
+﻿# Export active view state to PDF
 
 MVP PDF export should export the opened snapshot with the selected view inside a project version, not the whole project version. PDF export should use that active rendered view state, including any active `ViewScopedChangeSet` replacements for the current view, project version and snapshot. Exporting without changes should not be a default alternate path; if a user wants the original state, they should first use a separate confirmed clear-changes action that removes all active replacement selections for the current view, project version and snapshot. Initially, any user who may make replacements in the view may also clear the view-scoped changes.

@@ -1,4 +1,4 @@
-# Målarkitektur
+﻿# Målarkitektur
 
 ## Syfte
 

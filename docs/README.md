@@ -1,4 +1,4 @@
-# Dokumentationsindex
+﻿# Dokumentationsindex
 
 Den här katalogen är repoets långlivade kontextlager.
 

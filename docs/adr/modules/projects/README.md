@@ -1,4 +1,4 @@
-# Projects ADRs
+﻿# Projects ADRs
 
 Här ligger bara de Projects-beslut som fortfarande är riktiga ADR:er: långlivade trade-offs kring Projects-arkitektur, ansvar och tekniska vägval.
 

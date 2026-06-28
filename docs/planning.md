@@ -1,4 +1,4 @@
-# Planering
+﻿# Planering
 
 Backlog och konkreta uppgifter bör i första hand hanteras som GitHub Issues.
 

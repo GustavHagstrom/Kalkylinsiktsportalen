@@ -1,60 +1,60 @@
 # ADR - Architecture Decision Records
 
-ADR:er anvands for att dokumentera langlivade tekniska beslut som ar dyra att upptacka i efterhand.
+ADR:er används för att dokumentera långlivade tekniska beslut som är dyra att upptäcka i efterhand.
 
-## Nar En ADR Bor Skrivas
+## När En ADR Bör Skrivas
 
-Skriv en ADR bara nar alla tre kriterier ar uppfyllda:
+Skriv en ADR bara när alla tre kriterier är uppfyllda:
 
-- beslutet ar svart eller dyrt att backa ur
-- beslutet ar overraskande utan kontext
-- beslutet ar resultatet av en verklig trade-off
+- beslutet är svårt eller dyrt att backa ur
+- beslutet är överraskande utan kontext
+- beslutet är resultatet av en verklig trade-off
 
-Om nagot saknar nagon av de tre egenskaperna ska det normalt inte vara en ADR.
+Om något saknar någon av de tre egenskaperna ska det normalt inte vara en ADR.
 
-Folande hor normalt inte hemma i ADR:er:
+Följande hör normalt inte hemma i ADR:er:
 
-- domanordlista och begreppsdefinitioner
-- domanmodellens lopande struktur
+- domänordlista och begreppsdefinitioner
+- domänmodellens löpande struktur
 - aggregate, entiteter, relationer och invariants som del av den levande modellen
-- modulnara modellbeskrivningar som forvantas forfinas iterativt
+- modulnära modellbeskrivningar som förväntas förfinas iterativt
 
-Sant ska i stallet beskrivas i levande domandokument, medan ADR:er ska forklara de fa modellval som verkligen var svara att valja, dyra att andra och overraskande utan historiken.
+Sådant ska i stället beskrivas i levande domändokument, medan ADR:er ska förklara de få modellval som verkligen var svåra att välja, dyra att ändra och överraskande utan historiken.
 
-Exempel ar arkitekturens riktning, data- eller auth-modell, integrationsmonster, granser mellan moduler, persistensstrategi och avsiktliga avsteg fran det uppenbara.
+Exempel är arkitekturens riktning, data- eller auth-modell, integrationsmönster, gränser mellan moduler, persistensstrategi och avsiktliga avsteg från det uppenbara.
 
 ## Struktur
 
-ADR:er ligger nara beslutets agarskap:
+ADR:er ligger nära beslutets ägarskap:
 
-- [global/](global/) - repoovergripande arkitektur, modulgranser och gemensamma riktlinjer
-- [modules/bidcon/](modules/bidcon/) - Bidcon-import, snapshot-kalla och Bidcon-nara modellbeslut
-- [modules/projects/](modules/projects/) - langlivade Projects-beslut som fortfarande ar verkliga trade-offs
-- [modules/reports/](modules/reports/) - langlivade Reports-beslut kring export, historik och ansvar
+- [global/](global/) - repoövergripande arkitektur, modulgränser och gemensamma riktlinjer
+- [modules/bidcon/](modules/bidcon/) - Bidcon-import, snapshot-källa och Bidcon-nära modellbeslut
+- [modules/projects/](modules/projects/) - långlivade Projects-beslut som fortfarande är verkliga trade-offs
+- [modules/reports/](modules/reports/) - långlivade Reports-beslut kring export, historik och ansvar
 
-Om ett beslut paverkar flera moduler laggs det dar beslutet primart ags. Lagg det i `global/` nar beslutet framfor allt handlar om modulgransen mellan tva agare.
+Om ett beslut påverkar flera moduler läggs det där beslutet primärt ägs. Lägg det i `global/` när beslutet framför allt handlar om modulgränsen mellan två ägare.
 
 ## Namngivning
 
-Behall befintliga ADR-nummer nar filer flyttas, sa gamla hanvisningar fortsattar vara begripliga.
+Behåll befintliga ADR-nummer när filer flyttas, så gamla hänvisningar fortsatt är begripliga.
 
-Nya ADR:er numreras lokalt i den mapp dar de skapas:
+Nya ADR:er numreras lokalt i den mapp där de skapas:
 
 - `global/0003-kort-beskrivning.md`
 - `modules/projects/0025-kort-beskrivning.md`
 - `modules/reports/0006-kort-beskrivning.md`
 
-Anvand ett kort format:
+Använd ett kort format:
 
 ```md
 # Kort titel
 
-1-3 meningar: vilken kontext beslutet togs i, vad vi beslutade och varfor.
+1-3 meningar: vilken kontext beslutet togs i, vad vi beslutade och varför.
 ```
 
 ## Valfria Sektioner
 
-Lagg bara till extra sektioner nar de faktiskt hjalper en framtida lasare:
+Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 
 - status: `proposed`, `accepted`, `deprecated` eller `superseded by ADR-NNNN`
 - considered options

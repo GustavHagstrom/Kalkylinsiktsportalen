@@ -1,4 +1,4 @@
-# Produkt och domän
+﻿# Produkt och domän
 
 Det här dokumentet samlar produktbeskrivning, övergripande domänbild och centrala huvudflöden för Kalkylinsiktsportalen.
 

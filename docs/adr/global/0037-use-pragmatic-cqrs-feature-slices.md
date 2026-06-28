@@ -1,4 +1,4 @@
-# Use pragmatic CQRS feature slices
+﻿# Use pragmatic CQRS feature slices
 
 Status: accepted
 
