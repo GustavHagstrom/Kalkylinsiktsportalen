@@ -9,7 +9,8 @@ public sealed class Project
         OrganizationId organizationId,
         UserId createdBy,
         DateTimeOffset createdAt,
-        string name)
+        string name, 
+        string? description)
     {
         Id = id;
         OrganizationId = organizationId;
@@ -26,14 +27,15 @@ public sealed class Project
 
     public DateTimeOffset CreatedAt { get; }
 
-    public string Name { get; }
-
+    public string Name { get; private set; }
+    public string? Description { get; private set; }
     public static Project Create(
         ProjectId id,
         OrganizationId organizationId,
         UserId createdBy,
         DateTimeOffset createdAt,
-        string name)
+        string name,
+        string? description = null)
     {
         if (id.IsEmpty)
         {
@@ -55,6 +57,18 @@ public sealed class Project
             throw new ProjectDomainException("project.name.required", "Project name is required.");
         }
 
-        return new Project(id, organizationId, createdBy, createdAt, name.Trim());
+        return new Project(id, organizationId, createdBy, createdAt, name.Trim(), description?.Trim());
+    }
+    public void UpdateName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            throw new ProjectDomainException("project.name.required", "Project name is required.");
+        }
+        Name = newName.Trim();
+    }
+    public void UpdateDescription(string? newDescription)
+    {
+        Description = newDescription?.Trim();
     }
 }
