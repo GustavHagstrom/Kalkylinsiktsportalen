@@ -2,14 +2,13 @@
 
 ## Syfte Och Modulgräns
 
-Projects äger portalens arbetsmodell för projekt, estimations, snapshots och delade view-lokala ändringar ovanpå importerad Bidcon-data.
+Projects äger portalens arbetsmodell för projekt, projektkopplade estimations, versionsval och delade view-lokala ändringar ovanpå importerad Bidcon-data.
 
 Modulen äger:
 
 - `Project`
 - `ProjectEstimation`
 - `EstimationVersion`
-- `EstimationSnapshot`
 - `ViewScopedChangeSet`
 - `Ersättningsval`
 - `RenderableSnapshotState` som applikationskontrakt för aktiv renderbar kalkylstate
@@ -17,7 +16,8 @@ Modulen äger:
 Projects äger inte:
 
 - view-definition, layout eller PDF-rendering
-- Bidcon API-integration och importmekanik
+- Bidcon API-integration, importmekanik eller snapshot-lagring
+- `EstimationSnapshot` utöver att referera snapshot via `EstimationSnapshotId`
 - accessregler utanför de kontrakt som krävs för use cases
 
 ## Huvudaggregates
@@ -66,19 +66,6 @@ Ansvar:
 - bära sammanhanget där `ViewScopedChangeSet` används
 
 `EstimationVersion` äger inte kopior av snapshotdata eller färdigrenderad state.
-
-### `EstimationSnapshot`
-
-Oföränderlig komplett import av en Bidcon-estimation vid ett importtillfälle.
-
-Ansvar:
-
-- vara separat snapshot-objekt som refereras från `EstimationVersion`
-- vara källsanning för importerad kalkyldata
-- kunna tolkas av Projects use cases för att bygga aktiv state
-- bevara den importerade strukturen utan portalmutationer
-
-`EstimationSnapshot` är inte ett muterbart arbetsobjekt.
 
 ### `ViewScopedChangeSet`
 
@@ -131,7 +118,6 @@ Ansvar:
 - En `EstimationVersion` har också ett eget versionsnummer som är meningsfullt inom sin `ProjectEstimation`.
 - Versionsnumret för `EstimationVersion` är sekventiellt inom en `ProjectEstimation`.
 - Ett `EstimationSnapshot` ligger utanför `ProjectEstimation`-aggregatet och refereras via `EstimationSnapshotId`.
-- Ett `EstimationSnapshot` representerar en specifik importerad estimation vid en viss tidpunkt.
 - Ett `ViewScopedChangeSet` är eget aggregate och refererar en `EstimationVersion` i stället för att ligga inne i `ProjectEstimation`.
 - Ett `ViewScopedChangeSet` har ett eget internt id.
 - Ett `ViewScopedChangeSet` är unikt per kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
@@ -140,7 +126,6 @@ Ansvar:
 
 ## Invariants
 
-- `EstimationSnapshot` är oföränderlig efter import.
 - Användarförändringar sparas inte genom mutation av snapshotet.
 - `ProjectEstimation` identifieras inte bara av extern estimation-identitet eller sin plats i ett projekt.
 - `ProjectEstimation` har ett eget internt id i Projects-domänen.
@@ -199,7 +184,7 @@ Varje `ProjectEstimation` ansvarar för sin egen versionskedja. Nya importer ell
 
 `EstimationVersion` lever inne i detta aggregate som en entity under `ProjectEstimation`-reglerna, i stället för som eget aggregate root.
 
-`EstimationSnapshot` hålls separat som oföränderlig importerad källdata. `EstimationVersion` pekar på snapshotet i stället för att bära snapshotinnehåll inne i aggregatet.
+`EstimationVersion` pekar på snapshotet i stället för att bära snapshotinnehåll inne i aggregatet.
 
 `ViewScopedChangeSet` är ett separat aggregate. Det delas mellan användare, har egen samtidighetsmodell och refererar den `EstimationVersion` som ändringarna tillhör.
 
