@@ -118,6 +118,21 @@ Får innehålla teknisk implementation som delas av flera moduler, till exempel 
 
 Produktnära regler eller flöden ska inte placeras här bara för att de används från flera skärmar.
 
+### Modulregistrering Och UI Composition
+
+Nya målmoduler registreras via `IModule` och `ModuleRegistration`.
+
+`ModuleRegistration` är den avsiktliga ytan för modulens bidrag till:
+
+- dependency injection
+- app shell och settings-UI composition
+- access claims
+- authorization policies
+
+Äldre `IFeature`-registrering får finnas kvar under migrationen, men är en separat kompatibilitetsväg och ska inte vara modellen för ny modulär kod.
+
+Navigation i app shell och settings ska registreras som data, till exempel text, route, order, ikon och policy. Modulägt settings-innehåll kan däremot registreras som Blazor-komponent eftersom modulen då äger själva innehållet.
+
 ## Beroenderiktningar
 
 Rekommenderad riktning:

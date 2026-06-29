@@ -66,6 +66,7 @@ Följ nuläget när ändringen är liten:
 Följ målarkitekturen när du lägger ny produktlogik:
 
 - lägg ny produktlogik i relevant `Modules/*`
+- registrera nya målmoduler via `IModule` och `ModuleRegistration`
 - strukturera ny modulär logik som feature/use case-slices
 - skapa interna mappar som `Domain`, `Infrastructure` och `Components` bara när de löser ett konkret behov
 - använd avsiktliga kontrakt mellan moduler i stället för att nå in i intern implementation
@@ -95,6 +96,34 @@ Använd `Shared` restriktivt:
 - flytta testbar logik till use cases, tjänster, helpers eller state-objekt
 - undvik integrationslogik direkt i UI
 - undvik att ny produktlogik kräver Blazor-specifika typer
+- registrera top navigation och settings navigation som data via `module.Ui`, inte som godtyckliga komponenttyper
+- registrera settings sections som komponenter när modulen äger innehåll, formulär eller state
+
+Exempel på modulregistrering:
+
+```csharp
+public sealed class ExampleModule : IModule
+{
+    public void Register(ModuleRegistration module)
+    {
+        module.Services.AddTransient<ExampleHandler>();
+
+        module.Ui.AddTopNavigation(
+            text: "Exempel",
+            href: "/example",
+            order: 50);
+
+        module.Ui.AddSettingsNavigation(
+            text: "Exempel",
+            href: "/settings/example",
+            order: 50,
+            icon: Icons.Material.Sharp.Settings,
+            policy: "ExampleSettingsPolicy");
+
+        module.Ui.AddSettingsSection<ExampleSettingsSection>(order: 50);
+    }
+}
+```
 
 ## Services, Stores Och Kontrakt
 

@@ -73,7 +73,24 @@ Definition of done:
 
 ## Fas 3: Etablera Use Cases För Kärnflödet
 
-Status: bör göras innan större produktutbyggnad.
+Status: påbörjad.
+
+Det första modulära registreringsmönstret finns nu på plats. Nya målmoduler ska registreras via `IModule` och `ModuleRegistration`, medan äldre `Features/*` kan fortsätta använda `IFeature` under migrationen.
+
+Exempel:
+
+```csharp
+public sealed class ProjectsModule : IModule
+{
+    public void Register(ModuleRegistration module)
+    {
+        module.Services.AddSingleton<IProjectStore, InMemoryProjectStore>();
+        module.Services.AddTransient<CreateProjectCommandHandler>();
+    }
+}
+```
+
+`ConfigureFeatures(...)` och `ConfigureModules(...)` körs bredvid varandra men bidrar till samma runtime-context för UI, access claims och authorization policies.
 
 Första use cases bör spegla kärnresan:
 
@@ -93,6 +110,7 @@ Blazor-komponenter ska anropa dessa use cases i stället för att själva orkest
 Definition of done:
 
 - minst ett kärnflöde går via use case-lager
+- berörd målmodul registreras via `IModule`
 - UI-komponenten är tunnare
 - flödet kan testas utan Blazor-rendering
 
@@ -243,6 +261,7 @@ Definition of done:
 - `Shared` används inte längre som slaskyta
 - nya filer har tydlig ägare
 - modulgränser blir lättare att förstå vid code review
+- gamla registreringsadapters som `RenderCollection` används inte som primär yta för nya moduler
 
 ## Fas 9: Förbered API Och Framtida Frontend
 
