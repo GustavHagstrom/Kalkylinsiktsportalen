@@ -5,25 +5,35 @@ namespace BlazorServer.Shared.Registration;
 
 public class FeatureRegistrator
 {
-    private readonly WebApplicationBuilder _builder;
-    private readonly IServiceProvider _sp;
-    private HashSet<IFeature> _features = new();
+    private readonly WebApplicationBuilder builder;
+    private readonly IServiceProvider serviceProvider;
+    private readonly HashSet<IFeature> features = [];
+    private readonly AppRegistrationContext registrationContext;
     
 
     public FeatureRegistrator(WebApplicationBuilder builder)
+        : this(builder, new AppRegistrationContext())
     {
-        _builder = builder;
-        _sp = builder.Services.BuildServiceProvider();
     }
-    public RenderCollection RenderCollection { get; } = new();
-    public ClaimInfoCollection ClaimInfoCollection { get; } = new();
-    public PolicyCollection Policies { get; } = new();
+
+    public FeatureRegistrator(WebApplicationBuilder builder, AppRegistrationContext registrationContext)
+    {
+        this.builder = builder;
+        this.registrationContext = registrationContext;
+        serviceProvider = builder.Services.BuildServiceProvider();
+    }
+
+    public RenderCollection RenderCollection => registrationContext.RenderCollection;
+
+    public ClaimInfoCollection ClaimInfoCollection => registrationContext.ClaimInfoCollection;
+
+    public PolicyCollection Policies => registrationContext.Policies;
 
     public void AddFeature<T>() where T : IFeature
     {
-        var feature = ActivatorUtilities.CreateInstance<T>(_sp);
-        _features.Add(feature);
-        feature.RegisterServices(_builder.Services);
+        var feature = ActivatorUtilities.CreateInstance<T>(serviceProvider);
+        features.Add(feature);
+        feature.RegisterServices(builder.Services);
         feature.RegisterRenderObjects(RenderCollection);
         feature.RegisterClaims(ClaimInfoCollection);
         feature.AddAuthorizationPolicies(Policies);

@@ -3,6 +3,7 @@ using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
 using BlazorServer.Features.Settings;
 using BlazorServer.Features.ViewSettings;
+using BlazorServer.Modules.Projects;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Registration;
@@ -76,6 +77,12 @@ public static class ServiceAndFeatureRegistrations
                 config.RenderCollection.SetLoginDisplayComponent<LoginDisplay>();
             }
         });
+
+        builder.ConfigureModules(config =>
+        {
+            config.AddModule<ProjectsModule>();
+        });
+
         builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
         {
             client.BaseAddress = new Uri(builder.Configuration["Bidcon:BaseUrl"] ?? throw new InvalidOperationException("BidconApi:BaseUrl configuration is missing"));
@@ -91,15 +98,54 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddMudServices();
         return builder;
     }
+
     public static void ConfigureFeatures(this WebApplicationBuilder builder, Action<FeatureRegistrator> config)
     {
-        var featureRegistrator = new FeatureRegistrator(builder);
+        var registrationContext = builder.GetOrCreateAppRegistrationContext();
+        var featureRegistrator = new FeatureRegistrator(builder, registrationContext);
         config(featureRegistrator);
-        builder.Services.AddSingleton(featureRegistrator.RenderCollection);
-        builder.Services.AddSingleton(featureRegistrator.ClaimInfoCollection);
+        builder.AddAppRegistrationContext(registrationContext);
+    }
+
+    public static void ConfigureModules(this WebApplicationBuilder builder, Action<ModuleRegistrator> config)
+    {
+        var registrationContext = builder.GetOrCreateAppRegistrationContext();
+        var moduleRegistrator = new ModuleRegistrator(builder, registrationContext);
+        config(moduleRegistrator);
+        builder.AddAppRegistrationContext(registrationContext);
+    }
+
+    private static AppRegistrationContext GetOrCreateAppRegistrationContext(this WebApplicationBuilder builder)
+    {
+        var existingContext = builder.Services
+            .FirstOrDefault(service => service.ServiceType == typeof(AppRegistrationContext))
+            ?.ImplementationInstance as AppRegistrationContext;
+
+        if (existingContext is not null)
+        {
+            return existingContext;
+        }
+
+        var registrationContext = new AppRegistrationContext();
+        builder.Services.AddSingleton(registrationContext);
+
+        return registrationContext;
+    }
+
+    private static void AddAppRegistrationContext(
+        this WebApplicationBuilder builder,
+        AppRegistrationContext registrationContext)
+    {
+        if (builder.Services.Any(service => service.ServiceType == typeof(RenderCollection)))
+        {
+            return;
+        }
+
+        builder.Services.AddSingleton(registrationContext.RenderCollection);
+        builder.Services.AddSingleton(registrationContext.ClaimInfoCollection);
         builder.Services.AddAuthorization(options =>
         {
-            foreach (var policy in featureRegistrator.Policies.PolicyList)
+            foreach (var policy in registrationContext.Policies.PolicyList)
             {
                 options.AddPolicy(policy.Name, policy.Builder);
             }
