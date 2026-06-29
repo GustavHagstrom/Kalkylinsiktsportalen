@@ -30,7 +30,12 @@ public class BidconAccessFeature : IFeature
 
     public void RegisterRenderObjects(RenderCollection collection)
     {
-        collection.AddSettingNavigationComponent<SettingsLink>();
+        collection.AddSettingsNavigation(
+            text: "Api",
+            href: FeatureConstants.Routes.SettingsPage,
+            order: 20,
+            icon: MudBlazor.Icons.Material.Sharp.Api,
+            policy: FeatureConstants.Authorization.PolicyName);
     }
 
     public void RegisterServices(IServiceCollection services)

@@ -5,14 +5,14 @@ public sealed class ModuleRegistration
     public ModuleRegistration(IServiceCollection services, AppRegistrationContext registrationContext)
     {
         Services = services;
-        AppShell = new AppShellRegistration(registrationContext.RenderCollection);
+        Ui = new UiCompositionRegistration(registrationContext.UiComposition);
         Access = new AccessRegistration(registrationContext.ClaimInfoCollection);
         Authorization = new AuthorizationRegistration(registrationContext.Policies);
     }
 
     public IServiceCollection Services { get; }
 
-    public AppShellRegistration AppShell { get; }
+    public UiCompositionRegistration Ui { get; }
 
     public AccessRegistration Access { get; }
 

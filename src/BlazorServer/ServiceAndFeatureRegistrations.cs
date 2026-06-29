@@ -141,6 +141,7 @@ public static class ServiceAndFeatureRegistrations
             return;
         }
 
+        builder.Services.AddSingleton(registrationContext.UiComposition);
         builder.Services.AddSingleton(registrationContext.RenderCollection);
         builder.Services.AddSingleton(registrationContext.ClaimInfoCollection);
         builder.Services.AddAuthorization(options =>

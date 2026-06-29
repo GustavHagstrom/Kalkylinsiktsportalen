@@ -17,7 +17,10 @@ public class SettingsFeature : IFeature
 
     public void RegisterRenderObjects(RenderCollection collection)
     {
-        collection.AddAppBarNavMenuComponent<AppNavMenue>(10);
+        collection.AddTopNavigation(
+            text: "Inställningar",
+            href: BlazorServer.Shared.Constants.AppRoutes.Settings,
+            order: 10);
     }
 
     public void RegisterServices(IServiceCollection services)

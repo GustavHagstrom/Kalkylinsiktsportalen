@@ -4,12 +4,12 @@
 
 @inject IStringLocalizer<SettingsPage> Localizer
 
-@inject RenderCollection RenderCollection
+@inject UiCompositionRegistry UiComposition
 
 
 <SettingsPageBase>
-    @foreach (var component in RenderCollection.GetSharedSettingComponents())
+    @foreach (var component in UiComposition.SettingsSections)
     {
-        @RenderService.Render(component);
+        @RenderService.Render(component.ComponentType);
     }
 </SettingsPageBase>

@@ -2,7 +2,14 @@ namespace BlazorServer.Shared.Registration;
 
 public sealed class AppRegistrationContext
 {
-    public RenderCollection RenderCollection { get; } = new();
+    public AppRegistrationContext()
+    {
+        RenderCollection = new RenderCollection(UiComposition);
+    }
+
+    public UiCompositionRegistry UiComposition { get; } = new();
+
+    public RenderCollection RenderCollection { get; }
 
     public ClaimInfoCollection ClaimInfoCollection { get; } = new();
 

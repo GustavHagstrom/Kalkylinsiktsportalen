@@ -24,7 +24,10 @@ public class BidconBrowserFeature : IFeature
 
     public void RegisterRenderObjects(RenderCollection collection)
     {
-        collection.AddAppBarNavMenuComponent<AppBarNavMenu>(1);
+        collection.AddTopNavigation(
+            text: "Kalkyler",
+            href: FeatureConstants.Routes.Base,
+            order: 1);
     }
 
     public void RegisterServices(IServiceCollection services)

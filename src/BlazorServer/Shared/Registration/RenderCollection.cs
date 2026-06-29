@@ -1,36 +1,82 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace BlazorServer.Shared.Registration;
 
 public class RenderCollection
 {
-    private HashSet<(Type Type, int Order)> _appBarNavMenueComponents = new();
-    private HashSet<Type> __sharedSettingsCompoenents = new();
-    private HashSet<Type> _settingNavigationComponents = new();
-    private Type? _loginDisplayComponent;
-    public void AddAppBarNavMenuComponent<T>(int order) where T : ComponentBase => _appBarNavMenueComponents.Add((typeof(T), order));
-    public IEnumerable<(Type Type, int Order)> GetAppBarNavMenueComponents() => _appBarNavMenueComponents;
+    private readonly UiCompositionRegistry uiComposition;
+    private readonly List<(Type Type, int Order)> legacyAppBarNavigationComponents = [];
+    private readonly List<Type> legacySettingNavigationComponents = [];
 
-    /// <summary>
-    /// Components to be rendered in the shared settings page
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public void AddSharedSettingComponent<T>() where T : ComponentBase => __sharedSettingsCompoenents.Add(typeof(T));
-    /// <summary>
-    /// Returns a collection of types that represent shared setting components available in the current context.
-    /// </summary>
-    /// <returns>An enumerable collection of <see cref="Type"/> objects, each representing a shared setting component. The
-    /// collection may be empty if no shared setting components are defined. Used in the shared settings space to group settings from different features on the same page.</returns>
-    public IEnumerable<Type> GetSharedSettingComponents() => __sharedSettingsCompoenents;
-    public void AddSettingNavigationComponent<T>() where T : ComponentBase => _settingNavigationComponents.Add(typeof(T));
-    public IEnumerable<Type> GetSettingNavigationComponents() 
+    public RenderCollection()
+        : this(new UiCompositionRegistry())
     {
-        return _settingNavigationComponents;
-    } 
-
-    public void SetLoginDisplayComponent<T>() where T : ComponentBase
-    {
-        _loginDisplayComponent = typeof(T);
     }
-    public Type? GetLoginDisplayComponent() => _loginDisplayComponent;
+
+    public RenderCollection(UiCompositionRegistry uiComposition)
+    {
+        this.uiComposition = uiComposition;
+    }
+
+    public void AddTopNavigation(
+        string text,
+        string href,
+        int order,
+        string? icon = null,
+        string? policy = null,
+        NavLinkMatch match = NavLinkMatch.Prefix)
+    {
+        uiComposition.AddTopNavigation(new UiNavigationItem(text, href, order, icon, policy, match));
+    }
+
+    public void AddSettingsNavigation(
+        string text,
+        string href,
+        int order,
+        string? icon = null,
+        string? policy = null,
+        NavLinkMatch match = NavLinkMatch.Prefix)
+    {
+        uiComposition.AddSettingsNavigation(new UiNavigationItem(text, href, order, icon, policy, match));
+    }
+
+    public void AddSharedSettingComponent<T>(int order = 0)
+        where T : ComponentBase
+    {
+        uiComposition.AddSettingsSection(typeof(T), order);
+    }
+
+    public void SetLoginDisplayComponent<T>()
+        where T : ComponentBase
+    {
+        uiComposition.SetLoginDisplay(typeof(T));
+    }
+
+    public Type? GetLoginDisplayComponent() => uiComposition.LoginDisplayComponent;
+
+    [Obsolete("Use AddTopNavigation with navigation data instead.")]
+    public void AddAppBarNavMenuComponent<T>(int order)
+        where T : ComponentBase
+    {
+        legacyAppBarNavigationComponents.Add((typeof(T), order));
+    }
+
+    [Obsolete("Use UiCompositionRegistry.TopNavigation instead.")]
+    public IEnumerable<(Type Type, int Order)> GetAppBarNavMenueComponents() =>
+        legacyAppBarNavigationComponents;
+
+    [Obsolete("Use UiCompositionRegistry.SettingsSections instead.")]
+    public IEnumerable<Type> GetSharedSettingComponents() =>
+        uiComposition.SettingsSections.Select(component => component.ComponentType);
+
+    [Obsolete("Use AddSettingsNavigation with navigation data instead.")]
+    public void AddSettingNavigationComponent<T>()
+        where T : ComponentBase
+    {
+        legacySettingNavigationComponents.Add(typeof(T));
+    }
+
+    [Obsolete("Use UiCompositionRegistry.SettingsNavigation instead.")]
+    public IEnumerable<Type> GetSettingNavigationComponents() => legacySettingNavigationComponents;
 }

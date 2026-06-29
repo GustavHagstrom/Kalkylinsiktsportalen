@@ -30,7 +30,12 @@ public class ViewSettingsFeature : IFeature
 
     public void RegisterRenderObjects(RenderCollection collection)
     {
-        collection.AddSettingNavigationComponent<SettingsLink>();
+        collection.AddSettingsNavigation(
+            text: "Vyer",
+            href: FeatureConstants.Routes.SettingsPage,
+            order: 30,
+            icon: MudBlazor.Icons.Material.Sharp.Article,
+            policy: FeatureConstants.Authorization.PolicyName);
     }
 
     public void RegisterServices(IServiceCollection services)

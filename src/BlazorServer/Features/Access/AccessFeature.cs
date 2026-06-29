@@ -30,7 +30,12 @@ public class AccessFeature : IFeature
 
     public void RegisterRenderObjects(RenderCollection collection)
     {
-        collection.AddSettingNavigationComponent<SettingsLink>();
+        collection.AddSettingsNavigation(
+            text: "Rättigheter",
+            href: FeatureConstants.Routes.SettingsPage,
+            order: 10,
+            icon: MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
+            policy: FeatureConstants.Authorization.PolicyName);
     }
 
     public void RegisterServices(IServiceCollection services)
