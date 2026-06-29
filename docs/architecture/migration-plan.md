@@ -253,19 +253,19 @@ Status: efter att use cases och modulgränser stabiliserats.
 - definiera request/response-kontrakt för centrala use cases
 - undvik Blazor-specifika typer i use cases
 - introducera controller/minimal API för utvalda flöden
-- låt Blazor Server själv använda samma kontrakt som en extern frontend skulle använda där det är rimligt
+- låt Blazor Server fortsätta anropa application handlers direkt tills en faktisk API-klient eller migrationsövning behöver HTTP-kontrakt
 
 Mål:
 
 - Blazor Server kan ersättas eller kompletteras av Blazor WASM/React utan att skriva om kärnan
 - backend äger auth, Bidcon credentials, Mongo och snapshotimport
-- frontend äger rendering och interaktion
+- frontend äger rendering och interaktion, medan HTTP API senare blir en adapter över samma use cases
 
 Definition of done:
 
 - minst ett centralt flöde kan nås via HTTP API
 - kontrakten är frontend-oberoende
-- Blazor Server är en klient till samma applikationslogik, inte ägare av den
+- Blazor Server är en klient till samma applikationslogik via handlers, inte ägare av den
 
 ## Föreslagen Arbetsordning
 

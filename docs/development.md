@@ -70,6 +70,17 @@ Följ målarkitekturen när du lägger ny produktlogik:
 - skapa interna mappar som `Domain`, `Infrastructure` och `Components` bara när de löser ett konkret behov
 - använd avsiktliga kontrakt mellan moduler i stället för att nå in i intern implementation
 
+Praktiska regler för nya feature slices:
+
+- `Features/*` innehåller application use cases: commands, queries, handlers, validators, result/read models och slice-ägda store-kontrakt
+- `Components/*` innehåller Blazor UI och ska ligga separat från `Features/*`
+- components får bero på features, men features får inte bero på components
+- Blazor Server-components får anropa handlers direkt
+- handlers ska vara fria från Blazor-, HTTP-, navigation-, dialog-, snackbar-, JS- och andra host/UI-specifika beroenden
+- handlers returnerar application-resultat som kan visas av Blazor idag och mappas till HTTP senare
+- skapa inte endpoints, HTTP request/response-DTO:er eller OpenAPI-kontrakt som standard innan en faktisk API-klient eller migrationsövning behöver dem
+- framtida endpoints ska vara tunna adapters över samma handlers, inte en alternativ plats för produktlogik
+
 Använd `Shared` restriktivt:
 
 - lägg bara sådant i `Shared` som faktiskt är stabilt och tvärgående
