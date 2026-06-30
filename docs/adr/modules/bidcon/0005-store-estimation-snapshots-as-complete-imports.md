@@ -6,7 +6,7 @@
 
 - Store snapshots in the Bidcon/import module as immutable imported data, not as behavior-heavy aggregates.
 - Projects records only `EstimationSnapshotId` on `EstimationVersion`; it does not own snapshot JSON or allocate snapshot ids.
-- Store the normalized snapshot payload as uncompressed JSON text in the application database, loaded only when needed.
+- Store the normalized snapshot payload as one complete document in the application database, loaded only when needed. In a document database such as MongoDB this uses native nested document storage; in a non-document database this can be represented as uncompressed JSON text.
 - Use a portal-owned normalized payload format, not Bidcon's raw response shape.
 - Preserve all Bidcon data needed to reconstruct the imported estimation state, including metadata, structure, rows and Bidcon source identities.
 - Keep portal-computed view/report values out of the snapshot unless required to reproduce the imported source state.

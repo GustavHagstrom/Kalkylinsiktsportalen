@@ -1,0 +1,137 @@
+using System.Net;
+using System.Net.Http.Headers;
+using BlazorServer.Modules.Bidcon.Contracts;
+using BlazorServer.Modules.Bidcon.ExternalDtos;
+using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Shared.Stores;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
+
+public class BidconEstimationDetailsClient
+{
+    private readonly IHttpClientFactory? httpClientFactory;
+    private readonly IMemoryCache? cache;
+    private readonly IBidconApiCredentialsStore? credentialsStore;
+
+    protected BidconEstimationDetailsClient()
+    {
+    }
+
+    public BidconEstimationDetailsClient(
+        IHttpClientFactory httpClientFactory,
+        IMemoryCache cache,
+        IBidconApiCredentialsStore credentialsStore)
+    {
+        this.httpClientFactory = httpClientFactory;
+        this.cache = cache;
+        this.credentialsStore = credentialsStore;
+    }
+
+    public virtual async Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+        BidconEstimationId bidconEstimationId,
+        OrganizationId organizationId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var client = await GetAuthenticatedClientAsync(organizationId, cancellationToken);
+            var uriResponse = await client.GetAsync($"EstimationUri/{bidconEstimationId.Value}", cancellationToken);
+
+            if (uriResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            uriResponse.EnsureSuccessStatusCode();
+            var hrefToEstimation = await uriResponse.Content.ReadAsStringAsync(cancellationToken);
+
+            client.DefaultRequestHeaders.Authorization = null;
+            var estimationResponse = await client.GetAsync(hrefToEstimation, cancellationToken);
+
+            if (estimationResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            estimationResponse.EnsureSuccessStatusCode();
+            return await estimationResponse.Content.ReadFromJsonAsync<EstimationDetailsDto>(cancellationToken);
+        }
+        catch (BidconEstimationDetailsClientException)
+        {
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            throw new BidconEstimationDetailsClientException(
+                "bidcon.import.failed",
+                nameof(BidconEstimationId),
+                exception.Message);
+        }
+    }
+
+    private async Task<HttpClient> GetAuthenticatedClientAsync(
+        OrganizationId organizationId,
+        CancellationToken cancellationToken)
+    {
+        var client = httpClientFactory!.CreateClient(HttpClientNames.BidconApiClient);
+        var orgId = organizationId.Value.ToString();
+        var cacheKey = $"bidconAccessToken_{orgId}";
+
+        if (cache!.TryGetValue<string>(cacheKey, out var cachedAccessToken) &&
+            !string.IsNullOrWhiteSpace(cachedAccessToken))
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cachedAccessToken);
+            return client;
+        }
+
+        var credentials = await credentialsStore!.GetAsync(orgId);
+
+        if (credentials is null)
+        {
+            throw new BidconEstimationDetailsClientException(
+                "bidcon.credentials.missing",
+                nameof(OrganizationId),
+                "Bidcon credentials are missing.");
+        }
+
+        var tokenResponse = await client.PostAsJsonAsync(
+            "Authentication/Authenticate",
+            new ApiKeyAuthenticateDto
+            {
+                ApiKey = credentials.ApiKey,
+                Secret = credentials.ApiSecret
+            },
+            cancellationToken);
+
+        tokenResponse.EnsureSuccessStatusCode();
+        var token = await tokenResponse.Content.ReadFromJsonAsync<ApiKeyAuthenticateResultDto>(cancellationToken);
+
+        if (token is null || string.IsNullOrWhiteSpace(token.AccessToken))
+        {
+            throw new BidconEstimationDetailsClientException(
+                "bidcon.import.failed",
+                nameof(OrganizationId),
+                "Failed to retrieve Bidcon access token.");
+        }
+
+        cache!.Set(cacheKey, token.AccessToken, TimeSpan.FromSeconds(Math.Max(1, token.ExpireInSeconds - 20)));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+        return client;
+    }
+}
+
+public sealed class BidconEstimationDetailsClientException : Exception
+{
+    public BidconEstimationDetailsClientException(string code, string field, string message)
+        : base(message)
+    {
+        Code = code;
+        Field = field;
+    }
+
+    public string Code { get; }
+
+    public string Field { get; }
+}

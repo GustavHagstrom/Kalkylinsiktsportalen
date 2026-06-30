@@ -44,7 +44,7 @@ Ansvar:
 ## Invariants
 
 - `EstimationSnapshot` ändras inte efter import.
-- Snapshot-payloaden sparas som okomprimerad JSON-text i applikationsdatabasen.
+- Snapshot-payloaden sparas som ett komplett dokument i applikationsdatabasen. I dokumentdatabaser som MongoDB används native nested document storage; i andra databaser kan samma payload representeras som okomprimerad JSON-text.
 - Snapshot-payloaden representeras i kod med strikta C# payload-typer per `SnapshotSchemaVersion`.
 - Snapshot readers är versionsmedvetna och mappar till aktuell intern readmodell.
 - Portalberäknade view- eller rapportvärden sparas inte i snapshotten om de inte krävs för att återskapa importerad källstate.

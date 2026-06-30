@@ -3,6 +3,7 @@ using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
 using BlazorServer.Features.Settings;
 using BlazorServer.Features.ViewSettings;
+using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
@@ -80,6 +81,7 @@ public static class ServiceAndFeatureRegistrations
 
         builder.ConfigureModules(config =>
         {
+            config.AddModule<BidconModule>();
             config.AddModule<ProjectsModule>();
         });
 
