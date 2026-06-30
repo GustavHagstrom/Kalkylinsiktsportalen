@@ -12,6 +12,8 @@ public sealed class BidconModule : IModule
         module.Services.AddTransient<ImportEstimationSnapshotCommandHandler>();
         module.Services.AddTransient<BidconEstimationDetailsClient>();
 
+        module.Services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
+        module.Services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         module.Services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
         module.Services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
     }
