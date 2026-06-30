@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
+using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Registration;
@@ -13,6 +14,9 @@ public sealed class BidconModule : IModule
     {
         module.Services.AddTransient<GetBidconCredentialsQueryHandler>();
         module.Services.AddTransient<UpsertBidconCredentialsCommandHandler>();
+        module.Services.AddTransient<RemoveBidconCredentialsCommandHandler>();
+        module.Services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
+        module.Services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
         module.Services.AddTransient<ImportEstimationSnapshotCommandHandler>();
         module.Services.AddTransient<BidconEstimationDetailsClient>();
 

@@ -28,4 +28,9 @@ public sealed class MongoBidconApiCredentialsStore : IBidconApiCredentialsStore
             mongoCredentials,
             new ReplaceOptions { IsUpsert = true });
     }
+
+    public Task DeleteAsync(string orgId)
+    {
+        return collection.DeleteOneAsync(credentials => credentials.OrganizationId == orgId);
+    }
 }

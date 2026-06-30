@@ -76,6 +76,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 ### Bidcon
 
 - [0005 - Store estimation snapshots as complete imports](modules/bidcon/0005-store-estimation-snapshots-as-complete-imports.md)
+- [0006 - Store Bidcon credentials in Mongo for MVP](modules/bidcon/0006-store-bidcon-credentials-in-mongo-for-mvp.md)
 
 ### Projects
 

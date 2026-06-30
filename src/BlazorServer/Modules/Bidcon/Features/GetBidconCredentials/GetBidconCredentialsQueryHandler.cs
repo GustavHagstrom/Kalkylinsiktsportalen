@@ -42,8 +42,20 @@ public sealed class GetBidconCredentialsQueryHandler
         return QueryResult<GetBidconCredentialsResult>.Success(
             new GetBidconCredentialsResult(
                 query.OrganizationId,
-                credentials.ApiKey,
-                credentials.ApiSecret,
+                MaskCredential(credentials.ApiKey),
+                MaskCredential(credentials.ApiSecret),
                 true));
+    }
+
+    private static string MaskCredential(string value)
+    {
+        const int visibleCharacters = 4;
+
+        if (value.Length <= visibleCharacters)
+        {
+            return "****";
+        }
+
+        return $"****{value[^visibleCharacters..]}";
     }
 }

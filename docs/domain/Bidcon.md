@@ -62,11 +62,22 @@ Om en befintlig version för samma `ProjectEstimation` redan har matchande `Sour
 
 Skapande av snapshot i Bidcon och skapande eller aktivering av motsvarande `EstimationVersion` i Projects ska vara atomärt i importoperationen när modulerna delar databas.
 
+### Bidcon Credentials
+
+Bidcon credentials är organisationsägda och det finns högst ett aktuellt credential-par per organisation. Ändring av credentials ersätter hela paret efter att det nya paret har verifierats mot Bidcon API; om verifieringen misslyckas behålls befintliga credentials.
+
+Administratörer får se maskerade sparade värden, inte hemligheten i klartext. Administration av Bidcon credentials kräver en separat access claim från vanlig användning av Bidcon-data.
+
+När credentials ändras eller tas bort invalidas organisationens cachade Bidcon access token. Borttagna credentials är ett explicit konfigurationsläge och ska ge tydliga missing-credentials-fel vid Bidcon-anrop.
+
+Administration av Bidcon credentials ska audit-loggas med aktör, organisation, tidpunkt, åtgärd och verifieringsresultat. Audit-loggen får inte innehålla `ApiSecret` eller fullständiga credential-värden.
+
 ## MVP-Begränsningar Och Tillfälliga Val
 
 - Ingen separat rå Bidcon-response eller source envelope sparas bredvid normaliserad payload.
 - Gamla snapshots migreras inte i förväg; schema-migrering införs först när ett konkret behov finns.
 - Ingen djup payload-deduplicering görs när Bidcon `EditDate` har ändrats.
+- Bidcon credentials får lagras i applikationens MongoDB i MVP även om värdena ännu inte är krypterade applikationssidigt. Detta är ett medvetet temporärt val; åtkomst ska gå via Bidcon-modulens store-kontrakt så lagringen senare kan bytas till krypterad lagring eller extern secret store utan att ändra use cases och UI.
 
 ## Sannolika Framtida Variationer
 
@@ -77,3 +88,4 @@ Skapande av snapshot i Bidcon och skapande eller aktivering av motsvarande `Esti
 ## Relaterade ADR:er
 
 - [../adr/modules/bidcon/0005-store-estimation-snapshots-as-complete-imports.md](../adr/modules/bidcon/0005-store-estimation-snapshots-as-complete-imports.md)
+- [../adr/modules/bidcon/0006-store-bidcon-credentials-in-mongo-for-mvp.md](../adr/modules/bidcon/0006-store-bidcon-credentials-in-mongo-for-mvp.md)

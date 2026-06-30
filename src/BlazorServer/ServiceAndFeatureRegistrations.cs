@@ -26,7 +26,7 @@ public static class ServiceAndFeatureRegistrations
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
         
-        if (builder.Environment.IsDevelopment())
+        if (builder.Configuration["Auth:Mode"] == "Mock")
         {
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
             builder.Services.AddSingleton<MockedAuthSession>();
@@ -38,7 +38,7 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddTransient<IRoleService, MockedRoleService>();
             builder.Services.AddMemoryCache();
         }
-        else
+        else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddTransient<IUserService, UserService>();
@@ -69,7 +69,7 @@ public static class ServiceAndFeatureRegistrations
             config.AddFeature<BidconBrowserFeature>();
             config.AddFeature<ViewSettingsFeature>();
 
-            if (builder.Environment.IsDevelopment())
+            if (builder.Configuration["Auth:Mode"] == "Mock")
             {
                 config.RenderCollection.SetLoginDisplayComponent<MockedLoginDisplay>();
             }
