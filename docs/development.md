@@ -129,6 +129,9 @@ public sealed class ExampleModule : IModule
 
 - lägg integrationskod bakom tjänster
 - lägg persistence bakom stores eller tydliga kontrakt
+- låt handlers bero på module- eller slice-ägda store-kontrakt, inte direkt på `DbContext`, `IMongoCollection<T>` eller andra persistence-API:er
+- använd `DbContext`, `IMongoCollection<T>` och provider-specifika query builders i infrastructure, store-implementationer, migrations/setup eller tekniska adapters
+- håll store-kontrakt små och use case-nära; namnge nya persistenskontrakt som stores och skapa inte repositories eller generiska CRUD-abstraktioner som standard
 - håll beroenden explicita via DI
 - låt moduler bero på avsiktliga kontrakt eller use cases, inte på varandras interna implementationer
 
