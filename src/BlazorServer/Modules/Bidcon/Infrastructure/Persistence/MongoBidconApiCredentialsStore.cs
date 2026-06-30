@@ -11,7 +11,7 @@ public sealed class MongoBidconApiCredentialsStore : IBidconApiCredentialsStore
         this.collection = collection;
     }
 
-    public async Task<BidconApiCredentials> GetAsync(string orgId)
+    public async Task<BidconApiCredentials?> GetAsync(string orgId)
     {
         var credentials = await collection
             .Find(credentials => credentials.OrganizationId == orgId)

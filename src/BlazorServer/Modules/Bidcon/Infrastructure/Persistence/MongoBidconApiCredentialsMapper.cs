@@ -2,11 +2,11 @@ namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
 public static class MongoBidconApiCredentialsMapper
 {
-    public static BidconApiCredentials ToModel(this MongoBidconApiCredentials? entity)
+    public static BidconApiCredentials? ToModel(this MongoBidconApiCredentials? entity)
     {
         if (entity is null)
         {
-            return new BidconApiCredentials();
+            return null;
         }
 
         return new BidconApiCredentials

@@ -10,6 +10,10 @@ Externt system som portalen hämtar kalkyl- och estimationsdata från.
 **Bidcon API**:
 API för autentisering och läsning av Bidcon-data.
 
+**Bidcon credentials**:
+Organisationsägda API-uppgifter som portalen använder för att autentisera mot Bidcon API. Saknade Bidcon credentials är ett eget konfigurationsläge, inte samma sak som tomma uppgifter.
+_Avoid_: BidconApiCredentials i domänspråk
+
 **Organisation**:
 Tenant- och avgränsningsnivå för data, rättigheter, views och credentials.
 
