@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Bidcon.Contracts;
+
 namespace BlazorServer.Modules.Projects.Domain;
 
 public sealed class ProjectEstimation

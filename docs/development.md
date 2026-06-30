@@ -89,6 +89,7 @@ Använd `Shared` restriktivt:
 - använd `Shared/Kernel` för små stabila gemensamma typer
 - använd `Shared/Infrastructure` för teknisk implementation som delas av flera moduler
 - flytta äldre `Shared/*` stegvis när koden ändå berörs eller blockerar en tydlig modulgräns
+- externa API-DTO:er ska på sikt ligga i modulen som äger integrationen; äldre kopior i `Shared/DTOs` får ligga kvar som kompatibilitet tills berörda call sites flyttas
 
 ## Blazor Och UI
 
@@ -134,6 +135,7 @@ public sealed class ExampleModule : IModule
 - håll store-kontrakt små och use case-nära; namnge nya persistenskontrakt som stores och skapa inte repositories eller generiska CRUD-abstraktioner som standard
 - håll beroenden explicita via DI
 - låt moduler bero på avsiktliga kontrakt eller use cases, inte på varandras interna implementationer
+- använd `Contracts` för avsiktliga modulgränser, till exempel små interface, read models eller delade identitetstyper; lägg inte konkreta domänmodeller, persistence-modeller eller implementation där
 
 ## Tester
 

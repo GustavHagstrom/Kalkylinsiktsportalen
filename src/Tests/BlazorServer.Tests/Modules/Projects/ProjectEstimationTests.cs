@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Projects.Domain;
 
 namespace BlazorServer.Tests.Modules.Projects;
