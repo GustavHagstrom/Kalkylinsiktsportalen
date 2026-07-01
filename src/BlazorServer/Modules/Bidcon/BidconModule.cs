@@ -4,27 +4,29 @@ using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.FeatureRegistration;
-using BlazorServer.Shared.ModuleRegistration;
 using BlazorServer.Shared.Stores.MongoDb;
 
 namespace BlazorServer.Modules.Bidcon;
 
-public sealed class BidconModule : IModule
+public static class BidconModule
 {
-    public void Register(ModuleRegistration module)
+    public static IServiceCollection AddBidconModule(
+        this IServiceCollection services,
+        AppRegistrationContext registrationContext)
     {
-        module.Services.AddTransient<GetBidconCredentialsQueryHandler>();
-        module.Services.AddTransient<UpsertBidconCredentialsCommandHandler>();
-        module.Services.AddTransient<RemoveBidconCredentialsCommandHandler>();
-        module.Services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
-        module.Services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
-        module.Services.AddTransient<ImportEstimationSnapshotCommandHandler>();
-        module.Services.AddTransient<BidconEstimationDetailsClient>();
+        services.AddTransient<GetBidconCredentialsQueryHandler>();
+        services.AddTransient<UpsertBidconCredentialsCommandHandler>();
+        services.AddTransient<RemoveBidconCredentialsCommandHandler>();
+        services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
+        services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
+        services.AddTransient<ImportEstimationSnapshotCommandHandler>();
+        services.AddTransient<BidconEstimationDetailsClient>();
 
-        module.Services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
-        module.Services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
-        module.Services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
-        module.Services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
+        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
+        services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
+        services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
+        services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
+
+        return services;
     }
 }

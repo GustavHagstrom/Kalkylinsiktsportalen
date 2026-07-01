@@ -66,7 +66,7 @@ Följ nuläget när ändringen är liten:
 Följ målarkitekturen när du lägger ny produktlogik:
 
 - lägg ny produktlogik i relevant `Modules/*`
-- registrera nya målmoduler via `IModule` och `ModuleRegistration`
+- registrera nya målmoduler via statiska `IServiceCollection`-extensions som får `AppRegistrationContext`
 - strukturera ny modulär logik som feature/use case-slices
 - skapa interna mappar som `Domain`, `Infrastructure` och `Components` bara när de löser ett konkret behov
 - använd avsiktliga kontrakt mellan moduler i stället för att nå in i intern implementation
@@ -97,31 +97,38 @@ Använd `Shared` restriktivt:
 - flytta testbar logik till use cases, tjänster, helpers eller state-objekt
 - undvik integrationslogik direkt i UI
 - undvik att ny produktlogik kräver Blazor-specifika typer
-- registrera top navigation och settings navigation som data via `module.Ui`, inte som godtyckliga komponenttyper
-- registrera settings sections som komponenter när modulen äger innehåll, formulär eller state
+- registrera top navigation och settings areas som data i `AppRegistrationContext`, inte som godtyckliga komponenttyper
+- registrera settings area med explicit module key så Settings Hub kan hålla en synlig settings-ingång per modul
 
 Exempel på modulregistrering:
 
 ```csharp
-public sealed class ExampleModule : IModule
+public static class ExampleModule
 {
-    public void Register(ModuleRegistration module)
+    public static IServiceCollection AddExampleModule(
+        this IServiceCollection services,
+        AppRegistrationContext registrationContext)
     {
-        module.Services.AddTransient<ExampleHandler>();
+        services.AddTransient<ExampleHandler>();
 
-        module.Ui.AddTopNavigation(
-            text: "Exempel",
-            href: "/example",
-            order: 50);
+        registrationContext.UiComposition.AddTopNavigation(
+            new UiNavigationItem(
+                Text: "Exempel",
+                Href: "/example",
+                Order: 50));
 
-        module.Ui.AddSettingsNavigation(
-            text: "Exempel",
-            href: "/settings/example",
-            order: 50,
-            icon: Icons.Material.Sharp.Settings,
-            policy: "ExampleSettingsPolicy");
+        registrationContext.UiComposition.AddSettingsArea(
+            new UiSettingsArea(
+                Id: "example",
+                Title: "Exempel",
+                Description: "Administrera exempel.",
+                Href: "/settings/example",
+                Order: 50,
+                Icon: Icons.Material.Sharp.Settings,
+                Policy: "ExampleSettingsPolicy"),
+            moduleKey: "Example");
 
-        module.Ui.AddSettingsSection<ExampleSettingsSection>(order: 50);
+        return services;
     }
 }
 ```

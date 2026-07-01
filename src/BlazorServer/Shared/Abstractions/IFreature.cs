@@ -1,6 +1,5 @@
 ﻿using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.FeatureRegistration;
-using BlazorServer.Shared.ModuleRegistration;
 
 namespace BlazorServer.Shared.Abstractions;
 

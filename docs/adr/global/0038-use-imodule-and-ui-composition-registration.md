@@ -1,5 +1,7 @@
 # Use IModule and UI composition registration
 
+Status: superseded by ADR-0040
+
 New product modules should register through `IModule` and `ModuleRegistration`, while the older `IFeature` registration remains as a separate compatibility path during migration. UI composition is structured app-shell data, not arbitrary component injection.
 
 ## Decision

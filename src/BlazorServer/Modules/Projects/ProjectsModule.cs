@@ -1,16 +1,18 @@
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.FeatureRegistration;
-using BlazorServer.Shared.ModuleRegistration;
 
 namespace BlazorServer.Modules.Projects;
 
-public sealed class ProjectsModule : IModule
+public static class ProjectsModule
 {
-    public void Register(ModuleRegistration module)
+    public static IServiceCollection AddProjectsModule(
+        this IServiceCollection services,
+        AppRegistrationContext registrationContext)
     {
-        module.Services.AddSingleton<IProjectStore, InMemoryProjectStore>();
-        module.Services.AddTransient<CreateProjectCommandHandler>();
+        services.AddSingleton<IProjectStore, InMemoryProjectStore>();
+        services.AddTransient<CreateProjectCommandHandler>();
+
+        return services;
     }
 }

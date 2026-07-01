@@ -29,7 +29,7 @@ public static class MongoEstimationSnapshotMapper
 
         return EstimationSnapshot.Create(
             new EstimationSnapshotId(Guid.Parse(snapshot.Id)),
-            new OrganizationId(Guid.Parse(snapshot.OrganizationId)),
+            new OrganizationId(snapshot.OrganizationId),
             new BidconEstimationId(snapshot.BidconEstimationId),
             snapshot.SourceEditDate,
             snapshot.ImportedAt,

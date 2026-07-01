@@ -1,6 +1,6 @@
 namespace BlazorServer.Shared.Kernel.Identity;
 
-public readonly record struct OrganizationId(Guid Value)
+public readonly record struct OrganizationId(string Value)
 {
-    public bool IsEmpty => Value == Guid.Empty;
+    public bool IsEmpty => string.IsNullOrEmpty(Value);
 }

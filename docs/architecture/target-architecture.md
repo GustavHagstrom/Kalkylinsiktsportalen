@@ -120,9 +120,9 @@ Produktnära regler eller flöden ska inte placeras här bara för att de använ
 
 ### Modulregistrering Och UI Composition
 
-Nya målmoduler registreras via `IModule` och `ModuleRegistration`.
+Nya målmoduler registreras via statiska `IServiceCollection`-extensions som får portalens `AppRegistrationContext`.
 
-`ModuleRegistration` är den avsiktliga ytan för modulens bidrag till:
+`AppRegistrationContext` är den gemensamma samlingspunkten för modulens bidrag till:
 
 - dependency injection
 - app shell och settings-UI composition
@@ -131,7 +131,7 @@ Nya målmoduler registreras via `IModule` och `ModuleRegistration`.
 
 Äldre `IFeature`-registrering får finnas kvar under migrationen, men är en separat kompatibilitetsväg och ska inte vara modellen för ny modulär kod.
 
-Navigation i app shell och settings ska registreras som data, till exempel text, route, order, ikon och policy. Modulägt settings-innehåll kan däremot registreras som Blazor-komponent eftersom modulen då äger själva innehållet.
+Navigation i app shell och settings areas ska registreras som data, till exempel text, route, order, ikon och policy. Settings area-registrering ska ange en explicit module key så Settings Hub kan hålla en synlig settings-ingång per modul.
 
 ## Beroenderiktningar
 

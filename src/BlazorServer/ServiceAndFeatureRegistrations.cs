@@ -9,7 +9,6 @@ using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.FeatureRegistration;
-using BlazorServer.Shared.ModuleRegistration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
@@ -27,6 +26,7 @@ public static class ServiceAndFeatureRegistrations
 {
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
+        
         
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
@@ -59,7 +59,8 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         }
 
-        builder.ConfigureFeatures(config =>
+        var registrationContext = builder.Services.AddAppRegistrationContext();
+        builder.ConfigureFeatures(registrationContext, config =>
         {
             //config.AddAuthorizationPolicy(AuthConstants.RequireAuthenticatedUserPolicyName, policy =>
             //{
@@ -81,11 +82,8 @@ public static class ServiceAndFeatureRegistrations
             }
         });
 
-        builder.ConfigureModules(config =>
-        {
-            config.AddModule<BidconModule>();
-            config.AddModule<ProjectsModule>();
-        });
+        builder.Services.AddBidconModule(registrationContext);
+        builder.Services.AddProjectsModule(registrationContext);
 
         builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
         {
@@ -100,61 +98,16 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddSingleton<RenderService>();
         builder.Services.AddLocalization();
         builder.Services.AddMudServices();
+        builder.Services.ApplyAppRegistrationContext(registrationContext);
         return builder;
     }
 
-    public static void ConfigureFeatures(this WebApplicationBuilder builder, Action<FeatureRegistrator> config)
+    public static void ConfigureFeatures(
+        this WebApplicationBuilder builder,
+        AppRegistrationContext registrationContext,
+        Action<FeatureRegistrator> config)
     {
-        var registrationContext = builder.GetOrCreateAppRegistrationContext();
         var featureRegistrator = new FeatureRegistrator(builder, registrationContext);
         config(featureRegistrator);
-        builder.AddAppRegistrationContext(registrationContext);
-    }
-
-    public static void ConfigureModules(this WebApplicationBuilder builder, Action<ModuleRegistrator> config)
-    {
-        var registrationContext = builder.GetOrCreateAppRegistrationContext();
-        var moduleRegistrator = new ModuleRegistrator(builder, registrationContext);
-        config(moduleRegistrator);
-        builder.AddAppRegistrationContext(registrationContext);
-    }
-
-    private static AppRegistrationContext GetOrCreateAppRegistrationContext(this WebApplicationBuilder builder)
-    {
-        var existingContext = builder.Services
-            .FirstOrDefault(service => service.ServiceType == typeof(AppRegistrationContext))
-            ?.ImplementationInstance as AppRegistrationContext;
-
-        if (existingContext is not null)
-        {
-            return existingContext;
-        }
-
-        var registrationContext = new AppRegistrationContext();
-        builder.Services.AddSingleton(registrationContext);
-
-        return registrationContext;
-    }
-
-    private static void AddAppRegistrationContext(
-        this WebApplicationBuilder builder,
-        AppRegistrationContext registrationContext)
-    {
-        if (builder.Services.Any(service => service.ServiceType == typeof(RenderCollection)))
-        {
-            return;
-        }
-
-        builder.Services.AddSingleton(registrationContext.UiComposition);
-        builder.Services.AddSingleton(registrationContext.RenderCollection);
-        builder.Services.AddSingleton(registrationContext.ClaimInfoCollection);
-        builder.Services.AddAuthorization(options =>
-        {
-            foreach (var policy in registrationContext.Policies.PolicyList)
-            {
-                options.AddPolicy(policy.Name, policy.Builder);
-            }
-        });
     }
 }
-

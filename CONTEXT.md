@@ -128,5 +128,5 @@ Kompatibilitetsväg för äldre `IFeature`-kod som registrerar tjänster, access
 _Avoid_: module registration, ny registrering
 
 **Module registration**:
-Målform för nya produktmoduler där en `IModule` registrerar tjänster, UI-composition, access claims och policies genom avsiktsbaserade registreringsytor.
-_Avoid_: feature registration, legacy registration
+Målform för nya produktmoduler där modulen exponerar en statisk registreringsfunktion som bidrar med tjänster, UI-composition, access claims och policies till portalens `AppRegistrationContext`.
+_Avoid_: feature registration, legacy registration, IModule registration
