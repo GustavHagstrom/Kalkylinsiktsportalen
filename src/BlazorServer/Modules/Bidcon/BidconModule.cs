@@ -3,7 +3,9 @@ using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Registration;
+using BlazorServer.Shared.Composition;
+using BlazorServer.Shared.FeatureRegistration;
+using BlazorServer.Shared.ModuleRegistration;
 using BlazorServer.Shared.Stores.MongoDb;
 
 namespace BlazorServer.Modules.Bidcon;

@@ -13,6 +13,8 @@ public interface IModule
 }
 ```
 
+Keep the registration paths separate in code. `Feature registration` is compatibility for old `IFeature` code, and `Module registration` is the target model for new `IModule` code. Both paths may contribute to shared runtime app-shell data, but that shared data should live behind neutral `Composition` types rather than in either registration path.
+
 `ModuleRegistration` exposes intention-based registration surfaces:
 
 - `Services` for dependency injection
@@ -41,9 +43,13 @@ Settings areas are also shell-discovered data, but not generic settings navigati
 - New `Modules/*` code should use `IModule`.
 - Old `Features/*` code may keep using `IFeature` until migrated.
 - `IFeature` and `IModule` are not inheritance-related.
+- Shared runtime data such as UI composition, claims, and policies should live in neutral composition types, not in the feature or module registration APIs.
+- `ClaimInfoCollection` and `PolicyCollection` are composition data; feature and module registration are only contribution paths.
+- The old and new registration paths should be physically separated in folders and namespaces.
 - `ConfigureFeatures(...)` and `ConfigureModules(...)` can run side by side and contribute to the same runtime registration context.
 - `RenderCollection` is compatibility plumbing, not the preferred interface for new modules.
 - New navigation should be registered through `module.Ui` or the navigation-data methods, not by contributing navigation components directly.
 - New module settings should be registered through `module.Ui.Settings.SetArea(...)`.
+- `ModuleRegistration` must not expose legacy settings navigation or settings section registration.
 - `SettingsSections` and component-based shared settings-page composition are not part of the target model.
 - `SettingsNavigation` can remain only as old feature compatibility and must not be rendered by the new `Settings Hub`.

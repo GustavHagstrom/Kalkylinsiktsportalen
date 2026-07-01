@@ -1,6 +1,8 @@
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
-using BlazorServer.Shared.Registration;
+using BlazorServer.Shared.Composition;
+using BlazorServer.Shared.FeatureRegistration;
+using BlazorServer.Shared.ModuleRegistration;
 
 namespace BlazorServer.Modules.Projects;
 

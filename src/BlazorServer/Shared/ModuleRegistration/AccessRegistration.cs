@@ -1,6 +1,7 @@
+using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.Models;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.ModuleRegistration;
 
 public sealed class AccessRegistration
 {

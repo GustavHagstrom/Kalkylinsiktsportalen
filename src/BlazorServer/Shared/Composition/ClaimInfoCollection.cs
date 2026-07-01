@@ -1,7 +1,7 @@
-﻿using BlazorServer.Shared.Models;
+using BlazorServer.Shared.Models;
 using System.Collections.ObjectModel;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.Composition;
 
 public class ClaimInfoCollection
 {

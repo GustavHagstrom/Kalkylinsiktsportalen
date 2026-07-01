@@ -1,6 +1,7 @@
+using BlazorServer.Shared.Composition;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.ModuleRegistration;
 
 public sealed class AuthorizationRegistration
 {

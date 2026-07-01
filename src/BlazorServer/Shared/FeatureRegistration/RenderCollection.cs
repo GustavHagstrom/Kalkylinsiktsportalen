@@ -1,7 +1,8 @@
+using BlazorServer.Shared.Composition;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.FeatureRegistration;
 
 public class RenderCollection
 {

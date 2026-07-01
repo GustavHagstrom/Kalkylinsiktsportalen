@@ -122,3 +122,11 @@ _Avoid_: settings landing page, första settings-sidan
 **Settings Area**:
 Modulägd settings-yta som är den enda settings-ingången en modul registrerar i portalens Settings Hub. En Settings Area har stabil identitet och egen route, och modulen äger själv eventuell undersidesnavigation inom sin area.
 _Avoid_: settings section, settings component
+
+**Feature registration**:
+Kompatibilitetsväg för äldre `IFeature`-kod som registrerar tjänster, accessregler och äldre UI-bidrag utan att vara målformen för nya moduler.
+_Avoid_: module registration, ny registrering
+
+**Module registration**:
+Målform för nya produktmoduler där en `IModule` registrerar tjänster, UI-composition, access claims och policies genom avsiktsbaserade registreringsytor.
+_Avoid_: feature registration, legacy registration

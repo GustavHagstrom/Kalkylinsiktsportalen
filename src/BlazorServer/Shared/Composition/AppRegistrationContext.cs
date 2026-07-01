@@ -1,4 +1,6 @@
-namespace BlazorServer.Shared.Registration;
+using BlazorServer.Shared.FeatureRegistration;
+
+namespace BlazorServer.Shared.Composition;
 
 public sealed class AppRegistrationContext
 {

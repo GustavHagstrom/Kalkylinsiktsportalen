@@ -1,4 +1,4 @@
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.ModuleRegistration;
 
 public interface IModule
 {

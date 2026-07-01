@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.Composition;
 
 public class PolicyCollection
 {

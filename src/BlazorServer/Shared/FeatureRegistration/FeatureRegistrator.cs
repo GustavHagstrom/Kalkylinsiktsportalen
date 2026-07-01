@@ -1,7 +1,8 @@
-﻿using BlazorServer.Shared.Abstractions;
+using BlazorServer.Shared.Abstractions;
+using BlazorServer.Shared.Composition;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BlazorServer.Shared.Registration;
+namespace BlazorServer.Shared.FeatureRegistration;
 
 public class FeatureRegistrator
 {
