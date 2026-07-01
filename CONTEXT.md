@@ -114,3 +114,11 @@ _Avoid_: Jämförelse
 **History**:
 Spårbar följd av tidigare versioner av projekt eller kalkyllägen.
 _Avoid_: Historik
+
+**Settings Hub**:
+Portalägd landningsyta för settings som samlar länkar till modulernas egna settings-sidor.
+_Avoid_: settings landing page, första settings-sidan
+
+**Settings Area**:
+Modulägd settings-yta som är den enda settings-ingången en modul registrerar i portalens Settings Hub. En Settings Area har stabil identitet och egen route, och modulen äger själv eventuell undersidesnavigation inom sin area.
+_Avoid_: settings section, settings component
