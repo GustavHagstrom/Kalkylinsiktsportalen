@@ -10,8 +10,8 @@ Modulen äger:
 - `ProjectEstimation`
 - `EstimationVersion`
 - `ViewScopedChangeSet`
-- `Ersättningsval`
-- `RenderableSnapshotState` som applikationskontrakt för aktiv renderbar kalkylstate
+- `ReplacementSelection`
+- `RenderableSnapshotState` som preliminärt arbetsnamn för applikationskontraktet kring aktiv renderbar kalkylstate
 
 Projects äger inte:
 
@@ -76,28 +76,29 @@ Ansvar:
 - vara eget aggregate för delat versionsbundet arbetsläge
 - ha egen stabil identitet utan att tappa den domänunika kombinationen av view, version och snapshot
 - bära delade användarval utan att mutera snapshotet
-- valideras mot snapshotets struktur och ersättningspolicy
+- valideras mot snapshotets struktur och `ReplacementPolicy`
 - fungera som ett workspace för en specifik rapportvy i en specifik sparad estimation-version
 
 Projects äger `ViewScopedChangeSet` även när scoping sker till en `View`.
 
-### `Ersättningsval`
+### `ReplacementSelection`
 
-Sparat val i ett `ViewScopedChangeSet` som pekar ut vilken originalrad som ersatts av vilken ersättningsrad.
+Sparat val i ett `ViewScopedChangeSet` som pekar ut berörd `SheetSection`, originalrad, ersättningsrad och matchande `ReplacementTag`.
 
 Ansvar:
 
 - uttrycka ett användarvalt byte, inte ett materialiserat kalkylresultat
 - bära metadata som behövs för spårbarhet och tolkning
-- vara entydigt inom ett givet `ViewScopedChangeSet`
+- vara entydigt per `SheetSection` och originalrad inom ett givet `ViewScopedChangeSet`
+- låta originalraden inspekteras för spårbarhet när ersättningsraden visas på originalradens plats
 
-### `RenderableSnapshotState`
+### `RenderableSnapshotState` (preliminärt arbetsnamn)
 
-Applikationskontrakt som Projects producerar för att beskriva den aktiva kalkylstaten som Reports kan rendera.
+Preliminärt applikationskontrakt som Projects producerar för att beskriva den aktiva kalkylstaten som Reports kan rendera. Namnet och modulägarskapet är inte kanoniserat i `CONTEXT.md` eftersom gränsen mot Reports fortfarande behöver arbetas igenom.
 
 Ansvar:
 
-- representera aktivt snapshotläge efter att ersättningsval applicerats
+- representera aktivt snapshotläge efter att `ReplacementSelection` applicerats
 - visa både originaldata och aktivt ersatt läge där det behövs för förklaring eller rendering
 - ge Reports ett läsbart kontrakt utan att göra Reports beroende av Projects interna persistensmodell
 
@@ -121,7 +122,7 @@ Ansvar:
 - Ett `ViewScopedChangeSet` är eget aggregate och refererar en `EstimationVersion` i stället för att ligga inne i `ProjectEstimation`.
 - Ett `ViewScopedChangeSet` har ett eget internt id.
 - Ett `ViewScopedChangeSet` är unikt per kombinationen `View`, `EstimationVersion` och `EstimationSnapshot`.
-- Ett `ViewScopedChangeSet` innehåller högst ett aktivt `Ersättningsval` per originalrad.
+- Ett `ViewScopedChangeSet` innehåller högst ett aktivt `ReplacementSelection` per `SheetSection` och originalrad.
 - Projects producerar `RenderableSnapshotState` från `EstimationSnapshot` plus `ViewScopedChangeSet` i kontexten av en `View` och en `EstimationVersion`.
 
 ## Invariants
@@ -150,8 +151,8 @@ Ansvar:
 - När aktiv version byts till en äldre `EstimationVersion` blir den versionens bundna `ViewScopedChangeSet` åter de aktiva ändringarna.
 - Om en aktiv `EstimationVersion` saknar `ViewScopedChangeSet` för en viss `View` betyder det att den viewn inte har några sparade ändringar i den versionen.
 - `ViewScopedChangeSet` är alltid bundet till exakt en `View`, exakt en `EstimationVersion` och exakt ett `EstimationSnapshot`.
-- Ett `Ersättningsval` är alltid snapshot- och vy-lokalt, inte globalt eller automatiskt återanvänt mellan versioner.
-- Ett `ViewScopedChangeSet` har högst ett aktivt ersättningsval per originalrad.
+- Ett `ReplacementSelection` är alltid snapshot-, vy- och `SheetSection`-lokalt, inte globalt eller automatiskt återanvänt mellan versioner.
+- Ett `ViewScopedChangeSet` har högst ett aktivt `ReplacementSelection` per `SheetSection` och originalrad.
 - `EstimationVersion` refererar snapshots, men äger inte kopierad snapshotdata eller kopierade change sets.
 - `ViewScopedChangeSet` flyttas inte automatiskt till en ny `EstimationVersion`, utan ligger kvar bundet till den version där valet skapades.
 - `RenderableSnapshotState` är ett läskontrakt, inte en källa för framtida mutationer.
@@ -166,9 +167,11 @@ Ansvar:
 
 Ersättningar sparas som användarval, inte som färdiga omräknade resultat. Projects bygger den renderbara kalkylstaten genom att applicera valen mot snapshotet.
 
+Ett enskilt `ReplacementSelection` ska kunna rensas utan att övriga val i samma `ViewScopedChangeSet` tas bort. `ClearViewScopedChanges` finns kvar som separat bekräftad åtgärd för att rensa hela ändringsmängden för aktuell view, version och snapshot.
+
 ### Version-Lokala Val
 
-Ersättningsval förs inte automatiskt vidare till senare importer eller andra estimation-versioner. Ett nytt snapshotläge kräver nya bekräftade val.
+`ReplacementSelection` förs inte automatiskt vidare till senare importer eller andra estimation-versioner. Ett nytt snapshotläge kräver nya bekräftade val.
 
 ### Gamla Ändringar Ligger Kvar På Gammal Version
 
@@ -216,14 +219,14 @@ Om den aktiva versionen saknar `ViewScopedChangeSet` för en viss `View` visas d
 
 I modellen betyder ny version alltid ny import. Användaren skapar inte fristående manuella versioner utan nytt snapshotunderlag.
 
-### Ersättningspolicy För Taggade Rader
+### ReplacementPolicy För Taggade Rader
 
 Den nuvarande policyn matchar befintligt portalbeteende:
 
 - Bidcon-rader på samma trädnivå får ersätta varandra när de delar minst en klammertagg i `Remark`
 - originalradens mängd appliceras på ersättningsraden
 - endast kandidater med tillräcklig data för säker rendering ska vara valbara i första UI:t
-- alla `{tagg}` behandlas initialt som ersättningstaggar av kompatibilitetsskäl
+- alla `{tagg}` behandlas initialt som `ReplacementTag` av kompatibilitetsskäl
 
 Policyn ska hållas modulär så att syntax och regler senare kan förfinas utan att ändra snapshotets grundmodell.
 
@@ -236,12 +239,13 @@ Om `View.EnableChanges` stängs av i Reports betyder det att nya ändringar inte
 - Undo och redo för `ViewScopedChangeSet` stöds inte i MVP.
 - `ClearViewScopedChanges` behandlas som en bekräftad permanent åtgärd.
 - Bidcon-regler som ännu inte är fullt förstådda kan behöva exponeras snarare än räknas om fullt ut i den aktiva staten.
+- Interaktiv portal ska kunna visa eller inspektera originalrad för ett `ReplacementSelection`; PDF/export behöver i MVP bara bära ändringsindikatorn och behöver inte exponera full inspektionsdetalj.
 
 ## Sannolika Framtida Variationer
 
 - bekvämlighetsflöde för att skapa nya versioner för flera estimations samtidigt
-- föreslagna ersättningsval vid ny import, med explicit användarbekräftelse
-- rikare audit trail för tidigare ersättningsval
+- föreslagna `ReplacementSelection` vid ny import, med explicit användarbekräftelse
+- rikare audit trail för tidigare `ReplacementSelection`
 - mer namngiven eller namespacad taggsyntax, till exempel `{replace:kyla}`
 - tydligare stöd för mer komplexa Bidcon-formler och aggregatregler i renderbar state
 - eventuell operationslogg om undo och redo blir viktigt

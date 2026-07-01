@@ -7,9 +7,10 @@ Reports äger rapportvyer, view-definitioner, sektioner, layout, rendering och v
 Modulen äger:
 
 - `View`
-- view-definition och sektionstyper
+- view-definition med identifierbara `DataSection` och `SheetSection`
+- `PageBreakAfter` som layoutval på innehållssektioner
 - regler för när en view är ändringsbar eller arkiverad
-- översättning från renderbar state till rapportstruktur
+- rendering från `RenderingContext` till rapportstruktur
 - PDF-export och relaterade exportbeslut
 
 Reports äger inte:
@@ -22,25 +23,48 @@ Reports äger inte:
 
 ### `View`
 
-Organisationsägd rapportmall som beskriver hur kalkyldata ska visas.
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`.
 
 Ansvar:
 
 - bära rapportdefinitionen
-- bära `EnableChanges` som styr om nya delade ersättningsval får göras i vyn
+- bära sektionernas stabila identiteter inom vyn och deras ordning i rapporten
+- bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
 - vara workspace-gränsen som Projects change sets scope:as mot
 
+### `DataSection`
+
+Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`.
+
+Ansvar:
+
+- bära fria celler med text, formler, formatering och namngivna värdereferenser
+- läsa metadata och namngivna värden via aktuell `RenderingContext`
+- kunna ange `PageBreakAfter`
+
+### `SheetSection`
+
+Identifierbar sektion i en `View` som visar exakt ett datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext`.
+
+Ansvar:
+
+- bära vilket datablad som ska visas
+- bära synlighet och formatering för bladets fält
+- visa standardiserad radindikator när en rad är ändrad
+- kunna ange `PageBreakAfter`
+
 ## Relationer
 
-- Reports konsumerar `RenderableSnapshotState` från Projects för rendering.
+- Reports renderar aktuell `RenderingContext`. `RenderableSnapshotState` är tills vidare ett preliminärt arbetsnamn för kontraktet mellan Projects och Reports, inte ett kanoniskt Reports-begrepp.
 - En `View` kan användas mot olika snapshot- och versionslägen, men varje `ViewScopedChangeSet` ägs fortfarande av Projects.
 - `EnableChanges` på `View` styr om användare får skapa nya view-lokala ändringar, medan Projects fortfarande äger validering, lagring och concurrency.
 - När en view dupliceras kopieras view-definitionen, men inte det change set-state som Projects äger för tidigare arbetslägen.
 
 ## Invariants
 
-- `View` äger rapportdefinitionen men inte snapshotets sanning eller ersättningsvalens persistens.
+- `View` äger rapportdefinitionen men inte snapshotets sanning eller `ReplacementSelection`-persistens.
+- `SectionIndex` är ordning i rapporten, inte identitet för `DataSection` eller `SheetSection`.
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
@@ -49,7 +73,7 @@ Ansvar:
 
 ### `EnableChanges`
 
-Om en användare får använda en view och `EnableChanges` är aktiverat får användaren göra de delade ersättningsval som Projects tillåter. Detta är en view-egenskap, inte en generell projektinställning.
+Om en användare får använda en view och `EnableChanges` är aktiverat får användaren göra de delade `ReplacementSelection` som Projects tillåter. Detta är en view-egenskap, inte en generell projektinställning.
 
 ### Duplicering
 

@@ -15,7 +15,7 @@ Modulen äger:
 Bidcon äger inte:
 
 - projekt, projektkopplade estimations eller aktiv versionskedja
-- `ViewScopedChangeSet` eller användarens ersättningsval
+- `ViewScopedChangeSet` eller användarens `ReplacementSelection`
 - rapportdefinitioner, layout eller PDF-rendering
 
 ## Huvudmodeller
