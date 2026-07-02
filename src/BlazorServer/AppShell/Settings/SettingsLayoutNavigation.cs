@@ -1,6 +1,6 @@
 using BlazorServer.Shared.Composition;
 
-namespace BlazorServer.Features.Settings;
+namespace BlazorServer.AppShell.Settings;
 
 public static class SettingsLayoutNavigation
 {

@@ -80,6 +80,23 @@ Data, rättigheter, integrationer och konfiguration ska utformas så att organis
 
 Den långsiktiga riktningen är tydliga produktmoduler med avsiktliga kontrakt mellan sig.
 
+App shell är en egen top-level boundary bredvid produktmodulerna och `Shared`.
+
+```text
+AppShell/
+  Äger konkret applikationsram, till exempel appbar-navigation, layouts och Settings Hub.
+
+Modules/
+  Äger produktförmågor och kan bidra metadata till app shell via composition-kontrakt.
+
+Shared/
+  Äger stabila, neutrala byggblock som kan användas av både app shell och moduler.
+```
+
+Moduler ska inte bero på kod i `AppShell`. När en modul behöver synas i app shell ska den bidra metadata via `Shared/Composition`, till exempel en settings area. App shell konsumerar sedan metadata och renderar den konkreta shell-ytan.
+
+Om både app shell och moduler behöver samma primitiv ska den primitiva bo i `Shared`. Konkreta shell-routes, shell-bootstrap och hubbflöden ska inte flyttas till `Shared` bara för att flera delar av applikationen relaterar till dem.
+
 Målmodulerna är:
 
 - `Projects`

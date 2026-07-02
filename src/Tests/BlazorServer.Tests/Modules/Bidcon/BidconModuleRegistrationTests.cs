@@ -1,8 +1,13 @@
+using System.Security.Claims;
+using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Settings;
 using BlazorServer.Shared.Composition;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
@@ -26,6 +31,81 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconApiCredentialsStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IEstimationSnapshotStore)), Is.True);
             Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
+            Assert.That(registrationContext.UiComposition.SettingsAreas, Has.One.EqualTo(
+                new UiSettingsArea(
+                    "bidcon",
+                    "Bidcon API",
+                    "Configure Bidcon API credentials.",
+                    "/settings/bidcon",
+                    20,
+                    MudBlazor.Icons.Material.Sharp.Api,
+                    "ApiPolicy")));
         });
+    }
+
+    [Test]
+    public void BidconSettingsPageUsesModuleOwnedRouteAndAuthorizationPolicy()
+    {
+        var routes = typeof(BidconSettingsPage)
+            .GetCustomAttributes(typeof(RouteAttribute), inherit: false)
+            .Cast<RouteAttribute>()
+            .Select(attribute => attribute.Template);
+        var policies = typeof(BidconSettingsPage)
+            .GetCustomAttributes(typeof(AuthorizeAttribute), inherit: false)
+            .Cast<AuthorizeAttribute>()
+            .Select(attribute => attribute.Policy);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(routes, Has.One.EqualTo("/settings/bidcon"));
+            Assert.That(policies, Has.One.EqualTo("ApiPolicy"));
+        });
+    }
+
+    [Test]
+    public async Task BidconSettingsAreaIsVisibleOnlyWhenUserSatisfiesPolicy()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = services.AddAppRegistrationContext();
+        services.AddBidconModule(registrationContext);
+
+        var authorizedAreas = await SettingsHub.GetVisibleAreasAsync(
+            registrationContext.UiComposition,
+            new ClaimsPrincipal(new ClaimsIdentity("test")),
+            new PolicyAuthorizationService("ApiPolicy"));
+        var unauthorizedAreas = await SettingsHub.GetVisibleAreasAsync(
+            registrationContext.UiComposition,
+            new ClaimsPrincipal(new ClaimsIdentity("test")),
+            new PolicyAuthorizationService());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(authorizedAreas.Select(area => area.Id), Has.One.EqualTo("bidcon"));
+            Assert.That(unauthorizedAreas, Is.Empty);
+        });
+    }
+
+    private sealed class PolicyAuthorizationService(params string[] allowedPolicies) : IAuthorizationService
+    {
+        private readonly HashSet<string> allowedPolicies = allowedPolicies.ToHashSet(StringComparer.Ordinal);
+
+        public Task<AuthorizationResult> AuthorizeAsync(
+            ClaimsPrincipal user,
+            object? resource,
+            IEnumerable<IAuthorizationRequirement> requirements)
+        {
+            return Task.FromResult(AuthorizationResult.Success());
+        }
+
+        public Task<AuthorizationResult> AuthorizeAsync(
+            ClaimsPrincipal user,
+            object? resource,
+            string policyName)
+        {
+            return Task.FromResult(
+                allowedPolicies.Contains(policyName)
+                    ? AuthorizationResult.Success()
+                    : AuthorizationResult.Failed());
+        }
     }
 }

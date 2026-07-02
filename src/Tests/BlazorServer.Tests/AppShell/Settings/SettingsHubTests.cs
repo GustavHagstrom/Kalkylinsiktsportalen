@@ -1,9 +1,9 @@
 using System.Security.Claims;
-using BlazorServer.Features.Settings;
+using BlazorServer.AppShell.Settings;
 using BlazorServer.Shared.Composition;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BlazorServer.Tests.Features.Settings;
+namespace BlazorServer.Tests.AppShell.Settings;
 
 [TestFixture]
 public class SettingsHubTests
@@ -98,5 +98,4 @@ public class SettingsHubTests
                     : AuthorizationResult.Failed());
         }
     }
-
 }

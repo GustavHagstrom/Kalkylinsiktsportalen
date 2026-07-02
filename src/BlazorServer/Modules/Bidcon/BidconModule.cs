@@ -5,6 +5,7 @@ using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.Stores.MongoDb;
+using MudBlazor;
 
 namespace BlazorServer.Modules.Bidcon;
 
@@ -26,6 +27,17 @@ public static class BidconModule
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
         services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
+
+        registrationContext.UiComposition.AddSettingsArea(
+            new UiSettingsArea(
+                "bidcon",
+                "Bidcon API",
+                "Configure Bidcon API credentials.",
+                "/settings/bidcon",
+                20,
+                Icons.Material.Sharp.Api,
+                "ApiPolicy"),
+            typeof(BidconModule).FullName ?? nameof(BidconModule));
 
         return services;
     }

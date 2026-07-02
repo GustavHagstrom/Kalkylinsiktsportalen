@@ -1,0 +1,126 @@
+@page "/settings/bidcon"
+@attribute [Authorize(Policy = "ApiPolicy")]
+@inject IStringLocalizer<BidconSettingsPage> Localizer
+
+<SettingsPageBase Title="@Localizer["Bidcon API"]">
+    <SettingsSection LoadDataAsync="LoadDataAsync">
+        <KipTextField TValue="string" Label="@Localizer["Sparad nyckel"]" Value="@currentKey" />
+        <KipTextField TValue="string" Label="@Localizer["Sparad hemlighet"]" Value="@currentSecret" />
+        <KipTextField TValue="string" Label="@Localizer["Ny nyckel"]" Value="@newKey" ValueChanged="@UpdateKeyAsync" />
+        <KipTextField TValue="string" Label="@Localizer["Ny hemlighet"]" Value="@newSecret" ValueChanged="@UpdateSecretAsync" />
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">@Localizer["Spara"]</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="RemoveAsync" Disabled="@(!isConfigured)">@Localizer["Ta bort"]</MudButton>
+        </MudStack>
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <MudText Color="@statusColor">@statusMessage</MudText>
+        }
+    </SettingsSection>
+</SettingsPageBase>
+
+@inject Features.GetBidconCredentials.GetBidconCredentialsQueryHandler GetCredentialsHandler
+@inject Features.UpsertBidconCredentials.UpsertBidconCredentialsCommandHandler UpsertCredentialsHandler
+@inject Features.RemoveBidconCredentials.RemoveBidconCredentialsCommandHandler RemoveCredentialsHandler
+@inject IAuthService AuthService
+
+@code {
+    private string currentKey = string.Empty;
+    private string currentSecret = string.Empty;
+    private string newKey = string.Empty;
+    private string newSecret = string.Empty;
+    private string statusMessage = string.Empty;
+    private Color statusColor = Color.Default;
+    private bool isConfigured;
+
+    private Task UpdateKeyAsync(string value)
+    {
+        newKey = value;
+        return Task.CompletedTask;
+    }
+
+    private Task UpdateSecretAsync(string value)
+    {
+        newSecret = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadDataAsync()
+    {
+        if (AuthService.OrganizationId is null)
+        {
+            return;
+        }
+
+        var result = await GetCredentialsHandler.HandleAsync(
+            new Features.GetBidconCredentials.GetBidconCredentialsQuery(
+                new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId)),
+            CancellationToken.None);
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            return;
+        }
+
+        currentKey = result.Value.ApiKey;
+        currentSecret = result.Value.ApiSecret;
+        isConfigured = result.Value.IsConfigured;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (AuthService.OrganizationId is null)
+        {
+            return;
+        }
+
+        var organizationId = new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId);
+        var result = await UpsertCredentialsHandler.HandleAsync(
+            new Features.UpsertBidconCredentials.UpsertBidconCredentialsCommand(
+                organizationId,
+                newKey,
+                newSecret),
+            CancellationToken.None);
+
+        if (!result.IsSuccess)
+        {
+            statusColor = Color.Error;
+            statusMessage = string.Join(" ", result.Errors.Select(error => error.Message));
+            return;
+        }
+
+        newKey = string.Empty;
+        newSecret = string.Empty;
+        statusColor = Color.Success;
+        statusMessage = Localizer["Sparat."];
+        await LoadDataAsync();
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (AuthService.OrganizationId is null)
+        {
+            return;
+        }
+
+        var organizationId = new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId);
+        var result = await RemoveCredentialsHandler.HandleAsync(
+            new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(organizationId),
+            CancellationToken.None);
+
+        if (!result.IsSuccess)
+        {
+            statusColor = Color.Error;
+            statusMessage = string.Join(" ", result.Errors.Select(error => error.Message));
+            return;
+        }
+
+        currentKey = string.Empty;
+        currentSecret = string.Empty;
+        newKey = string.Empty;
+        newSecret = string.Empty;
+        isConfigured = false;
+        statusColor = Color.Success;
+        statusMessage = Localizer["Borttaget."];
+    }
+}

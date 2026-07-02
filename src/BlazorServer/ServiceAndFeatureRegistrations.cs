@@ -1,7 +1,7 @@
 ﻿using BlazorServer.Features.Access;
 using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
-using BlazorServer.Features.Settings;
+using BlazorServer.AppShell.Settings;
 using BlazorServer.Features.ViewSettings;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
@@ -60,13 +60,13 @@ public static class ServiceAndFeatureRegistrations
         }
 
         var registrationContext = builder.Services.AddAppRegistrationContext();
+        builder.Services.AddSettingsShell(registrationContext);
         builder.ConfigureFeatures(registrationContext, config =>
         {
             //config.AddAuthorizationPolicy(AuthConstants.RequireAuthenticatedUserPolicyName, policy =>
             //{
             //    policy.RequireAuthenticatedUser();
             //});
-            config.AddFeature<SettingsFeature>();
             config.AddFeature<AccessFeature>();
             config.AddFeature<BidconAccessFeature>();
             config.AddFeature<BidconBrowserFeature>();

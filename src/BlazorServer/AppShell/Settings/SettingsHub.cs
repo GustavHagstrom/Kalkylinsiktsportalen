@@ -2,7 +2,7 @@ using System.Security.Claims;
 using BlazorServer.Shared.Composition;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BlazorServer.Features.Settings;
+namespace BlazorServer.AppShell.Settings;
 
 public static class SettingsHub
 {
