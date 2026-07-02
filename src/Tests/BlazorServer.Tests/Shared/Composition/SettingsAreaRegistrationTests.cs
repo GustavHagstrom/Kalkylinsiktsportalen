@@ -110,6 +110,28 @@ public class SettingsAreaRegistrationTests
     }
 
     [Test]
+    public void UiCompositionRegistryDoesNotExposeSettingsSectionComposition()
+    {
+        var memberNames = typeof(UiCompositionRegistry)
+            .GetMembers()
+            .Select(member => member.Name);
+
+        Assert.That(memberNames, Does.Not.Contain("SettingsSections"));
+        Assert.That(memberNames, Does.Not.Contain("AddSettingsSection"));
+    }
+
+    [Test]
+    public void CompatibilityRenderCollectionDoesNotExposeSharedSettingsComponents()
+    {
+        var memberNames = typeof(RenderCollection)
+            .GetMembers()
+            .Select(member => member.Name);
+
+        Assert.That(memberNames, Does.Not.Contain("AddSharedSettingComponent"));
+        Assert.That(memberNames, Does.Not.Contain("GetSharedSettingComponents"));
+    }
+
+    [Test]
     public void ExistingTopNavigationRegistrationStillWorks()
     {
         var context = new AppRegistrationContext();

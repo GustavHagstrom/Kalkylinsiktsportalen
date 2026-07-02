@@ -40,11 +40,10 @@ public class SettingsHubTests
     }
 
     [Test]
-    public async Task HubDoesNotFallbackToOldSettingsNavigationOrComponentSections()
+    public async Task HubDoesNotFallbackToOldSettingsNavigation()
     {
         var registry = new UiCompositionRegistry();
         registry.AddSettingsNavigation(new UiNavigationItem("Legacy settings", "/settings/legacy", 10));
-        registry.AddSettingsSection(typeof(LegacySettingsSection), 10);
 
         var visibleAreas = await SettingsHub.GetVisibleAreasAsync(
             registry,
@@ -100,5 +99,4 @@ public class SettingsHubTests
         }
     }
 
-    private sealed class LegacySettingsSection;
 }

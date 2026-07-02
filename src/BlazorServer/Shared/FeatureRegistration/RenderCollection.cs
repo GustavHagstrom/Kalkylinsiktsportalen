@@ -42,12 +42,6 @@ public class RenderCollection
         uiComposition.AddSettingsNavigation(new UiNavigationItem(text, href, order, icon, policy, match));
     }
 
-    public void AddSharedSettingComponent<T>(int order = 0)
-        where T : ComponentBase
-    {
-        uiComposition.AddSettingsSection(typeof(T), order);
-    }
-
     public void SetLoginDisplayComponent<T>()
         where T : ComponentBase
     {
@@ -66,10 +60,6 @@ public class RenderCollection
     [Obsolete("Use UiCompositionRegistry.TopNavigation instead.")]
     public IEnumerable<(Type Type, int Order)> GetAppBarNavMenueComponents() =>
         legacyAppBarNavigationComponents;
-
-    [Obsolete("Use UiCompositionRegistry.SettingsSections instead.")]
-    public IEnumerable<Type> GetSharedSettingComponents() =>
-        uiComposition.SettingsSections.Select(component => component.ComponentType);
 
     [Obsolete("Use AddSettingsNavigation with navigation data instead.")]
     public void AddSettingNavigationComponent<T>()
