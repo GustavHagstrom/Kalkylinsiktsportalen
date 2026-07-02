@@ -11,7 +11,7 @@ public class EstimationSnapshotTests
     public void Create_PreservesVersionedPayloadAndMetadata()
     {
         var snapshotId = new EstimationSnapshotId(Guid.Parse("44444444-4444-4444-4444-444444444444"));
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var bidconEstimationId = new BidconEstimationId("EST-100");
         var sourceEditDate = new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc);
         var importedAt = new DateTimeOffset(2026, 06, 30, 10, 15, 00, TimeSpan.Zero);
@@ -46,7 +46,7 @@ public class EstimationSnapshotTests
         var exception = Assert.Throws<BidconDomainException>(() =>
             EstimationSnapshot.Create(
                 new EstimationSnapshotId(Guid.Empty),
-                new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a")),
+                new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a"),
                 new BidconEstimationId("EST-100"),
                 new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc),
                 DateTimeOffset.UtcNow,

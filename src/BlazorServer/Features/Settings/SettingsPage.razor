@@ -1,15 +1,45 @@
-﻿@page "/settings"
+@page "/settings"
 @layout SettingsLayout
-@inject RenderService RenderService
-
 @inject IStringLocalizer<SettingsPage> Localizer
-
 @inject UiCompositionRegistry UiComposition
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthorizationService AuthorizationService
 
-
-<SettingsPageBase>
-    @foreach (var component in UiComposition.SettingsSections)
+<SettingsPageBase Title="@Localizer["Inställningar"]">
+    @if (visibleAreas.Count == 0)
     {
-        @RenderService.Render(component.ComponentType);
+        <MudText Typo="Typo.body2">No module settings registered.</MudText>
+    }
+    else
+    {
+        <div class="settings-hub-list">
+            @foreach (var area in visibleAreas)
+            {
+                <a class="settings-hub-entry" href="@area.Href">
+                    @if (area.Icon is not null)
+                    {
+                        <MudIcon Icon="@area.Icon" Size="Size.Medium" />
+                    }
+
+                    <span class="settings-hub-entry-text">
+                        <MudText Typo="Typo.subtitle1">@area.Title</MudText>
+                        <MudText Typo="Typo.body2">@area.Description</MudText>
+                    </span>
+                </a>
+            }
+        </div>
     }
 </SettingsPageBase>
+
+@code {
+    private IReadOnlyList<UiSettingsArea> visibleAreas = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        visibleAreas = await SettingsHub.GetVisibleAreasAsync(
+            UiComposition,
+            authenticationState.User,
+            AuthorizationService);
+    }
+}

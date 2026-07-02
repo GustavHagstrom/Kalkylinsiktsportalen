@@ -12,7 +12,7 @@ public class BidconCredentialsTests
     [Test]
     public async Task GetBidconCredentials_ReturnsNotConfigured_WhenCredentialsAreMissing()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var handler = new GetBidconCredentialsQueryHandler(new RecordingBidconApiCredentialsStore());
 
         var result = await handler.HandleAsync(
@@ -32,7 +32,7 @@ public class BidconCredentialsTests
     [Test]
     public async Task GetBidconCredentials_ReturnsMaskedConfiguredCredentials_WhenCredentialsExist()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
@@ -64,7 +64,7 @@ public class BidconCredentialsTests
         var handler = new GetBidconCredentialsQueryHandler(store);
 
         var result = await handler.HandleAsync(
-            new GetBidconCredentialsQuery(new OrganizationId(Guid.Empty)),
+            new GetBidconCredentialsQuery(new OrganizationId(string.Empty)),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -80,7 +80,7 @@ public class BidconCredentialsTests
     [Test]
     public async Task UpsertBidconCredentials_SavesCredentials_WhenCommandIsValid()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var store = new RecordingBidconApiCredentialsStore();
         var verifier = new RecordingBidconCredentialsVerifier(true);
         var tokenCache = new RecordingBidconAccessTokenCache();
@@ -109,7 +109,7 @@ public class BidconCredentialsTests
     [Test]
     public async Task UpsertBidconCredentials_KeepsExistingCredentials_WhenVerificationFails()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
@@ -150,7 +150,7 @@ public class BidconCredentialsTests
             new RecordingBidconAccessTokenCache());
 
         var result = await handler.HandleAsync(
-            new UpsertBidconCredentialsCommand(new OrganizationId(Guid.Empty), " ", string.Empty),
+            new UpsertBidconCredentialsCommand(new OrganizationId(string.Empty), " ", string.Empty),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -169,7 +169,7 @@ public class BidconCredentialsTests
     [Test]
     public async Task RemoveBidconCredentials_RemovesCredentialsAndInvalidatesToken_WhenOrganizationExists()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {

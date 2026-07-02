@@ -14,7 +14,7 @@ public class ProjectsModuleFoundationTests
     {
         var store = new InMemoryProjectStore();
         var commandHandler = new CreateProjectCommandHandler(store);
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var projectId = new ProjectId(Guid.Parse("0c67ee33-0924-4515-937f-8dd77efc1dc5"));
         var createdBy = new UserId(Guid.Parse("9178ba3d-461f-440e-9388-6deef941767b"));
         var createdAt = new DateTimeOffset(2026, 06, 25, 13, 30, 00, TimeSpan.Zero);
@@ -48,7 +48,7 @@ public class ProjectsModuleFoundationTests
 
         var result = await commandHandler.HandleAsync(
             new CreateProjectCommand(
-                new OrganizationId(Guid.NewGuid()),
+                new OrganizationId(Guid.NewGuid().ToString()),
                 new ProjectId(Guid.NewGuid()),
                 new UserId(Guid.NewGuid()),
                 DateTimeOffset.UtcNow,
@@ -70,7 +70,7 @@ public class ProjectsModuleFoundationTests
         var exception = Assert.Throws<ProjectDomainException>(() =>
             Project.Create(
                 new ProjectId(Guid.NewGuid()),
-                new OrganizationId(Guid.Empty),
+                new OrganizationId(string.Empty),
                 new UserId(Guid.NewGuid()),
                 DateTimeOffset.UtcNow,
                 "Kvarteret Linden"));

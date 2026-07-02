@@ -13,7 +13,7 @@ public class ImportEstimationSnapshotTests
     [Test]
     public async Task ImportEstimationSnapshot_SavesCompleteSnapshot_WhenBidconReturnsDetails()
     {
-        var organizationId = new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a"));
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var bidconEstimationId = new BidconEstimationId("EST-100");
         var store = new RecordingEstimationSnapshotStore();
         var handler = new ImportEstimationSnapshotCommandHandler(
@@ -59,7 +59,7 @@ public class ImportEstimationSnapshotTests
 
         var result = await handler.HandleAsync(
             new ImportEstimationSnapshotCommand(
-                new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a")),
+                new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a"),
                 new BidconEstimationId("EST-100")),
             CancellationToken.None);
 
@@ -83,7 +83,7 @@ public class ImportEstimationSnapshotTests
 
         var result = await handler.HandleAsync(
             new ImportEstimationSnapshotCommand(
-                new OrganizationId(Guid.Empty),
+                new OrganizationId(string.Empty),
                 new BidconEstimationId(" ")),
             CancellationToken.None);
 
@@ -114,7 +114,7 @@ public class ImportEstimationSnapshotTests
 
         var result = await handler.HandleAsync(
             new ImportEstimationSnapshotCommand(
-                new OrganizationId(Guid.Parse("1c928774-3e22-4a94-9146-8784fb54d67a")),
+                new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a"),
                 new BidconEstimationId("EST-100")),
             CancellationToken.None);
 
