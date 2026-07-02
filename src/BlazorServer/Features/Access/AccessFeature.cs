@@ -19,14 +19,12 @@ public class AccessFeature : IFeature
         });
     }
 
-    public void RegisterClaims(ClaimInfoCollection collection)
+    public void RegisterClaims(AccessClaimRegistry collection)
     {
-        collection.AddAccessClaimInfo(new AccessClaimInfo()
-        {
-            Value = FeatureConstants.Authorization.AccessClaimValue,
-            Name = "Rättigheter",
-            Description = "Skapa, ändra och ta bort användarrättigheter och roller."
-        });
+        collection.Register(new AccessClaimInfo(
+            FeatureConstants.Authorization.AccessClaimValue,
+            "Rättigheter",
+            "Skapa, ändra och ta bort användarrättigheter och roller."));
     }
 
     public void RegisterRenderObjects(RenderCollection collection)

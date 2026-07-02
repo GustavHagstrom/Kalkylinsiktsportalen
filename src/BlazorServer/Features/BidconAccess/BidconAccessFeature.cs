@@ -19,14 +19,12 @@ public class BidconAccessFeature : IFeature
         
     }
 
-    public void RegisterClaims(ClaimInfoCollection collection)
+    public void RegisterClaims(AccessClaimRegistry collection)
     {
-        collection.AddAccessClaimInfo(new AccessClaimInfo
-        {
-            Name = "BidconApiAccess",
-            Value = FeatureConstants.Authorization.AccessClaimValue,
-            Description = "Ändra Api-nyckel och hemlighet."
-        });
+        collection.Register(new AccessClaimInfo(
+            FeatureConstants.Authorization.AccessClaimValue,
+            "BidconApiAccess",
+            "Ändra Api-nyckel och hemlighet."));
     }
 
     public void RegisterRenderObjects(RenderCollection collection)

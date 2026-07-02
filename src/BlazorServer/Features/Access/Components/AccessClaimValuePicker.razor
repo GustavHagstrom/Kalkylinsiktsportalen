@@ -1,6 +1,6 @@
 <MudSimpleTable Dense="true" Bordered="false">
     <tbody>
-        @foreach (var claimInfo in ClaimInfoCollection.AccessClaimInfos)
+        @foreach (var claimInfo in AccessClaims.Claims)
         {
             <tr>
                 <td class="pl-2">
@@ -16,7 +16,7 @@
     </tbody>
 </MudSimpleTable>
 
-@inject ClaimInfoCollection ClaimInfoCollection
+@inject AccessClaimRegistry AccessClaims
 
 @code{
     /// <summary>

@@ -19,14 +19,12 @@ public class ViewSettingsFeature : IFeature
         });
     }
 
-    public void RegisterClaims(ClaimInfoCollection collection)
+    public void RegisterClaims(AccessClaimRegistry collection)
     {
-        collection.AddAccessClaimInfo(new AccessClaimInfo
-        {
-            Name = "ViewSettingsAccess",
-            Value = FeatureConstants.Authorization.AccessClaimValue,
-            Description = "Tillåts redigera mallarna och sätta rättigheter på dem."
-        });
+        collection.Register(new AccessClaimInfo(
+            FeatureConstants.Authorization.AccessClaimValue,
+            "ViewSettingsAccess",
+            "Tillåts redigera mallarna och sätta rättigheter på dem."));
     }
 
     public void RegisterRenderObjects(RenderCollection collection)

@@ -26,7 +26,7 @@ public class FeatureRegistrator
 
     public RenderCollection RenderCollection => registrationContext.RenderCollection;
 
-    public ClaimInfoCollection ClaimInfoCollection => registrationContext.ClaimInfoCollection;
+    public AccessClaimRegistry AccessClaims => registrationContext.AccessClaims;
 
     public PolicyCollection Policies => registrationContext.Policies;
 
@@ -36,7 +36,7 @@ public class FeatureRegistrator
         features.Add(feature);
         feature.RegisterServices(builder.Services);
         feature.RegisterRenderObjects(RenderCollection);
-        feature.RegisterClaims(ClaimInfoCollection);
+        feature.RegisterClaims(AccessClaims);
         feature.AddAuthorizationPolicies(Policies);
     }
     public void AddAuthorizationPolicy(string name, Action<AuthorizationPolicyBuilder> builder)

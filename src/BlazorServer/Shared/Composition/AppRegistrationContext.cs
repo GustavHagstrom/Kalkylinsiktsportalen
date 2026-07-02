@@ -13,7 +13,7 @@ public sealed class AppRegistrationContext
 
     public RenderCollection RenderCollection { get; }
 
-    public ClaimInfoCollection ClaimInfoCollection { get; } = new();
+    public AccessClaimRegistry AccessClaims { get; } = new();
 
     public PolicyCollection Policies { get; } = new();
 }

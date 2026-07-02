@@ -17,7 +17,7 @@ public static class AppRegistrationServiceCollectionExtensions
     {
         services.AddSingleton(registrationContext.UiComposition);
         services.AddSingleton(registrationContext.RenderCollection);
-        services.AddSingleton(registrationContext.ClaimInfoCollection);
+        services.AddSingleton(registrationContext.AccessClaims);
         services.AddAuthorization(options =>
         {
             foreach (var policy in registrationContext.Policies.PolicyList)

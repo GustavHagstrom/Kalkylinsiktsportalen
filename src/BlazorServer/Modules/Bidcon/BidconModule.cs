@@ -38,7 +38,6 @@ public static class BidconModule
                 Icons.Material.Sharp.Api,
                 "ApiPolicy"),
             typeof(BidconModule).FullName ?? nameof(BidconModule));
-
         return services;
     }
 }

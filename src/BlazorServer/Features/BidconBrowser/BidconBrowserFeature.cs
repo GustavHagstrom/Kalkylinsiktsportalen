@@ -13,14 +13,12 @@ public class BidconBrowserFeature : IFeature
 
     }
 
-    public void RegisterClaims(ClaimInfoCollection collection)
+    public void RegisterClaims(AccessClaimRegistry collection)
     {
-        collection.AddAccessClaimInfo(new AccessClaimInfo 
-        { 
-            Name = "Bidconutforskaren", 
-            Description = "Använda kalkylutforskaren", 
-            Value = FeatureConstants.Authorization.AccessClaimValue
-        });
+        collection.Register(new AccessClaimInfo(
+            FeatureConstants.Authorization.AccessClaimValue,
+            "Bidconutforskaren",
+            "Använda kalkylutforskaren"));
     }
 
     public void RegisterRenderObjects(RenderCollection collection)

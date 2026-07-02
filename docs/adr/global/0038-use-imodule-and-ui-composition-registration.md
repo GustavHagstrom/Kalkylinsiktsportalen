@@ -32,7 +32,7 @@ The older `SettingsNavigation` registration remains compatibility plumbing for o
 
 ## Rationale
 
-The old `IFeature` contract mixed application startup concerns with feature naming and exposed low-level collections such as `RenderCollection`, `ClaimInfoCollection`, and `PolicyCollection`.
+The old `IFeature` contract mixed application startup concerns with feature naming and exposed low-level collections such as `RenderCollection`, `AccessClaimRegistry`, and `PolicyCollection`.
 
 The target module contract should be a deeper interface: callers learn one registration method, while the implementation can evolve behind named surfaces. This keeps module registration explicit without turning the application into a plugin platform.
 
@@ -46,7 +46,7 @@ Settings areas are also shell-discovered data, but not generic settings navigati
 - Old `Features/*` code may keep using `IFeature` until migrated.
 - `IFeature` and `IModule` are not inheritance-related.
 - Shared runtime data such as UI composition, claims, and policies should live in neutral composition types, not in the feature or module registration APIs.
-- `ClaimInfoCollection` and `PolicyCollection` are composition data; feature and module registration are only contribution paths.
+- `AccessClaimRegistry` and `PolicyCollection` are composition data; feature and module registration are only contribution paths.
 - The old and new registration paths should be physically separated in folders and namespaces.
 - `ConfigureFeatures(...)` and `ConfigureModules(...)` can run side by side and contribute to the same runtime registration context.
 - `RenderCollection` is compatibility plumbing, not the preferred interface for new modules.

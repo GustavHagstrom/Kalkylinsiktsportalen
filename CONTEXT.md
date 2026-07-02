@@ -27,7 +27,7 @@ Gruppering av användare som används tillsammans med portalens accessregler.
 _Avoid_: Roll
 
 **Access claim**:
-Funktionellt rättighetsvärde som styr vad användare eller roller får göra.
+Funktionellt rättighetsvärde som styr vad användare eller roller får göra. Claimens value är dess globala stabila identitet och får bara ha en betydelse i systemet.
 
 **Estimation**:
 Centralt affärsobjekt från Bidcon med kalkylinformation och metadata.
