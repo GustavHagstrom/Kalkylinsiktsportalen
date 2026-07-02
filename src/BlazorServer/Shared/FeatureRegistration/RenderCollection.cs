@@ -31,6 +31,9 @@ public class RenderCollection
         uiComposition.AddTopNavigation(new UiNavigationItem(text, href, order, icon, policy, match));
     }
 
+    /// <summary>
+    /// Compatibility registration for old IFeature settings links. The Settings Hub ignores these entries.
+    /// </summary>
     public void AddSettingsNavigation(
         string text,
         string href,

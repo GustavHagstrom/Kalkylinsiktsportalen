@@ -10,6 +10,9 @@ public sealed class UiCompositionRegistry
 
     public IReadOnlyList<UiNavigationItem> TopNavigation => Ordered(topNavigation);
 
+    /// <summary>
+    /// Compatibility data for old IFeature settings navigation. The Settings Hub does not consume it.
+    /// </summary>
     public IReadOnlyList<UiNavigationItem> SettingsNavigation => Ordered(settingsNavigation);
 
     public IReadOnlyList<UiSettingsArea> SettingsAreas => Ordered(settingsAreas);
@@ -21,6 +24,10 @@ public sealed class UiCompositionRegistry
         AddNavigation(topNavigation, item, nameof(TopNavigation));
     }
 
+    /// <summary>
+    /// Registers compatibility settings navigation for old IFeature code.
+    /// New module settings should register a Settings Area instead.
+    /// </summary>
     public void AddSettingsNavigation(UiNavigationItem item)
     {
         AddNavigation(settingsNavigation, item, nameof(SettingsNavigation));

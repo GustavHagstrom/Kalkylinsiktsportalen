@@ -22,6 +22,7 @@ public class ProjectsModuleRegistrationTests
         {
             Assert.That(provider.GetRequiredService<IProjectStore>(), Is.Not.Null);
             Assert.That(provider.GetRequiredService<CreateProjectCommandHandler>(), Is.Not.Null);
+            Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
         });
     }
 }

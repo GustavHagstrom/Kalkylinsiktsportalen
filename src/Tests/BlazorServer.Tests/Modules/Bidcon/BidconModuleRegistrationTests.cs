@@ -25,6 +25,7 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconApiCredentialsStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IEstimationSnapshotStore)), Is.True);
+            Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
         });
     }
 }
