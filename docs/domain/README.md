@@ -27,11 +27,12 @@ Lägg inte sådant i ADR:er som standard. ADR:er används bara när ett modell- 
 
 ## Karta
 
+- [access.md](access.md) - Access-modulens ansvar, access grants, claim-katalog och externa role/group-grans
 - [Bidcon.md](Bidcon.md) - Bidcon-modulens integration, snapshots, importregler och normaliserade payload
 - [projects.md](projects.md) - Projects-modulens aggregates, relationer, invariants och policyer
 - [reports.md](reports.md) - Reports-modulens aggregate, livscykel, relationer och policyer
 
-Senare kan fler moduldokument läggas till, till exempel för `Access` och `Organizations`.
+Senare kan fler moduldokument läggas till, till exempel för `Organizations`.
 
 ## Gemensamma Modelleringsprinciper
 

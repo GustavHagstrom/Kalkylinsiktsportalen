@@ -23,11 +23,15 @@ Identifierad person i portalen, typiskt via Microsoft Identity eller Graph.
 _Avoid_: Användare
 
 **Role**:
-Gruppering av användare som används tillsammans med portalens accessregler.
+Extern auth-grupp som används tillsammans med portalens accessregler. Portalen äger inte en egen rollkatalog i den nuvarande modellen.
 _Avoid_: Roll
 
 **Access claim**:
 Funktionellt rättighetsvärde som styr vad användare eller roller får göra. Claimens value är dess globala stabila identitet och får bara ha en betydelse i systemet.
+
+**Access grant**:
+Organisationsbunden tilldelning av en `Access claim` eller view-permission till en `User` eller extern `Role/Group`. Ett grant beskriver vad någon får göra i en Organization-kontext; själva access claimens globala betydelse ändras inte av grantet.
+_Avoid_: Access claim när du menar den lagrade tilldelningen
 
 **Estimation**:
 Centralt affärsobjekt från Bidcon med kalkylinformation och metadata.

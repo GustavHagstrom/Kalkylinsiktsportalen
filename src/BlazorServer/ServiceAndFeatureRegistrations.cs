@@ -1,8 +1,8 @@
-﻿using BlazorServer.Features.Access;
 using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Features.ViewSettings;
+using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Shared.Components.Authentication;
@@ -67,7 +67,6 @@ public static class ServiceAndFeatureRegistrations
             //{
             //    policy.RequireAuthenticatedUser();
             //});
-            config.AddFeature<AccessFeature>();
             config.AddFeature<BidconAccessFeature>();
             config.AddFeature<BidconBrowserFeature>();
             config.AddFeature<ViewSettingsFeature>();
@@ -82,6 +81,7 @@ public static class ServiceAndFeatureRegistrations
             }
         });
 
+        builder.Services.AddAccessModule(registrationContext);
         builder.Services.AddBidconModule(registrationContext);
         builder.Services.AddProjectsModule(registrationContext);
 

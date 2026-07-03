@@ -28,6 +28,7 @@ Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som
 - [../CONTEXT.md](../CONTEXT.md) - kanonisk ordlista för domänspråk
 - [product-and-domain.md](product-and-domain.md) - produktbeskrivning, övergripande domänkarta och huvudflöden
 - [domain/README.md](domain/README.md) - levande domänmodell och mall för modulvisa domändokument
+- [domain/access.md](domain/access.md) - Access-modulens grants, claim-gräns och externa role/group-ansvar
 - [domain/projects.md](domain/projects.md) - Projects-modulens aggregates, invariants och policyer
 - [domain/reports.md](domain/reports.md) - Reports-modulens aggregate, livscykel och policyer
 - [architecture/target-architecture.md](architecture/target-architecture.md) - målarkitektur för modulär monolit, snapshots och utbytbar frontend

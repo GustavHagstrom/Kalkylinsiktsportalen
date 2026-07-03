@@ -1,3 +1,4 @@
+@page "/settings/access/users/{UserId}"
 @page "/Settings/rights/UserEdit/{UserId}"
 @inject IStringLocalizer<EditUserAccessPage> Localizer
 
@@ -19,7 +20,7 @@
     </SettingsSection>
 </SettingsPageBase>
 
-@inject IAccessStore AccessStore
+@inject FunctionalAccessGrantUseCases AccessGrants
 @inject IRoleService RoleService
 @inject IUserService UserService
 @inject IAuthService AuthService
@@ -39,7 +40,7 @@
         SetIsLoading(true);
         if (UserId is not null && AuthService.OrganizationId is not null)
         {
-            UserAccess = await AccessStore.GetUserAccessAsync(UserId, AuthService.OrganizationId);
+            UserAccess = await AccessGrants.GetUserAccessAsync(UserId, AuthService.OrganizationId);
             User = await UserService.GetUserAsync(UserId);
             AllRoles = await RoleService.GetRolesAsync(AuthService.OrganizationId);
             var pickedRoles = await RoleService.GetRolesForUserAsync(UserId, AuthService.OrganizationId);
@@ -58,12 +59,12 @@
         if (pickedRecord.IsPicked && !UserAccess.AccessClaimValues.Contains(pickedRecord.Data.Value))
         {
             UserAccess.AccessClaimValues.Add(pickedRecord.Data.Value);
-            return AccessStore.AddUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
+            return AccessGrants.GrantUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
         }
         else
         {
             UserAccess.AccessClaimValues.Remove(pickedRecord.Data.Value);
-            return AccessStore.DeleteUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
+            return AccessGrants.RevokeUserAccessAsync(UserAccess.UserId, UserAccess.OrganizationId, pickedRecord.Data.Value);
         }
     }
 }

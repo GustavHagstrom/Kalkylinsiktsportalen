@@ -1,3 +1,4 @@
+@page "/settings/access/roles/{RoleId}"
 @page "/Settings/rights/RoleEdit/{RoleId}"
 @inject IStringLocalizer<EditRoleAccessPage> Localizer
 
@@ -17,7 +18,7 @@
 </SettingsPageBase>
 
 
-@inject IAccessStore AccessStore
+@inject FunctionalAccessGrantUseCases AccessGrants
 @inject IUserService UserService
 @inject IRoleService RoleService
 @inject IDialogService DialogService
@@ -46,7 +47,7 @@
         SetIsLoading(true);
         if (RoleId is not null && AuthService.OrganizationId is not null)
         {
-            RoleAccess = await AccessStore.GetRoleAccessAsync(RoleId, AuthService.OrganizationId);
+            RoleAccess = await AccessGrants.GetRoleAccessAsync(RoleId, AuthService.OrganizationId);
             Role = await RoleService.GetRoleAsync(RoleId);
             PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, AuthService.OrganizationId);
         }
@@ -63,12 +64,12 @@
         if (checkedRecord.IsPicked && !RoleAccess.AccessClaimValues.Contains(checkedRecord.Data.Value))
         {
             RoleAccess.AccessClaimValues.Add(checkedRecord.Data.Value);
-            return AccessStore.AddRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return AccessGrants.GrantRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
         }
         else
         {
             RoleAccess.AccessClaimValues.Remove(checkedRecord.Data.Value);
-            return AccessStore.DeleteRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return AccessGrants.RevokeRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
         }
         
     }

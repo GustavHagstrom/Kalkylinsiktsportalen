@@ -3,9 +3,9 @@ public static class FeatureConstants
 {
     public static class Routes
     {
-        public const string UserAccessEdit = "/Settings/rights/UserEdit";
-        public const string RoleAccessEdit = "/Settings/rights/RoleEdit";
-        public const string SettingsPage = "/Settings/rights";
+        public const string UserAccessEdit = "/settings/access/users";
+        public const string RoleAccessEdit = "/settings/access/roles";
+        public const string SettingsPage = "/settings/access";
 
     }
     public static class Authorization

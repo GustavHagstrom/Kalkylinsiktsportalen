@@ -1,4 +1,4 @@
-ï»¿@page "/Settings/views/{ViewId}"
+@page "/Settings/views/{ViewId}"
 
     
 @if(View is not null)
@@ -6,9 +6,9 @@
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
             
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["LÃ¤gg till datasektion"]</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["LÃ¤gg till bladsektion"]</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["LÃ¤gg till sidbrytning"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["Lägg till sidbrytning"]</MudButton>
 
             <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
             
@@ -49,6 +49,8 @@
 
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IViewStore ViewStore
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ViewAccessDecisionUseCases ViewAccessDecisions
 
 @code {
     [Parameter] public string? ViewId { get; set; }
@@ -80,6 +82,15 @@
     {
         if (ViewId is null) return;
         SetLoading(true);
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!await ViewAccessDecisions.CanEditViewAsync(authenticationState.User, ViewId))
+        {
+            View = null;
+            Editor = null;
+            SetLoading(false);
+            return;
+        }
+
         View = await ViewStore.GetAsync(ViewId);
         if(View is not null)
         {
