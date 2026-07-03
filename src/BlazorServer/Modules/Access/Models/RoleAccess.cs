@@ -1,4 +1,4 @@
-﻿namespace BlazorServer.Shared.Models;
+namespace BlazorServer.Modules.Access.Models;
 public class RoleAccess
 {
     public string RoleId { get; set; } = string.Empty;

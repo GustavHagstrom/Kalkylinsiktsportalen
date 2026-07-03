@@ -1,11 +1,12 @@
-﻿using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores.MongoDb.Enteties;
-using BlazorServer.Shared.Stores.MongoDb.Mappers;
+using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
+using BlazorServer.Modules.Access.Models;
+using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
+using BlazorServer.Modules.Access.Infrastructure.MongoDb.Mappers;
 using MongoDB.Driver;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Stores;
+namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 
-public class MongoAccessStore : IAccessStore
+public class MongoAccessStore : IFunctionalAccessGrantStore
 {
     private readonly IMongoCollection<MongoUserAccess> _userAccessCollection;
     private readonly IMongoCollection<MongoRoleAccess> _roleAccessCollection;

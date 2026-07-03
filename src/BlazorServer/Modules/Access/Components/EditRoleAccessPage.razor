@@ -17,7 +17,9 @@
 </SettingsPageBase>
 
 
-@inject FunctionalAccessGrantUseCases AccessGrants
+@inject GetRoleFunctionalAccessHandler GetRoleAccess
+@inject GrantRoleFunctionalAccessHandler GrantRoleAccess
+@inject RevokeRoleFunctionalAccessHandler RevokeRoleAccess
 @inject IUserService UserService
 @inject IRoleService RoleService
 @inject IDialogService DialogService
@@ -37,7 +39,7 @@
     // string Title => Role is null ? "Roll: " : $"{Localizer["Roll:"]} {Role.Name}";
     void EditUser(User user)
     {
-        NavigationManager.NavigateTo($"{FeatureConstants.Routes.UserAccessEdit}/{user.Id}");
+        NavigationManager.NavigateTo($"{Constants.Routes.UserAccessEdit}/{user.Id}");
     }
 
 
@@ -46,7 +48,8 @@
         SetIsLoading(true);
         if (RoleId is not null && AuthService.OrganizationId is not null)
         {
-            RoleAccess = await AccessGrants.GetRoleAccessAsync(RoleId, AuthService.OrganizationId);
+            RoleAccess = await GetRoleAccess.HandleAsync(
+                new GetRoleFunctionalAccessQuery(RoleId, AuthService.OrganizationId));
             Role = await RoleService.GetRoleAsync(RoleId);
             PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, AuthService.OrganizationId);
         }
@@ -63,12 +66,18 @@
         if (checkedRecord.IsPicked && !RoleAccess.AccessClaimValues.Contains(checkedRecord.Data.Value))
         {
             RoleAccess.AccessClaimValues.Add(checkedRecord.Data.Value);
-            return AccessGrants.GrantRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return GrantRoleAccess.HandleAsync(new GrantRoleFunctionalAccessCommand(
+                RoleAccess.RoleId,
+                RoleAccess.OrgId,
+                checkedRecord.Data.Value));
         }
         else
         {
             RoleAccess.AccessClaimValues.Remove(checkedRecord.Data.Value);
-            return AccessGrants.RevokeRoleAccessAsync(RoleAccess.RoleId, RoleAccess.OrgId, checkedRecord.Data.Value);
+            return RevokeRoleAccess.HandleAsync(new RevokeRoleFunctionalAccessCommand(
+                RoleAccess.RoleId,
+                RoleAccess.OrgId,
+                checkedRecord.Data.Value));
         }
         
     }

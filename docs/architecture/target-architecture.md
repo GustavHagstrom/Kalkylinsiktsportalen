@@ -14,7 +14,7 @@ Den sammanfattande riktningen är:
 
 - modulär monolit som systemform
 - vertical slices som huvudsaklig arbetsform
-- pragmatisk CQRS för nya use cases
+- pragmatisk CQRS för nya feature slices
 - clean architecture som beroendeprincip
 - DDD-light för domänmodellering där det ger verkligt värde
 

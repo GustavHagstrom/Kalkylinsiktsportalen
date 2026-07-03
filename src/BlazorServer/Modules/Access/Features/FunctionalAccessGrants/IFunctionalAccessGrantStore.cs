@@ -1,8 +1,8 @@
-﻿using BlazorServer.Shared.Models;
+using BlazorServer.Modules.Access.Models;
 
-namespace BlazorServer.Shared.Stores;
+namespace BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 
-public interface IAccessStore
+public interface IFunctionalAccessGrantStore
 {
     Task<UserAccess> GetUserAccessAsync(string userId, string orgId);
     Task<RoleAccess> GetRoleAccessAsync(string roleId, string orgId);

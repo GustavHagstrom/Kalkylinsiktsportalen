@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
 
-namespace BlazorServer.Shared.Services.Authentication;
+namespace BlazorServer.Modules.Access.Authentication;
 
-public class MemoryClaimsCache : IClaimsCache
+public class MemoryAccessClaimsCache : IAccessClaimsCache
 {
     private readonly IMemoryCache _memoryCache;
     private MemoryCacheEntryOptions _cacheOptions = new MemoryCacheEntryOptions
@@ -10,7 +10,7 @@ public class MemoryClaimsCache : IClaimsCache
         AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
     };
 
-    public MemoryClaimsCache(IMemoryCache memoryCache)
+    public MemoryAccessClaimsCache(IMemoryCache memoryCache)
     {
         _memoryCache = memoryCache;
     }
@@ -33,24 +33,4 @@ public class MemoryClaimsCache : IClaimsCache
         _memoryCache.Remove($"accessClaims:{userId}:{orgId}");
     }
 
-    public void SetIsAdminRole(string userId, string orgId)
-    {
-        _memoryCache.Set($"isAdminRole:{userId}:{orgId}", true, _cacheOptions);
-    }
-
-    public bool TryGetIsAdminRole(string userId, string orgId, out bool isAdmin)
-    {
-        if (_memoryCache.TryGetValue($"isAdminRole:{userId}:{orgId}", out var cachedIsAdminObj) && cachedIsAdminObj is bool isAdminRole)
-        {
-            isAdmin = isAdminRole;
-            return true;
-        }
-        isAdmin = false;
-        return false;
-    }
-
-    public void ClearIsAdminRole(string userId, string orgId)
-    {
-        _memoryCache.Remove($"isAdminRole:{userId}:{orgId}");
-    }
 }

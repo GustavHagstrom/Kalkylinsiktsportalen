@@ -1,25 +1,26 @@
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
-using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores;
+using BlazorServer.Modules.Access.Models;
 
 namespace BlazorServer.Tests.Modules.Access;
 
 [TestFixture]
-public class FunctionalAccessGrantUseCasesTests
+public class FunctionalAccessGrantHandlersTests
 {
     [Test]
     public async Task UserAccessGrantsCanBeReadGrantedRevokedAndGrantedIdempotently()
     {
         var store = new RecordingAccessStore();
-        var useCases = new FunctionalAccessGrantUseCases(store);
+        var grant = new GrantUserFunctionalAccessHandler(store);
+        var revoke = new RevokeUserFunctionalAccessHandler(store);
+        var get = new GetUserFunctionalAccessHandler(store);
 
-        await useCases.GrantUserAccessAsync("user-1", "org-1", "CanManageAccess");
-        await useCases.GrantUserAccessAsync("user-1", "org-1", "CanManageAccess");
+        await grant.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        await grant.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
 
-        var granted = await useCases.GetUserAccessAsync("user-1", "org-1");
+        var granted = await get.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
 
-        await useCases.RevokeUserAccessAsync("user-1", "org-1", "CanManageAccess");
-        var revoked = await useCases.GetUserAccessAsync("user-1", "org-1");
+        await revoke.HandleAsync(new RevokeUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        var revoked = await get.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
 
         Assert.Multiple(() =>
         {
@@ -34,15 +35,17 @@ public class FunctionalAccessGrantUseCasesTests
     public async Task RoleAccessGrantsCanBeReadGrantedRevokedAndGrantedIdempotently()
     {
         var store = new RecordingAccessStore();
-        var useCases = new FunctionalAccessGrantUseCases(store);
+        var grant = new GrantRoleFunctionalAccessHandler(store);
+        var revoke = new RevokeRoleFunctionalAccessHandler(store);
+        var get = new GetRoleFunctionalAccessHandler(store);
 
-        await useCases.GrantRoleAccessAsync("role-1", "org-1", "CanManageAccess");
-        await useCases.GrantRoleAccessAsync("role-1", "org-1", "CanManageAccess");
+        await grant.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        await grant.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
 
-        var granted = await useCases.GetRoleAccessAsync("role-1", "org-1");
+        var granted = await get.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
 
-        await useCases.RevokeRoleAccessAsync("role-1", "org-1", "CanManageAccess");
-        var revoked = await useCases.GetRoleAccessAsync("role-1", "org-1");
+        await revoke.HandleAsync(new RevokeRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        var revoked = await get.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
 
         Assert.Multiple(() =>
         {
@@ -57,16 +60,18 @@ public class FunctionalAccessGrantUseCasesTests
     public async Task RuntimeAccessCombinesDirectUserAndExternalRoleGroupGrants()
     {
         var store = new RecordingAccessStore();
-        var useCases = new FunctionalAccessGrantUseCases(store);
+        var grantUser = new GrantUserFunctionalAccessHandler(store);
+        var grantRole = new GrantRoleFunctionalAccessHandler(store);
+        var getEffectiveClaims = new GetEffectiveFunctionalAccessClaimsHandler(store);
 
-        await useCases.GrantUserAccessAsync("user-1", "org-1", "DirectAccess");
-        await useCases.GrantRoleAccessAsync("role-1", "org-1", "GroupAccess");
-        await useCases.GrantRoleAccessAsync("role-2", "org-1", "GroupAccess");
+        await grantUser.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "DirectAccess"));
+        await grantRole.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "GroupAccess"));
+        await grantRole.HandleAsync(new GrantRoleFunctionalAccessCommand("role-2", "org-1", "GroupAccess"));
 
-        var effectiveClaims = await useCases.GetAccessClaimsForUserAsync(
+        var effectiveClaims = await getEffectiveClaims.HandleAsync(new GetEffectiveFunctionalAccessClaimsQuery(
             "user-1",
             ["role-1", "role-2"],
-            "org-1");
+            "org-1"));
 
         Assert.That(effectiveClaims.Select(claim => claim.Value), Is.EquivalentTo([
             "DirectAccess",
@@ -74,7 +79,7 @@ public class FunctionalAccessGrantUseCasesTests
         ]));
     }
 
-    private sealed class RecordingAccessStore : IAccessStore
+    private sealed class RecordingAccessStore : IFunctionalAccessGrantStore
     {
         private readonly Dictionary<(string UserId, string OrgId), HashSet<string>> userAccess = [];
         private readonly Dictionary<(string RoleId, string OrgId), HashSet<string>> roleAccess = [];

@@ -1,7 +1,7 @@
-﻿using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores.MongoDb.Enteties;
+using BlazorServer.Modules.Access.Models;
+using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Mappers;
+namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Mappers;
 
 public static class MongoUserAccessMapper
 {

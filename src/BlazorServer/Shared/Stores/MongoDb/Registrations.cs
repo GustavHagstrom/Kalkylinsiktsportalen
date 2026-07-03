@@ -1,4 +1,4 @@
-﻿using BlazorServer.Shared.Stores.MongoDb.Enteties;
+using BlazorServer.Shared.Stores.MongoDb.Enteties;
 using BlazorServer.Shared.Stores.MongoDb.Stores;
 using MongoDB.Driver;
 
@@ -10,8 +10,6 @@ public static class Registrations
     static IServiceCollection RegisterSharedMongoCollections(this IServiceCollection services)
     {
         services.AddMongoCollection<MongoUserSettings>("UserSettings");
-        services.AddMongoCollection<MongoUserAccess>("UserAccess");
-        services.AddMongoCollection<MongoRoleAccess>("RoleAccess");
         services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
         services.AddMongoCollection<MongoView>("Views");
         return services;
@@ -20,7 +18,6 @@ public static class Registrations
     {
         services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
         services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
-        services.AddSingleton<IAccessStore, MongoAccessStore>();
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         services.AddSingleton<IViewStore, MongoViewStore>();
         return services;

@@ -8,9 +8,9 @@ public class RoleService : IRoleService
 {
     private readonly GraphServiceClient _graphClient;
     private readonly IUserService _userService;
-    private readonly IClaimsCache _cache;
+    private readonly IAdminRoleCache _cache;
 
-    public RoleService(GraphServiceClient graphClient, IUserService userService, IClaimsCache claimsCache)
+    public RoleService(GraphServiceClient graphClient, IUserService userService, IAdminRoleCache claimsCache)
     {
         _graphClient = graphClient;
         _userService = userService;

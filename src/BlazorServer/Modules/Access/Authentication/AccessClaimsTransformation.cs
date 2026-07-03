@@ -1,21 +1,22 @@
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Extensions;
-using BlazorServer.Shared.Models;
+using BlazorServer.Modules.Access.Models;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
-namespace BlazorServer.Shared.Services.Authentication;
+namespace BlazorServer.Modules.Access.Authentication;
 
-public class ClaimsTransformation : IClaimsTransformation
+public class AccessClaimsTransformation : IClaimsTransformation
 {
-    private readonly FunctionalAccessGrantUseCases accessGrants;
-    private readonly IClaimsCache _cache;
+    private readonly GetEffectiveFunctionalAccessClaimsHandler effectiveClaims;
+    private readonly IAccessClaimsCache _cache;
 
-    public ClaimsTransformation(FunctionalAccessGrantUseCases accessGrants, IClaimsCache cache)
+    public AccessClaimsTransformation(
+        GetEffectiveFunctionalAccessClaimsHandler effectiveClaims,
+        IAccessClaimsCache cache)
     {
-        this.accessGrants = accessGrants;
+        this.effectiveClaims = effectiveClaims;
         _cache = cache;
     }
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -29,7 +30,8 @@ public class ClaimsTransformation : IClaimsTransformation
         if (!_cache.TryGetAccessClaims(userId, orgId, out List<string>? accessClaimValues))
         {
             _cache.ClearAccessClaims(userId, orgId);
-            var accessClaims = await accessGrants.GetAccessClaimsForUserAsync(userId, groupIds, orgId);
+            var accessClaims = await effectiveClaims.HandleAsync(
+                new GetEffectiveFunctionalAccessClaimsQuery(userId, groupIds, orgId));
             foreach (var claim in accessClaims)
             {
                 if (!principal.HasClaim(claim.ValueType, claim.Value))

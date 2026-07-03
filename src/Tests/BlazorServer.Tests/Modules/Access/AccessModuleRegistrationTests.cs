@@ -45,10 +45,12 @@ public class AccessModuleRegistrationTests
                     10,
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
                     Constants.Authorization.PolicyName)));
-            Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantUseCases)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserFunctionalAccessHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeUserFunctionalAccessHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetEffectiveFunctionalAccessClaimsHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantUseCases)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionUseCases)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserViewAccessHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(CanEditViewHandler)), Is.True);
         });
     }
 

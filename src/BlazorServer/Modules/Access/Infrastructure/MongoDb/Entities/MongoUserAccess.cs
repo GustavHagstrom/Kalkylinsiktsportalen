@@ -1,7 +1,7 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Enteties;
+namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 
 public class MongoUserAccess
 {

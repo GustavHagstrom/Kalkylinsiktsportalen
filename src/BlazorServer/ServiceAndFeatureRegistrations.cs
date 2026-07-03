@@ -92,9 +92,8 @@ public static class ServiceAndFeatureRegistrations
 
         builder.UseMongoDb();
         builder.Services.AddTransient<BidconApiAccess>();
-        builder.Services.AddSingleton<IClaimsCache, MemoryClaimsCache>();
+        builder.Services.AddSingleton<IAdminRoleCache, MemoryAdminRoleCache>();
         builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         builder.Services.AddSingleton<RenderService>();
         builder.Services.AddLocalization();
         builder.Services.AddMudServices();
