@@ -1,5 +1,4 @@
 @page "/settings/access"
-@page "/Settings/rights"
 @inject IStringLocalizer<SettingsPage> Localizer
 
 <SettingsPageBase>
@@ -8,7 +7,7 @@
         <RoleList Roles="Roles"/>
     </SettingsSection>
 
-    <SettingsSection Title="@Localizer["Användare"]" LoadDataAsync="LoadUserDataAsync">
+    <SettingsSection Title="@Localizer["AnvÃ¤ndare"]" LoadDataAsync="LoadUserDataAsync">
         <UserPicker AllUsers="Users" EnablePicking="false">
             <ExtraTdContent>
                 <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" OnClick="() => EditUserAccess(context)" Size="Size.Small" />

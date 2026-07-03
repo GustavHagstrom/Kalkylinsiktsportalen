@@ -1,7 +1,6 @@
 using System.Security.Claims;
-using BlazorServer.Features.Access;
-using BlazorServer.Features.Access.Components;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.AppShell.Settings;
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using AccessSettingsPage = BlazorServer.Features.Access.Components.SettingsPage;
+using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -31,11 +30,11 @@ public class AccessModuleRegistrationTests
         {
             Assert.That(registrationContext.AccessClaims.Claims, Has.One.EqualTo(
                 new AccessClaimInfo(
-                    FeatureConstants.Authorization.AccessClaimValue,
+                    Constants.Authorization.AccessClaimValue,
                     "Rättigheter",
                     "Skapa, ändra och ta bort användarrättigheter och roller.")));
             Assert.That(registrationContext.Policies.PolicyList.Select(policy => policy.Name), Has.One.EqualTo(
-                FeatureConstants.Authorization.PolicyName));
+                Constants.Authorization.PolicyName));
             Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
             Assert.That(registrationContext.UiComposition.SettingsAreas, Has.One.EqualTo(
                 new UiSettingsArea(
@@ -45,7 +44,7 @@ public class AccessModuleRegistrationTests
                     "/settings/access",
                     10,
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
-                    FeatureConstants.Authorization.PolicyName)));
+                    Constants.Authorization.PolicyName)));
             Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantUseCases)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantUseCases)), Is.True);
@@ -87,25 +86,16 @@ public class AccessModuleRegistrationTests
     }
 
     [Test]
-    public void AccessSettingsPagesKeepModuleAndLegacyRoutesWithAuthorizationPolicy()
+    public void AccessSettingsPagesUseModuleRoutesWithAuthorizationPolicy()
     {
         Assert.Multiple(() =>
         {
-            Assert.That(RouteTemplatesFor<AccessSettingsPage>(), Is.SupersetOf([
-                "/settings/access",
-                "/Settings/rights"
-            ]));
-            Assert.That(RouteTemplatesFor<EditUserAccessPage>(), Is.SupersetOf([
-                "/settings/access/users/{UserId}",
-                "/Settings/rights/UserEdit/{UserId}"
-            ]));
-            Assert.That(RouteTemplatesFor<EditRoleAccessPage>(), Is.SupersetOf([
-                "/settings/access/roles/{RoleId}",
-                "/Settings/rights/RoleEdit/{RoleId}"
-            ]));
-            Assert.That(AuthorizationPoliciesFor<AccessSettingsPage>(), Has.One.EqualTo(FeatureConstants.Authorization.PolicyName));
-            Assert.That(AuthorizationPoliciesFor<EditUserAccessPage>(), Has.One.EqualTo(FeatureConstants.Authorization.PolicyName));
-            Assert.That(AuthorizationPoliciesFor<EditRoleAccessPage>(), Has.One.EqualTo(FeatureConstants.Authorization.PolicyName));
+            Assert.That(RouteTemplatesFor<AccessSettingsPage>(), Is.EquivalentTo(["/settings/access"]));
+            Assert.That(RouteTemplatesFor<EditUserAccessPage>(), Is.EquivalentTo(["/settings/access/users/{UserId}"]));
+            Assert.That(RouteTemplatesFor<EditRoleAccessPage>(), Is.EquivalentTo(["/settings/access/roles/{RoleId}"]));
+            Assert.That(AuthorizationPoliciesFor<AccessSettingsPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
+            Assert.That(AuthorizationPoliciesFor<EditUserAccessPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
+            Assert.That(AuthorizationPoliciesFor<EditRoleAccessPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
         });
     }
 
@@ -113,7 +103,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimTypes.AccessClaim, FeatureConstants.Authorization.AccessClaimValue)
+            new Claim(ApplicationClaimTypes.AccessClaim, Constants.Authorization.AccessClaimValue)
         ], "test"));
     }
 

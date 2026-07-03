@@ -1,14 +1,13 @@
 @page "/settings/access/users/{UserId}"
-@page "/Settings/rights/UserEdit/{UserId}"
 @inject IStringLocalizer<EditUserAccessPage> Localizer
 
 <SettingsPageBase>
 
-    <SettingsSection Title="@Localizer["Användare"]">
+    <SettingsSection Title="@Localizer["AnvÃ¤ndare"]">
         <UserAvatarWithName User="User"/>
     </SettingsSection>
 
-    <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadUserDataAsync">
+    <SettingsSection Title="@Localizer["RÃ¤ttigheter"]" LoadDataAsync="LoadUserDataAsync">
         <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
             <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
         </MudOverlay>

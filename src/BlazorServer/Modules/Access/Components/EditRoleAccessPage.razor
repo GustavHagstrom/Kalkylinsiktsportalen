@@ -1,5 +1,4 @@
 @page "/settings/access/roles/{RoleId}"
-@page "/Settings/rights/RoleEdit/{RoleId}"
 @inject IStringLocalizer<EditRoleAccessPage> Localizer
 
 <SettingsPageBase IsLoading="IsLoading">
@@ -7,11 +6,11 @@
         <MudText Typo="Typo.subtitle2">@Role?.Name</MudText>
     </SettingsSection>
 
-    <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
+    <SettingsSection Title="@Localizer["RÃ¤ttigheter"]" LoadDataAsync="LoadDataAsync">
         <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
     </SettingsSection>
     
-    <SettingsSection Title="@Localizer["Användare"]">
+    <SettingsSection Title="@Localizer["AnvÃ¤ndare"]">
         <UserList Users="PickedUsers"/>
     </SettingsSection>
 

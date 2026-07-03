@@ -1,4 +1,3 @@
-using BlazorServer.Features.Access;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Shared.Composition;
@@ -19,17 +18,17 @@ public static class AccessModule
         services.AddTransient<ViewAccessGrantUseCases>();
         services.AddTransient<ViewAccessDecisionUseCases>();
 
-        registrationContext.Policies.AddPolicy(FeatureConstants.Authorization.PolicyName, config =>
+        registrationContext.Policies.AddPolicy(Constants.Authorization.PolicyName, config =>
         {
             config.RequireAssertion(context =>
                 context.User.HasClaim(
                     ApplicationClaimTypes.AccessClaim,
-                    FeatureConstants.Authorization.AccessClaimValue) ||
+                    Constants.Authorization.AccessClaimValue) ||
                 context.User.IsInRole(AuthConstants.AdminRoleClaimValue));
         });
 
         registrationContext.AccessClaims.Register(new AccessClaimInfo(
-            FeatureConstants.Authorization.AccessClaimValue,
+            Constants.Authorization.AccessClaimValue,
             "Rättigheter",
             "Skapa, ändra och ta bort användarrättigheter och roller."));
 
@@ -41,7 +40,7 @@ public static class AccessModule
                 "/settings/access",
                 10,
                 Icons.Material.Sharp.AdminPanelSettings,
-                FeatureConstants.Authorization.PolicyName),
+                Constants.Authorization.PolicyName),
             typeof(AccessModule).FullName ?? nameof(AccessModule));
 
         return services;

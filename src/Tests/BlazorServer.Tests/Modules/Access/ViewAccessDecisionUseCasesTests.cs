@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using BlazorServer.Features.ViewSettings;
+using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Shared.Constants;
 using Microsoft.Identity.Web;
@@ -39,7 +39,7 @@ public class ViewAccessDecisionUseCasesTests
         var user = Principal(
             userId: "user-1",
             organizationId: "org-1",
-            accessClaims: [FeatureConstants.Authorization.AccessClaimValue]);
+            accessClaims: [BlazorServer.Modules.Access.Constants.Authorization.AccessClaimValue]);
 
         var canUse = await decisions.CanUseViewAsync(user, "view-1");
         var canEdit = await decisions.CanEditViewAsync(user, "view-1");
