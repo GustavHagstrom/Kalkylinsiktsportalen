@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Extensions;
+using BlazorServer.Shared.Kernel.Authentication;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 

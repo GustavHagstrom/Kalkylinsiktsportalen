@@ -1,5 +1,5 @@
 ﻿using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Extensions;
+using BlazorServer.Shared.Kernel.Authentication;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

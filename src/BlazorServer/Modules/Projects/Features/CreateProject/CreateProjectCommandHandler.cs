@@ -1,4 +1,5 @@
 using BlazorServer.Modules.Projects.Domain;
+using BlazorServer.Modules.Projects.Infrastructure;
 using BlazorServer.Shared.Kernel.CQRS;
 using BlazorServer.Shared.Kernel.Validation;
 

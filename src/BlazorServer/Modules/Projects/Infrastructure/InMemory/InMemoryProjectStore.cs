@@ -1,5 +1,4 @@
 using BlazorServer.Modules.Projects.Domain;
-using BlazorServer.Modules.Projects.Features.CreateProject;
 
 namespace BlazorServer.Modules.Projects.Infrastructure.InMemory;
 

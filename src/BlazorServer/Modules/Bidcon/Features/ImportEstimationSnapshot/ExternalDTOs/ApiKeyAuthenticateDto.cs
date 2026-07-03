@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Bidcon.ExternalDtos;
+namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 
 public class ApiKeyAuthenticateDto
 {        

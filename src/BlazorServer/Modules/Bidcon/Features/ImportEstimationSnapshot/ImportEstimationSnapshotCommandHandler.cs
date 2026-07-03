@@ -1,9 +1,8 @@
 using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.ExternalDtos;
+using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Identity;
 using BlazorServer.Shared.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;

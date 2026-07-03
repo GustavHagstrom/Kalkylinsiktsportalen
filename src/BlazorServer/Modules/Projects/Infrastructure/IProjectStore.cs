@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Projects.Domain;
 
-namespace BlazorServer.Modules.Projects.Features.CreateProject;
+namespace BlazorServer.Modules.Projects.Infrastructure;
 
 public interface IProjectStore
 {

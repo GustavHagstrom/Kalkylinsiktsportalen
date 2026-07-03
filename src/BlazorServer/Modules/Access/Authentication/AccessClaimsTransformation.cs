@@ -1,9 +1,9 @@
 using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Extensions;
-using BlazorServer.Modules.Access.Models;
+using BlazorServer.Modules.Access.Domain;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using BlazorServer.Shared.Kernel.Authentication;
 
 namespace BlazorServer.Modules.Access.Authentication;
 

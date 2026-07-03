@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using BlazorServer.Modules.Bidcon.Contracts;
-using BlazorServer.Modules.Bidcon.ExternalDtos;
+using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Kernel.Identity;
@@ -29,7 +29,7 @@ public class BidconEstimationDetailsClient
         this.credentialsStore = credentialsStore;
     }
 
-    public virtual async Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+    public async Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
         BidconEstimationId bidconEstimationId,
         OrganizationId organizationId,
         CancellationToken cancellationToken)
@@ -120,18 +120,4 @@ public class BidconEstimationDetailsClient
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         return client;
     }
-}
-
-public sealed class BidconEstimationDetailsClientException : Exception
-{
-    public BidconEstimationDetailsClientException(string code, string field, string message)
-        : base(message)
-    {
-        Code = code;
-        Field = field;
-    }
-
-    public string Code { get; }
-
-    public string Field { get; }
 }

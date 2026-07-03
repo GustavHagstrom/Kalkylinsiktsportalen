@@ -1,7 +1,7 @@
 using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.ExternalDtos;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
+using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Kernel.Identity;
 

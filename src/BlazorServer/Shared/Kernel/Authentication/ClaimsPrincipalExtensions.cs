@@ -1,7 +1,7 @@
 ﻿using Microsoft.Identity.Web;
 using System.Security.Claims;
 
-namespace BlazorServer.Shared.Extensions;
+namespace BlazorServer.Shared.Kernel.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {

@@ -1,5 +1,5 @@
+using BlazorServer.Modules.Access.Domain;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
-using BlazorServer.Modules.Access.Models;
 
 namespace BlazorServer.Tests.Modules.Access;
 

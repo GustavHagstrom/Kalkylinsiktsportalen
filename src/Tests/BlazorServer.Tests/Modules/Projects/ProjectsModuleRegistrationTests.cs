@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Projects.Features.CreateProject;
+using BlazorServer.Modules.Projects.Infrastructure;
 using BlazorServer.Shared.Composition;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Access.Models;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
+using BlazorServer.Modules.Access.Domain;
 
 namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Mappers;
 

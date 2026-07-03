@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Access.Models;
+using BlazorServer.Modules.Access.Domain;
 
 namespace BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 
