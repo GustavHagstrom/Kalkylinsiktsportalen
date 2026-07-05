@@ -11,7 +11,7 @@
         <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
             <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
         </MudOverlay>
-        <AccessClaimValuePicker PickedAccessClaimValues="UserAccess?.AccessClaimValues ?? []" PickChanged="UserAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="UserAccessGrant?.AccessClaimValues ?? []" PickChanged="UserAccessCheckBoxClick" />
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Roller"]">
@@ -19,9 +19,7 @@
     </SettingsSection>
 </SettingsPageBase>
 
-@inject GetUserFunctionalAccessHandler GetUserAccess
-@inject GrantUserFunctionalAccessHandler GrantUserAccess
-@inject RevokeUserFunctionalAccessHandler RevokeUserAccess
+@inject FunctionalAccessGrantHandler FunctionalAccessGrants
 @inject IRoleService RoleService
 @inject IUserService UserService
 @inject IAuthService AuthService
@@ -30,7 +28,7 @@
 @code{
     [Parameter] public string? UserId { get; set; }
     User? User { get; set; }
-    UserAccess? UserAccess { get; set; }
+    FunctionalAccessGrant? UserAccessGrant { get; set; }
     List<Role> AllRoles { get; set; } = [];
     List<Role> PickedRoles { get; set; } = [];
 
@@ -41,7 +39,7 @@
         SetIsLoading(true);
         if (UserId is not null && AuthService.OrganizationId is not null)
         {
-            UserAccess = await GetUserAccess.HandleAsync(
+            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(
                 new GetUserFunctionalAccessQuery(UserId, AuthService.OrganizationId));
             User = await UserService.GetUserAsync(UserId);
             AllRoles = await RoleService.GetRolesAsync(AuthService.OrganizationId);
@@ -57,21 +55,27 @@
     }
     Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> pickedRecord)
     {
-        if (UserAccess is null) return Task.CompletedTask;
-        if (pickedRecord.IsPicked && !UserAccess.AccessClaimValues.Contains(pickedRecord.Data.Value))
+        if (UserAccessGrant is null) return Task.CompletedTask;
+        if (pickedRecord.IsPicked && !UserAccessGrant.AccessClaimValues.Contains(pickedRecord.Data.Value))
         {
-            UserAccess.AccessClaimValues.Add(pickedRecord.Data.Value);
-            return GrantUserAccess.HandleAsync(new GrantUserFunctionalAccessCommand(
-                UserAccess.UserId,
-                UserAccess.OrganizationId,
+            UserAccessGrant = new FunctionalAccessGrant(
+                UserAccessGrant.Target,
+                UserAccessGrant.OrganizationId,
+                UserAccessGrant.AccessClaimValues.Append(pickedRecord.Data.Value));
+            return FunctionalAccessGrants.HandleAsync(new GrantUserFunctionalAccessCommand(
+                UserAccessGrant.Target.Id,
+                UserAccessGrant.OrganizationId,
                 pickedRecord.Data.Value));
         }
         else
         {
-            UserAccess.AccessClaimValues.Remove(pickedRecord.Data.Value);
-            return RevokeUserAccess.HandleAsync(new RevokeUserFunctionalAccessCommand(
-                UserAccess.UserId,
-                UserAccess.OrganizationId,
+            UserAccessGrant = new FunctionalAccessGrant(
+                UserAccessGrant.Target,
+                UserAccessGrant.OrganizationId,
+                UserAccessGrant.AccessClaimValues.Where(value => value != pickedRecord.Data.Value));
+            return FunctionalAccessGrants.HandleAsync(new RevokeUserFunctionalAccessCommand(
+                UserAccessGrant.Target.Id,
+                UserAccessGrant.OrganizationId,
                 pickedRecord.Data.Value));
         }
     }

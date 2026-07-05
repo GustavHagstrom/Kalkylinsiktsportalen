@@ -7,7 +7,7 @@
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
-        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccess?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccessGrant?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
     </SettingsSection>
     
     <SettingsSection Title="@Localizer["Användare"]">
@@ -17,9 +17,7 @@
 </SettingsPageBase>
 
 
-@inject GetRoleFunctionalAccessHandler GetRoleAccess
-@inject GrantRoleFunctionalAccessHandler GrantRoleAccess
-@inject RevokeRoleFunctionalAccessHandler RevokeRoleAccess
+@inject FunctionalAccessGrantHandler FunctionalAccessGrants
 @inject IUserService UserService
 @inject IRoleService RoleService
 @inject IDialogService DialogService
@@ -32,7 +30,7 @@
     bool IsLoading { get; set; } = false;
 
     Role? Role { get; set; }
-    RoleAccess? RoleAccess { get; set; }
+    FunctionalAccessGrant? RoleAccessGrant { get; set; }
 
     List<User> PickedUsers { get; set; } = new();
 
@@ -48,7 +46,7 @@
         SetIsLoading(true);
         if (RoleId is not null && AuthService.OrganizationId is not null)
         {
-            RoleAccess = await GetRoleAccess.HandleAsync(
+            RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
                 new GetRoleFunctionalAccessQuery(RoleId, AuthService.OrganizationId));
             Role = await RoleService.GetRoleAsync(RoleId);
             PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, AuthService.OrganizationId);
@@ -62,21 +60,27 @@
     }
     Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> checkedRecord)
     {
-        if (RoleAccess is null) return Task.CompletedTask;
-        if (checkedRecord.IsPicked && !RoleAccess.AccessClaimValues.Contains(checkedRecord.Data.Value))
+        if (RoleAccessGrant is null) return Task.CompletedTask;
+        if (checkedRecord.IsPicked && !RoleAccessGrant.AccessClaimValues.Contains(checkedRecord.Data.Value))
         {
-            RoleAccess.AccessClaimValues.Add(checkedRecord.Data.Value);
-            return GrantRoleAccess.HandleAsync(new GrantRoleFunctionalAccessCommand(
-                RoleAccess.RoleId,
-                RoleAccess.OrgId,
+            RoleAccessGrant = new FunctionalAccessGrant(
+                RoleAccessGrant.Target,
+                RoleAccessGrant.OrganizationId,
+                RoleAccessGrant.AccessClaimValues.Append(checkedRecord.Data.Value));
+            return FunctionalAccessGrants.HandleAsync(new GrantRoleFunctionalAccessCommand(
+                RoleAccessGrant.Target.Id,
+                RoleAccessGrant.OrganizationId,
                 checkedRecord.Data.Value));
         }
         else
         {
-            RoleAccess.AccessClaimValues.Remove(checkedRecord.Data.Value);
-            return RevokeRoleAccess.HandleAsync(new RevokeRoleFunctionalAccessCommand(
-                RoleAccess.RoleId,
-                RoleAccess.OrgId,
+            RoleAccessGrant = new FunctionalAccessGrant(
+                RoleAccessGrant.Target,
+                RoleAccessGrant.OrganizationId,
+                RoleAccessGrant.AccessClaimValues.Where(value => value != checkedRecord.Data.Value));
+            return FunctionalAccessGrants.HandleAsync(new RevokeRoleFunctionalAccessCommand(
+                RoleAccessGrant.Target.Id,
+                RoleAccessGrant.OrganizationId,
                 checkedRecord.Data.Value));
         }
         

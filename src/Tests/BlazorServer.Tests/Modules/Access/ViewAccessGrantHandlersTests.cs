@@ -11,9 +11,9 @@ public class ViewAccessGrantHandlersTests
     public async Task DirectUserGrantAllowsEachViewRightIndependently(ViewAccessRight grantedRight)
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grant = new GrantUserViewAccessHandler(store);
+        var grantHandler = new ViewAccessGrantHandler(store);
 
-        await grant.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", grantedRight));
+        await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", grantedRight));
 
         var decisions = await DecisionsForAllRightsAsync(store, Principal("user-1", "org-1"), "view-1");
 
@@ -26,9 +26,9 @@ public class ViewAccessGrantHandlersTests
     public async Task ExternalRoleGroupGrantAllowsEachViewRightIndependently(ViewAccessRight grantedRight)
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grant = new GrantRoleViewAccessHandler(store);
+        var grantHandler = new ViewAccessGrantHandler(store);
 
-        await grant.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", grantedRight));
+        await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", grantedRight));
 
         var decisions = await DecisionsForAllRightsAsync(store, Principal("user-1", "org-1", ["role-1"]), "view-1");
 
@@ -39,19 +39,16 @@ public class ViewAccessGrantHandlersTests
     public async Task ViewAccessDecisionsCombineDirectUserAndExternalRoleGroupGrants()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grantUser = new GrantUserViewAccessHandler(store);
-        var grantRole = new GrantRoleViewAccessHandler(store);
-        var canUseHandler = new CanUseViewHandler(store);
-        var canEditHandler = new CanEditViewHandler(store);
-        var canAdministerHandler = new CanAdministerViewAccessHandler(store);
+        var grantHandler = new ViewAccessGrantHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var user = Principal("user-1", "org-1", ["role-1"]);
 
-        await grantUser.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
-        await grantRole.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
+        await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
+        await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
 
-        var canUse = await canUseHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await canEditHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await canAdministerHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
 
         Assert.Multiple(() =>
         {
@@ -65,15 +62,14 @@ public class ViewAccessGrantHandlersTests
     public async Task RevokedViewAccessNoLongerAllowsDecision()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grant = new GrantUserViewAccessHandler(store);
-        var revoke = new RevokeUserViewAccessHandler(store);
-        var canUseHandler = new CanUseViewHandler(store);
+        var grantHandler = new ViewAccessGrantHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var user = Principal("user-1", "org-1");
 
-        await grant.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
-        await revoke.HandleAsync(new RevokeUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
+        await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
+        await grantHandler.HandleAsync(new RevokeUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
 
-        var canUse = await canUseHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
 
         Assert.That(canUse, Is.False);
     }
@@ -83,14 +79,12 @@ public class ViewAccessGrantHandlersTests
         System.Security.Claims.ClaimsPrincipal user,
         string viewId)
     {
-        var canUseHandler = new CanUseViewHandler(store);
-        var canEditHandler = new CanEditViewHandler(store);
-        var canAdministerHandler = new CanAdministerViewAccessHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var decisions = new Dictionary<ViewAccessRight, bool>();
-        decisions[ViewAccessRight.UseView] = await canUseHandler.HandleAsync(new CanUseViewQuery(user, viewId));
-        decisions[ViewAccessRight.EditView] = await canEditHandler.HandleAsync(new CanEditViewQuery(user, viewId));
+        decisions[ViewAccessRight.UseView] = await decisionHandler.HandleAsync(new CanUseViewQuery(user, viewId));
+        decisions[ViewAccessRight.EditView] = await decisionHandler.HandleAsync(new CanEditViewQuery(user, viewId));
         decisions[ViewAccessRight.AdministerViewAccess] =
-            await canAdministerHandler.HandleAsync(new CanAdministerViewAccessQuery(user, viewId));
+            await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, viewId));
 
         return decisions;
     }

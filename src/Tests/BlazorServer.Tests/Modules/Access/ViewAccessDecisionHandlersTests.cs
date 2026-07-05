@@ -13,19 +13,16 @@ public class ViewAccessDecisionHandlersTests
     public async Task ViewFlowAllowsUseEditAndAdministerOnlyWhenMatchingViewGrantExists()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grantUser = new GrantUserViewAccessHandler(store);
-        var grantRole = new GrantRoleViewAccessHandler(store);
-        var canUseHandler = new CanUseViewHandler(store);
-        var canEditHandler = new CanEditViewHandler(store);
-        var canAdministerHandler = new CanAdministerViewAccessHandler(store);
+        var grantHandler = new ViewAccessGrantHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var user = Principal(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
 
-        await grantUser.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
-        await grantRole.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
+        await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
+        await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
 
-        var canUse = await canUseHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await canEditHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await canAdministerHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
 
         Assert.Multiple(() =>
         {
@@ -39,17 +36,15 @@ public class ViewAccessDecisionHandlersTests
     public async Task GlobalViewSettingsFeatureAccessDoesNotImplyPerViewAccess()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var canUseHandler = new CanUseViewHandler(store);
-        var canEditHandler = new CanEditViewHandler(store);
-        var canAdministerHandler = new CanAdministerViewAccessHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var user = Principal(
             userId: "user-1",
             organizationId: "org-1",
             accessClaims: [BlazorServer.Modules.Access.Constants.Authorization.AccessClaimValue]);
 
-        var canUse = await canUseHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await canEditHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await canAdministerHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
 
         Assert.Multiple(() =>
         {
@@ -63,18 +58,16 @@ public class ViewAccessDecisionHandlersTests
     public async Task AdminBypassExplicitlyAllowsViewFlowsWithoutStoredGrant()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var canUseHandler = new CanUseViewHandler(store);
-        var canEditHandler = new CanEditViewHandler(store);
-        var canAdministerHandler = new CanAdministerViewAccessHandler(store);
+        var decisionHandler = new ViewAccessDecisionHandler(store);
         var admin = Principal(
             userId: "admin-1",
             organizationId: "org-1",
             roleIds: [],
             appRoles: [AuthConstants.AdminRoleClaimValue]);
 
-        var canUse = await canUseHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
-        var canEdit = await canEditHandler.HandleAsync(new CanEditViewQuery(admin, "view-1"));
-        var canAdminister = await canAdministerHandler.HandleAsync(new CanAdministerViewAccessQuery(admin, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(admin, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(admin, "view-1"));
 
         Assert.Multiple(() =>
         {

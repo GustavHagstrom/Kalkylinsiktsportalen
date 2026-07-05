@@ -8,55 +8,41 @@ namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 
 public class MongoAccessStore : IFunctionalAccessGrantStore
 {
-    private readonly IMongoCollection<MongoUserAccess> _userAccessCollection;
-    private readonly IMongoCollection<MongoRoleAccess> _roleAccessCollection;
+    private readonly IMongoCollection<MongoFunctionalAccessGrant> _accessGrants;
 
-    public MongoAccessStore(IMongoCollection<MongoUserAccess> userAccessCollection, IMongoCollection<MongoRoleAccess> roleAccessCollection)
+    public MongoAccessStore(IMongoCollection<MongoFunctionalAccessGrant> accessGrants)
     {
-        _userAccessCollection = userAccessCollection;
-        _roleAccessCollection = roleAccessCollection;
-    }
-    public Task AddRoleAccessAsync(string roleId, string orgId, string accessClaimValue)
-    {
-        var filter = Builders<MongoRoleAccess>.Filter.Eq(ra => ra.RoleId, roleId) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-        var update = Builders<MongoRoleAccess>.Update.AddToSet(ra => ra.AccessClaimValues, accessClaimValue);
-        return _roleAccessCollection.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+        _accessGrants = accessGrants;
     }
 
-    public Task AddUserAccessAsync(string userId, string orgId, string accessClaimValue)
+    public Task AddAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
     {
-        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var update = Builders<MongoUserAccess>.Update.AddToSet(ua => ua.AccessClaimValues, accessClaimValue);
-        return _userAccessCollection.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+        var update = Builders<MongoFunctionalAccessGrant>.Update
+            .SetOnInsert(grant => grant.TargetType, target.Type)
+            .SetOnInsert(grant => grant.TargetId, target.Id)
+            .SetOnInsert(grant => grant.OrganizationId, orgId)
+            .AddToSet(grant => grant.AccessClaimValues, accessClaimValue);
+
+        return _accessGrants.UpdateOneAsync(FilterFor(target, orgId), update, new UpdateOptions { IsUpsert = true });
     }
 
-    public Task DeleteRoleAccessAsync(string roleId, string orgId, string accessClaimValue)
+    public Task DeleteAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
     {
-        var filter = Builders<MongoRoleAccess>.Filter.Eq(ra => ra.RoleId, roleId) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-        var update = Builders<MongoRoleAccess>.Update.Pull(ra => ra.AccessClaimValues, accessClaimValue);
-        return _roleAccessCollection.UpdateOneAsync(filter, update);
-    }
-
-    public Task DeleteUserAccessAsync(string userId, string orgId, string accessClaimValue)
-    {
-        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var update = Builders<MongoUserAccess>.Update.Pull(ua => ua.AccessClaimValues, accessClaimValue);
-        return _userAccessCollection.UpdateOneAsync(filter, update);
+        var update = Builders<MongoFunctionalAccessGrant>.Update.Pull(grant => grant.AccessClaimValues, accessClaimValue);
+        return _accessGrants.UpdateOneAsync(FilterFor(target, orgId), update);
     }
 
     public async Task<List<AccessClaim>> GetAccessClaimsForUserAsync(string userId, IEnumerable<string> roleIds, string orgId)
     {
-        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var userAccess = await GetUserAccessAsync(userId, orgId);
+        var userAccess = await GetAccessGrantAsync(FunctionalAccessGrantTarget.User(userId), orgId);
 
         var accessClaimValues = new HashSet<string>(userAccess?.AccessClaimValues ?? Enumerable.Empty<string>());
 
         if (roleIds != null && roleIds.Any())
         {
-            var roleFilter = Builders<MongoRoleAccess>.Filter.In(ra => ra.RoleId, roleIds) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-
-
-            var roleAccessTasks = roleIds.Select(roleId => GetLazyMongoRoleAccessAsync(roleId, orgId));
+            var roleAccessTasks = roleIds.Select(roleId => GetLazyMongoAccessGrantAsync(
+                FunctionalAccessGrantTarget.Role(roleId),
+                orgId));
             var roleAccesses = await Task.WhenAll(roleAccessTasks);
             foreach (var roleAccess in roleAccesses)
             {
@@ -69,50 +55,35 @@ public class MongoAccessStore : IFunctionalAccessGrantStore
         return accessClaimValues.Select(x => new AccessClaim(x)).ToList();
     }
 
-    public async Task<RoleAccess> GetRoleAccessAsync(string roleId, string orgId)
+    public async Task<FunctionalAccessGrant> GetAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId)
     {
-        var result = await GetLazyMongoRoleAccessAsync(roleId, orgId);
-        return MongoRoleAccessMapper.ToModel(result);
+        var result = await GetLazyMongoAccessGrantAsync(target, orgId);
+        return MongoFunctionalAccessGrantMapper.ToModel(result);
     }
 
-    public async Task<UserAccess> GetUserAccessAsync(string userId, string orgId)
+    async Task<MongoFunctionalAccessGrant> GetLazyMongoAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId)
     {
-        var mongoUserAccess = await GetLazyMongoUserAccessAsync(userId, orgId);
-        return MongoUserAccessMapper.ToModel(mongoUserAccess);
-    }
-
-    async Task<MongoUserAccess> GetLazyMongoUserAccessAsync(string userId, string orgId)
-    {
-        var filter = Builders<MongoUserAccess>.Filter.Eq(ua => ua.UserId, userId) & Builders<MongoUserAccess>.Filter.Eq(ua => ua.OrganizationId, orgId);
-        var user = await _userAccessCollection.Find(filter).FirstOrDefaultAsync();
-        if (user != null)
+        var grant = await _accessGrants.Find(FilterFor(target, orgId)).FirstOrDefaultAsync();
+        if (grant != null)
         {
-            return user;
+            return grant;
         }
-        var newUserAccess = new MongoUserAccess
+
+        var newGrant = new MongoFunctionalAccessGrant
         {
-            UserId = userId,
+            TargetType = target.Type,
+            TargetId = target.Id,
             OrganizationId = orgId,
             AccessClaimValues = new List<string>()
         };
-        await _userAccessCollection.InsertOneAsync(newUserAccess);
-        return newUserAccess;
+        await _accessGrants.InsertOneAsync(newGrant);
+        return newGrant;
     }
-    async Task<MongoRoleAccess> GetLazyMongoRoleAccessAsync(string roleId, string orgId)
+
+    static FilterDefinition<MongoFunctionalAccessGrant> FilterFor(FunctionalAccessGrantTarget target, string orgId)
     {
-        var filter = Builders<MongoRoleAccess>.Filter.Eq(ra => ra.RoleId, roleId) & Builders<MongoRoleAccess>.Filter.Eq(ra => ra.OrganizationId, orgId);
-        var role = await _roleAccessCollection.Find(filter).FirstOrDefaultAsync();
-        if(role != null)
-        {
-            return role;
-        }
-        var newRoleAccess = new MongoRoleAccess
-        {
-            RoleId = roleId,
-            OrganizationId = orgId,
-            AccessClaimValues = new List<string>()
-        };
-        await _roleAccessCollection.InsertOneAsync(newRoleAccess);
-        return newRoleAccess;
+        return Builders<MongoFunctionalAccessGrant>.Filter.Eq(grant => grant.TargetType, target.Type) &
+            Builders<MongoFunctionalAccessGrant>.Filter.Eq(grant => grant.TargetId, target.Id) &
+            Builders<MongoFunctionalAccessGrant>.Filter.Eq(grant => grant.OrganizationId, orgId);
     }
 }

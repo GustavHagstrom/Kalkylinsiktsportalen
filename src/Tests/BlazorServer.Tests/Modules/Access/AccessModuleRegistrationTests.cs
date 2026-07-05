@@ -3,6 +3,7 @@ using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Composition;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 
 namespace BlazorServer.Tests.Modules.Access;
@@ -45,12 +47,11 @@ public class AccessModuleRegistrationTests
                     10,
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
                     Constants.Authorization.PolicyName)));
-            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserFunctionalAccessHandler)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeUserFunctionalAccessHandler)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(GetEffectiveFunctionalAccessClaimsHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(IMongoCollection<MongoFunctionalAccessGrant>)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserViewAccessHandler)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(CanEditViewHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
         });
     }
 

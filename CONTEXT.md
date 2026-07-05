@@ -33,6 +33,14 @@ Funktionellt rättighetsvärde som styr vad användare eller roller får göra. 
 Organisationsbunden tilldelning av en `Access claim` eller view-permission till en `User` eller extern `Role/Group`. Ett grant beskriver vad någon får göra i en Organization-kontext; själva access claimens globala betydelse ändras inte av grantet.
 _Avoid_: Access claim när du menar den lagrade tilldelningen
 
+**Access grant target**:
+Mottagaren av ett `Access grant`, antingen en `User` eller en extern `Role/Group`. Direkta user-grants och role-grants är separata källor till access även när de ger samma effektiva `Access claim`.
+_Avoid_: Principal när du behöver skilja på user och role/group
+
+**Functional access grant**:
+Ett `Access grant` som tilldelar en `Access claim` till en `User` eller extern `Role/Group` i en Organization-kontext. Används när grantet behöver skiljas från view-permissions.
+_Avoid_: Access grant när skillnaden mot view-permission spelar roll
+
 **Estimation**:
 Centralt affärsobjekt från Bidcon med kalkylinformation och metadata.
 _Avoid_: kalkyl, estimat

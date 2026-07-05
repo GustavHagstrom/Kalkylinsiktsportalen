@@ -19,26 +19,14 @@ public static class AccessModule
         AppRegistrationContext registrationContext)
     {
         services.AddMemoryCache();
-        services.AddMongoCollection<MongoUserAccess>("UserAccess");
-        services.AddMongoCollection<MongoRoleAccess>("RoleAccess");
+        services.AddMongoCollection<MongoFunctionalAccessGrant>("FunctionalAccessGrants");
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
         services.AddTransient<IClaimsTransformation, AccessClaimsTransformation>();
-        services.AddTransient<GrantUserFunctionalAccessHandler>();
-        services.AddTransient<RevokeUserFunctionalAccessHandler>();
-        services.AddTransient<GrantRoleFunctionalAccessHandler>();
-        services.AddTransient<RevokeRoleFunctionalAccessHandler>();
-        services.AddTransient<GetUserFunctionalAccessHandler>();
-        services.AddTransient<GetRoleFunctionalAccessHandler>();
-        services.AddTransient<GetEffectiveFunctionalAccessClaimsHandler>();
+        services.AddTransient<FunctionalAccessGrantHandler>();
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
-        services.AddTransient<GrantUserViewAccessHandler>();
-        services.AddTransient<RevokeUserViewAccessHandler>();
-        services.AddTransient<GrantRoleViewAccessHandler>();
-        services.AddTransient<RevokeRoleViewAccessHandler>();
-        services.AddTransient<CanUseViewHandler>();
-        services.AddTransient<CanEditViewHandler>();
-        services.AddTransient<CanAdministerViewAccessHandler>();
+        services.AddTransient<ViewAccessGrantHandler>();
+        services.AddTransient<ViewAccessDecisionHandler>();
 
         registrationContext.Policies.AddPolicy(Constants.Authorization.PolicyName, config =>
         {

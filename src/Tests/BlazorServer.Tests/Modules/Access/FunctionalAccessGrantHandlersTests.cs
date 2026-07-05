@@ -10,24 +10,23 @@ public class FunctionalAccessGrantHandlersTests
     public async Task UserAccessGrantsCanBeReadGrantedRevokedAndGrantedIdempotently()
     {
         var store = new RecordingAccessStore();
-        var grant = new GrantUserFunctionalAccessHandler(store);
-        var revoke = new RevokeUserFunctionalAccessHandler(store);
-        var get = new GetUserFunctionalAccessHandler(store);
+        var handler = new FunctionalAccessGrantHandler(store);
 
-        await grant.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
-        await grant.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
 
-        var granted = await get.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
+        var granted = await handler.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
 
-        await revoke.HandleAsync(new RevokeUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
-        var revoked = await get.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
+        await handler.HandleAsync(new RevokeUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        var revoked = await handler.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
 
         Assert.Multiple(() =>
         {
             Assert.That(granted.AccessClaimValues, Is.EqualTo(new[] { "CanManageAccess" }));
+            Assert.That(granted.Target, Is.EqualTo(FunctionalAccessGrantTarget.User("user-1")));
             Assert.That(revoked.AccessClaimValues, Is.Empty);
-            Assert.That(store.UserGrantCalls, Is.EqualTo(2));
-            Assert.That(store.UserRevokeCalls, Is.EqualTo(1));
+            Assert.That(store.GrantCalls, Is.EqualTo(2));
+            Assert.That(store.RevokeCalls, Is.EqualTo(1));
         });
     }
 
@@ -35,24 +34,23 @@ public class FunctionalAccessGrantHandlersTests
     public async Task RoleAccessGrantsCanBeReadGrantedRevokedAndGrantedIdempotently()
     {
         var store = new RecordingAccessStore();
-        var grant = new GrantRoleFunctionalAccessHandler(store);
-        var revoke = new RevokeRoleFunctionalAccessHandler(store);
-        var get = new GetRoleFunctionalAccessHandler(store);
+        var handler = new FunctionalAccessGrantHandler(store);
 
-        await grant.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
-        await grant.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
 
-        var granted = await get.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
+        var granted = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
 
-        await revoke.HandleAsync(new RevokeRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
-        var revoked = await get.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
+        await handler.HandleAsync(new RevokeRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        var revoked = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
 
         Assert.Multiple(() =>
         {
             Assert.That(granted.AccessClaimValues, Is.EqualTo(new[] { "CanManageAccess" }));
+            Assert.That(granted.Target, Is.EqualTo(FunctionalAccessGrantTarget.Role("role-1")));
             Assert.That(revoked.AccessClaimValues, Is.Empty);
-            Assert.That(store.RoleGrantCalls, Is.EqualTo(2));
-            Assert.That(store.RoleRevokeCalls, Is.EqualTo(1));
+            Assert.That(store.GrantCalls, Is.EqualTo(2));
+            Assert.That(store.RevokeCalls, Is.EqualTo(1));
         });
     }
 
@@ -60,15 +58,13 @@ public class FunctionalAccessGrantHandlersTests
     public async Task RuntimeAccessCombinesDirectUserAndExternalRoleGroupGrants()
     {
         var store = new RecordingAccessStore();
-        var grantUser = new GrantUserFunctionalAccessHandler(store);
-        var grantRole = new GrantRoleFunctionalAccessHandler(store);
-        var getEffectiveClaims = new GetEffectiveFunctionalAccessClaimsHandler(store);
+        var handler = new FunctionalAccessGrantHandler(store);
 
-        await grantUser.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "DirectAccess"));
-        await grantRole.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "GroupAccess"));
-        await grantRole.HandleAsync(new GrantRoleFunctionalAccessCommand("role-2", "org-1", "GroupAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "DirectAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "GroupAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-2", "org-1", "GroupAccess"));
 
-        var effectiveClaims = await getEffectiveClaims.HandleAsync(new GetEffectiveFunctionalAccessClaimsQuery(
+        var effectiveClaims = await handler.HandleAsync(new GetEffectiveFunctionalAccessClaimsQuery(
             "user-1",
             ["role-1", "role-2"],
             "org-1"));
@@ -81,70 +77,42 @@ public class FunctionalAccessGrantHandlersTests
 
     private sealed class RecordingAccessStore : IFunctionalAccessGrantStore
     {
-        private readonly Dictionary<(string UserId, string OrgId), HashSet<string>> userAccess = [];
-        private readonly Dictionary<(string RoleId, string OrgId), HashSet<string>> roleAccess = [];
+        private readonly Dictionary<(FunctionalAccessGrantTarget Target, string OrgId), HashSet<string>> accessGrants = [];
 
-        public int UserGrantCalls { get; private set; }
-        public int RoleGrantCalls { get; private set; }
-        public int UserRevokeCalls { get; private set; }
-        public int RoleRevokeCalls { get; private set; }
+        public int GrantCalls { get; private set; }
+        public int RevokeCalls { get; private set; }
 
-        public Task<UserAccess> GetUserAccessAsync(string userId, string orgId)
+        public Task<FunctionalAccessGrant> GetAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId)
         {
-            return Task.FromResult(new UserAccess
-            {
-                UserId = userId,
-                OrganizationId = orgId,
-                AccessClaimValues = ValuesFor(userAccess, (userId, orgId))
-            });
-        }
-
-        public Task<RoleAccess> GetRoleAccessAsync(string roleId, string orgId)
-        {
-            return Task.FromResult(new RoleAccess
-            {
-                RoleId = roleId,
-                OrgId = orgId,
-                AccessClaimValues = ValuesFor(roleAccess, (roleId, orgId))
-            });
+            return Task.FromResult(new FunctionalAccessGrant(
+                target,
+                orgId,
+                ValuesFor(accessGrants, (target, orgId))));
         }
 
         public Task<List<AccessClaim>> GetAccessClaimsForUserAsync(string userId, IEnumerable<string> roleIds, string orgId)
         {
-            var values = ValuesFor(userAccess, (userId, orgId)).ToHashSet(StringComparer.Ordinal);
+            var values = ValuesFor(accessGrants, (FunctionalAccessGrantTarget.User(userId), orgId))
+                .ToHashSet(StringComparer.Ordinal);
             foreach (var roleId in roleIds)
             {
-                values.UnionWith(ValuesFor(roleAccess, (roleId, orgId)));
+                values.UnionWith(ValuesFor(accessGrants, (FunctionalAccessGrantTarget.Role(roleId), orgId)));
             }
 
             return Task.FromResult(values.Select(value => new AccessClaim(value)).ToList());
         }
 
-        public Task AddUserAccessAsync(string userId, string orgId, string accessClaimValue)
+        public Task AddAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
         {
-            UserGrantCalls++;
-            ValuesForMutation(userAccess, (userId, orgId)).Add(accessClaimValue);
+            GrantCalls++;
+            ValuesForMutation(accessGrants, (target, orgId)).Add(accessClaimValue);
             return Task.CompletedTask;
         }
 
-        public Task AddRoleAccessAsync(string roleId, string orgId, string accessClaimValue)
+        public Task DeleteAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
         {
-            RoleGrantCalls++;
-            ValuesForMutation(roleAccess, (roleId, orgId)).Add(accessClaimValue);
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteUserAccessAsync(string userId, string orgId, string accessClaimValue)
-        {
-            UserRevokeCalls++;
-            ValuesForMutation(userAccess, (userId, orgId)).Remove(accessClaimValue);
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteRoleAccessAsync(string roleId, string orgId, string accessClaimValue)
-        {
-            RoleRevokeCalls++;
-            ValuesForMutation(roleAccess, (roleId, orgId)).Remove(accessClaimValue);
+            RevokeCalls++;
+            ValuesForMutation(accessGrants, (target, orgId)).Remove(accessClaimValue);
             return Task.CompletedTask;
         }
 

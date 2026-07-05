@@ -22,7 +22,7 @@
     /// <summary>
     /// Picked access claim values for role or user.
     /// </summary>
-    [Parameter] public List<string> PickedAccessClaimValues { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<string> PickedAccessClaimValues { get; set; } = [];
     [Parameter] public EventCallback<PickChangedRecord<AccessClaimInfo>> PickChanged { get; set; }
 
     Task OnCheckChanged(AccessClaimInfo info, bool isChecked)

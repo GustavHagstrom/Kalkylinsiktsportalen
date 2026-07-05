@@ -4,10 +4,33 @@ using BlazorServer.Shared.Kernel.Authentication;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
-internal static class ViewAccessDecision
+public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
 {
-    public static async Task<bool> HasViewAccessAsync(
-        IViewAccessGrantStore store,
+    public Task<bool> HandleAsync(CanUseViewQuery query)
+    {
+        return HasViewAccessAsync(
+            query.User,
+            query.ViewId,
+            ViewAccessRight.UseView);
+    }
+
+    public Task<bool> HandleAsync(CanEditViewQuery query)
+    {
+        return HasViewAccessAsync(
+            query.User,
+            query.ViewId,
+            ViewAccessRight.EditView);
+    }
+
+    public Task<bool> HandleAsync(CanAdministerViewAccessQuery query)
+    {
+        return HasViewAccessAsync(
+            query.User,
+            query.ViewId,
+            ViewAccessRight.AdministerViewAccess);
+    }
+
+    async Task<bool> HasViewAccessAsync(
         ClaimsPrincipal user,
         string viewId,
         ViewAccessRight right)
@@ -34,7 +57,7 @@ internal static class ViewAccessDecision
             IsGrantForUserOrRole(grant, userId, roleIds));
     }
 
-    private static bool IsGrantForUserOrRole(
+    static bool IsGrantForUserOrRole(
         ViewAccessGrant grant,
         string userId,
         IReadOnlySet<string> roleIds)

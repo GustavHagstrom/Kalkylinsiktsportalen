@@ -9,14 +9,14 @@ namespace BlazorServer.Modules.Access.Authentication;
 
 public class AccessClaimsTransformation : IClaimsTransformation
 {
-    private readonly GetEffectiveFunctionalAccessClaimsHandler effectiveClaims;
+    private readonly FunctionalAccessGrantHandler functionalAccessGrants;
     private readonly IAccessClaimsCache _cache;
 
     public AccessClaimsTransformation(
-        GetEffectiveFunctionalAccessClaimsHandler effectiveClaims,
+        FunctionalAccessGrantHandler functionalAccessGrants,
         IAccessClaimsCache cache)
     {
-        this.effectiveClaims = effectiveClaims;
+        this.functionalAccessGrants = functionalAccessGrants;
         _cache = cache;
     }
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -30,7 +30,7 @@ public class AccessClaimsTransformation : IClaimsTransformation
         if (!_cache.TryGetAccessClaims(userId, orgId, out List<string>? accessClaimValues))
         {
             _cache.ClearAccessClaims(userId, orgId);
-            var accessClaims = await effectiveClaims.HandleAsync(
+            var accessClaims = await functionalAccessGrants.HandleAsync(
                 new GetEffectiveFunctionalAccessClaimsQuery(userId, groupIds, orgId));
             foreach (var claim in accessClaims)
             {
