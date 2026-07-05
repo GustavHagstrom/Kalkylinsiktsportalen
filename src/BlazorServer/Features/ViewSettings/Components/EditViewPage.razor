@@ -50,7 +50,7 @@
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IViewStore ViewStore
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject CanEditViewHandler CanEditView
+@inject ViewAccessDecisionHandler ViewAccessDecisions
 
 @code {
     [Parameter] public string? ViewId { get; set; }
@@ -83,7 +83,7 @@
         if (ViewId is null) return;
         SetLoading(true);
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        if (!await CanEditView.HandleAsync(new CanEditViewQuery(authenticationState.User, ViewId)))
+        if (!await ViewAccessDecisions.HandleAsync(new CanEditViewQuery(authenticationState.User, ViewId)))
         {
             View = null;
             Editor = null;
