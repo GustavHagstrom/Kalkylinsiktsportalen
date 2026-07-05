@@ -17,7 +17,7 @@ Product modules should register through explicit static `IServiceCollection` ext
 - Keep helper APIs only where they protect a real application rule, such as one settings area per module. Thin wrappers around collection methods should be removed.
 - Settings area registration should keep an explicit module key so the Settings Hub can enforce at most one settings area per module after `IModule` is removed.
 - Existing `Feature registration` remains a compatibility path for old `IFeature` code during migration.
-- ADR-0038 remains useful for the UI composition and settings-area decisions, but its `IModule` target is superseded.
+- ADR-0038 is historical only; current UI composition and settings-area guidance lives in the target architecture and development docs.
 - App shell code is a top-level application boundary, not part of `Shared`.
 - Modules must not depend on app shell code. Modules contribute shell metadata through neutral composition contracts such as `Shared/Composition`.
 - App shell code consumes composition data and owns concrete shell surfaces such as app navigation and the Settings Hub.

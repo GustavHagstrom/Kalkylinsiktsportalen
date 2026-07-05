@@ -8,7 +8,7 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - produktbild och huvudflöden: [product-and-domain.md](product-and-domain.md)
 - levande modulägd domänmodell: [domain/README.md](domain/README.md)
 - arkitekturriktning: [architecture/target-architecture.md](architecture/target-architecture.md)
-- migreringsriktning: [architecture/migration-plan.md](architecture/migration-plan.md)
+- praktiska kodregler och övergång från äldre feature-struktur: [development.md](development.md)
 - dokumentägarskap: [README.md](README.md)
 
 ## Viktigt Att Veta
@@ -19,10 +19,10 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 ## Arbetssätt För Agenter
 
 - läs relevanta filer innan ändring
-- läs målarkitektur och migrationsplan om ändringen påverkar struktur eller ansvar
+- läs målarkitektur och utvecklingsriktlinjer om ändringen påverkar struktur eller ansvar
 - gör små, fokuserade ändringar
 - håll små ändringar nära befintlig feature
-- lägg ny produktkod i `Modules/*` när det passar migrationsplanen
+- lägg ny produktkod i `Modules/*` när det passar målarkitekturen och utvecklingsriktlinjerna
 - lägg inte saker i `Shared` i onödan
 - undvik nya paket om de inte behövs
 - uppdatera [../CONTEXT.md](../CONTEXT.md) när ett kanoniskt domänbegrepp ändras eller etableras
@@ -81,7 +81,7 @@ Ange vilka tester eller kontroller som ska köras.
 
 ```text
 Läs först relevanta filer och sammanfatta kort hur berörd feature fungerar idag.
-Läs målarkitektur och migrationsplan om ändringen påverkar struktur eller ansvar.
+Läs målarkitektur och utvecklingsriktlinjer om ändringen påverkar struktur eller ansvar.
 Implementera minsta rimliga ändring.
 Följ befintlig feature-struktur för små ändringar och målmodulerna för ny produktkod.
 Lägg inte till nya paket.

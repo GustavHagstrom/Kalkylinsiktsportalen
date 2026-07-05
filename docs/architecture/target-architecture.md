@@ -115,6 +115,20 @@ Detta dokument äger modulernas ansvar på översiktsnivå:
 
 Den detaljerade modellen inom varje modul ska beskrivas i `docs/domain/*`.
 
+### Övergång Från Äldre Feature-Struktur
+
+Äldre produktkod kan fortfarande ligga i `Features/*` och `Shared/*`. För små ändringar är det ofta rätt att arbeta nära den befintliga koden, medan ny produktlogik bör röra sig mot målmodulerna ovan.
+
+Den praktiska arbetsregeln för när kod ska ligga kvar nära dagens feature och när den ska flyttas mot `Modules/*` ägs av [../development.md](../development.md).
+
+| Äldre feature | Målmodul/riktning |
+|---|---|
+| `Settings` | `AppShell` / generisk shared UI |
+| `Access` | `Access` |
+| `BidconAccess` | `Bidcon` + `Organizations` |
+| `BidconBrowser` | `Bidcon`, senare delvis `Projects` |
+| `ViewSettings` | `Reports` |
+
 ## Shared Och Gemensamma Byggblock
 
 Gemensamma byggblock ska hållas små, stabila och avsiktliga.
@@ -137,7 +151,9 @@ Produktnära regler eller flöden ska inte placeras här bara för att de använ
 
 ### Modulregistrering Och UI Composition
 
-Nya målmoduler registreras via statiska `IServiceCollection`-extensions som får portalens `AppRegistrationContext`.
+Nya målmoduler ska registreras explicit och bidra metadata till app shell genom neutrala composition-kontrakt.
+
+Den praktiska kodformen för modulregistrering ägs av [../development.md](../development.md). Det historiska trade-off-beslutet finns i [../adr/global/0040-use-static-module-registration-functions.md](../adr/global/0040-use-static-module-registration-functions.md).
 
 `AppRegistrationContext` är den gemensamma samlingspunkten för modulens bidrag till:
 
@@ -148,7 +164,7 @@ Nya målmoduler registreras via statiska `IServiceCollection`-extensions som få
 
 Äldre `IFeature`-registrering får finnas kvar under migrationen, men är en separat kompatibilitetsväg och ska inte vara modellen för ny modulär kod.
 
-Navigation i app shell och settings areas ska registreras som data, till exempel text, route, order, ikon och policy. Settings area-registrering ska ange en explicit module key så Settings Hub kan hålla en synlig settings-ingång per modul.
+Navigation i app shell och settings areas ska registreras som data, inte som godtyckliga komponenttyper.
 
 ## Beroenderiktningar
 

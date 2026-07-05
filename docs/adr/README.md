@@ -72,6 +72,10 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0034 - Defer domain events during initial migration](global/0034-defer-domain-events-during-initial-migration.md)
 - [0035 - Let Web orchestrate Projects and Reports initially](global/0035-let-web-orchestrate-projects-and-reports-initially.md)
 - [0037 - Use pragmatic CQRS feature slices](global/0037-use-pragmatic-cqrs-feature-slices.md)
+- [0038 - Use IModule and UI composition registration](global/0038-use-imodule-and-ui-composition-registration.md) - superseded by ADR-0040; historical context only
+- [0039 - Keep persistence APIs behind store contracts](global/0039-keep-persistence-apis-behind-store-contracts.md)
+- [0040 - Use static module registration functions](global/0040-use-static-module-registration-functions.md)
+- [0041 - Use access claim registry](global/0041-use-access-claim-registry.md)
 
 ### Bidcon
 

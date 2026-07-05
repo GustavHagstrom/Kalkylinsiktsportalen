@@ -16,12 +16,9 @@ För de flesta ändringar räcker den här ordningen:
 2. [product-and-domain.md](product-and-domain.md) - produktens syfte, övergripande domänkarta och huvudflöden
 3. [domain/README.md](domain/README.md) - levande domänmodell och modulvisa domändokument
 4. [architecture/target-architecture.md](architecture/target-architecture.md) - långsiktig målbild
-5. [architecture/migration-plan.md](architecture/migration-plan.md) - stegvis väg dit
-6. [architecture/next-phase-plan.md](architecture/next-phase-plan.md) - konkret plan för nästa migrationsfas
-7. [architecture/current-state.md](architecture/current-state.md) - nuläge och mapping från features till målmoduler
-8. [development.md](development.md) - lokal utveckling och kodriktlinjer
+5. [development.md](development.md) - lokal utveckling och kodriktlinjer
 
-Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som riktning, medan nulägesdokumenten beskriver hur koden ser ut idag.
+Om äldre kod och målarkitekturen säger olika saker gäller målarkitekturen som riktning för ny produktlogik. Små ändringar kan fortfarande göras nära befintlig feature enligt [development.md](development.md).
 
 ## Struktur
 
@@ -32,9 +29,6 @@ Om målarkitekturen och nuläget säger olika saker gäller målarkitekturen som
 - [domain/projects.md](domain/projects.md) - Projects-modulens aggregates, invariants och policyer
 - [domain/reports.md](domain/reports.md) - Reports-modulens aggregate, livscykel och policyer
 - [architecture/target-architecture.md](architecture/target-architecture.md) - målarkitektur för modulär monolit, snapshots och utbytbar frontend
-- [architecture/migration-plan.md](architecture/migration-plan.md) - stegvis plan från nuvarande struktur till målarkitekturen
-- [architecture/next-phase-plan.md](architecture/next-phase-plan.md) - aktuell plan för nästa migrationsfas
-- [architecture/current-state.md](architecture/current-state.md) - nuläge, runtime-flöden, infrastruktur och feature-mapping
 - [development.md](development.md) - lokal setup, arbetsflöde, kodriktlinjer och Definition of Done
 - [planning.md](planning.md) - planeringsprinciper och öppna frågor som ännu inte blivit issues eller ADR:er
 - [agent-guide.md](agent-guide.md) - agentinstruktioner och uppgiftsmall
@@ -48,9 +42,6 @@ För att undvika motsägelser ska varje typ av information ha en primär ägare:
 - [product-and-domain.md](product-and-domain.md) äger produktsyfte, målbild, användartyper, huvudflöden och globala domängränser.
 - [domain/README.md](domain/README.md) och `domain/*.md` äger modulernas levande domänmodell: aggregates, relationer, invariants och modulnära policyer.
 - [architecture/target-architecture.md](architecture/target-architecture.md) äger arkitekturprinciper, modulgränser och beroenderiktning.
-- [architecture/current-state.md](architecture/current-state.md) äger observerat nuläge i koden.
-- [architecture/migration-plan.md](architecture/migration-plan.md) äger migreringssteg, sequencing och definition of done för flytten mot målarkitekturen.
-- [architecture/next-phase-plan.md](architecture/next-phase-plan.md) äger den aktuella genomförandeplanen för nästa migrationsfas.
 - [development.md](development.md) äger lokal setup, arbetsflöde och praktiska kodriktlinjer.
 - [planning.md](planning.md) äger öppna frågor som ännu inte blivit issues eller ADR:er.
 - [agent-guide.md](agent-guide.md) äger agentinstruktioner och uppgiftsmallar, inte allmän produkt- eller arkitekturbeskrivning.
@@ -67,13 +58,9 @@ Primära styrdokument ska vara korta, aktiva och hållas uppdaterade när riktni
 - kanoniskt domänspråk
 - produkt och övergripande domänkarta
 - levande modulägd domänmodell
-- målarkitektur och migrationsplan
+- målarkitektur
 - utvecklingsriktlinjer
 - planeringsprinciper och öppna frågor
-
-### Nulägesdokument
-
-Nulägesdokument beskriver observerad kod. De får vara mer deskriptiva, men ska inte styra nya större vägval om de krockar med målarkitekturen.
 
 ### Planering och Öppna Frågor
 
@@ -99,8 +86,7 @@ När du lägger till eller ändrar en feature bör du i normalfallet överväga 
 - kanoniskt domänspråk
 - produktbild och övergripande domänkarta
 - levande modulägd domänmodell
-- målarkitektur eller migrationsplan
-- nuläge
+- målarkitektur
 - utvecklingsriktlinjer
 - planering eller öppna frågor
 - ADR om beslutet är långlivat eller svårt att backa ur

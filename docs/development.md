@@ -57,7 +57,7 @@ Gör minsta rimliga ändring:
 - håll dig inom rätt feature eller modul
 - undvik bred refaktorering om den inte behövs
 
-Följ nuläget när ändringen är liten:
+Följ befintlig kod när ändringen är liten:
 
 - använd befintlig feature-baserad indelning i `Features/*` när ändringen hör nära ihop med dagens kod
 - håll dig nära befintlig registrering via `ServiceAndFeatureRegistrations`
