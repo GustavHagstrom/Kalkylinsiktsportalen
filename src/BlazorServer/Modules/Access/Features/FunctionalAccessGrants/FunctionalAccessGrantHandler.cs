@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Domain;
 
 namespace BlazorServer.Modules.Access.Features.FunctionalAccessGrants;

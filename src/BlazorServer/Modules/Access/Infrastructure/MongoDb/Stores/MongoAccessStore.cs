@@ -3,6 +3,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Mappers;
 using MongoDB.Driver;
 using BlazorServer.Modules.Access.Domain;
+using BlazorServer.Modules.Access.Authentication;
 
 namespace BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 
