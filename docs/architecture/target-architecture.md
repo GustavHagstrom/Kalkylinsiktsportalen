@@ -177,7 +177,7 @@ Web
 
 Modules
   -> SharedKernel
-  -> avsiktliga modulkontrakt
+  -> avsiktliga publika modulkontrakt
 
 Infrastructure
   -> modulkontrakt
@@ -186,7 +186,7 @@ Infrastructure
 
 Moduler ska undvika att nå in i varandras interna implementationer.
 
-När en modul behöver något från en annan modul ska det ske via ett avsiktligt kontrakt eller ett use case, inte via intern persistens- eller UI-struktur.
+När en modul behöver något från en annan modul ska det ske via den andra modulens publika interface under `Modules/{Module}/Public`, inte via interna use cases, persistens- eller UI-struktur. Det historiska trade-off-beslutet finns i [../adr/global/0042-use-public-module-interfaces.md](../adr/global/0042-use-public-module-interfaces.md).
 
 ## Frontendstrategi
 
