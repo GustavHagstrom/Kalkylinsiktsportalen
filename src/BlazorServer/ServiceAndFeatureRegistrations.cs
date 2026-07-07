@@ -1,4 +1,3 @@
-using BlazorServer.Features.BidconAccess;
 using BlazorServer.Features.BidconBrowser;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Features.ViewSettings;
@@ -67,7 +66,6 @@ public static class ServiceAndFeatureRegistrations
             //{
             //    policy.RequireAuthenticatedUser();
             //});
-            config.AddFeature<BidconAccessFeature>();
             config.AddFeature<BidconBrowserFeature>();
             config.AddFeature<ViewSettingsFeature>();
 

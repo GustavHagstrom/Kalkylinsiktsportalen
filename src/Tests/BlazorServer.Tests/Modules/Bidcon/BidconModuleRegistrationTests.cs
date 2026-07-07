@@ -6,9 +6,11 @@ using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Settings;
 using BlazorServer.Shared.Composition;
+using BlazorServer.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 
@@ -83,6 +85,55 @@ public class BidconModuleRegistrationTests
             Assert.That(authorizedAreas.Select(area => area.Id), Has.One.EqualTo("bidcon"));
             Assert.That(unauthorizedAreas, Is.Empty);
         });
+    }
+
+    [Test]
+    public async Task BidconApiPolicyAllowsConfiguredClaimOrAdminRole()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = services.AddAppRegistrationContext();
+        services.AddBidconModule(registrationContext);
+        services.AddLogging();
+        services.ApplyAppRegistrationContext(registrationContext);
+
+        using var provider = services.BuildServiceProvider();
+        var authorizationService = provider.GetRequiredService<IAuthorizationService>();
+
+        var authorizedByClaim = await authorizationService.AuthorizeAsync(
+            PrincipalWithBidconApiClaim(),
+            resource: null,
+            "ApiPolicy");
+        var authorizedByAdmin = await authorizationService.AuthorizeAsync(
+            PrincipalInAdminRole(),
+            resource: null,
+            "ApiPolicy");
+        var unauthorized = await authorizationService.AuthorizeAsync(
+            new ClaimsPrincipal(new ClaimsIdentity("test")),
+            resource: null,
+            "ApiPolicy");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(authorizedByClaim.Succeeded, Is.True);
+            Assert.That(authorizedByAdmin.Succeeded, Is.True);
+            Assert.That(unauthorized.Succeeded, Is.False);
+        });
+    }
+
+    private static ClaimsPrincipal PrincipalWithBidconApiClaim()
+    {
+        return new ClaimsPrincipal(new ClaimsIdentity(
+        [
+            new Claim("BidconApiWritePermission", "true")
+        ], "test"));
+    }
+
+    private static ClaimsPrincipal PrincipalInAdminRole()
+    {
+        return new ClaimsPrincipal(new ClaimsIdentity(
+        [
+            new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue)
+        ], "test"));
     }
 
     private sealed class PolicyAuthorizationService(params string[] allowedPolicies) : IAuthorizationService

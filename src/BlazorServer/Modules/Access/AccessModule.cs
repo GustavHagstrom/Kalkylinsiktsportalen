@@ -5,6 +5,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Kernel.Authentication;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
@@ -31,10 +32,7 @@ public static class AccessModule
         registrationContext.Policies.AddPolicy(Constants.Authorization.PolicyName, config =>
         {
             config.RequireAssertion(context =>
-                context.User.HasClaim(
-                    ApplicationClaimTypes.AccessClaim,
-                    Constants.Authorization.AccessClaimValue) ||
-                context.User.IsInRole(AuthConstants.AdminRoleClaimValue));
+                context.User.HasAccessClaimOrApplicationAdmin(Constants.Authorization.AccessClaimValue));
         });
 
         registrationContext.AccessClaims.Register(new AccessClaimInfo(

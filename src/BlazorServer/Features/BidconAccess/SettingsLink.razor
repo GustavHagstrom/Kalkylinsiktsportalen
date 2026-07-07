@@ -1,7 +1,0 @@
-@using BlazorServer.Features.BidconAccess
-@inject IStringLocalizer<SettingsLink> Localizer
-
-<SettingsNavLink Text="@Localizer["Api"]" 
-                 AuthPolicy="@FeatureConstants.Authorization.PolicyName" 
-                 Href="@FeatureConstants.Routes.SettingsPage"
-                 Icon="@Icons.Material.Sharp.Api" />

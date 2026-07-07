@@ -4,6 +4,7 @@ using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.FeatureRegistration;
+using BlazorServer.Shared.Kernel.Authentication;
 
 namespace BlazorServer.Features.ViewSettings;
 
@@ -14,8 +15,7 @@ public class ViewSettingsFeature : IFeature
         policies.AddPolicy(FeatureConstants.Authorization.PolicyName, config =>
         {
             config.RequireAssertion(context =>
-                context.User.HasClaim(ApplicationClaimTypes.AccessClaim, FeatureConstants.Authorization.AccessClaimValue) ||
-                context.User.IsInRole(AuthConstants.AdminRoleClaimValue));
+                context.User.HasAccessClaimOrApplicationAdmin(FeatureConstants.Authorization.AccessClaimValue));
         });
     }
 

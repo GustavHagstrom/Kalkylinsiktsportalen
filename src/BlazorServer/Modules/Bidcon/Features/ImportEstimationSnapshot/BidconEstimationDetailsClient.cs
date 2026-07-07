@@ -29,7 +29,7 @@ public class BidconEstimationDetailsClient
         this.credentialsStore = credentialsStore;
     }
 
-    public async Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+    public async virtual Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
         BidconEstimationId bidconEstimationId,
         OrganizationId organizationId,
         CancellationToken cancellationToken)

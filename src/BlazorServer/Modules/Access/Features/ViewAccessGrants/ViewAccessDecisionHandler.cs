@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Kernel.Authentication;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -35,7 +34,7 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
         string viewId,
         ViewAccessRight right)
     {
-        if (user.IsInRole(AuthConstants.AdminRoleClaimValue))
+        if (user.IsApplicationAdmin())
         {
             return true;
         }

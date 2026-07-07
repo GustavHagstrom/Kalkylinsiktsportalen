@@ -4,6 +4,7 @@ using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Composition;
+using BlazorServer.Shared.Kernel.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
 using MudBlazor;
 
@@ -27,6 +28,11 @@ public static class BidconModule
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
         services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
+
+        registrationContext.AccessClaims.Register(new Shared.Models.AccessClaimInfo("BidconApiWritePermission", "Bidcon Api Write permission", "Grants permission to edit Bidcon API credentials."));
+        registrationContext.Policies.AddPolicy(
+            "ApiPolicy",
+            policy => policy.RequireAssertion(context => context.User.HasAccessClaimOrApplicationAdmin("BidconApiWritePermission")));
 
         registrationContext.UiComposition.AddSettingsArea(
             new UiSettingsArea(
