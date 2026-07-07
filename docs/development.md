@@ -69,7 +69,17 @@ Följ målarkitekturen när du lägger ny produktlogik:
 - registrera nya målmoduler via statiska `IServiceCollection`-extensions som får `AppRegistrationContext`
 - strukturera ny modulär logik som feature/use case-slices
 - skapa interna mappar som `Domain`, `Infrastructure` och `Components` bara när de löser ett konkret behov
-- använd avsiktliga kontrakt mellan moduler i stället för att nå in i intern implementation
+- exponera cross-module-ytor under `Modules/{Module}/Public`
+- använd avsiktliga publika kontrakt mellan moduler i stället för att nå in i intern implementation
+
+Hård regel för modulgränser:
+
+- andra moduler får bara referera till kod under `Modules/{Module}/Public`
+- `Public/Contracts` innehåller typer och abstractions som andra moduler får referera
+- `Public/Components` innehåller avsiktliga entry components som andra moduler får bädda in
+- `Features`, `Domain`, `Infrastructure`, `Settings` och icke-publika `Components` är implementation details för den ägande modulen
+- moduler får inte anropa varandras `Features/*` eller use case-handlers direkt
+- om en annan modul behöver beteende från ett use case, store, extern DTO, API-klient eller intern helper component ska den ägande modulen exponera ett smalare interface under `Public`
 
 Praktiska regler för nya feature slices:
 
@@ -141,8 +151,8 @@ public static class ExampleModule
 - använd `DbContext`, `IMongoCollection<T>` och provider-specifika query builders i infrastructure, store-implementationer, migrations/setup eller tekniska adapters
 - håll store-kontrakt små och use case-nära; namnge nya persistenskontrakt som stores och skapa inte repositories eller generiska CRUD-abstraktioner som standard
 - håll beroenden explicita via DI
-- låt moduler bero på avsiktliga kontrakt eller use cases, inte på varandras interna implementationer
-- använd `Contracts` för avsiktliga modulgränser, till exempel små interface, read models eller delade identitetstyper; lägg inte konkreta domänmodeller, persistence-modeller eller implementation där
+- låt moduler bero på avsiktliga kontrakt under `Public/Contracts`, inte på varandras interna implementationer eller use cases
+- använd `Public/Contracts` för avsiktliga modulgränser, till exempel små interface, read models eller delade identitetstyper; lägg inte konkreta domänmodeller, persistence-modeller eller implementation där
 
 ## Tester
 

@@ -186,7 +186,7 @@ Infrastructure
 
 Moduler ska undvika att nå in i varandras interna implementationer.
 
-När en modul behöver något från en annan modul ska det ske via den andra modulens publika interface under `Modules/{Module}/Public`, inte via interna use cases, persistens- eller UI-struktur. Det historiska trade-off-beslutet finns i [../adr/global/0042-use-public-module-interfaces.md](../adr/global/0042-use-public-module-interfaces.md).
+När en modul behöver något från en annan modul ska det ske via den andra modulens publika interface under `Modules/{Module}/Public`, inte via interna use cases, persistens- eller UI-struktur. Den praktiska arbetsregeln ägs av [../development.md](../development.md).
 
 ## Frontendstrategi
 
