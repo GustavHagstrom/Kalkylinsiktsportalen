@@ -4,6 +4,8 @@ Backlog och konkreta uppgifter bör i första hand hanteras som GitHub Issues.
 
 Docs ska inte vara en parallell ärendelista. Den här filen används bara för planeringsprinciper och öppna frågor som ännu inte är tillräckligt konkreta för en issue eller ADR.
 
+Lösa idéer och utredningssignaler som inte är redo som öppna planeringsfrågor kan fångas i [ideas.md](ideas.md). Flytta dem hit först när de behöver behandlas som en aktiv öppen fråga.
+
 ## Principer
 
 - Skapa GitHub Issues för konkreta buggar, förbättringar och implementation tasks.

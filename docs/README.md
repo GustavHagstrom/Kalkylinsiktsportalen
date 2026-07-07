@@ -30,6 +30,7 @@ Om äldre kod och målarkitekturen säger olika saker gäller målarkitekturen s
 - [domain/reports.md](domain/reports.md) - Reports-modulens aggregate, livscykel och policyer
 - [architecture/target-architecture.md](architecture/target-architecture.md) - målarkitektur för modulär monolit, snapshots och utbytbar frontend
 - [development.md](development.md) - lokal setup, arbetsflöde, kodriktlinjer och Definition of Done
+- [ideas.md](ideas.md) - lågfriktions-inbox för idéer som inte är backlog, beslut eller planeringsfrågor ännu
 - [planning.md](planning.md) - planeringsprinciper och öppna frågor som ännu inte blivit issues eller ADR:er
 - [agent-guide.md](agent-guide.md) - agentinstruktioner och uppgiftsmall
 - [adr/README.md](adr/README.md) - hur arkitekturbeslut dokumenteras
@@ -43,6 +44,7 @@ För att undvika motsägelser ska varje typ av information ha en primär ägare:
 - [domain/README.md](domain/README.md) och `domain/*.md` äger modulernas levande domänmodell: aggregates, relationer, invariants och modulnära policyer.
 - [architecture/target-architecture.md](architecture/target-architecture.md) äger arkitekturprinciper, modulgränser och beroenderiktning.
 - [development.md](development.md) äger lokal setup, arbetsflöde och praktiska kodriktlinjer.
+- [ideas.md](ideas.md) äger lösa idéer och utredningssignaler som inte är konkreta backlog-items, beslut eller etablerade öppna frågor.
 - [planning.md](planning.md) äger öppna frågor som ännu inte blivit issues eller ADR:er.
 - [agent-guide.md](agent-guide.md) äger agentinstruktioner och uppgiftsmallar, inte allmän produkt- eller arkitekturbeskrivning.
 - [adr/README.md](adr/README.md) och `adr/**/*.md` äger långlivade, svårbackade trade-offs.
@@ -65,6 +67,8 @@ Primära styrdokument ska vara korta, aktiva och hållas uppdaterade när riktni
 ### Planering och Öppna Frågor
 
 Konkreta uppgifter bör hanteras som GitHub Issues. Docs ska bara samla planeringsprinciper och frågor som ännu inte är issues eller ADR:er.
+
+Lösa idéer som inte är redo som GitHub Issue, ADR eller planeringsfråga kan fångas i [ideas.md](ideas.md). Den filen är en inbox, inte beslutad riktning eller parallell backlog.
 
 Beslut som är långlivade, svåra att backa ur och resultatet av en verklig trade-off ska dokumenteras som korta ADR:er via [adr/README.md](adr/README.md), med filen placerad under rätt global- eller modulmapp.
 

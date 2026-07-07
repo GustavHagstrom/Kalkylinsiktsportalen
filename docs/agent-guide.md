@@ -10,6 +10,7 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - arkitekturriktning: [architecture/target-architecture.md](architecture/target-architecture.md)
 - praktiska kodregler och övergång från äldre feature-struktur: [development.md](development.md)
 - dokumentägarskap: [README.md](README.md)
+- lösa idéer och utredningssignaler: [ideas.md](ideas.md)
 
 ## Viktigt Att Veta
 
@@ -30,6 +31,8 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - skriv en kort ADR enligt [adr/README.md](adr/README.md) när ett beslut är långlivat, svårt att backa ur och resultatet av en verklig trade-off
 - använd inte ADR:er för löpande domänmodellering; aggregate, relationer, invariants och modulnära modellbeskrivningar hör normalt hemma i levande domändokument
 - använd [planning.md](planning.md) för öppna frågor, inte för beslut som redan är fattade
+- läs [ideas.md](ideas.md) vid planering, arkitekturarbete, produktfrågor eller när användaren explicit nämner idéer
+- behandla inte idéer i [ideas.md](ideas.md) som beslutad riktning eller backlog
 - uppdatera docs när ansvar, regler eller arkitektur påverkas
 - verifiera med relevanta tester eller annan rimlig kontroll
 
