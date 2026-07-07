@@ -39,3 +39,10 @@ Varför det kan spela roll:
 
 Nästa rimliga steg:
 ```
+
+### EstimationExplorer
+Bicon bör äga en Estimationbrowser. Exponera komponent via public/components. Andra moduler kan använda denna. 
+Denna komponent vill nog project använda vid val av kalkyl som ska tillhöra projektet.
+Bidconmodujle vill kanske också ha en sida som använder denna kompoent men ge som alternativ att skapa projekt utifrån valda kalkyler. Eller så tillhör även denna funktion project modulen.
+Man kanske bara vill bläddra runt bland kalklyler lite. Var ska en sådan kompenent ligga? Om man bara bläddrar runt lite kan det ju hända att man också vill titta på en vald kalkyl eller skapa projekt från den eller bara en engångrapportl.
+Var ska alla dessa alternativ ägas av?
