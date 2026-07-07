@@ -1,8 +1,8 @@
-using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Domain;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Kernel.Identity;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
@@ -90,11 +90,11 @@ public class ImportEstimationSnapshotTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors.Select(error => error.Code), Is.EquivalentTo(new[]
-            {
+            Assert.That(result.Errors.Select(error => error.Code), Is.EquivalentTo(
+            [
                 "bidcon.import.organization.required",
                 "bidcon.import.estimation.required"
-            }));
+            ]));
             Assert.That(client.WasCalled, Is.False);
             Assert.That(store.SavedSnapshot, Is.Null);
         });
@@ -281,21 +281,16 @@ public class ImportEstimationSnapshotTests
         Assert.That(snapshotValues, Is.EqualTo(externalValues));
     }
 
-    private sealed class StubBidconEstimationDetailsClient : BidconEstimationDetailsClient
+    private sealed class StubBidconEstimationDetailsClient(EstimationDetailsDto? estimationDetails) : BidconEstimationDetailsClient
     {
-        private readonly EstimationDetailsDto? estimationDetails;
-
-        public StubBidconEstimationDetailsClient(EstimationDetailsDto? estimationDetails)
-        {
-            this.estimationDetails = estimationDetails;
-        }
+        private readonly EstimationDetailsDto? _estimationDetails = estimationDetails;
 
         public override Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
             BidconEstimationId bidconEstimationId,
             OrganizationId organizationId,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(estimationDetails);
+            return Task.FromResult(_estimationDetails);
         }
     }
 
@@ -329,21 +324,16 @@ public class ImportEstimationSnapshotTests
         }
     }
 
-    private sealed class FailingBidconEstimationDetailsClient : BidconEstimationDetailsClient
+    private sealed class FailingBidconEstimationDetailsClient(Exception exception) : BidconEstimationDetailsClient
     {
-        private readonly Exception exception;
-
-        public FailingBidconEstimationDetailsClient(Exception exception)
-        {
-            this.exception = exception;
-        }
+        private readonly Exception _exception = exception;
 
         public override Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
             BidconEstimationId bidconEstimationId,
             OrganizationId organizationId,
             CancellationToken cancellationToken)
         {
-            throw exception;
+            throw _exception;
         }
     }
 }

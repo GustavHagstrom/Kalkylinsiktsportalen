@@ -18,6 +18,11 @@
   </ItemGroup>
 
 
+  <ItemGroup>
+    <Folder Include="Modules\Bidcon\Contracts\" />
+  </ItemGroup>
+
+
   <!--<ItemGroup>
     <None Include="wwwroot\Pageination\styles.css" />
     <None Include="wwwroot\Pageination\engine.js" />

@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Bidcon.Contracts;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Kernel.CQRS;
 using BlazorServer.Shared.Kernel.Identity;
 

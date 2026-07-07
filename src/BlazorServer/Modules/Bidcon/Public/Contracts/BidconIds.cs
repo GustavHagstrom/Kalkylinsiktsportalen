@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Bidcon.Contracts;
+namespace BlazorServer.Modules.Bidcon.Public.Contracts;
 
 public readonly record struct BidconEstimationId(string Value)
 {

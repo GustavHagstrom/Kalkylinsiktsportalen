@@ -1,45 +1,38 @@
-using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Domain;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Kernel.CQRS;
 using BlazorServer.Shared.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
-public sealed class ImportEstimationSnapshotCommandHandler
-    : ICommandHandler<ImportEstimationSnapshotCommand, ImportEstimationSnapshotResult>
+public sealed class ImportEstimationSnapshotCommandHandler(
+    BidconEstimationDetailsClient estimationDetailsClient,
+    IEstimationSnapshotStore estimationSnapshotStore,
+    IValidator<ImportEstimationSnapshotCommand>? validator = null)
+        : ICommandHandler<ImportEstimationSnapshotCommand, ImportEstimationSnapshotResult>
 {
-    private readonly BidconEstimationDetailsClient estimationDetailsClient;
-    private readonly IEstimationSnapshotStore estimationSnapshotStore;
-    private readonly IValidator<ImportEstimationSnapshotCommand> validator;
-
-    public ImportEstimationSnapshotCommandHandler(
-        BidconEstimationDetailsClient estimationDetailsClient,
-        IEstimationSnapshotStore estimationSnapshotStore,
-        IValidator<ImportEstimationSnapshotCommand>? validator = null)
-    {
-        this.estimationDetailsClient = estimationDetailsClient;
-        this.estimationSnapshotStore = estimationSnapshotStore;
-        this.validator = validator ?? new ImportEstimationSnapshotCommandValidator();
-    }
+    private readonly BidconEstimationDetailsClient _estimationDetailsClient = estimationDetailsClient;
+    private readonly IEstimationSnapshotStore _estimationSnapshotStore = estimationSnapshotStore;
+    private readonly IValidator<ImportEstimationSnapshotCommand> _validator = validator ?? new ImportEstimationSnapshotCommandValidator();
 
     public async Task<CommandResult<ImportEstimationSnapshotResult>> HandleAsync(
         ImportEstimationSnapshotCommand command,
         CancellationToken cancellationToken)
     {
-        var validationResult = validator.Validate(command);
+        var validationResult = _validator.Validate(command);
 
         if (!validationResult.IsValid)
         {
-            return CommandResult<ImportEstimationSnapshotResult>.Invalid(validationResult.Errors.ToArray());
+            return CommandResult<ImportEstimationSnapshotResult>.Invalid([.. validationResult.Errors]);
         }
 
         EstimationDetailsDto? estimationDetails;
 
         try
         {
-            estimationDetails = await estimationDetailsClient.GetEstimationDetailsAsync(
+            estimationDetails = await _estimationDetailsClient.GetEstimationDetailsAsync(
                 command.BidconEstimationId,
                 command.OrganizationId,
                 cancellationToken);
@@ -68,7 +61,7 @@ public sealed class ImportEstimationSnapshotCommandHandler
             importedAt,
             estimationDetails.ToSnapshotPayload());
 
-        await estimationSnapshotStore.AddAsync(snapshot, cancellationToken);
+        await _estimationSnapshotStore.AddAsync(snapshot, cancellationToken);
 
         return CommandResult<ImportEstimationSnapshotResult>.Success(
             new ImportEstimationSnapshotResult(

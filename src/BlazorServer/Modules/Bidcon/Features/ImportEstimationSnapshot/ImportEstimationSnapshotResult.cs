@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Bidcon.Contracts;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 

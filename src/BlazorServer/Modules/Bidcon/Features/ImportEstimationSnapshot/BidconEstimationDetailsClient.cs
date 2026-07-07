@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
-using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Kernel.Identity;
 using Microsoft.Extensions.Caching.Memory;

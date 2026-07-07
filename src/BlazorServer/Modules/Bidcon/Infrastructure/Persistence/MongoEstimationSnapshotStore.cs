@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Bidcon.Contracts;
 using BlazorServer.Modules.Bidcon.Domain;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using MongoDB.Driver;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;

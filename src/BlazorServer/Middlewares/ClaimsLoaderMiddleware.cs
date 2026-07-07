@@ -6,14 +6,10 @@ using System.Security.Claims;
 
 namespace BlazorServer.Middlewares;
 
-public class ClaimsLoaderMiddleware
+public class ClaimsLoaderMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
+    private readonly RequestDelegate _next = next;
 
-    public ClaimsLoaderMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
     public async Task InvokeAsync(HttpContext context)
     {
         if (context.User?.Identity is not null && context.User.Identity.IsAuthenticated)
@@ -40,7 +36,7 @@ public class ClaimsLoaderMiddleware
         }
         await _next(context);
     }
-    void SetAdminRole(ClaimsPrincipal principal)
+    static void SetAdminRole(ClaimsPrincipal principal)
     {
         ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
     }
