@@ -8,10 +8,8 @@ Arkitekturriktning, modulgränser och beroendeprinciper ägs av [architecture/ta
 
 Förutsättningar:
 
-- .NET SDK 10
-- lokal eller åtkomlig MongoDB
+- .NET SDK 10 som kan bygga `net10.0`
 - möjlighet att köra Blazor Server lokalt
-- eventuell Azure/Microsoft Identity-konfiguration om production-lik auth ska testas
 
 Startprojekt:
 
@@ -30,6 +28,8 @@ Viktiga konfigurationsområden:
 - `ConnectionStrings`
 
 I development används mockad auth, vilket gör lokal utveckling möjlig utan full production-inloggning.
+Azure/Microsoft Identity-konfiguration behövs bara när production-lik auth uttryckligen ska testas.
+MongoDB behövs för appkörning och persistence-flöden som använder Mongo-konfiguration.
 
 ## Vanliga Kommandon
 
@@ -44,8 +44,8 @@ dotnet test Tests/BlazorServer.Tests
 
 1. Starta `BlazorServer`.
 2. Kontrollera att development-auth fungerar.
-3. Säkerställ att MongoDB är tillgänglig.
-4. Arbeta i berörd feature eller målmodul.
+3. Säkerställ att MongoDB är tillgänglig när ändringen använder Mongo-baserad persistence.
+4. Arbeta i berörd modul eller befintligt kodområde.
 5. Kör relevanta tester.
 6. Uppdatera docs om ansvar, regler eller struktur ändrats.
 
@@ -54,13 +54,12 @@ dotnet test Tests/BlazorServer.Tests
 Gör minsta rimliga ändring:
 
 - ändra så få filer som möjligt
-- håll dig inom rätt feature eller modul
+- håll dig inom rätt modul eller kodområde
 - undvik bred refaktorering om den inte behövs
 
 Följ befintlig kod när ändringen är liten:
 
-- använd befintlig feature-baserad indelning i `Features/*` när ändringen hör nära ihop med dagens kod
-- håll dig nära befintlig registrering via `ServiceAndFeatureRegistrations`
+- håll dig nära befintlig struktur när ändringen hör nära ihop med dagens kod
 - återanvänd etablerade UI-mönster i Blazor Server och MudBlazor
 
 Följ målarkitekturen när du lägger ny produktlogik:
@@ -75,21 +74,18 @@ Följ målarkitekturen när du lägger ny produktlogik:
 Hård regel för modulgränser:
 
 - andra moduler får bara referera till kod under `Modules/{Module}/Public`
-- `Public/Contracts` innehåller typer och abstractions som andra moduler får referera
-- `Public/Components` innehåller avsiktliga entry components som andra moduler får bädda in
-- `Features`, `Domain`, `Infrastructure`, `Settings` och icke-publika `Components` är implementation details för den ägande modulen
-- moduler får inte anropa varandras `Features/*` eller use case-handlers direkt
-- om en annan modul behöver beteende från ett use case, store, extern DTO, API-klient eller intern helper component ska den ägande modulen exponera ett smalare interface under `Public`
+- använd `Public/Contracts` för avsiktliga modulkontrakt och `Public/Components` för avsiktliga entry components
+- moduler får inte anropa varandras interna use cases, stores, API-klienter eller helper components direkt
+- om en annan modul behöver beteende ska den ägande modulen exponera ett smalare kontrakt under `Public`
 
 Praktiska regler för nya feature slices:
 
-- `Features/*` innehåller application use cases: commands, queries, handlers, validators, result/read models och slice-ägda store-kontrakt
-- `Components/*` innehåller Blazor UI och ska ligga separat från `Features/*`
+- `Features/*` innehåller application use cases
+- `Components/*` innehåller Blazor UI
 - components får bero på features, men features får inte bero på components
 - Blazor Server-components får anropa handlers direkt
 - handlers ska vara fria från Blazor-, HTTP-, navigation-, dialog-, snackbar-, JS- och andra host/UI-specifika beroenden
 - handlers returnerar application-resultat som kan visas av Blazor idag och mappas till HTTP senare
-- skapa inte endpoints, HTTP request/response-DTO:er eller OpenAPI-kontrakt som standard innan en faktisk API-klient eller migrationsövning behöver dem
 - framtida endpoints ska vara tunna adapters över samma handlers, inte en alternativ plats för produktlogik
 
 Använd `Shared` restriktivt:
@@ -98,8 +94,8 @@ Använd `Shared` restriktivt:
 - använd `Shared/UI` för generiska UI-primitiver
 - använd `Shared/Kernel` för små stabila gemensamma typer
 - använd `Shared/Infrastructure` för teknisk implementation som delas av flera moduler
-- flytta äldre `Shared/*` stegvis när koden ändå berörs eller blockerar en tydlig modulgräns
-- externa API-DTO:er ska på sikt ligga i modulen som äger integrationen; äldre kopior i `Shared/DTOs` får ligga kvar som kompatibilitet tills berörda call sites flyttas
+- `Shared/DTOs` är befintlig intern/legacy-modell och inte en defaultplats för ny kod
+- externa integrations-DTO:er ska ligga i modulen som äger integrationen
 
 ## Blazor Och UI
 
@@ -109,39 +105,7 @@ Använd `Shared` restriktivt:
 - undvik att ny produktlogik kräver Blazor-specifika typer
 - registrera top navigation och settings areas som data i `AppRegistrationContext`, inte som godtyckliga komponenttyper
 - registrera settings area med explicit module key så Settings Hub kan hålla en synlig settings-ingång per modul
-
-Exempel på modulregistrering:
-
-```csharp
-public static class ExampleModule
-{
-    public static IServiceCollection AddExampleModule(
-        this IServiceCollection services,
-        AppRegistrationContext registrationContext)
-    {
-        services.AddTransient<ExampleHandler>();
-
-        registrationContext.UiComposition.AddTopNavigation(
-            new UiNavigationItem(
-                Text: "Exempel",
-                Href: "/example",
-                Order: 50));
-
-        registrationContext.UiComposition.AddSettingsArea(
-            new UiSettingsArea(
-                Id: "example",
-                Title: "Exempel",
-                Description: "Administrera exempel.",
-                Href: "/settings/example",
-                Order: 50,
-                Icon: Icons.Material.Sharp.Settings,
-                Policy: "ExampleSettingsPolicy"),
-            moduleKey: "Example");
-
-        return services;
-    }
-}
-```
+- följ befintliga modulregistreringar, till exempel `Modules/Access/AccessModule.cs`
 
 ## Services, Stores Och Kontrakt
 
@@ -151,8 +115,6 @@ public static class ExampleModule
 - använd `DbContext`, `IMongoCollection<T>` och provider-specifika query builders i infrastructure, store-implementationer, migrations/setup eller tekniska adapters
 - håll store-kontrakt små och use case-nära; namnge nya persistenskontrakt som stores och skapa inte repositories eller generiska CRUD-abstraktioner som standard
 - håll beroenden explicita via DI
-- låt moduler bero på avsiktliga kontrakt under `Public/Contracts`, inte på varandras interna implementationer eller use cases
-- använd `Public/Contracts` för avsiktliga modulgränser, till exempel små interface, read models eller delade identitetstyper; lägg inte konkreta domänmodeller, persistence-modeller eller implementation där
 
 ## Tester
 
@@ -173,7 +135,7 @@ En ändring är normalt klar när:
 
 - lösningen kompilerar eller berörda delar verifierats
 - relevant beteende är testat
-- ändringen följer feature- och modulgränser
+- ändringen följer modulgränser och berörd use case-struktur
 - ny struktur, nytt ansvar eller nytt arbetssätt är dokumenterat
 
 ## Säkerhet
