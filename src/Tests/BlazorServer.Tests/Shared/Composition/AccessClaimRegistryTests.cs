@@ -1,5 +1,5 @@
+using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Models;
 
 namespace BlazorServer.Tests.Shared.Composition;
 

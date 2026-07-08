@@ -1,5 +1,4 @@
 using BlazorServer.AppShell.Settings;
-using BlazorServer.Features.ViewSettings;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
@@ -17,6 +16,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
+using BlazorServer.Modules.Reports;
 
 namespace BlazorServer;
 
@@ -61,12 +61,6 @@ public static class ServiceAndFeatureRegistrations
         builder.Services.AddSettingsShell(registrationContext);
         builder.ConfigureFeatures(registrationContext, config =>
         {
-            //config.AddAuthorizationPolicy(AuthConstants.RequireAuthenticatedUserPolicyName, policy =>
-            //{
-            //    policy.RequireAuthenticatedUser();
-            //});
-            config.AddFeature<ViewSettingsFeature>();
-
             if (builder.Configuration["Auth:Mode"] == "Mock")
             {
                 config.RenderCollection.SetLoginDisplayComponent<MockedLoginDisplay>();
@@ -76,10 +70,10 @@ public static class ServiceAndFeatureRegistrations
                 config.RenderCollection.SetLoginDisplayComponent<LoginDisplay>();
             }
         });
-
         builder.Services.AddAccessModule(registrationContext);
         builder.Services.AddBidconModule(registrationContext);
         builder.Services.AddProjectsModule(registrationContext);
+        builder.Services.AddReportsModule(registrationContext);
 
         builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
         {

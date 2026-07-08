@@ -53,7 +53,7 @@
                 OrganizationId = AuthService.OrganizationId
             };
             await ViewStore.UpsertAsync(view);
-            Navigation.NavigateTo(FeatureConstants.Routes.EditViewPage(view.Id));
+            Navigation.NavigateTo(ReportsModule.Routes.EditViewPage(view.Id));
         }
         
     }

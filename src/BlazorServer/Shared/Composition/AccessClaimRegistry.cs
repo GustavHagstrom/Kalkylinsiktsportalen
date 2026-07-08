@@ -1,4 +1,4 @@
-using BlazorServer.Shared.Models;
+using BlazorServer.Modules.Access.Public.Contracts;
 
 namespace BlazorServer.Shared.Composition;
 

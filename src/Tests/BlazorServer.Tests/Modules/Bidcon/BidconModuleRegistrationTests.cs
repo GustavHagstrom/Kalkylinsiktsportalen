@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
+using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;

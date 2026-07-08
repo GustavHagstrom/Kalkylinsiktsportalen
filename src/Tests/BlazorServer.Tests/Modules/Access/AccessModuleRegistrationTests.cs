@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
+using BlazorServer.Modules.Access.Public.Contracts;
 
 namespace BlazorServer.Tests.Modules.Access;
 
