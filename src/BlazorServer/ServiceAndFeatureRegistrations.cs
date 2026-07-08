@@ -1,4 +1,3 @@
-using BlazorServer.Features.BidconBrowser;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Features.ViewSettings;
 using BlazorServer.Modules.Access;
@@ -66,7 +65,6 @@ public static class ServiceAndFeatureRegistrations
             //{
             //    policy.RequireAuthenticatedUser();
             //});
-            config.AddFeature<BidconBrowserFeature>();
             config.AddFeature<ViewSettingsFeature>();
 
             if (builder.Configuration["Auth:Mode"] == "Mock")

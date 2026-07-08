@@ -1,12 +1,15 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Bidcon;
+using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Public.Components;
 using BlazorServer.Modules.Bidcon.Settings;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +35,15 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconApiCredentialsStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IEstimationSnapshotStore)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(EstimationListState) &&
+                service.Lifetime == ServiceLifetime.Scoped));
+            Assert.That(registrationContext.AccessClaims.Claims, Has.Member(new AccessClaimInfo(
+                "BrowserAccess",
+                "Bidconutforskaren",
+                "Använda kalkylutforskaren")));
+            Assert.That(registrationContext.UiComposition.TopNavigation, Has.One.EqualTo(
+                new UiNavigationItem("Kalkyler", "/BidconBrowser", 1)));
             Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
             Assert.That(registrationContext.UiComposition.SettingsAreas, Has.One.EqualTo(
                 new UiSettingsArea(
@@ -43,6 +55,28 @@ public class BidconModuleRegistrationTests
                     MudBlazor.Icons.Material.Sharp.Api,
                     "ApiPolicy")));
         });
+    }
+
+    [Test]
+    public void EstimationExplorerIsReusableComponentWithoutRoute()
+    {
+        var routes = typeof(EstimationExplorer)
+            .GetCustomAttributes(typeof(RouteAttribute), inherit: false)
+            .Cast<RouteAttribute>()
+            .Select(attribute => attribute.Template);
+
+        Assert.That(routes, Is.Empty);
+    }
+
+    [Test]
+    public void EstimationExplorerPageUsesLegacyRoute()
+    {
+        var routes = typeof(EstimationExplorerPage)
+            .GetCustomAttributes(typeof(RouteAttribute), inherit: false)
+            .Cast<RouteAttribute>()
+            .Select(attribute => attribute.Template);
+
+        Assert.That(routes, Has.One.EqualTo("/BidconBrowser"));
     }
 
     [Test]
@@ -124,7 +158,7 @@ public class BidconModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim("BidconApiWritePermission", "true")
+            new Claim(ApplicationClaimTypes.AccessClaim, "BidconApiWritePermission")
         ], "test"));
     }
 

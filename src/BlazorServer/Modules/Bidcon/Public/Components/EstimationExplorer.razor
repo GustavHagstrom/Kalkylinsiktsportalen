@@ -1,6 +1,7 @@
-﻿@page "/BidconBrowser"
+@using BlazorServer.Modules.Bidcon.Components
 @using BlazorServer.Shared.DTOs.Bidcon
-@inject IStringLocalizer<BrowserPage> Localizer
+@inject IStringLocalizer<EstimationExplorer> Localizer
+
 <MudOverlay Visible="IsLoading" DarkBackground="true" LockScroll="true">
     <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
 </MudOverlay>
@@ -14,7 +15,6 @@
             <MudIconButton Size="Size.Medium" Color="Color.Primary" OnClick="LoadData" Icon="@Icons.Material.Sharp.Refresh" Class="pa-1" />
             <NavButton IsActive="ActiveTab == 1" OnClick="@(() => ActiveTab = 1)">@Localizer["Sök"]</NavButton>
             <NavButton IsActive="ActiveTab == 2" OnClick="@(() => ActiveTab = 2)">@($"{Localizer["Valda"]} ({EstimationListState.SelectedEstimations.Count})")</NavButton>
-
         </MudStack>
     </CenterToolbarContent>
     <ChildContent>
@@ -33,52 +33,75 @@
                     <MudText>@Localizer["Välj en flik"]</MudText>
                 }
             </MudPaper>
-            
         </MudContainer>
-        
     </ChildContent>
 </ToolbarPage>
-
 
 @inject BidconApiAccess BidconAccess
 @inject IAuthService AuthService
 @inject EstimationListState EstimationListState
 
 @code {
-    int ActiveTab { get; set; } = 1;
-    bool IsLoading { get; set; } = false;
-
-
-    Variant GetTabVariant(int tabIndex) => ActiveTab == tabIndex ? Variant.Filled : Variant.Outlined;
+    private int ActiveTab { get; set; } = 1;
+    private bool IsLoading { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        if (EstimationListState.HasLoaded) return Task.CompletedTask;
+        if (EstimationListState.HasLoaded)
+        {
+            return Task.CompletedTask;
+        }
+
         return LoadData();
     }
-    async Task LoadData()
+
+    private async Task LoadData()
     {
         SetIsLoading(true);
-        if (AuthService.UserEmail is null || AuthService.OrganizationId is null) return;
-        var estimations = await BidconAccess.GetAllEstimationsFlatAsync(AuthService.UserEmail, AuthService.OrganizationId);
-        EstimationListState.Estimations = estimations.Select(e => DtoToModel(e)).OrderBy(x => x.Name).ToList();
-        EstimationListState.HasLoaded = true;
-        SetIsLoading(false);
+
+        try
+        {
+            if (AuthService.UserEmail is null || AuthService.OrganizationId is null)
+            {
+                return;
+            }
+
+            var estimations = await BidconAccess.GetAllEstimationsFlatAsync(
+                AuthService.UserEmail,
+                AuthService.OrganizationId);
+
+            EstimationListState.Estimations = estimations
+                .Select(DtoToModel)
+                .OrderBy(x => x.Name)
+                .ToList();
+            EstimationListState.HasLoaded = true;
+        }
+        finally
+        {
+            SetIsLoading(false);
+        }
     }
-    void SetIsLoading(bool isLoading)
+
+    private void SetIsLoading(bool isLoading)
     {
         IsLoading = isLoading;
         StateHasChanged();
     }
-    EstimationInfo DtoToModel(EstimationDto dto)
+
+    private static EstimationInfo DtoToModel(EstimationDto dto)
     {
-        var name = string.IsNullOrWhiteSpace(dto.Description) ? dto.Name : $"{dto.Name} - {dto.Description}";
+        var name = string.IsNullOrWhiteSpace(dto.Description)
+            ? dto.Name
+            : $"{dto.Name} - {dto.Description}";
+
         return new EstimationInfo(name, dto.Id.ToString(), false);
     }
-    void UpdateSelectedEstimations()
-    {
-        EstimationListState.SelectedEstimations = EstimationListState.Estimations.Where(x => x.IsSelected).ToList();
-        StateHasChanged();
 
+    private void UpdateSelectedEstimations()
+    {
+        EstimationListState.SelectedEstimations = EstimationListState.Estimations
+            .Where(x => x.IsSelected)
+            .ToList();
+        StateHasChanged();
     }
 }
