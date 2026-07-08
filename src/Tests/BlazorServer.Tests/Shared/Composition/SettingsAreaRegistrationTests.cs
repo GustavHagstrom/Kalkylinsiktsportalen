@@ -1,5 +1,4 @@
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.FeatureRegistration;
 
 namespace BlazorServer.Tests.Shared.Composition;
 
@@ -93,23 +92,6 @@ public class SettingsAreaRegistrationTests
     }
 
     [Test]
-    public void OldSettingsNavigationIsSeparateFromSettingsAreas()
-    {
-        var context = new AppRegistrationContext();
-
-        context.RenderCollection.AddSettingsNavigation(
-            text: "Legacy settings",
-            href: "/legacy-settings",
-            order: 10);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(context.UiComposition.SettingsNavigation, Has.Count.EqualTo(1));
-            Assert.That(context.UiComposition.SettingsAreas, Is.Empty);
-        });
-    }
-
-    [Test]
     public void UiCompositionRegistryDoesNotExposeSettingsSectionComposition()
     {
         var memberNames = typeof(UiCompositionRegistry)
@@ -118,33 +100,6 @@ public class SettingsAreaRegistrationTests
 
         Assert.That(memberNames, Does.Not.Contain("SettingsSections"));
         Assert.That(memberNames, Does.Not.Contain("AddSettingsSection"));
-    }
-
-    [Test]
-    public void CompatibilityRenderCollectionDoesNotExposeSharedSettingsComponents()
-    {
-        var memberNames = typeof(RenderCollection)
-            .GetMembers()
-            .Select(member => member.Name);
-
-        Assert.That(memberNames, Does.Not.Contain("AddSharedSettingComponent"));
-        Assert.That(memberNames, Does.Not.Contain("GetSharedSettingComponents"));
-    }
-
-    [Test]
-    public void ExistingTopNavigationRegistrationStillWorks()
-    {
-        var context = new AppRegistrationContext();
-
-        context.RenderCollection.AddTopNavigation(
-            text: "Home",
-            href: "/",
-            order: 10);
-
-        Assert.That(context.UiComposition.TopNavigation, Has.One.Matches<UiNavigationItem>(item =>
-            item.Text == "Home" &&
-            item.Href == "/" &&
-            item.Order == 10));
     }
 
     private static void RegisterArea<TModule>(

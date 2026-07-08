@@ -1,17 +1,8 @@
-using BlazorServer.Shared.FeatureRegistration;
-
 namespace BlazorServer.Shared.Composition;
 
 public sealed class AppRegistrationContext
 {
-    public AppRegistrationContext()
-    {
-        RenderCollection = new RenderCollection(UiComposition);
-    }
-
     public UiCompositionRegistry UiComposition { get; } = new();
-
-    public RenderCollection RenderCollection { get; }
 
     public AccessClaimRegistry AccessClaims { get; } = new();
 

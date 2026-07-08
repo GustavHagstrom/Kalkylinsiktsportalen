@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components;
+
 namespace BlazorServer.Shared.Composition;
 
 public sealed class UiCompositionRegistry
@@ -55,16 +57,16 @@ public sealed class UiCompositionRegistry
 
         settingsAreas.Add(new UiSettingsAreaEntry(area, moduleKey, sequence++));
     }
-
-    public void SetLoginDisplay(Type componentType)
+    public void SetLoginDisplay<T>()
+       where T : ComponentBase
     {
-        if (loginDisplayComponent is not null && loginDisplayComponent != componentType)
+        var type = typeof(T);
+        if (loginDisplayComponent is not null && loginDisplayComponent != type)
         {
             throw new InvalidOperationException(
                 $"Login display component is already registered as {loginDisplayComponent.FullName}.");
         }
-
-        loginDisplayComponent = componentType;
+        loginDisplayComponent = type;
     }
 
     private void AddNavigation(

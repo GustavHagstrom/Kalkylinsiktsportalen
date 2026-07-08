@@ -1,5 +1,4 @@
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.FeatureRegistration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -26,7 +25,6 @@ public class AppRegistrationContextRegistrationTests
         {
             Assert.That(provider.GetRequiredService<AppRegistrationContext>(), Is.SameAs(context));
             Assert.That(provider.GetRequiredService<UiCompositionRegistry>(), Is.SameAs(context.UiComposition));
-            Assert.That(provider.GetRequiredService<RenderCollection>(), Is.SameAs(context.RenderCollection));
             Assert.That(provider.GetRequiredService<AccessClaimRegistry>(), Is.SameAs(context.AccessClaims));
             Assert.That(authorizationOptions.GetPolicy("CanUseReports"), Is.Not.Null);
         });

@@ -5,7 +5,6 @@ using BlazorServer.Modules.Projects;
 using BlazorServer.Shared.Components.Authentication;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.FeatureRegistration;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
@@ -24,22 +23,30 @@ public static class ServiceAndFeatureRegistrations
 {
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
+
+        var registrationContext = builder.Services.AddAppRegistrationContext();
+
         
-        
+        builder.Services.AddSettingsShell(registrationContext);
+        builder.Services.AddAccessModule(registrationContext);
+        builder.Services.AddBidconModule(registrationContext);
+        builder.Services.AddProjectsModule(registrationContext);
+        builder.Services.AddReportsModule(registrationContext);
+
+
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
+            registrationContext.UiComposition.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
             builder.Services.AddSingleton<MockedAuthSession>();
-            builder.Services.AddAuthentication()
-                .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthConstants.MockAuthScheme, null);
-
-            //builder.Services.AddScoped<AuthenticationStateProvider, MockedAuthStateProvider>();
+            builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthConstants.MockAuthScheme, null);
             builder.Services.AddTransient<IUserService, MockedUserService>();
             builder.Services.AddTransient<IRoleService, MockedRoleService>();
             builder.Services.AddMemoryCache();
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
+            registrationContext.UiComposition.SetLoginDisplay<LoginDisplay>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IRoleService, RoleService>();
@@ -57,23 +64,6 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         }
 
-        var registrationContext = builder.Services.AddAppRegistrationContext();
-        builder.Services.AddSettingsShell(registrationContext);
-        builder.ConfigureFeatures(registrationContext, config =>
-        {
-            if (builder.Configuration["Auth:Mode"] == "Mock")
-            {
-                config.RenderCollection.SetLoginDisplayComponent<MockedLoginDisplay>();
-            }
-            else
-            {
-                config.RenderCollection.SetLoginDisplayComponent<LoginDisplay>();
-            }
-        });
-        builder.Services.AddAccessModule(registrationContext);
-        builder.Services.AddBidconModule(registrationContext);
-        builder.Services.AddProjectsModule(registrationContext);
-        builder.Services.AddReportsModule(registrationContext);
 
         builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
         {
@@ -90,12 +80,4 @@ public static class ServiceAndFeatureRegistrations
         return builder;
     }
 
-    public static void ConfigureFeatures(
-        this WebApplicationBuilder builder,
-        AppRegistrationContext registrationContext,
-        Action<FeatureRegistrator> config)
-    {
-        var featureRegistrator = new FeatureRegistrator(builder, registrationContext);
-        config(featureRegistrator);
-    }
 }
