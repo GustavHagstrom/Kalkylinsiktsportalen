@@ -1,9 +1,6 @@
 ﻿@page "/"
 
 @using BlazorServer.Shared.Components.PrintPreview
-@using BlazorServer.Shared.Helpers
-@using System.Text
-@using Microsoft.JSInterop
 
 <AuthorizeView>
     <Authorized>
@@ -14,7 +11,6 @@
             </div>
             <div class="full-height" style="overflow: auto;">
                 <MudStack Spacing="2">
-                    <MudButton OnClick="ExportEstimationsToCsv" Color="Color.Primary">Export Estimations to CSV</MudButton>
                     <PrintableDocument />
                 </MudStack>
             </div>
@@ -22,49 +18,3 @@
         </MudStack>
     </Authorized>
 </AuthorizeView>
-
-
-@inject BidconApiAccess BidconApiAccess
-@inject IAuthService AuthService
-@inject IJSRuntime JSRuntime
-
-@code{
-
-
-    private record Data(string Name, string Description, string Customer, string HandlingOfficer, string CreateDate);
-
-    async Task ExportEstimationsToCsv()
-    {
-        if (AuthService.OrganizationId is null || AuthService.UserEmail is null) return;
-        
-        var estimations = await BidconApiAccess.GetAllEstimationsFlatAsync(AuthService.UserEmail, AuthService.OrganizationId);
-        List<Data> datas = estimations.Select(x => new Data(
-            x.Name,
-            x.Description,
-            x.Customer ?? "No Customer",
-            x.HandlingOfficer ?? "No Handling Officer",
-            x.CreateDate.ToString("yyyy-MM-dd")
-        )).ToList();
-
-        var csvContent = CsvExporter.ToCsv(datas);
-        var bytes = Encoding.UTF8.GetBytes(csvContent);
-        var fileName = $"Estimations_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
-
-        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
-    }
-}
-
-<script>
-    window.downloadFile = function(filename, contentType, data) {
-        const blob = new Blob([new Uint8Array(data)], { type: contentType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-</script>
-

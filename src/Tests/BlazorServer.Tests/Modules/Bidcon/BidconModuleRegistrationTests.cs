@@ -2,8 +2,10 @@ using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Bidcon.Components;
+using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Components;
 using BlazorServer.Modules.Bidcon.Settings;
@@ -31,7 +33,9 @@ public class BidconModuleRegistrationTests
         Assert.Multiple(() =>
         {
             Assert.That(services.Any(service => service.ServiceType == typeof(UpsertBidconCredentialsCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetEstimationListQueryHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ImportEstimationSnapshotCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(BidconEstimationClient)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconApiCredentialsStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IEstimationSnapshotStore)), Is.True);

@@ -1,5 +1,5 @@
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using DisciplineType = BlazorServer.Modules.Bidcon.Domain.DisciplineType;
 using RowType = BlazorServer.Modules.Bidcon.Domain.RowType;
 using SheetType = BlazorServer.Modules.Bidcon.Domain.SheetType;

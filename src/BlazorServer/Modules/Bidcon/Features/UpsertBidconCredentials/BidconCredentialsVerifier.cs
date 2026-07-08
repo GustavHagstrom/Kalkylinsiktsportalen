@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Constants;
 

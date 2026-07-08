@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Kernel.CQRS;
@@ -8,12 +9,12 @@ using BlazorServer.Shared.Kernel.Validation;
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
 public sealed class ImportEstimationSnapshotCommandHandler(
-    BidconEstimationDetailsClient estimationDetailsClient,
+    BidconEstimationClient estimationDetailsClient,
     IEstimationSnapshotStore estimationSnapshotStore,
     IValidator<ImportEstimationSnapshotCommand>? validator = null)
         : ICommandHandler<ImportEstimationSnapshotCommand, ImportEstimationSnapshotResult>
 {
-    private readonly BidconEstimationDetailsClient _estimationDetailsClient = estimationDetailsClient;
+    private readonly BidconEstimationClient _estimationDetailsClient = estimationDetailsClient;
     private readonly IEstimationSnapshotStore _estimationSnapshotStore = estimationSnapshotStore;
     private readonly IValidator<ImportEstimationSnapshotCommand> _validator = validator ?? new ImportEstimationSnapshotCommandValidator();
 
@@ -37,7 +38,7 @@ public sealed class ImportEstimationSnapshotCommandHandler(
                 command.OrganizationId,
                 cancellationToken);
         }
-        catch (BidconEstimationDetailsClientException exception)
+        catch (BidconEstimationClientException exception)
         {
             return CommandResult<ImportEstimationSnapshotResult>.Invalid(
                 new ValidationError(exception.Code, exception.Field, exception.Message));

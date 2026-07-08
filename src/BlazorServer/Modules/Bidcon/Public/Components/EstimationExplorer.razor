@@ -1,5 +1,6 @@
 @using BlazorServer.Modules.Bidcon.Components
-@using BlazorServer.Shared.DTOs.Bidcon
+@using BlazorServer.Modules.Bidcon.Features.GetEstimationList
+@using BlazorServer.Shared.Kernel.Identity
 @inject IStringLocalizer<EstimationExplorer> Localizer
 
 <MudOverlay Visible="IsLoading" DarkBackground="true" LockScroll="true">
@@ -37,7 +38,7 @@
     </ChildContent>
 </ToolbarPage>
 
-@inject BidconApiAccess BidconAccess
+@inject GetEstimationListQueryHandler GetEstimationListHandler
 @inject IAuthService AuthService
 @inject EstimationListState EstimationListState
 
@@ -66,11 +67,18 @@
                 return;
             }
 
-            var estimations = await BidconAccess.GetAllEstimationsFlatAsync(
-                AuthService.UserEmail,
-                AuthService.OrganizationId);
+            var result = await GetEstimationListHandler.HandleAsync(
+                new GetEstimationListQuery(
+                    new OrganizationId(AuthService.OrganizationId),
+                    AuthService.UserEmail),
+                CancellationToken.None);
 
-            EstimationListState.Estimations = estimations
+            if (!result.IsSuccess)
+            {
+                return;
+            }
+
+            EstimationListState.Estimations = result.Value!.Estimations
                 .Select(DtoToModel)
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -88,13 +96,13 @@
         StateHasChanged();
     }
 
-    private static EstimationInfo DtoToModel(EstimationDto dto)
+    private static EstimationInfo DtoToModel(GetEstimationListItem dto)
     {
         var name = string.IsNullOrWhiteSpace(dto.Description)
             ? dto.Name
             : $"{dto.Name} - {dto.Description}";
 
-        return new EstimationInfo(name, dto.Id.ToString(), false);
+        return new EstimationInfo(name, dto.Id, false);
     }
 
     private void UpdateSelectedEstimations()

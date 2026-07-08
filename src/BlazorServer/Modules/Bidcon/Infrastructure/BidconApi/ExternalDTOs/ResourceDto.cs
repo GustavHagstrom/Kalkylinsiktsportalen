@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 
 public class ResourceDto
 {

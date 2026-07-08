@@ -1,8 +1,10 @@
 using BlazorServer.Modules.Bidcon.Components;
-using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
+using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
+using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Composition;
 using BlazorServer.Shared.Kernel.Authentication;
@@ -19,12 +21,13 @@ public static class BidconModule
         AppRegistrationContext registrationContext)
     {
         services.AddTransient<GetBidconCredentialsQueryHandler>();
+        services.AddTransient<GetEstimationListQueryHandler>();
         services.AddTransient<UpsertBidconCredentialsCommandHandler>();
         services.AddTransient<RemoveBidconCredentialsCommandHandler>();
         services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
         services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
         services.AddTransient<ImportEstimationSnapshotCommandHandler>();
-        services.AddTransient<BidconEstimationDetailsClient>();
+        services.AddTransient<BidconEstimationClient>();
         services.AddScoped<EstimationListState>();
 
         services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");

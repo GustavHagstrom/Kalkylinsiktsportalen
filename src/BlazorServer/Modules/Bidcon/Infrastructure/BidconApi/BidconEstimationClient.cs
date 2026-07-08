@@ -1,25 +1,25 @@
 using System.Net;
 using System.Net.Http.Headers;
-using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Kernel.Identity;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
+namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 
-public class BidconEstimationDetailsClient
+public class BidconEstimationClient
 {
     private readonly IHttpClientFactory? httpClientFactory;
     private readonly IMemoryCache? cache;
     private readonly IBidconApiCredentialsStore? credentialsStore;
 
-    protected BidconEstimationDetailsClient()
+    protected BidconEstimationClient()
     {
     }
 
-    public BidconEstimationDetailsClient(
+    public BidconEstimationClient(
         IHttpClientFactory httpClientFactory,
         IMemoryCache cache,
         IBidconApiCredentialsStore credentialsStore)
@@ -27,6 +27,37 @@ public class BidconEstimationDetailsClient
         this.httpClientFactory = httpClientFactory;
         this.cache = cache;
         this.credentialsStore = credentialsStore;
+    }
+
+    public async virtual Task<IReadOnlyList<EstimationDto>> GetEstimationListAsync(
+        string userEmail,
+        OrganizationId organizationId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var client = await GetAuthenticatedClientAsync(organizationId, cancellationToken);
+            var response = await client.GetAsync($"Estimations/{userEmail}", cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                return [];
+            }
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<EstimationDto>>(cancellationToken) ?? [];
+        }
+        catch (BidconEstimationClientException)
+        {
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            throw new BidconEstimationClientException(
+                "bidcon.estimationClient.failed",
+                nameof(userEmail),
+                exception.Message);
+        }
     }
 
     public async virtual Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
@@ -58,14 +89,14 @@ public class BidconEstimationDetailsClient
             estimationResponse.EnsureSuccessStatusCode();
             return await estimationResponse.Content.ReadFromJsonAsync<EstimationDetailsDto>(cancellationToken);
         }
-        catch (BidconEstimationDetailsClientException)
+        catch (BidconEstimationClientException)
         {
             throw;
         }
         catch (HttpRequestException exception)
         {
-            throw new BidconEstimationDetailsClientException(
-                "bidcon.import.failed",
+            throw new BidconEstimationClientException(
+                "bidcon.estimationClient.failed",
                 nameof(BidconEstimationId),
                 exception.Message);
         }
@@ -90,7 +121,7 @@ public class BidconEstimationDetailsClient
 
         if (credentials is null)
         {
-            throw new BidconEstimationDetailsClientException(
+            throw new BidconEstimationClientException(
                 "bidcon.credentials.missing",
                 nameof(OrganizationId),
                 "Bidcon credentials are missing.");
@@ -110,8 +141,8 @@ public class BidconEstimationDetailsClient
 
         if (token is null || string.IsNullOrWhiteSpace(token.AccessToken))
         {
-            throw new BidconEstimationDetailsClientException(
-                "bidcon.import.failed",
+            throw new BidconEstimationClientException(
+                "bidcon.estimationClient.failed",
                 nameof(OrganizationId),
                 "Failed to retrieve Bidcon access token.");
         }

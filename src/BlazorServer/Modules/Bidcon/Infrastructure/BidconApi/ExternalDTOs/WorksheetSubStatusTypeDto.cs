@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot.ExternalDTOs;
+namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum WorksheetSubStatusTypeDto
