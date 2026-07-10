@@ -1,4 +1,5 @@
-﻿@using BlazorServer.Shared.DTOs.Views
+@using BlazorServer.Shared.DTOs.Views
+@using BlazorServer.Modules.Reports.Public
 <MudSimpleTable Hover="false" Dense="true" Bordered="false">
     <tbody>
         @foreach (var view in Views)
@@ -12,7 +13,7 @@
                 </td>
                 <td>
                     <div style="display: flex; justify-content: flex-end;">
-                        <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" Href="@ReportsModule.Routes.EditViewPage(view.Id)" Size="Size.Small" />
+                        <MudIconButton Icon="@Icons.Material.Sharp.Edit" Color="Color.Primary" Href="@ReportsRoutes.EditViewPage(view.Id)" Size="Size.Small" />
                     </div>
                 </td>
             </tr>

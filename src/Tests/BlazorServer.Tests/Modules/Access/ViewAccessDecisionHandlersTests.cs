@@ -1,7 +1,7 @@
+using BlazorServer.Shared.Constants;
 using System.Security.Claims;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
-using BlazorServer.Shared.Constants;
 using Microsoft.Identity.Web;
 
 namespace BlazorServer.Tests.Modules.Access;

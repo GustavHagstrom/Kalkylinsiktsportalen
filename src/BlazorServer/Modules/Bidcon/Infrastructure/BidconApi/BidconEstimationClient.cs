@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Shared.Constants;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
@@ -105,7 +104,7 @@ public class BidconEstimationClient
         OrganizationId organizationId,
         CancellationToken cancellationToken)
     {
-        var client = httpClientFactory!.CreateClient(HttpClientNames.BidconApiClient);
+        var client = httpClientFactory!.CreateClient(BidconHttpClientNames.ApiClient);
         var orgId = organizationId.Value.ToString();
         var cacheKey = $"bidconAccessToken_{orgId}";
 

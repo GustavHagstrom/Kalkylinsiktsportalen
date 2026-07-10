@@ -1,13 +1,14 @@
+@using BlazorServer.AppShell.Composition.UI;
 @inherits LayoutComponentBase
 @layout MainLayout
 
 @inject IStringLocalizer<SettingsLayout> Localizer
-@inject UiCompositionRegistry UiComposition
+@inject UiRegistry Ui
 
 <PageSetupWithNavigation>
     <NavigationContent>
-        <SettingsNavLink Href="@AppRoutes.Settings" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Settings" Text="@Localizer["Allmänt"]" />
-        @foreach (var item in SettingsLayoutNavigation.GetNavigationItems(UiComposition))
+        <SettingsNavLink Href="@AppShellRoutes.Settings" Match="NavLinkMatch.All" Icon="@Icons.Material.Sharp.Settings" Text="@Localizer["Allmänt"]" />
+        @foreach (var item in SettingsLayoutNavigation.GetNavigationItems(Ui))
         {
             <SettingsNavLink Href="@item.Href"
                              Match="@item.Match"

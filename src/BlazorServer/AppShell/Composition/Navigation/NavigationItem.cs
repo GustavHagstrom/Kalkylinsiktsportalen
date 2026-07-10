@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace BlazorServer.Shared.Composition;
+namespace BlazorServer.AppShell.Composition.Navigation;
 
-public sealed record UiNavigationItem(
+public sealed record NavigationItem(
     string Text,
     string Href,
     int Order,

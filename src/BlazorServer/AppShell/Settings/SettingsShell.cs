@@ -1,5 +1,6 @@
-using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.AppShell.Composition;
+using BlazorServer.AppShell.Routes;
 
 namespace BlazorServer.AppShell.Settings;
 
@@ -9,10 +10,10 @@ public static class SettingsShell
         this IServiceCollection services,
         AppRegistrationContext registrationContext)
     {
-        registrationContext.UiComposition.AddTopNavigation(
-            new UiNavigationItem(
+        registrationContext.Ui.AddTopNavigation(
+            new NavigationItem(
                 "Inställningar",
-                AppRoutes.Settings,
+                AppShellRoutes.Settings,
                 10));
 
         return services;

@@ -1,6 +1,8 @@
+using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.AppShell.Composition.UI;
 using BlazorServer.AppShell.Settings;
-using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Composition;
+using BlazorServer.AppShell.Routes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorServer.Tests.AppShell.Settings;
@@ -16,18 +18,18 @@ public class SettingsShellTests
 
         services.AddSettingsShell(registrationContext);
 
-        Assert.That(registrationContext.UiComposition.TopNavigation, Has.One.EqualTo(
-            new UiNavigationItem(
+        Assert.That(registrationContext.Ui.TopNavigation, Has.One.EqualTo(
+            new NavigationItem(
                 "Inställningar",
-                AppRoutes.Settings,
+                AppShellRoutes.Settings,
                 10)));
     }
 
     [Test]
     public void SettingsShellNavigationDoesNotIncludeLegacySettingsNavigation()
     {
-        var registry = new UiCompositionRegistry();
-        registry.AddSettingsNavigation(new UiNavigationItem("Legacy settings", "/settings/legacy", 10));
+        var registry = new UiRegistry();
+        registry.AddSettingsNavigation(new NavigationItem("Legacy settings", "/settings/legacy", 10));
 
         var navigationItems = SettingsLayoutNavigation.GetNavigationItems(registry);
 

@@ -1,8 +1,10 @@
-namespace BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition.UI;
+
+namespace BlazorServer.AppShell.Composition;
 
 public sealed class AppRegistrationContext
 {
-    public UiCompositionRegistry UiComposition { get; } = new();
+    public UiRegistry Ui { get; } = new();
 
     public AccessClaimRegistry AccessClaims { get; } = new();
 

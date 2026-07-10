@@ -1,4 +1,4 @@
-﻿using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Routes;
 using BlazorServer.Shared.MockedData;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
@@ -24,7 +24,7 @@ public class MockedAuthService : IAuthService
     public Task LoginAsync()
     {
         _session.SetSession(MockedDataStore.Users.First(), MockedDataStore.OrganizationId);
-        _navigation.NavigateTo(AppRoutes.Home, forceLoad: true);
+        _navigation.NavigateTo(AppShellRoutes.Home, forceLoad: true);
         return Task.CompletedTask;
     }
     public void Login(User user)

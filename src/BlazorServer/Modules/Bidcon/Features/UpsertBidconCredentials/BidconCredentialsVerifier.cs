@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Constants;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 
@@ -8,7 +8,7 @@ public sealed class BidconCredentialsVerifier(IHttpClientFactory httpClientFacto
 {
     public async Task<bool> VerifyAsync(BidconApiCredentials credentials, CancellationToken cancellationToken)
     {
-        var client = httpClientFactory.CreateClient(HttpClientNames.BidconApiClient);
+        var client = httpClientFactory.CreateClient(BidconHttpClientNames.ApiClient);
         var response = await client.PostAsJsonAsync(
             "Authentication/Authenticate",
             new ApiKeyAuthenticateDto

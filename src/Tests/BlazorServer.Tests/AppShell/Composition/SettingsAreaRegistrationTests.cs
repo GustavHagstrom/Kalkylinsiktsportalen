@@ -1,6 +1,8 @@
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.AppShell.Composition.UI;
+using BlazorServer.AppShell.Composition;
 
-namespace BlazorServer.Tests.Shared.Composition;
+namespace BlazorServer.Tests.AppShell.Composition;
 
 [TestFixture]
 public class SettingsAreaRegistrationTests
@@ -10,8 +12,8 @@ public class SettingsAreaRegistrationTests
     {
         var context = new AppRegistrationContext();
 
-        context.UiComposition.AddSettingsArea(
-            new UiSettingsArea(
+        context.Ui.AddSettingsArea(
+            new SettingsAreaContribution(
                 "bidcon",
                 "Bidcon",
                 "Configure Bidcon integration.",
@@ -21,8 +23,8 @@ public class SettingsAreaRegistrationTests
                 "CanManageBidcon"),
             ModuleKey<TestModule>());
 
-        Assert.That(context.UiComposition.SettingsAreas, Has.One.EqualTo(
-            new UiSettingsArea(
+        Assert.That(context.Ui.SettingsAreas, Has.One.EqualTo(
+            new SettingsAreaContribution(
                 "bidcon",
                 "Bidcon",
                 "Configure Bidcon integration.",
@@ -36,7 +38,7 @@ public class SettingsAreaRegistrationTests
     public void SettingsAreaDoesNotExposeInternalModuleKey()
     {
         Assert.That(
-            typeof(UiSettingsArea).GetProperties().Select(property => property.Name),
+            typeof(SettingsAreaContribution).GetProperties().Select(property => property.Name),
             Does.Not.Contain("ModuleKey"));
     }
 
@@ -50,7 +52,7 @@ public class SettingsAreaRegistrationTests
         RegisterArea<ThirdModule>(context, "third", "/settings/third", 20);
 
         Assert.That(
-            context.UiComposition.SettingsAreas.Select(area => area.Id),
+            context.Ui.SettingsAreas.Select(area => area.Id),
             Is.EqualTo(new[] { "first", "second", "third" }));
     }
 
@@ -92,9 +94,9 @@ public class SettingsAreaRegistrationTests
     }
 
     [Test]
-    public void UiCompositionRegistryDoesNotExposeSettingsSectionComposition()
+    public void UiRegistryDoesNotExposeSettingsSectionComposition()
     {
-        var memberNames = typeof(UiCompositionRegistry)
+        var memberNames = typeof(UiRegistry)
             .GetMembers()
             .Select(member => member.Name);
 
@@ -108,8 +110,8 @@ public class SettingsAreaRegistrationTests
         string href,
         int order)
     {
-        context.UiComposition.AddSettingsArea(
-            new UiSettingsArea(
+        context.Ui.AddSettingsArea(
+            new SettingsAreaContribution(
                 id,
                 id,
                 $"{id} settings",

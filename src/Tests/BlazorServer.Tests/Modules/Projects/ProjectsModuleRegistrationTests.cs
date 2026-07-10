@@ -1,7 +1,7 @@
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorServer.Tests.Modules.Projects;
@@ -23,7 +23,7 @@ public class ProjectsModuleRegistrationTests
         {
             Assert.That(provider.GetRequiredService<IProjectStore>(), Is.Not.Null);
             Assert.That(provider.GetRequiredService<CreateProjectCommandHandler>(), Is.Not.Null);
-            Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
+            Assert.That(registrationContext.Ui.SettingsNavigation, Is.Empty);
         });
     }
 }

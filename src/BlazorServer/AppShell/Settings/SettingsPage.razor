@@ -1,6 +1,8 @@
+@using BlazorServer.AppShell.Composition.Settings;
+@using BlazorServer.AppShell.Composition.UI;
 @page "/settings"
 @inject IStringLocalizer<SettingsPage> Localizer
-@inject UiCompositionRegistry UiComposition
+@inject UiRegistry Ui
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAuthorizationService AuthorizationService
 
@@ -31,13 +33,13 @@
 </SettingsPageBase>
 
 @code {
-    private IReadOnlyList<UiSettingsArea> visibleAreas = [];
+    private IReadOnlyList<SettingsAreaContribution> visibleAreas = [];
 
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         visibleAreas = await SettingsHub.GetVisibleAreasAsync(
-            UiComposition,
+            Ui,
             authenticationState.User,
             AuthorizationService);
     }

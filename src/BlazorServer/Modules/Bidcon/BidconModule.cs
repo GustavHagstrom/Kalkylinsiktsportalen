@@ -1,3 +1,5 @@
+using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
@@ -7,7 +9,8 @@ using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Composition;
+using BlazorServer.Modules.Bidcon.Public;
+using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Stores.MongoDb;
@@ -19,7 +22,8 @@ public static class BidconModule
 {
     public static IServiceCollection AddBidconModule(
         this IServiceCollection services,
-        AppRegistrationContext registrationContext)
+        AppRegistrationContext registrationContext,
+        string? baseUrl = null)
     {
         services.AddTransient<GetBidconCredentialsQueryHandler>();
         services.AddTransient<GetEstimationListQueryHandler>();
@@ -30,6 +34,13 @@ public static class BidconModule
         services.AddTransient<ImportEstimationSnapshotCommandHandler>();
         services.AddTransient<BidconEstimationClient>();
         services.AddScoped<EstimationListState>();
+        if (baseUrl is not null)
+        {
+            services.AddHttpClient(BidconHttpClientNames.ApiClient, client =>
+            {
+                client.BaseAddress = new Uri(baseUrl);
+            });
+        }
 
         services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
@@ -45,17 +56,17 @@ public static class BidconModule
             "ApiPolicy",
             policy => policy.RequireAssertion(context => context.User.HasAccessClaimOrApplicationAdmin("BidconApiWritePermission")));
 
-        registrationContext.UiComposition.AddTopNavigation(new UiNavigationItem(
+        registrationContext.Ui.AddTopNavigation(new NavigationItem(
             "Kalkyler",
-            "/BidconBrowser",
+            BidconRoutes.Browser,
             1));
 
-        registrationContext.UiComposition.AddSettingsArea(
-            new UiSettingsArea(
+        registrationContext.Ui.AddSettingsArea(
+            new SettingsAreaContribution(
                 "bidcon",
                 "Bidcon API",
                 "Configure Bidcon API credentials.",
-                "/settings/bidcon",
+                BidconRoutes.Settings,
                 20,
                 Icons.Material.Sharp.Api,
                 "ApiPolicy"),

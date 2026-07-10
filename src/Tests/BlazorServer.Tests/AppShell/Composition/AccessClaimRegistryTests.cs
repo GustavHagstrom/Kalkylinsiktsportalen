@@ -1,7 +1,7 @@
 using BlazorServer.Modules.Access.Public.Contracts;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 
-namespace BlazorServer.Tests.Shared.Composition;
+namespace BlazorServer.Tests.AppShell.Composition;
 
 [TestFixture]
 public class AccessClaimRegistryTests

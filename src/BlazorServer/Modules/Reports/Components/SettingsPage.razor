@@ -1,5 +1,6 @@
-﻿@page "/Settings/views"
+@page "/Settings/views"
 @using BlazorServer.Shared.DTOs.Views
+@using BlazorServer.Modules.Reports.Public
 
 <ToolbarPage IsLoading="isLoading">
     <LeftToolbarContent>
@@ -53,7 +54,7 @@
                 OrganizationId = AuthService.OrganizationId
             };
             await ViewStore.UpsertAsync(view);
-            Navigation.NavigateTo(ReportsModule.Routes.EditViewPage(view.Id));
+            Navigation.NavigateTo(ReportsRoutes.EditViewPage(view.Id));
         }
         
     }

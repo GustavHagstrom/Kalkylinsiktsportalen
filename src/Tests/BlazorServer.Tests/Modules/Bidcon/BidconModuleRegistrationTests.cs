@@ -1,3 +1,6 @@
+using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
@@ -8,10 +11,10 @@ using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Public;
 using BlazorServer.Modules.Bidcon.Public.Components;
 using BlazorServer.Modules.Bidcon.Settings;
-using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Composition;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -47,15 +50,15 @@ public class BidconModuleRegistrationTests
                 "BrowserAccess",
                 "Bidconutforskaren",
                 "Använda kalkylutforskaren")));
-            Assert.That(registrationContext.UiComposition.TopNavigation, Has.One.EqualTo(
-                new UiNavigationItem("Kalkyler", "/BidconBrowser", 1)));
-            Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
-            Assert.That(registrationContext.UiComposition.SettingsAreas, Has.One.EqualTo(
-                new UiSettingsArea(
+            Assert.That(registrationContext.Ui.TopNavigation, Has.One.EqualTo(
+                new NavigationItem("Kalkyler", BidconRoutes.Browser, 1)));
+            Assert.That(registrationContext.Ui.SettingsNavigation, Is.Empty);
+            Assert.That(registrationContext.Ui.SettingsAreas, Has.One.EqualTo(
+                new SettingsAreaContribution(
                     "bidcon",
                     "Bidcon API",
                     "Configure Bidcon API credentials.",
-                    "/settings/bidcon",
+                    BidconRoutes.Settings,
                     20,
                     MudBlazor.Icons.Material.Sharp.Api,
                     "ApiPolicy")));
@@ -111,11 +114,11 @@ public class BidconModuleRegistrationTests
         services.AddBidconModule(registrationContext);
 
         var authorizedAreas = await SettingsHub.GetVisibleAreasAsync(
-            registrationContext.UiComposition,
+            registrationContext.Ui,
             new ClaimsPrincipal(new ClaimsIdentity("test")),
             new PolicyAuthorizationService("ApiPolicy"));
         var unauthorizedAreas = await SettingsHub.GetVisibleAreasAsync(
-            registrationContext.UiComposition,
+            registrationContext.Ui,
             new ClaimsPrincipal(new ClaimsIdentity("test")),
             new PolicyAuthorizationService());
 

@@ -1,4 +1,4 @@
-﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;

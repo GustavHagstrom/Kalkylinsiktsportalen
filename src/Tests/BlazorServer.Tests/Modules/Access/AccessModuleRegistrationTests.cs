@@ -1,3 +1,5 @@
+using BlazorServer.Shared.Constants;
+using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
@@ -5,8 +7,7 @@ using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.AppShell.Settings;
-using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -38,9 +39,9 @@ public class AccessModuleRegistrationTests
                     "Skapa, ändra och ta bort användarrättigheter och roller.")));
             Assert.That(registrationContext.Policies.PolicyList.Select(policy => policy.Name), Has.One.EqualTo(
                 Constants.Authorization.PolicyName));
-            Assert.That(registrationContext.UiComposition.SettingsNavigation, Is.Empty);
-            Assert.That(registrationContext.UiComposition.SettingsAreas, Has.One.EqualTo(
-                new UiSettingsArea(
+            Assert.That(registrationContext.Ui.SettingsNavigation, Is.Empty);
+            Assert.That(registrationContext.Ui.SettingsAreas, Has.One.EqualTo(
+                new SettingsAreaContribution(
                     "access",
                     "Rättigheter",
                     "Hantera användarrättigheter och externa grupper.",
@@ -69,15 +70,15 @@ public class AccessModuleRegistrationTests
         var authorizationService = provider.GetRequiredService<IAuthorizationService>();
 
         var visibleForClaim = await SettingsHub.GetVisibleAreasAsync(
-            registrationContext.UiComposition,
+            registrationContext.Ui,
             PrincipalWithClaim(),
             authorizationService);
         var visibleForAdmin = await SettingsHub.GetVisibleAreasAsync(
-            registrationContext.UiComposition,
+            registrationContext.Ui,
             PrincipalInAdminRole(),
             authorizationService);
         var hiddenForUnprivilegedUser = await SettingsHub.GetVisibleAreasAsync(
-            registrationContext.UiComposition,
+            registrationContext.Ui,
             new ClaimsPrincipal(new ClaimsIdentity("test")),
             authorizationService);
 

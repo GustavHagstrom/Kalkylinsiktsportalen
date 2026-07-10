@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using BlazorServer.Shared.Constants;
+using System.Security.Claims;
 using Microsoft.Identity.Web;
 
 namespace BlazorServer.AppShell.Authentication;

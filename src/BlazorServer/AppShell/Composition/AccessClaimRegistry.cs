@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Access.Public.Contracts;
 
-namespace BlazorServer.Shared.Composition;
+namespace BlazorServer.AppShell.Composition;
 
 public sealed class AccessClaimRegistry
 {

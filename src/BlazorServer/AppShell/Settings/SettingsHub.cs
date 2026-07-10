@@ -1,19 +1,21 @@
+using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.AppShell.Composition.UI;
 using System.Security.Claims;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BlazorServer.AppShell.Settings;
 
 public static class SettingsHub
 {
-    public static async Task<IReadOnlyList<UiSettingsArea>> GetVisibleAreasAsync(
-        UiCompositionRegistry uiComposition,
+    public static async Task<IReadOnlyList<SettingsAreaContribution>> GetVisibleAreasAsync(
+        UiRegistry ui,
         ClaimsPrincipal user,
         IAuthorizationService authorizationService)
     {
-        var visibleAreas = new List<UiSettingsArea>();
+        var visibleAreas = new List<SettingsAreaContribution>();
 
-        foreach (var area in uiComposition.SettingsAreas)
+        foreach (var area in ui.SettingsAreas)
         {
             if (area.Policy is null)
             {

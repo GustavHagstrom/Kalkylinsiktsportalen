@@ -1,5 +1,6 @@
-﻿@inherits LayoutComponentBase
-@inject UiCompositionRegistry UiComposition
+@using BlazorServer.AppShell.Composition.UI;
+@inherits LayoutComponentBase
+@inject UiRegistry Ui
 @inject RenderService RenderService
 
 
@@ -16,13 +17,13 @@
 
 
     <MudToolBar Dense="true" Gutters="false" Class="px-4 mud-elevation-4 app-bar" Style="z-index: 10000; background-color: var(--mud-palette-drawer-background)">
-        <a href="@AppRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
+        <a href="@AppShellRoutes.Home"><MudText Typo="Typo.h5" Style="color: var(--mud-palette-primary)"><b>Kalkylinsiktsportalen</b></MudText></a>
         <div class="py-2 px-3" style="height: 100%;">
             <MudDivider Vertical="true" />
         </div>
                 
         <div class="d-flex gap-1">
-            @foreach (var item in UiComposition.TopNavigation)
+            @foreach (var item in Ui.TopNavigation)
             {
                 if (item.Policy is not null)
                 {
@@ -41,7 +42,7 @@
 
         <MudSpacer />
 
-        @RenderService.Render(UiComposition.LoginDisplayComponent ?? throw new Exception("Login display component not found"))
+        @RenderService.Render(Ui.LoginDisplayComponent ?? throw new Exception("Login display component not found"))
 
     </MudToolBar>
 

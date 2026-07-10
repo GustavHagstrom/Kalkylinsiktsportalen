@@ -1,10 +1,10 @@
+using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Shared.Components.Authentication;
-using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
@@ -29,14 +29,17 @@ public static class ServiceAndFeatureRegistrations
         
         builder.Services.AddSettingsShell(registrationContext);
         builder.Services.AddAccessModule(registrationContext);
-        builder.Services.AddBidconModule(registrationContext);
+        builder.Services.AddBidconModule(
+            registrationContext,
+            builder.Configuration["Bidcon:BaseUrl"] ??
+            throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
         builder.Services.AddProjectsModule(registrationContext);
         builder.Services.AddReportsModule(registrationContext);
 
 
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
-            registrationContext.UiComposition.SetLoginDisplay<MockedLoginDisplay>();
+            registrationContext.Ui.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<IAuthService, MockedAuthService>();
             builder.Services.AddSingleton<MockedAuthSession>();
             builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthConstants.MockAuthScheme, null);
@@ -46,7 +49,7 @@ public static class ServiceAndFeatureRegistrations
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
-            registrationContext.UiComposition.SetLoginDisplay<LoginDisplay>();
+            registrationContext.Ui.SetLoginDisplay<LoginDisplay>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IRoleService, RoleService>();
@@ -63,12 +66,6 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddTransient<IAuthenticationProvider, GraphClientAuthProvider>();
             builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         }
-
-
-        builder.Services.AddHttpClient(HttpClientNames.BidconApiClient, client =>
-        {
-            client.BaseAddress = new Uri(builder.Configuration["Bidcon:BaseUrl"] ?? throw new InvalidOperationException("BidconApi:BaseUrl configuration is missing"));
-        });
 
         builder.UseMongoDb();
         builder.Services.AddSingleton<IAdminRoleCache, MemoryAdminRoleCache>();

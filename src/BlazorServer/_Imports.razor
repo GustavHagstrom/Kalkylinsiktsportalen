@@ -1,4 +1,5 @@
-﻿@* @attribute [Authorize(Policy = AuthConstants.RequireAuthenticationPolicyName)] *@
+@using BlazorServer.Shared.Constants
+@* @attribute [Authorize(Policy = AuthConstants.RequireAuthenticationPolicyName)] *@
 
 @using System.Net.Http
 @using System.Net.Http.Json
@@ -10,9 +11,9 @@
 @using BlazorServer.Shared.Components.Authentication
 @using BlazorServer.Shared.Components.Layout
 @using BlazorServer.Shared.Components.StateManagment
-@using BlazorServer.Shared.Constants
 @using BlazorServer.Shared.Models
-@using BlazorServer.Shared.Composition
+@using BlazorServer.AppShell.Routes
+@using BlazorServer.AppShell.Composition
 @using BlazorServer.Shared.Services
 @using BlazorServer.Shared.Services.Authentication
 @using BlazorServer.Shared.Components.Settings

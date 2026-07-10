@@ -1,4 +1,4 @@
-namespace BlazorServer.Shared.Composition;
+namespace BlazorServer.AppShell.Composition;
 
 public static class AppRegistrationServiceCollectionExtensions
 {
@@ -13,7 +13,9 @@ public static class AppRegistrationServiceCollectionExtensions
         this IServiceCollection services,
         AppRegistrationContext registrationContext)
     {
-        services.AddSingleton(registrationContext.UiComposition);
+        services.AddSingleton(registrationContext.Ui);
+        services.AddSingleton(registrationContext.Ui.Navigation);
+        services.AddSingleton(registrationContext.Ui.SettingsAreaRegistry);
         services.AddSingleton(registrationContext.AccessClaims);
         services.AddAuthorization(options =>
         {

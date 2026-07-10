@@ -1,6 +1,6 @@
-﻿namespace BlazorServer.Shared.Constants;
+namespace BlazorServer.AppShell.Routes;
 
-public static class AppRoutes
+public static class AppShellRoutes
 {
     public const string Home = "/";
 

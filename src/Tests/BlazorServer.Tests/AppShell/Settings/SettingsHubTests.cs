@@ -1,6 +1,9 @@
+using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.AppShell.Composition.UI;
 using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
-using BlazorServer.Shared.Composition;
+using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BlazorServer.Tests.AppShell.Settings;
@@ -11,9 +14,9 @@ public class SettingsHubTests
     [Test]
     public async Task HubReadsVisibleSettingsAreasFromRegistry()
     {
-        var registry = new UiCompositionRegistry();
+        var registry = new UiRegistry();
         registry.AddSettingsArea(
-            new UiSettingsArea(
+            new SettingsAreaContribution(
                 "bidcon",
                 "Bidcon",
                 "Configure Bidcon integration.",
@@ -29,7 +32,7 @@ public class SettingsHubTests
             new PolicyAuthorizationService("CanManageBidcon"));
 
         Assert.That(visibleAreas, Has.One.EqualTo(
-            new UiSettingsArea(
+            new SettingsAreaContribution(
                 "bidcon",
                 "Bidcon",
                 "Configure Bidcon integration.",
@@ -42,8 +45,8 @@ public class SettingsHubTests
     [Test]
     public async Task HubDoesNotFallbackToOldSettingsNavigation()
     {
-        var registry = new UiCompositionRegistry();
-        registry.AddSettingsNavigation(new UiNavigationItem("Legacy settings", "/settings/legacy", 10));
+        var registry = new UiRegistry();
+        registry.AddSettingsNavigation(new NavigationItem("Legacy settings", "/settings/legacy", 10));
 
         var visibleAreas = await SettingsHub.GetVisibleAreasAsync(
             registry,
@@ -56,9 +59,9 @@ public class SettingsHubTests
     [Test]
     public async Task HubHidesSettingsAreasWhenUserDoesNotSatisfyPolicy()
     {
-        var registry = new UiCompositionRegistry();
+        var registry = new UiRegistry();
         registry.AddSettingsArea(
-            new UiSettingsArea(
+            new SettingsAreaContribution(
                 "access",
                 "Access",
                 "Manage rights.",

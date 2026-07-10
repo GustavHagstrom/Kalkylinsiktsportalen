@@ -1,4 +1,4 @@
-﻿using BlazorServer.Shared.Constants;
+using BlazorServer.Shared.Constants;
 using BlazorServer.Shared.Models;
 using Microsoft.Graph;
 

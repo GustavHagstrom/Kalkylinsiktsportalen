@@ -1,6 +1,6 @@
-namespace BlazorServer.Shared.Composition;
+namespace BlazorServer.AppShell.Composition.Settings;
 
-public sealed record UiSettingsArea(
+public sealed record SettingsAreaContribution(
     string Id,
     string Title,
     string Description,

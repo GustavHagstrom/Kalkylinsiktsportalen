@@ -1,4 +1,4 @@
-﻿@using BlazorServer.Shared.Composition
+@using BlazorServer.AppShell.Composition.Navigation
 @implements IDisposable
 @inject NavigationManager NavigationManager
 
@@ -14,7 +14,7 @@
         <ChildContent>
             @foreach (var link in MenuLinks)
             {
-                <MudMenuItem Href="@link.Route" Label="@link.Title" Style="@MenuItemStyle(link.Route, link.Match)" />
+                <MudMenuItem Href="@link.Href" Label="@link.Text" Style="@MenuItemStyle(link.Href, link.Match)" />
             }
         </ChildContent>
 
@@ -35,7 +35,7 @@ else
 
     [Parameter] public string MenuTitle { get; set; } = string.Empty;
     [Parameter] public string? FeatureRoute { get; set; }
-    [Parameter] public List<MenuLink> MenuLinks { get; set; } = [];
+    [Parameter] public List<NavigationItem> MenuLinks { get; set; } = [];
     [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
 
 
