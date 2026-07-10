@@ -3,30 +3,30 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
 public sealed class ImportEstimationSnapshotCommandHandler(
     BidconEstimationClient estimationDetailsClient,
     IEstimationSnapshotStore estimationSnapshotStore,
-    IValidator<ImportEstimationSnapshotCommand>? validator = null)
+    ImportEstimationSnapshotCommandValidator? validator = null)
         : ICommandHandler<ImportEstimationSnapshotCommand, ImportEstimationSnapshotResult>
 {
     private readonly BidconEstimationClient _estimationDetailsClient = estimationDetailsClient;
     private readonly IEstimationSnapshotStore _estimationSnapshotStore = estimationSnapshotStore;
-    private readonly IValidator<ImportEstimationSnapshotCommand> _validator = validator ?? new ImportEstimationSnapshotCommandValidator();
+    private readonly ImportEstimationSnapshotCommandValidator _validator = validator ?? new ImportEstimationSnapshotCommandValidator();
 
-    public async Task<CommandResult<ImportEstimationSnapshotResult>> HandleAsync(
+    public async Task<ImportEstimationSnapshotResult> HandleAsync(
         ImportEstimationSnapshotCommand command,
         CancellationToken cancellationToken)
     {
-        var validationResult = _validator.Validate(command);
+        var errors = _validator.Validate(command);
 
-        if (!validationResult.IsValid)
+        if (errors.Count > 0)
         {
-            return CommandResult<ImportEstimationSnapshotResult>.Invalid([.. validationResult.Errors]);
+            return ImportEstimationSnapshotResult.Invalid([.. errors]);
         }
 
         EstimationDetailsDto? estimationDetails;
@@ -40,13 +40,13 @@ public sealed class ImportEstimationSnapshotCommandHandler(
         }
         catch (BidconEstimationClientException exception)
         {
-            return CommandResult<ImportEstimationSnapshotResult>.Invalid(
+            return ImportEstimationSnapshotResult.Invalid(
                 new ValidationError(exception.Code, exception.Field, exception.Message));
         }
 
         if (estimationDetails is null)
         {
-            return CommandResult<ImportEstimationSnapshotResult>.Invalid(
+            return ImportEstimationSnapshotResult.Invalid(
                 new ValidationError(
                     "bidcon.estimation.notFound",
                     nameof(command.BidconEstimationId),
@@ -64,12 +64,11 @@ public sealed class ImportEstimationSnapshotCommandHandler(
 
         await _estimationSnapshotStore.AddAsync(snapshot, cancellationToken);
 
-        return CommandResult<ImportEstimationSnapshotResult>.Success(
-            new ImportEstimationSnapshotResult(
-                snapshot.Id,
-                snapshot.BidconEstimationId,
-                snapshot.SourceEditDate,
-                snapshot.ImportedAt));
+        return ImportEstimationSnapshotResult.Success(
+            snapshot.Id,
+            snapshot.BidconEstimationId,
+            snapshot.SourceEditDate,
+            snapshot.ImportedAt);
     }
 
 }

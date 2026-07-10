@@ -1,10 +1,10 @@
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
-public sealed class ImportEstimationSnapshotCommandValidator : IValidator<ImportEstimationSnapshotCommand>
+public sealed class ImportEstimationSnapshotCommandValidator
 {
-    public ValidationResult Validate(ImportEstimationSnapshotCommand instance)
+    public IReadOnlyList<ValidationError> Validate(ImportEstimationSnapshotCommand instance)
     {
         var errors = new List<ValidationError>();
 
@@ -24,8 +24,6 @@ public sealed class ImportEstimationSnapshotCommandValidator : IValidator<Import
                 "Bidcon estimation id is required."));
         }
 
-        return errors.Count == 0
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(errors.ToArray());
+        return errors;
     }
 }

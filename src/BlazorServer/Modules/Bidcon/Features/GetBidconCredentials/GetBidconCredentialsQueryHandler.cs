@@ -1,6 +1,5 @@
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.CQRS;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 
@@ -8,25 +7,25 @@ public sealed class GetBidconCredentialsQueryHandler
     : IQueryHandler<GetBidconCredentialsQuery, GetBidconCredentialsResult>
 {
     private readonly IBidconApiCredentialsStore credentialsStore;
-    private readonly IValidator<GetBidconCredentialsQuery> validator;
+    private readonly GetBidconCredentialsQueryValidator validator;
 
     public GetBidconCredentialsQueryHandler(
         IBidconApiCredentialsStore credentialsStore,
-        IValidator<GetBidconCredentialsQuery>? validator = null)
+        GetBidconCredentialsQueryValidator? validator = null)
     {
         this.credentialsStore = credentialsStore;
         this.validator = validator ?? new GetBidconCredentialsQueryValidator();
     }
 
-    public async Task<QueryResult<GetBidconCredentialsResult>> HandleAsync(
+    public async Task<GetBidconCredentialsResult> HandleAsync(
         GetBidconCredentialsQuery query,
         CancellationToken cancellationToken)
     {
-        var validationResult = validator.Validate(query);
+        var errors = validator.Validate(query);
 
-        if (!validationResult.IsValid)
+        if (errors.Count > 0)
         {
-            return QueryResult<GetBidconCredentialsResult>.Invalid(validationResult.Errors.ToArray());
+            return GetBidconCredentialsResult.Invalid([.. errors]);
         }
 
         var credentials = await credentialsStore.GetAsync(query.OrganizationId.Value.ToString());
@@ -35,16 +34,14 @@ public sealed class GetBidconCredentialsQueryHandler
             string.IsNullOrWhiteSpace(credentials.ApiKey) ||
             string.IsNullOrWhiteSpace(credentials.ApiSecret))
         {
-            return QueryResult<GetBidconCredentialsResult>.Success(
-                new GetBidconCredentialsResult(query.OrganizationId, string.Empty, string.Empty, false));
+            return GetBidconCredentialsResult.Success(query.OrganizationId, string.Empty, string.Empty, false);
         }
 
-        return QueryResult<GetBidconCredentialsResult>.Success(
-            new GetBidconCredentialsResult(
-                query.OrganizationId,
-                MaskCredential(credentials.ApiKey),
-                MaskCredential(credentials.ApiSecret),
-                true));
+        return GetBidconCredentialsResult.Success(
+            query.OrganizationId,
+            MaskCredential(credentials.ApiKey),
+            MaskCredential(credentials.ApiSecret),
+            true);
     }
 
     private static string MaskCredential(string value)

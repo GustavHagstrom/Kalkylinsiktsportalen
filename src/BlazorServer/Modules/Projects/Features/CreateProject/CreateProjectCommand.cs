@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Projects.Domain;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Identity;
 
 namespace BlazorServer.Modules.Projects.Features.CreateProject;
 

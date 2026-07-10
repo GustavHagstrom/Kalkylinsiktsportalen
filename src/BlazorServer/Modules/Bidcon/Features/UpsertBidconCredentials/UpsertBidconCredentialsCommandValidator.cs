@@ -1,10 +1,10 @@
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 
-public sealed class UpsertBidconCredentialsCommandValidator : IValidator<UpsertBidconCredentialsCommand>
+public sealed class UpsertBidconCredentialsCommandValidator
 {
-    public ValidationResult Validate(UpsertBidconCredentialsCommand command)
+    public IReadOnlyList<ValidationError> Validate(UpsertBidconCredentialsCommand command)
     {
         var errors = new List<ValidationError>();
 
@@ -32,8 +32,6 @@ public sealed class UpsertBidconCredentialsCommandValidator : IValidator<UpsertB
                 "Bidcon API secret is required."));
         }
 
-        return errors.Count == 0
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(errors.ToArray());
+        return errors;
     }
 }

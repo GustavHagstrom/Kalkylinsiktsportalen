@@ -1,5 +1,6 @@
 @page "/settings/bidcon"
 @attribute [Authorize(Policy = "ApiPolicy")]
+@using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<BidconSettingsPage> Localizer
 
 <SettingsPageBase Title="@Localizer["Bidcon API"]">
@@ -54,17 +55,17 @@
 
         var result = await GetCredentialsHandler.HandleAsync(
             new Features.GetBidconCredentials.GetBidconCredentialsQuery(
-                new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId)),
+                new OrganizationId(AuthService.OrganizationId)),
             CancellationToken.None);
 
-        if (!result.IsSuccess || result.Value is null)
+        if (!result.IsSuccess || result.OrganizationId is null)
         {
             return;
         }
 
-        currentKey = result.Value.ApiKey;
-        currentSecret = result.Value.ApiSecret;
-        isConfigured = result.Value.IsConfigured;
+        currentKey = result.ApiKey ?? string.Empty;
+        currentSecret = result.ApiSecret ?? string.Empty;
+        isConfigured = result.IsConfigured;
     }
 
     private async Task SaveAsync()
@@ -74,7 +75,7 @@
             return;
         }
 
-        var organizationId = new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId);
+        var organizationId = new OrganizationId(AuthService.OrganizationId);
         var result = await UpsertCredentialsHandler.HandleAsync(
             new Features.UpsertBidconCredentials.UpsertBidconCredentialsCommand(
                 organizationId,
@@ -103,7 +104,7 @@
             return;
         }
 
-        var organizationId = new Shared.Kernel.Identity.OrganizationId(AuthService.OrganizationId);
+        var organizationId = new OrganizationId(AuthService.OrganizationId);
         var result = await RemoveCredentialsHandler.HandleAsync(
             new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(organizationId),
             CancellationToken.None);

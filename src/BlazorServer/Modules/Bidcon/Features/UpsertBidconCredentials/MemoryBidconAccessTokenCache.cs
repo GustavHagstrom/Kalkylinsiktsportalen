@@ -1,4 +1,4 @@
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;

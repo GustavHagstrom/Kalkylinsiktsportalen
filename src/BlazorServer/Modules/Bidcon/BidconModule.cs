@@ -8,7 +8,7 @@ using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Kernel.Authentication;
+using BlazorServer.AppShell.Authentication;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Stores.MongoDb;
 using MudBlazor;

@@ -1,20 +1,22 @@
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 
-public sealed class GetBidconCredentialsQueryValidator : IValidator<GetBidconCredentialsQuery>
+public sealed class GetBidconCredentialsQueryValidator
 {
-    public ValidationResult Validate(GetBidconCredentialsQuery query)
+    public IReadOnlyList<ValidationError> Validate(GetBidconCredentialsQuery query)
     {
         if (query.OrganizationId.IsEmpty)
         {
-            return ValidationResult.Failure(
+            return
+            [
                 new ValidationError(
                     "bidcon.credentials.organization.required",
                     nameof(GetBidconCredentialsQuery.OrganizationId),
-                    "Organization id is required."));
+                    "Organization id is required.")
+            ];
         }
 
-        return ValidationResult.Success();
+        return Array.Empty<ValidationError>();
     }
 }

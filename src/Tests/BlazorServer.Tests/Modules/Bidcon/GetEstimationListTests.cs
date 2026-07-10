@@ -1,7 +1,8 @@
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.Validation;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 
@@ -36,12 +37,12 @@ public class GetEstimationListTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.Estimations, Has.Count.EqualTo(2));
-            Assert.That(result.Value.Estimations[0], Is.EqualTo(new GetEstimationListItem(
+            Assert.That(result.Estimations, Has.Count.EqualTo(2));
+            Assert.That(result.Estimations[0], Is.EqualTo(new GetEstimationListItem(
                 "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                 "Beta",
                 "Second")));
-            Assert.That(result.Value.Estimations[1], Is.EqualTo(new GetEstimationListItem(
+            Assert.That(result.Estimations[1], Is.EqualTo(new GetEstimationListItem(
                 "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                 "Alpha",
                 "First")));
@@ -91,8 +92,8 @@ public class GetEstimationListTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Value, Is.Null);
-            Assert.That(result.Errors, Has.One.Matches<BlazorServer.Shared.Kernel.Validation.ValidationError>(error =>
+            Assert.That(result.Estimations, Is.Empty);
+            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.credentials.missing" &&
                 error.Field == nameof(GetEstimationListQuery.OrganizationId)));
         });
@@ -112,7 +113,7 @@ public class GetEstimationListTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.Estimations, Is.Empty);
+            Assert.That(result.Estimations, Is.Empty);
         });
     }
 

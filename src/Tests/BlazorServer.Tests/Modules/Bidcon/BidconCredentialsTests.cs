@@ -2,7 +2,8 @@ using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.Validation;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 
@@ -22,10 +23,10 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Value.IsConfigured, Is.False);
-            Assert.That(result.Value.ApiKey, Is.Empty);
-            Assert.That(result.Value.ApiSecret, Is.Empty);
+            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(result.IsConfigured, Is.False);
+            Assert.That(result.ApiKey, Is.Empty);
+            Assert.That(result.ApiSecret, Is.Empty);
         });
     }
 
@@ -50,10 +51,10 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Value.IsConfigured, Is.True);
-            Assert.That(result.Value.ApiKey, Is.EqualTo("****ey-1"));
-            Assert.That(result.Value.ApiSecret, Is.EqualTo("****et-1"));
+            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(result.IsConfigured, Is.True);
+            Assert.That(result.ApiKey, Is.EqualTo("****ey-1"));
+            Assert.That(result.ApiSecret, Is.EqualTo("****et-1"));
         });
     }
 
@@ -70,7 +71,7 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<BlazorServer.Shared.Kernel.Validation.ValidationError>(error =>
+            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.credentials.organization.required" &&
                 error.Field == nameof(GetBidconCredentialsQuery.OrganizationId)));
             Assert.That(store.WasRead, Is.False);
@@ -93,8 +94,8 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Value.IsConfigured, Is.True);
+            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(result.IsConfigured, Is.True);
             Assert.That(store.SavedCredentials, Is.Not.Null);
             Assert.That(store.SavedCredentials!.OrganizationId, Is.EqualTo(organizationId.Value.ToString()));
             Assert.That(store.SavedCredentials.ApiKey, Is.EqualTo("key-1"));
@@ -131,7 +132,7 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<BlazorServer.Shared.Kernel.Validation.ValidationError>(error =>
+            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.credentials.verification.failed" &&
                 error.Field == nameof(UpsertBidconCredentialsCommand.ApiKey)));
             Assert.That(store.SavedCredentials!.ApiKey, Is.EqualTo("old-key"));
@@ -188,8 +189,8 @@ public class BidconCredentialsTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Value.IsConfigured, Is.False);
+            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(result.IsConfigured, Is.False);
             Assert.That(store.SavedCredentials, Is.Null);
             Assert.That(tokenCache.InvalidatedOrganizationId, Is.EqualTo(organizationId));
         });

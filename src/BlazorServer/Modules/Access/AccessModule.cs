@@ -5,7 +5,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Kernel.Authentication;
+using BlazorServer.AppShell.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using MudBlazor;

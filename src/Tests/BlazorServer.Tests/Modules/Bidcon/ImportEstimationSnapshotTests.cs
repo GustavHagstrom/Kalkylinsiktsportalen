@@ -4,7 +4,7 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 
@@ -30,17 +30,17 @@ public class ImportEstimationSnapshotTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.SnapshotId.IsEmpty, Is.False);
-            Assert.That(result.Value.BidconEstimationId, Is.EqualTo(bidconEstimationId));
-            Assert.That(result.Value.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
-            Assert.That(result.Value.ImportedAt, Is.InRange(beforeImport, afterImport));
+            Assert.That(result.SnapshotId!.Value.IsEmpty, Is.False);
+            Assert.That(result.BidconEstimationId, Is.EqualTo(bidconEstimationId));
+            Assert.That(result.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
+            Assert.That(result.ImportedAt, Is.InRange(beforeImport, afterImport));
 
             Assert.That(store.SavedSnapshot, Is.Not.Null);
-            Assert.That(store.SavedSnapshot!.Id, Is.EqualTo(result.Value.SnapshotId));
+            Assert.That(store.SavedSnapshot!.Id, Is.EqualTo(result.SnapshotId));
             Assert.That(store.SavedSnapshot.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(store.SavedSnapshot.BidconEstimationId, Is.EqualTo(bidconEstimationId));
             Assert.That(store.SavedSnapshot.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
-            Assert.That(store.SavedSnapshot.ImportedAt, Is.EqualTo(result.Value.ImportedAt));
+            Assert.That(store.SavedSnapshot.ImportedAt, Is.EqualTo(result.ImportedAt));
             Assert.That(store.SavedSnapshot.Payload.Name, Is.EqualTo("Kvarteret Linden"));
             Assert.That(store.SavedSnapshot.Payload.Discipline, Is.EqualTo(DisciplineType.Bygg));
             Assert.That(store.SavedSnapshot.Payload.BidPhaseResources[0].Remark, Is.EqualTo("{replace:mark}"));
@@ -67,8 +67,8 @@ public class ImportEstimationSnapshotTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Value, Is.Null);
-            Assert.That(result.Errors, Has.One.Matches<BlazorServer.Shared.Kernel.Validation.ValidationError>(error =>
+            Assert.That(result.SnapshotId, Is.Null);
+            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.estimation.notFound" &&
                 error.Field == nameof(ImportEstimationSnapshotCommand.BidconEstimationId)));
             Assert.That(store.SavedSnapshot, Is.Null);
@@ -122,7 +122,7 @@ public class ImportEstimationSnapshotTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<BlazorServer.Shared.Kernel.Validation.ValidationError>(error =>
+            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.credentials.missing" &&
                 error.Field == nameof(ImportEstimationSnapshotCommand.OrganizationId)));
             Assert.That(store.SavedSnapshot, Is.Null);

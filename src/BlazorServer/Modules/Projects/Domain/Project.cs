@@ -1,4 +1,4 @@
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.Identity;
 
 namespace BlazorServer.Modules.Projects.Domain;
 

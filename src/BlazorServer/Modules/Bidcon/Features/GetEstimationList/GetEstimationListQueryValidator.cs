@@ -1,10 +1,10 @@
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 
-public sealed class GetEstimationListQueryValidator : IValidator<GetEstimationListQuery>
+public sealed class GetEstimationListQueryValidator
 {
-    public ValidationResult Validate(GetEstimationListQuery query)
+    public IReadOnlyList<ValidationError> Validate(GetEstimationListQuery query)
     {
         var errors = new List<ValidationError>();
 
@@ -24,8 +24,6 @@ public sealed class GetEstimationListQueryValidator : IValidator<GetEstimationLi
                 "User email is required."));
         }
 
-        return errors.Count == 0
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(errors.ToArray());
+        return errors;
     }
 }

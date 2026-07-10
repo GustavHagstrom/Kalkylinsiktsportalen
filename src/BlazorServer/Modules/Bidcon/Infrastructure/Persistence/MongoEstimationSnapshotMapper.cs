@@ -1,6 +1,5 @@
 using BlazorServer.Modules.Bidcon.Domain;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Shared.Kernel.Identity;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 

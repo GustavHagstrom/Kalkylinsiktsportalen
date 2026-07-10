@@ -1,8 +1,8 @@
 using BlazorServer.Modules.Projects.Domain;
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
-using BlazorServer.Shared.Kernel.Identity;
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Identity;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Tests.Modules.Projects;
 
@@ -26,9 +26,9 @@ public class ProjectsModuleFoundationTests
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value!.ProjectId, Is.EqualTo(projectId));
-            Assert.That(result.Value.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Value.Name, Is.EqualTo("Kvarteret Linden"));
+            Assert.That(result.ProjectId, Is.EqualTo(projectId));
+            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(result.Name, Is.EqualTo("Kvarteret Linden"));
         });
 
         var storedProject = await store.GetAsync(projectId, CancellationToken.None);

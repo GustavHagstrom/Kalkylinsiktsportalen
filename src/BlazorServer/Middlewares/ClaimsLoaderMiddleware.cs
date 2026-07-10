@@ -1,5 +1,5 @@
 ﻿using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Kernel.Authentication;
+using BlazorServer.AppShell.Authentication;
 using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;

@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 
@@ -10,13 +10,13 @@ public sealed class UpsertBidconCredentialsCommandHandler
     private readonly IBidconApiCredentialsStore credentialsStore;
     private readonly IBidconCredentialsVerifier credentialsVerifier;
     private readonly IBidconAccessTokenCache accessTokenCache;
-    private readonly IValidator<UpsertBidconCredentialsCommand> validator;
+    private readonly UpsertBidconCredentialsCommandValidator validator;
 
     public UpsertBidconCredentialsCommandHandler(
         IBidconApiCredentialsStore credentialsStore,
         IBidconCredentialsVerifier credentialsVerifier,
         IBidconAccessTokenCache accessTokenCache,
-        IValidator<UpsertBidconCredentialsCommand>? validator = null)
+        UpsertBidconCredentialsCommandValidator? validator = null)
     {
         this.credentialsStore = credentialsStore;
         this.credentialsVerifier = credentialsVerifier;
@@ -24,15 +24,15 @@ public sealed class UpsertBidconCredentialsCommandHandler
         this.validator = validator ?? new UpsertBidconCredentialsCommandValidator();
     }
 
-    public async Task<CommandResult<UpsertBidconCredentialsResult>> HandleAsync(
+    public async Task<UpsertBidconCredentialsResult> HandleAsync(
         UpsertBidconCredentialsCommand command,
         CancellationToken cancellationToken)
     {
-        var validationResult = validator.Validate(command);
+        var errors = validator.Validate(command);
 
-        if (!validationResult.IsValid)
+        if (errors.Count > 0)
         {
-            return CommandResult<UpsertBidconCredentialsResult>.Invalid(validationResult.Errors.ToArray());
+            return UpsertBidconCredentialsResult.Invalid([.. errors]);
         }
 
         var credentials = new BidconApiCredentials
@@ -46,7 +46,7 @@ public sealed class UpsertBidconCredentialsCommandHandler
 
         if (!isVerified)
         {
-            return CommandResult<UpsertBidconCredentialsResult>.Invalid(
+            return UpsertBidconCredentialsResult.Invalid(
                 new ValidationError(
                     "bidcon.credentials.verification.failed",
                     nameof(UpsertBidconCredentialsCommand.ApiKey),
@@ -56,7 +56,6 @@ public sealed class UpsertBidconCredentialsCommandHandler
         await credentialsStore.UpsertAsync(credentials);
         accessTokenCache.Invalidate(command.OrganizationId);
 
-        return CommandResult<UpsertBidconCredentialsResult>.Success(
-            new UpsertBidconCredentialsResult(command.OrganizationId, true));
+        return UpsertBidconCredentialsResult.Success(command.OrganizationId, true);
     }
 }

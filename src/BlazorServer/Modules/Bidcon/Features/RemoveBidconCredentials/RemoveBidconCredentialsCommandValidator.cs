@@ -1,20 +1,22 @@
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 
-public sealed class RemoveBidconCredentialsCommandValidator : IValidator<RemoveBidconCredentialsCommand>
+public sealed class RemoveBidconCredentialsCommandValidator
 {
-    public ValidationResult Validate(RemoveBidconCredentialsCommand command)
+    public IReadOnlyList<ValidationError> Validate(RemoveBidconCredentialsCommand command)
     {
         if (command.OrganizationId.IsEmpty)
         {
-            return ValidationResult.Failure(
+            return
+            [
                 new ValidationError(
                     "bidcon.credentials.organization.required",
                     nameof(RemoveBidconCredentialsCommand.OrganizationId),
-                    "Organization id is required."));
+                    "Organization id is required.")
+            ];
         }
 
-        return ValidationResult.Success();
+        return Array.Empty<ValidationError>();
     }
 }

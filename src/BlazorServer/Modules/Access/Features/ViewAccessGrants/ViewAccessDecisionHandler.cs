@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using BlazorServer.Shared.Kernel.Authentication;
+using BlazorServer.AppShell.Authentication;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 

@@ -4,7 +4,6 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Shared.Constants;
-using BlazorServer.Shared.Kernel.Identity;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;

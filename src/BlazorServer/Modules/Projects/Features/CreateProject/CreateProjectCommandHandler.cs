@@ -1,32 +1,32 @@
 using BlazorServer.Modules.Projects.Domain;
 using BlazorServer.Modules.Projects.Infrastructure;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Validation;
+using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Projects.Features.CreateProject;
 
 public sealed class CreateProjectCommandHandler : ICommandHandler<CreateProjectCommand, CreateProjectResult>
 {
     private readonly IProjectStore projectStore;
-    private readonly IValidator<CreateProjectCommand> validator;
+    private readonly CreateProjectCommandValidator validator;
 
     public CreateProjectCommandHandler(
         IProjectStore projectStore,
-        IValidator<CreateProjectCommand>? validator = null)
+        CreateProjectCommandValidator? validator = null)
     {
         this.projectStore = projectStore;
         this.validator = validator ?? new CreateProjectCommandValidator();
     }
 
-    public async Task<CommandResult<CreateProjectResult>> HandleAsync(
+    public async Task<CreateProjectResult> HandleAsync(
         CreateProjectCommand command,
         CancellationToken cancellationToken)
     {
-        var validationResult = validator.Validate(command);
+        var errors = validator.Validate(command);
 
-        if (!validationResult.IsValid)
+        if (errors.Count > 0)
         {
-            return CommandResult<CreateProjectResult>.Invalid(validationResult.Errors.ToArray());
+            return CreateProjectResult.Invalid([.. errors]);
         }
 
         var project = Project.Create(
@@ -38,7 +38,6 @@ public sealed class CreateProjectCommandHandler : ICommandHandler<CreateProjectC
 
         await projectStore.AddAsync(project, cancellationToken);
 
-        return CommandResult<CreateProjectResult>.Success(
-            new CreateProjectResult(project.Id, project.OrganizationId, project.Name));
+        return CreateProjectResult.Success(project.Id, project.OrganizationId, project.Name);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Shared.Composition;
-using BlazorServer.Shared.Kernel.Authentication;
+using BlazorServer.AppShell.Authentication;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Reports;

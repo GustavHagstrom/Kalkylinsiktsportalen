@@ -1,6 +1,6 @@
 @using BlazorServer.Modules.Bidcon.Components
 @using BlazorServer.Modules.Bidcon.Features.GetEstimationList
-@using BlazorServer.Shared.Kernel.Identity
+@using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<EstimationExplorer> Localizer
 
 <MudOverlay Visible="IsLoading" DarkBackground="true" LockScroll="true">
@@ -78,7 +78,7 @@
                 return;
             }
 
-            EstimationListState.Estimations = result.Value!.Estimations
+            EstimationListState.Estimations = result.Estimations
                 .Select(DtoToModel)
                 .OrderBy(x => x.Name)
                 .ToList();

@@ -1,6 +1,5 @@
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Shared.Kernel.CQRS;
-using BlazorServer.Shared.Kernel.Identity;
+using BlazorServer.Kernel.CQRS;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
