@@ -1,7 +1,7 @@
-using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon;
@@ -174,7 +174,7 @@ public class BidconModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue)
+            new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 

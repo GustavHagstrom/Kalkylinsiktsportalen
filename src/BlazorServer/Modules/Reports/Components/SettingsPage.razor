@@ -1,4 +1,4 @@
-@page "/Settings/views"
+﻿@page "/Settings/views"
 @using BlazorServer.Shared.DTOs.Views
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Components
@@ -26,7 +26,7 @@
 @inject IViewStore ViewStore
 @inject IDialogService DialogService
 @inject IStringLocalizer<SettingsPage> Localizer
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 @inject NavigationManager Navigation
 @code {
     bool isLoading = false;
@@ -39,7 +39,9 @@
 
     async Task NewView()
     {
-        if(AuthService.OrganizationId is null) return;
+        await CurrentUserSession.RefreshAsync();
+
+        if(CurrentUserSession.OrganizationId is null) return;
 
         var parameters = new DialogParameters<StringInputDialog>()
         {
@@ -52,7 +54,7 @@
             var view = new ViewDto()
             {
                 Name = name,
-                OrganizationId = AuthService.OrganizationId
+                OrganizationId = CurrentUserSession.OrganizationId
             };
             await ViewStore.UpsertAsync(view);
             Navigation.NavigateTo(ReportsRoutes.EditViewPage(view.Id));
@@ -62,9 +64,11 @@
 
     async Task LoadDataAsync()
     {
-        if (AuthService.OrganizationId is null) return;
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null) return;
         SetLoading(true);
-        var views = await ViewStore.GetAllAsync(AuthService.OrganizationId);
+        var views = await ViewStore.GetAllAsync(CurrentUserSession.OrganizationId);
         Views = views;
         SetLoading(false);
     }

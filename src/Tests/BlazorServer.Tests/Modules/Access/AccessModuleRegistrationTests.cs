@@ -1,6 +1,6 @@
-using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
@@ -116,7 +116,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue)
+            new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 

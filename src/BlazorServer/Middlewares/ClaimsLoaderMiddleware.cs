@@ -1,5 +1,5 @@
-using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Authentication;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
@@ -38,7 +38,7 @@ public class ClaimsLoaderMiddleware(RequestDelegate next)
     }
     static void SetAdminRole(ClaimsPrincipal principal)
     {
-        ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AdminRoleClaimValue));
+        ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue));
     }
 }
 public static class ClaimsLoaderMiddlewareExtensions

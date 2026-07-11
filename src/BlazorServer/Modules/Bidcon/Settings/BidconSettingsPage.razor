@@ -1,4 +1,4 @@
-@page "/settings/bidcon"
+﻿@page "/settings/bidcon"
 @attribute [Authorize(Policy = "ApiPolicy")]
 @using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<BidconSettingsPage> Localizer
@@ -23,7 +23,7 @@
 @inject Features.GetBidconCredentials.GetBidconCredentialsQueryHandler GetCredentialsHandler
 @inject Features.UpsertBidconCredentials.UpsertBidconCredentialsCommandHandler UpsertCredentialsHandler
 @inject Features.RemoveBidconCredentials.RemoveBidconCredentialsCommandHandler RemoveCredentialsHandler
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 
 @code {
     private string currentKey = string.Empty;
@@ -48,14 +48,16 @@
 
     private async Task LoadDataAsync()
     {
-        if (AuthService.OrganizationId is null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null)
         {
             return;
         }
 
         var result = await GetCredentialsHandler.HandleAsync(
             new Features.GetBidconCredentials.GetBidconCredentialsQuery(
-                new OrganizationId(AuthService.OrganizationId)),
+                new OrganizationId(CurrentUserSession.OrganizationId)),
             CancellationToken.None);
 
         if (!result.IsSuccess || result.OrganizationId is null)
@@ -70,12 +72,14 @@
 
     private async Task SaveAsync()
     {
-        if (AuthService.OrganizationId is null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null)
         {
             return;
         }
 
-        var organizationId = new OrganizationId(AuthService.OrganizationId);
+        var organizationId = new OrganizationId(CurrentUserSession.OrganizationId);
         var result = await UpsertCredentialsHandler.HandleAsync(
             new Features.UpsertBidconCredentials.UpsertBidconCredentialsCommand(
                 organizationId,
@@ -99,12 +103,14 @@
 
     private async Task RemoveAsync()
     {
-        if (AuthService.OrganizationId is null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null)
         {
             return;
         }
 
-        var organizationId = new OrganizationId(AuthService.OrganizationId);
+        var organizationId = new OrganizationId(CurrentUserSession.OrganizationId);
         var result = await RemoveCredentialsHandler.HandleAsync(
             new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(organizationId),
             CancellationToken.None);

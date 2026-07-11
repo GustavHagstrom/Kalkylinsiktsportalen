@@ -1,4 +1,4 @@
-@using BlazorServer.Modules.Bidcon.Components
+﻿@using BlazorServer.Modules.Bidcon.Components
 @using BlazorServer.Modules.Bidcon.Features.GetEstimationList
 @using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<EstimationExplorer> Localizer
@@ -39,7 +39,7 @@
 </ToolbarPage>
 
 @inject GetEstimationListQueryHandler GetEstimationListHandler
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 @inject EstimationListState EstimationListState
 
 @code {
@@ -62,15 +62,17 @@
 
         try
         {
-            if (AuthService.UserEmail is null || AuthService.OrganizationId is null)
+            await CurrentUserSession.RefreshAsync();
+
+            if (CurrentUserSession.CurrentUser?.Email is null || CurrentUserSession.OrganizationId is null)
             {
                 return;
             }
 
             var result = await GetEstimationListHandler.HandleAsync(
                 new GetEstimationListQuery(
-                    new OrganizationId(AuthService.OrganizationId),
-                    AuthService.UserEmail),
+                    new OrganizationId(CurrentUserSession.OrganizationId),
+                    CurrentUserSession.CurrentUser.Email),
                 CancellationToken.None);
 
             if (!result.IsSuccess)

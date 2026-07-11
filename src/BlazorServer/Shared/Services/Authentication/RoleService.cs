@@ -1,4 +1,4 @@
-using BlazorServer.Shared.Constants;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Shared.Models;
 using Microsoft.Graph;
 
@@ -29,7 +29,7 @@ public class RoleService : IRoleService
             var adminRole = roleResult?.Value?
             .Where(r => r is Microsoft.Graph.Models.DirectoryRole)
             .Select(dr => dr as Microsoft.Graph.Models.DirectoryRole)
-            .FirstOrDefault(dr => dr?.RoleTemplateId == AuthConstants.AdminRoleClaimValue);
+            .FirstOrDefault(dr => dr?.RoleTemplateId == AccessPolicies.ApplicationAdminRoleClaimValue);
             if (adminRole != null)
             {
                 _cache.SetIsAdminRole(userId, orgId);

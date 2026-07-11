@@ -2,7 +2,7 @@ using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.AppShell.Composition;
-using BlazorServer.AppShell.Authentication;
+using BlazorServer.Modules.Access.Authentication;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Reports;

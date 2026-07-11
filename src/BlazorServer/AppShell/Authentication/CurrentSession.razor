@@ -1,0 +1,14 @@
+<AuthorizeView>
+    <Authorized>
+        @if (CurrentUserSession.CurrentUser is not null)
+        {
+            <MudText Typo="Typo.h6">@CurrentUserSession.CurrentUser.DisplayName</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-0">@CurrentUserSession.CurrentUser.Email</MudText>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h3>No session</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@inject ICurrentUserSession CurrentUserSession

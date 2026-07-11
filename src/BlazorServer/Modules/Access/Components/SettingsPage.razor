@@ -1,4 +1,4 @@
-@page "/settings/access"
+﻿@page "/settings/access"
 @inject IStringLocalizer<SettingsPage> Localizer
 
 <SettingsPageBase>
@@ -17,7 +17,7 @@
 
 </SettingsPageBase>
 
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 @inject IUserService UserService
 @inject IRoleService RoleService
 @inject NavigationManager NavigationManager
@@ -29,23 +29,27 @@
     async Task LoadUserDataAsync()
     {
         Users.Clear();
-        if (AuthService.OrganizationId is null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Users = await UserService.GetUsersAsync(AuthService.OrganizationId);
+        Users = await UserService.GetUsersAsync(CurrentUserSession.OrganizationId);
         StateHasChanged();
     }
     async Task LoadRoleDataAsync()
     {
         Roles.Clear();
-        if (AuthService.OrganizationId is null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (CurrentUserSession.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Roles.AddRange(await RoleService.GetRolesAsync(AuthService.OrganizationId));
+        Roles.AddRange(await RoleService.GetRolesAsync(CurrentUserSession.OrganizationId));
         StateHasChanged();
     }
     void EditUserAccess(User user)

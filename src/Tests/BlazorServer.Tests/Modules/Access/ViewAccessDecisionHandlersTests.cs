@@ -1,5 +1,5 @@
-using BlazorServer.Shared.Constants;
 using System.Security.Claims;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using Microsoft.Identity.Web;
@@ -63,7 +63,7 @@ public class ViewAccessDecisionHandlersTests
             userId: "admin-1",
             organizationId: "org-1",
             roleIds: [],
-            appRoles: [AuthConstants.AdminRoleClaimValue]);
+            appRoles: [AccessPolicies.ApplicationAdminRoleClaimValue]);
 
         var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
         var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(admin, "view-1"));

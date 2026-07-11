@@ -11,7 +11,7 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public;
 using BlazorServer.AppShell.Composition;
-using BlazorServer.AppShell.Authentication;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Stores.MongoDb;
 using MudBlazor;

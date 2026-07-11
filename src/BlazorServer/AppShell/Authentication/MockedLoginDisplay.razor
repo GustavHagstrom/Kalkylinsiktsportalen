@@ -1,6 +1,6 @@
 ﻿@using BlazorServer.Shared.MockedData
 @using BlazorServer.Shared.Models
-@using BlazorServer.Shared.Services.Authentication
+@using BlazorServer.AppShell.Authentication
 
 <AuthorizeView>
     <Authorized>
@@ -55,7 +55,7 @@
     Task LogoutAsync() => AuthService.LogoutAsync();
     void Login(User user)
     {
-        if(AuthService is MockedAuthService mockedAuthService)
+        if(AuthService is MockCurrentUserSession mockedAuthService)
         {
             mockedAuthService.Login(user);
             ShowLoginPopover = false;

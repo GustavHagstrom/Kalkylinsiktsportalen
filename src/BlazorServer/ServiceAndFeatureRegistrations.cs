@@ -1,9 +1,8 @@
-using BlazorServer.Shared.Constants;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
-using BlazorServer.Shared.Components.Authentication;
+using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Composition;
 using BlazorServer.Shared.Services;
 using BlazorServer.Shared.Services.Authentication;
@@ -40,9 +39,11 @@ public static class ServiceAndFeatureRegistrations
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
             registrationContext.Ui.SetLoginDisplay<MockedLoginDisplay>();
-            builder.Services.AddScoped<IAuthService, MockedAuthService>();
+            builder.Services.AddScoped<MockCurrentUserSession>();
+            builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
+            builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddSingleton<MockedAuthSession>();
-            builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthConstants.MockAuthScheme, null);
+            builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
             builder.Services.AddTransient<IUserService, MockedUserService>();
             builder.Services.AddTransient<IRoleService, MockedRoleService>();
             builder.Services.AddMemoryCache();
@@ -50,7 +51,9 @@ public static class ServiceAndFeatureRegistrations
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
             registrationContext.Ui.SetLoginDisplay<LoginDisplay>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<CurrentUserSession>();
+            builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
+            builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IRoleService, RoleService>();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)

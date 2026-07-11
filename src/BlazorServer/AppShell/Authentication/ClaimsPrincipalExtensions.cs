@@ -1,4 +1,3 @@
-using BlazorServer.Shared.Constants;
 using System.Security.Claims;
 using Microsoft.Identity.Web;
 
@@ -13,12 +12,17 @@ public static class ClaimsPrincipalExtensions
         => principal.FindFirstValue(ClaimConstants.TenantId);
 
     public static string? GetUserEmail(this ClaimsPrincipal principal)
-        => principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+        => principal.FindFirstValue(CurrentUserSessionClaimTypes.Email);
 
-    public static bool IsApplicationAdmin(this ClaimsPrincipal principal)
-        => principal.IsInRole(AuthConstants.AdminRoleClaimValue);
+    public static CurrentUser? ToCurrentUser(this ClaimsPrincipal principal)
+    {
+        var userId = principal.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return null;
+        }
 
-    public static bool HasAccessClaimOrApplicationAdmin(this ClaimsPrincipal principal, string accessClaimValue)
-        => principal.HasClaim(ApplicationClaimTypes.AccessClaim, accessClaimValue) ||
-           principal.IsApplicationAdmin();
+        var displayName = principal.Identity?.Name ?? userId;
+        return new CurrentUser(userId, displayName, principal.GetUserEmail());
+    }
 }

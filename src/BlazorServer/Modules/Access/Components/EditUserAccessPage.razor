@@ -1,4 +1,4 @@
-@page "/settings/access/users/{UserId}"
+﻿@page "/settings/access/users/{UserId}"
 @inject IStringLocalizer<EditUserAccessPage> Localizer
 
 <SettingsPageBase>
@@ -22,7 +22,7 @@
 @inject FunctionalAccessGrantHandler FunctionalAccessGrants
 @inject IRoleService RoleService
 @inject IUserService UserService
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 @inject NavigationManager NavigationManager
 
 @code{
@@ -37,13 +37,15 @@
     async Task LoadUserDataAsync()
     {
         SetIsLoading(true);
-        if (UserId is not null && AuthService.OrganizationId is not null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (UserId is not null && CurrentUserSession.OrganizationId is not null)
         {
             UserAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetUserFunctionalAccessQuery(UserId, AuthService.OrganizationId));
+                new GetUserFunctionalAccessQuery(UserId, CurrentUserSession.OrganizationId));
             User = await UserService.GetUserAsync(UserId);
-            AllRoles = await RoleService.GetRolesAsync(AuthService.OrganizationId);
-            var pickedRoles = await RoleService.GetRolesForUserAsync(UserId, AuthService.OrganizationId);
+            AllRoles = await RoleService.GetRolesAsync(CurrentUserSession.OrganizationId);
+            var pickedRoles = await RoleService.GetRolesForUserAsync(UserId, CurrentUserSession.OrganizationId);
             PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);

@@ -1,4 +1,4 @@
-@page "/settings/access/roles/{RoleId}"
+﻿@page "/settings/access/roles/{RoleId}"
 @inject IStringLocalizer<EditRoleAccessPage> Localizer
 
 <SettingsPageBase IsLoading="IsLoading">
@@ -21,7 +21,7 @@
 @inject IUserService UserService
 @inject IRoleService RoleService
 @inject IDialogService DialogService
-@inject IAuthService AuthService
+@inject ICurrentUserSession CurrentUserSession
 @inject NavigationManager NavigationManager
 
 @code{
@@ -44,12 +44,14 @@
     async Task LoadDataAsync()
     {
         SetIsLoading(true);
-        if (RoleId is not null && AuthService.OrganizationId is not null)
+        await CurrentUserSession.RefreshAsync();
+
+        if (RoleId is not null && CurrentUserSession.OrganizationId is not null)
         {
             RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetRoleFunctionalAccessQuery(RoleId, AuthService.OrganizationId));
+                new GetRoleFunctionalAccessQuery(RoleId, CurrentUserSession.OrganizationId));
             Role = await RoleService.GetRoleAsync(RoleId);
-            PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, AuthService.OrganizationId);
+            PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, CurrentUserSession.OrganizationId);
         }
         SetIsLoading(false);
     }
