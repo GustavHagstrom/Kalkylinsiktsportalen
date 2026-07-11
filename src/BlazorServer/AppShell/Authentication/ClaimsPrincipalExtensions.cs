@@ -14,6 +14,9 @@ public static class ClaimsPrincipalExtensions
     public static string? GetUserEmail(this ClaimsPrincipal principal)
         => principal.FindFirstValue(CurrentUserSessionClaimTypes.Email);
 
+    public static List<string> GetDirectoryRoles(this ClaimsPrincipal principal)
+        => principal.FindAll(CurrentUserSessionClaimTypes.DirectoryRoles).Select(c => c.Value).ToList();
+
     public static CurrentUser? ToCurrentUser(this ClaimsPrincipal principal)
     {
         var userId = principal.GetUserId();

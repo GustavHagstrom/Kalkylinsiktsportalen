@@ -8,16 +8,13 @@ namespace BlazorServer.Modules.Access.Authentication;
 public class ClaimsTransformation : IClaimsTransformation
 {
     private readonly FunctionalAccessGrantHandler functionalAccessGrants;
-    private readonly IApplicationAdminLookup _applicationAdminLookup;
     private readonly IAccessClaimsCache _cache;
 
     public ClaimsTransformation(
         FunctionalAccessGrantHandler functionalAccessGrants,
-        IApplicationAdminLookup applicationAdminLookup,
         IAccessClaimsCache cache)
     {
         this.functionalAccessGrants = functionalAccessGrants;
-        _applicationAdminLookup = applicationAdminLookup;
         _cache = cache;
     }
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -45,11 +42,12 @@ public class ClaimsTransformation : IClaimsTransformation
                 }
             }
         }
-        var isAdmin = await _applicationAdminLookup.IsApplicationAdminAsync(userId, orgId);
-        if (isAdmin && !principal.HasClaim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue))
-        {
-            ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue));
-        }
+
+        //var isAdmin = await _applicationAdminLookup.IsApplicationAdminAsync(principal);
+        //if (isAdmin && !principal.HasClaim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue))
+        //{
+        //    ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue));
+        //}
         return principal;
     }
     

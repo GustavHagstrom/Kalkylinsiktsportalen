@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Access.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
@@ -41,6 +42,10 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
             new(ClaimConstants.TenantId, _defaults.OrganizationId),
             new(CurrentUserSessionClaimTypes.Email, user.Email ?? string.Empty)
         };
+        if(user.Id.ToLower() == "admin")
+        {
+            claims.Add(new Claim(ApplicationClaimTypes.ExternalDirectoryRole, AccessPolicies.ApplicationAdminRoleClaimValue));
+        }
         claims.AddRange(roles);
 
         var identity = new ClaimsIdentity(claims, Scheme.Name);
