@@ -1,4 +1,3 @@
-using BlazorServer.Shared.MockedData;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
@@ -10,14 +9,17 @@ namespace BlazorServer.AppShell.Authentication;
 public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private readonly MockedAuthSession _session;
+    private readonly MockAuthDefaults _defaults;
 
     public MockAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        MockedAuthSession session) : base(options, logger, encoder)
+        MockedAuthSession session,
+        MockAuthDefaults defaults) : base(options, logger, encoder)
     {
         _session = session;
+        _defaults = defaults;
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -28,16 +30,16 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var roles = MockedDataStore.Roles
-            .Where(role => role.Id == user.Id)
-            .Select(role => new Claim("groups", role.Id));
+        var roles = _defaults.RoleIdsByUserId.TryGetValue(user.Id, out var roleIds)
+            ? roleIds.Select(roleId => new Claim("groups", roleId))
+            : [];
 
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, user.Name),
             new(ClaimConstants.ObjectId, user.Id),
-            new(ClaimConstants.TenantId, MockedDataStore.OrganizationId),
-            new(CurrentUserSessionClaimTypes.Email, "gustav@rorvikshus.se")
+            new(ClaimConstants.TenantId, _defaults.OrganizationId),
+            new(CurrentUserSessionClaimTypes.Email, user.Email ?? string.Empty)
         };
         claims.AddRange(roles);
 

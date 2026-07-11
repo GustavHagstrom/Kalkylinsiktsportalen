@@ -1,5 +1,4 @@
-@using BlazorServer.Shared.Models
-@using BlazorServer.AppShell.Composition
+ï»¿@using BlazorServer.AppShell.Composition
 @inherits StyleComponent
 
 <style>
@@ -16,28 +15,27 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(255, 200, 0, 0); /* start: ingen färg */
+        background: rgba(255, 200, 0, 0);
         pointer-events: none;
         transition: background 0.25s ease;
     }
 
     .avatar-style.clickable:hover::after {
             background: var(--mud-palette-action-default-hover);
-            /* rgba(0, 0, 0, 1); */
     }
 </style>
 
-@if (User is not null)
+@if (!string.IsNullOrWhiteSpace(Name))
 {
     <MudAvatar Size="Size" Class="@ClassNames" Style="@Style" @onclick="@OnAvatarClick">
-        @if (User.AvatarBase64 != null)
+        @if (AvatarBase64 != null)
         {
-            <MudImage Src="@($"data:image/png;base64, {User.AvatarBase64}")" Alt="User photo" />
+            <MudImage Src="@($"data:image/png;base64, {AvatarBase64}")" Alt="User photo" />
         }
         else
         {
             <div class="pa-0">
-                @User.Name.First()
+                @Name.First()
             </div>
         }
     </MudAvatar>
@@ -48,7 +46,8 @@ else
 }
 
 @code{
-    [Parameter] public User? User { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? AvatarBase64 { get; set; }
     [Parameter] public Size Size { get; set; } = Size.Medium;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public bool Clickable { get; set; } = true;
@@ -59,11 +58,4 @@ else
     {
         return Clickable ? OnClick.InvokeAsync(args) : Task.CompletedTask;
     }
-
-    public enum AvtarNamePosition
-    {
-        Left,
-        Right
-    }
-
 }

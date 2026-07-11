@@ -4,7 +4,7 @@
 <SettingsPageBase>
 
     <SettingsSection Title="@Localizer["Användare"]">
-        <UserAvatarWithName User="User"/>
+        <UserAvatarWithName Name="User?.Name" AvatarBase64="User?.AvatarBase64"/>
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadUserDataAsync">
@@ -20,17 +20,16 @@
 </SettingsPageBase>
 
 @inject FunctionalAccessGrantHandler FunctionalAccessGrants
-@inject IRoleService RoleService
-@inject IUserService UserService
+@inject IAccessDirectory AccessDirectory
 @inject ICurrentUserSession CurrentUserSession
 @inject NavigationManager NavigationManager
 
 @code{
     [Parameter] public string? UserId { get; set; }
-    User? User { get; set; }
+    AccessDirectoryUser? User { get; set; }
     FunctionalAccessGrant? UserAccessGrant { get; set; }
-    List<Role> AllRoles { get; set; } = [];
-    List<Role> PickedRoles { get; set; } = [];
+    List<AccessDirectoryRole> AllRoles { get; set; } = [];
+    List<AccessDirectoryRole> PickedRoles { get; set; } = [];
 
     bool IsLoading { get; set; } = false;
 
@@ -43,9 +42,9 @@
         {
             UserAccessGrant = await FunctionalAccessGrants.HandleAsync(
                 new GetUserFunctionalAccessQuery(UserId, CurrentUserSession.OrganizationId));
-            User = await UserService.GetUserAsync(UserId);
-            AllRoles = await RoleService.GetRolesAsync(CurrentUserSession.OrganizationId);
-            var pickedRoles = await RoleService.GetRolesForUserAsync(UserId, CurrentUserSession.OrganizationId);
+            User = await AccessDirectory.GetUserAsync(UserId);
+            AllRoles = await AccessDirectory.GetRolesAsync(CurrentUserSession.OrganizationId);
+            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId, CurrentUserSession.OrganizationId);
             PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);

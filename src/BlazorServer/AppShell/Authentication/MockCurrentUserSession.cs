@@ -1,6 +1,4 @@
 using BlazorServer.AppShell.Routes;
-using BlazorServer.Shared.MockedData;
-using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
@@ -10,15 +8,18 @@ namespace BlazorServer.AppShell.Authentication;
 public class MockCurrentUserSession : ICurrentUserSession, IAuthService
 {
     private readonly MockedAuthSession _session;
+    private readonly MockAuthDefaults _defaults;
     private readonly NavigationManager _navigation;
     private readonly AuthenticationStateProvider _stateProvider;
 
     public MockCurrentUserSession(
         MockedAuthSession session,
+        MockAuthDefaults defaults,
         NavigationManager navigation,
         AuthenticationStateProvider stateProvider)
     {
         _session = session;
+        _defaults = defaults;
         _navigation = navigation;
         _stateProvider = stateProvider;
     }
@@ -29,24 +30,24 @@ public class MockCurrentUserSession : ICurrentUserSession, IAuthService
 
     public CurrentUser? CurrentUser => _session.User is null
         ? null
-        : new CurrentUser(_session.User.Id, _session.User.Name, UserEmail);
+        : new CurrentUser(_session.User.Id, _session.User.Name, _session.User.Email);
 
-    public User? User => _session.User;
+    public SessionUser? User => _session.User;
 
-    public string? UserEmail => "gustav@rorvikshus.se";
+    public string? UserEmail => _session.User?.Email;
 
     public IReadOnlyList<Claim> Claims => _stateProvider.GetAuthenticationStateAsync().Result.User.Claims.ToList();
 
     public Task LoginAsync()
     {
-        _session.SetSession(MockedDataStore.Users.First(), MockedDataStore.OrganizationId);
+        _session.SetSession(_defaults.Users.First(), _defaults.OrganizationId);
         _navigation.NavigateTo(AppShellRoutes.Home, forceLoad: true);
         return Task.CompletedTask;
     }
 
-    public void Login(User user)
+    public void Login(SessionUser user)
     {
-        _session.SetSession(user, MockedDataStore.OrganizationId);
+        _session.SetSession(user, _defaults.OrganizationId);
         _navigation.Refresh(forceReload: true);
     }
 
@@ -62,7 +63,7 @@ public class MockCurrentUserSession : ICurrentUserSession, IAuthService
         return Task.FromResult(CurrentUser);
     }
 
-    public Task<User?> UpdateUserAsync()
+    public Task<SessionUser?> UpdateUserAsync()
     {
         return Task.FromResult(User);
     }

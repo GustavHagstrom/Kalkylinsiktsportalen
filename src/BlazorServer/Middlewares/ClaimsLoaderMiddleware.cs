@@ -1,6 +1,5 @@
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.Modules.Access.Authentication;
-using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 
@@ -21,12 +20,12 @@ public class ClaimsLoaderMiddleware(RequestDelegate next)
                 using (var scope = context.RequestServices.CreateScope())
                 {
                     var sp = scope.ServiceProvider;
-                    var roleService = sp.GetRequiredService<IRoleService>();
+                    var applicationAdminLookup = sp.GetRequiredService<IApplicationAdminLookup>();
                     var claimsTransofmation = sp.GetRequiredService<IClaimsTransformation>();
 
                     await claimsTransofmation.TransformAsync(context.User);
 
-                    var isAdmin = await roleService.IsAdminAsync(userId, orgId);
+                    var isAdmin = await applicationAdminLookup.IsApplicationAdminAsync(userId, orgId);
                     if (isAdmin)
                     {
                         SetAdminRole(context.User);

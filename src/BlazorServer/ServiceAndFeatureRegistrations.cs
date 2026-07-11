@@ -38,14 +38,16 @@ public static class ServiceAndFeatureRegistrations
 
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
+            var mockOrganizationId = builder.Configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
             registrationContext.Ui.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<MockCurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddSingleton<MockedAuthSession>();
+            builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
+            builder.Services.AddSingleton<IApplicationAdminLookup, MockApplicationAdminLookup>();
             builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
-            builder.Services.AddTransient<IUserService, MockedUserService>();
-            builder.Services.AddTransient<IRoleService, MockedRoleService>();
+            builder.Services.AddMockAccessDirectory(mockOrganizationId);
             builder.Services.AddMemoryCache();
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
@@ -54,8 +56,9 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped<CurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<CurrentUserSession>());
-            builder.Services.AddTransient<IUserService, UserService>();
-            builder.Services.AddTransient<IRoleService, RoleService>();
+            builder.Services.AddSingleton<IApplicationAdminCache, MemoryApplicationAdminCache>();
+            builder.Services.AddTransient<IApplicationAdminLookup, GraphApplicationAdminLookup>();
+            builder.Services.AddGraphAccessDirectory();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                     .AddMicrosoftIdentityWebApp(options =>
                     {
@@ -71,7 +74,6 @@ public static class ServiceAndFeatureRegistrations
         }
 
         builder.UseMongoDb();
-        builder.Services.AddSingleton<IAdminRoleCache, MemoryAdminRoleCache>();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddSingleton<RenderService>();
         builder.Services.AddLocalization();

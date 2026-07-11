@@ -18,8 +18,7 @@
 
 
 @inject FunctionalAccessGrantHandler FunctionalAccessGrants
-@inject IUserService UserService
-@inject IRoleService RoleService
+@inject IAccessDirectory AccessDirectory
 @inject IDialogService DialogService
 @inject ICurrentUserSession CurrentUserSession
 @inject NavigationManager NavigationManager
@@ -29,13 +28,13 @@
 
     bool IsLoading { get; set; } = false;
 
-    Role? Role { get; set; }
+    AccessDirectoryRole? Role { get; set; }
     FunctionalAccessGrant? RoleAccessGrant { get; set; }
 
-    List<User> PickedUsers { get; set; } = new();
+    List<AccessDirectoryUser> PickedUsers { get; set; } = new();
 
     // string Title => Role is null ? "Roll: " : $"{Localizer["Roll:"]} {Role.Name}";
-    void EditUser(User user)
+    void EditUser(AccessDirectoryUser user)
     {
         NavigationManager.NavigateTo($"{Constants.Routes.UserAccessEdit}/{user.Id}");
     }
@@ -50,8 +49,8 @@
         {
             RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
                 new GetRoleFunctionalAccessQuery(RoleId, CurrentUserSession.OrganizationId));
-            Role = await RoleService.GetRoleAsync(RoleId);
-            PickedUsers = await RoleService.GetUsersInRoleAsync(RoleId, CurrentUserSession.OrganizationId);
+            Role = await AccessDirectory.GetRoleAsync(RoleId);
+            PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, CurrentUserSession.OrganizationId);
         }
         SetIsLoading(false);
     }

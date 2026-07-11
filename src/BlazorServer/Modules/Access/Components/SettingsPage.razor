@@ -18,13 +18,12 @@
 </SettingsPageBase>
 
 @inject ICurrentUserSession CurrentUserSession
-@inject IUserService UserService
-@inject IRoleService RoleService
+@inject IAccessDirectory AccessDirectory
 @inject NavigationManager NavigationManager
 
 @code{
-    List<Role> Roles { get; set; } = new();
-    List<User> Users { get; set; } = new();
+    List<AccessDirectoryRole> Roles { get; set; } = new();
+    List<AccessDirectoryUser> Users { get; set; } = new();
 
     async Task LoadUserDataAsync()
     {
@@ -36,7 +35,7 @@
             StateHasChanged();
             return;
         }
-        Users = await UserService.GetUsersAsync(CurrentUserSession.OrganizationId);
+        Users = await AccessDirectory.GetUsersAsync(CurrentUserSession.OrganizationId);
         StateHasChanged();
     }
     async Task LoadRoleDataAsync()
@@ -49,10 +48,10 @@
             StateHasChanged();
             return;
         }
-        Roles.AddRange(await RoleService.GetRolesAsync(CurrentUserSession.OrganizationId));
+        Roles.AddRange(await AccessDirectory.GetRolesAsync(CurrentUserSession.OrganizationId));
         StateHasChanged();
     }
-    void EditUserAccess(User user)
+    void EditUserAccess(AccessDirectoryUser user)
     {
         NavigationManager.NavigateTo($"{Constants.Routes.UserAccessEdit}/{user.Id}");
     }

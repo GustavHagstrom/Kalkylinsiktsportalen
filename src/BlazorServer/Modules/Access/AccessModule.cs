@@ -2,6 +2,7 @@ using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Infrastructure.Identity;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Modules.Access.Public.Contracts;
@@ -51,5 +52,15 @@ public static class AccessModule
             typeof(AccessModule).FullName ?? nameof(AccessModule));
 
         return services;
+    }
+
+    public static IServiceCollection AddMockAccessDirectory(this IServiceCollection services, string organizationId)
+    {
+        return services.AddSingleton<IAccessDirectory>(_ => new MockAccessDirectory(organizationId));
+    }
+
+    public static IServiceCollection AddGraphAccessDirectory(this IServiceCollection services)
+    {
+        return services.AddTransient<IAccessDirectory, GraphAccessDirectory>();
     }
 }

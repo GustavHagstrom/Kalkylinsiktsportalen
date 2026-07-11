@@ -1,13 +1,11 @@
-using BlazorServer.Shared.Models;
-
 namespace BlazorServer.AppShell.Authentication;
 
 public class MockedAuthSession
 {
-    public User? User { get; private set; }
+    public SessionUser? User { get; private set; }
     public string? OrganizationId { get; private set; }
 
-    public void SetSession(User user, string orgId)
+    public void SetSession(SessionUser user, string orgId)
     {
         User = user;
         OrganizationId = orgId;

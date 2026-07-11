@@ -8,7 +8,6 @@ using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.AppShell.Composition;
-using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;

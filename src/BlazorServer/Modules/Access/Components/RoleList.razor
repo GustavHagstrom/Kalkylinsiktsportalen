@@ -23,11 +23,11 @@
 
 @inject NavigationManager NavigationManager
 @code {
-    [Parameter] public List<Role> Roles { get; set; } = new();
-    IEnumerable<Role> RolesIterator => Roles.OrderBy(x => x.Name);
+    [Parameter] public List<AccessDirectoryRole> Roles { get; set; } = new();
+    IEnumerable<AccessDirectoryRole> RolesIterator => Roles.OrderBy(x => x.Name);
 
 
-    void EditRoleAccess(Role role)
+    void EditRoleAccess(AccessDirectoryRole role)
     {
         NavigationManager.NavigateTo($"{Constants.Routes.RoleAccessEdit}/{role.Id}");
     }

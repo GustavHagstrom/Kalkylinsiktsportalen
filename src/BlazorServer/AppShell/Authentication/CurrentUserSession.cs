@@ -1,5 +1,3 @@
-using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
@@ -10,18 +8,14 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
 {
     private readonly AuthenticationStateProvider _authProvider;
     private readonly NavigationManager _navigationManager;
-    private readonly IUserService _userService;
     private AuthenticationState? _cachedAuthState;
-    private User? _cachedUser;
 
     public CurrentUserSession(
         AuthenticationStateProvider authProvider,
-        NavigationManager navigationManager,
-        IUserService userService)
+        NavigationManager navigationManager)
     {
         _authProvider = authProvider;
         _navigationManager = navigationManager;
-        _userService = userService;
         _authProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
     }
 
@@ -33,7 +27,9 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
 
     public CurrentUser? CurrentUser => _cachedAuthState?.User.ToCurrentUser();
 
-    public User? User => _cachedUser;
+    public SessionUser? User => CurrentUser is null
+        ? null
+        : new SessionUser(CurrentUser.UserId, CurrentUser.DisplayName, CurrentUser.Email, null);
 
     public IReadOnlyList<Claim> Claims => _cachedAuthState?.User.Claims.ToList() ?? new List<Claim>();
 
@@ -60,10 +56,10 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
         return CurrentUser;
     }
 
-    public async Task<User?> UpdateUserAsync()
+    public async Task<SessionUser?> UpdateUserAsync()
     {
         await RefreshAsync();
-        return _cachedUser;
+        return User;
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
@@ -76,11 +72,7 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
         _cachedAuthState = await task;
         if (!IsAuthenticated)
         {
-            _cachedUser = null;
             return;
         }
-
-        var userId = CurrentUser?.UserId;
-        _cachedUser = userId is null ? null : await _userService.GetUserAsync(userId);
     }
 }

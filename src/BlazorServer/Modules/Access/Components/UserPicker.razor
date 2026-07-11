@@ -5,7 +5,7 @@
     <MudSwitch T="bool" @bind-Value="ShowOnlyPicked" Label="@Localizer["Visa endast valda"]" Color="Color.Primary" />
 }
 
-<MudTextField T="string" Variant="Variant.Outlined" @bind-Value="Filter" Label="@Localizer["Sök"]" Margin="Margin.Dense" Immediate="true" />
+<MudTextField T="string" Variant="Variant.Outlined" @bind-Value="Filter" Label="@Localizer["SÃ¶k"]" Margin="Margin.Dense" Immediate="true" />
 <MudSimpleTable Hover="false" Dense="true" Bordered="false">
     <tbody>
         @foreach (var user in UsersIterator)
@@ -20,9 +20,9 @@
                                  ValueChanged="x => OnPickChanged(user, x)" />
                     </td>
                 }
-                
+
                 <td class="pl-2" style="width: 100%;">
-                    <UserAvatarWithName Size="Size.Small" User="user"/>
+                    <UserAvatarWithName Size="Size.Small" Name="user.Name" AvatarBase64="user.AvatarBase64"/>
                 </td>
                 @if(ExtraTdContent is not null)
                 {
@@ -38,23 +38,23 @@
 
 @code {
     [Parameter] public bool EnablePicking { get; set; } = true;
-    [Parameter] public List<string> PickedUserIds { get; set; } = new List<string>();
-    [Parameter] public List<User> AllUsers { get; set; } = new List<User>();
-    [Parameter] public EventCallback<PickChangedRecord<User>> PickChanged { get; set; }
-    [Parameter] public RenderFragment<User>? ExtraTdContent { get; set; }
+    [Parameter] public List<string> PickedUserIds { get; set; } = new();
+    [Parameter] public List<AccessDirectoryUser> AllUsers { get; set; } = new();
+    [Parameter] public EventCallback<PickChangedRecord<AccessDirectoryUser>> PickChanged { get; set; }
+    [Parameter] public RenderFragment<AccessDirectoryUser>? ExtraTdContent { get; set; }
 
     bool ShowOnlyPicked { get; set; } = false;
     string Filter { get; set; } = string.Empty;
     IEnumerable<string> FilterWords => Filter.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-    IEnumerable<User> UsersIterator => AllUsers
-        .Where(x => ShowOnlyPicked == true ? PickedUserIds.Contains(x.Id!) : true)
-        .Where(user => FilterWords.All(word => user.Name is null ? false : user.Name.ToLower().Contains(word.ToLower())))
+    IEnumerable<AccessDirectoryUser> UsersIterator => AllUsers
+        .Where(x => ShowOnlyPicked == true ? PickedUserIds.Contains(x.Id) : true)
+        .Where(user => FilterWords.All(word => user.Name.Contains(word, StringComparison.OrdinalIgnoreCase)))
         .OrderBy(x => x.Name);
 
-    async Task OnPickChanged(User user, bool value)
+    async Task OnPickChanged(AccessDirectoryUser user, bool value)
     {
-        await PickChanged.InvokeAsync(new PickChangedRecord<User>(user, value));
+        await PickChanged.InvokeAsync(new PickChangedRecord<AccessDirectoryUser>(user, value));
         StateHasChanged();
     }
 }

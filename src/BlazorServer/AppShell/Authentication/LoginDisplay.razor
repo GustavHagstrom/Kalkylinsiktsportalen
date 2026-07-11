@@ -1,8 +1,6 @@
-﻿@using BlazorServer.Shared.Models
-
-<AuthorizeView>
+﻿<AuthorizeView>
     <Authorized>
-        <UserAvatar User="user" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="user?.Name" AvatarBase64="user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
@@ -25,11 +23,9 @@
 
 @code {
     bool ShowLogoutPopover = false;
-    User? user => AuthService.User;
+    SessionUser? user => AuthService.User;
     [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
 
-    // Define IsSmOrDown in the current context
-    private bool IsSmOrDown => /* logic to determine if small or down, e.g. based on screen size or breakpoint */ false;
     Task LogoutAsync() => AuthService.LogoutAsync();
     Task Login() => AuthService.LoginAsync();
 
@@ -37,7 +33,4 @@
     {
         await AuthService.UpdateUserAsync();
     }
-
-    
-
 }

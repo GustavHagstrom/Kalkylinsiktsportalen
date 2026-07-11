@@ -1,10 +1,8 @@
-﻿@using BlazorServer.Shared.MockedData
-@using BlazorServer.Shared.Models
-@using BlazorServer.AppShell.Authentication
+﻿@using BlazorServer.AppShell.Authentication
 
 <AuthorizeView>
     <Authorized>
-        <UserAvatar User="user" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="user?.Name" AvatarBase64="user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
@@ -19,16 +17,14 @@
         <MudButton Style="height: 100%" OnClick="() => ShowLoginPopover = !ShowLoginPopover">
             @Localizer["Logga in"]
         </MudButton>
-        
 
         <MudPopover Open="ShowLoginPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudStack Spacing="2">
-                @foreach (var user in MockedDataStore.Users)
+                @foreach (var user in MockDefaults.Users)
                 {
                     <MudButton OnClick="() => Login(user)">@LoginText(user)</MudButton>
                 }
             </MudStack>
-            
         </MudPopover>
 
         <MudOverlay Visible="ShowLoginPopover" LockScroll="true" OnClick="() => ShowLoginPopover = false" />
@@ -36,24 +32,19 @@
 </AuthorizeView>
 
 @inject IAuthService AuthService
+@inject MockAuthDefaults MockDefaults
 @inject IStringLocalizer<MockedLoginDisplay> Localizer
 
 @code {
-
     [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
     bool ShowLogoutPopover = false;
     bool ShowLoginPopover = false;
-   
 
-    string LoginText(User user) => $"{Localizer["Logga in med"]} : {user.Name}";
-    User? user => AuthService.User;
+    string LoginText(SessionUser user) => $"{Localizer["Logga in med"]} : {user.Name}";
+    SessionUser? user => AuthService.User;
 
-    
-
-    // Define IsSmOrDown in the current context
-    private bool IsSmOrDown => /* logic to determine if small or down, e.g. based on screen size or breakpoint */ false;
     Task LogoutAsync() => AuthService.LogoutAsync();
-    void Login(User user)
+    void Login(SessionUser user)
     {
         if(AuthService is MockCurrentUserSession mockedAuthService)
         {
@@ -62,5 +53,4 @@
             ShowLogoutPopover = false;
         }
     }
-
 }
