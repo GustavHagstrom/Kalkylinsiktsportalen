@@ -2,6 +2,7 @@ using BlazorServer.Shared.Models;
 using BlazorServer.Shared.Services.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
 namespace BlazorServer.AppShell.Authentication;
 
@@ -33,6 +34,8 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
     public CurrentUser? CurrentUser => _cachedAuthState?.User.ToCurrentUser();
 
     public User? User => _cachedUser;
+
+    public IReadOnlyList<Claim> Claims => _cachedAuthState?.User.Claims.ToList() ?? new List<Claim>();
 
     public void Dispose()
     {

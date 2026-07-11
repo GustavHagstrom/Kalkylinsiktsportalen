@@ -2,6 +2,8 @@ using BlazorServer.AppShell.Routes;
 using BlazorServer.Shared.MockedData;
 using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
 namespace BlazorServer.AppShell.Authentication;
 
@@ -9,13 +11,16 @@ public class MockCurrentUserSession : ICurrentUserSession, IAuthService
 {
     private readonly MockedAuthSession _session;
     private readonly NavigationManager _navigation;
+    private readonly AuthenticationStateProvider _stateProvider;
 
     public MockCurrentUserSession(
         MockedAuthSession session,
-        NavigationManager navigation)
+        NavigationManager navigation,
+        AuthenticationStateProvider stateProvider)
     {
         _session = session;
         _navigation = navigation;
+        _stateProvider = stateProvider;
     }
 
     public string? OrganizationId => _session.OrganizationId;
@@ -29,6 +34,8 @@ public class MockCurrentUserSession : ICurrentUserSession, IAuthService
     public User? User => _session.User;
 
     public string? UserEmail => "gustav@rorvikshus.se";
+
+    public IReadOnlyList<Claim> Claims => _stateProvider.GetAuthenticationStateAsync().Result.User.Claims.ToList();
 
     public Task LoginAsync()
     {

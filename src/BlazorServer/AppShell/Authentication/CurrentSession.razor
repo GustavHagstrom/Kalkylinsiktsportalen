@@ -4,6 +4,15 @@
         {
             <MudText Typo="Typo.h6">@CurrentUserSession.CurrentUser.DisplayName</MudText>
             <MudText Typo="Typo.subtitle2" Class="mb-0">@CurrentUserSession.CurrentUser.Email</MudText>
+            @if (CurrentUserSession.Claims.Any())
+            {
+                <ul>
+                    @foreach (var claim in CurrentUserSession.Claims)
+                    {
+                        <li>@claim.Type: @claim.Value</li>
+                    }
+                </ul>
+            }
         }
     </Authorized>
     <NotAuthorized>
