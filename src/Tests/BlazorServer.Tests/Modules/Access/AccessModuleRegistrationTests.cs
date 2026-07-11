@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 using BlazorServer.Modules.Access.Public.Contracts;
+using Microsoft.Extensions.Configuration;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -26,8 +27,8 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-
-        services.AddAccessModule(registrationContext);
+        IConfiguration configuration = new ConfigurationBuilder().Build();
+        services.AddAccessModule(registrationContext, configuration);
 
         Assert.Multiple(() =>
         {
@@ -61,7 +62,9 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-        services.AddAccessModule(registrationContext);
+        IConfiguration configuration = new ConfigurationBuilder().Build();
+
+        services.AddAccessModule(registrationContext, configuration);
         services.AddLogging();
         services.ApplyAppRegistrationContext(registrationContext);
 
@@ -107,7 +110,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimTypes.AccessClaim, Constants.Authorization.AccessClaimValue)
+            new Claim(ApplicationClaimConstants.AccessClaimType, Constants.Authorization.AccessClaimValue)
         ], "test"));
     }
 
@@ -115,7 +118,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue)
+            new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 

@@ -166,7 +166,7 @@ public class BidconModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimTypes.AccessClaim, "BidconApiWritePermission")
+            new Claim(ApplicationClaimConstants.AccessClaimType, "BidconApiWritePermission")
         ], "test"));
     }
 
@@ -174,7 +174,7 @@ public class BidconModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue)
+            new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 

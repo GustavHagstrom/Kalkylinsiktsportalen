@@ -15,6 +15,7 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
 using BlazorServer.Modules.Reports;
+using BlazorServer.Modules.Access.Authentication;
 
 namespace BlazorServer;
 
@@ -27,7 +28,7 @@ public static class ServiceAndFeatureRegistrations
 
         
         builder.Services.AddSettingsShell(registrationContext);
-        builder.Services.AddAccessModule(registrationContext);
+        builder.Services.AddAccessModule(registrationContext, builder.Configuration);
         builder.Services.AddBidconModule(
             registrationContext,
             builder.Configuration["Bidcon:BaseUrl"] ??
@@ -44,9 +45,9 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddSingleton<ICurrentUserProfileLookup, ClaimsCurrentUserProfileLookup>();
-            builder.Services.AddSingleton<MockedAuthSession>();
+            
             builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
-            builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
+            
             builder.Services.AddMockAccessDirectory(mockOrganizationId);
             builder.Services.AddMemoryCache();
         }

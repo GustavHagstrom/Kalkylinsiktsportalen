@@ -1,3 +1,4 @@
+using BlazorServer.Kernel.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;

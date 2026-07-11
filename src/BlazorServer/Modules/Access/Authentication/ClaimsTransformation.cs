@@ -1,4 +1,4 @@
-using BlazorServer.AppShell.Authentication;
+using BlazorServer.Kernel.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
@@ -36,7 +36,7 @@ public class ClaimsTransformation : IClaimsTransformation
         {
             foreach (var value in accessClaimValues)
             {
-                if (!principal.HasClaim(ApplicationClaimTypes.AccessClaim, value))
+                if (!principal.HasClaim(ApplicationClaimConstants.AccessClaimType, value))
                 {
                     ((ClaimsIdentity)principal.Identity!).AddClaim(new AccessClaim(value));
                 }

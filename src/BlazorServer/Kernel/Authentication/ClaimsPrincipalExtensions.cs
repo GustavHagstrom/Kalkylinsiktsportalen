@@ -1,7 +1,8 @@
 using System.Security.Claims;
+using BlazorServer.AppShell.Authentication;
 using Microsoft.Identity.Web;
 
-namespace BlazorServer.AppShell.Authentication;
+namespace BlazorServer.Kernel.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {

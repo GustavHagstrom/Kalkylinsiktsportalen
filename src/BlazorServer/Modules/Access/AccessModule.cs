@@ -1,12 +1,13 @@
+using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.Modules.Access.Authentication.Mock;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Modules.Access.Public.Contracts;
-using BlazorServer.AppShell.Composition;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
 using MudBlazor;
@@ -17,8 +18,18 @@ public static class AccessModule
 {
     public static IServiceCollection AddAccessModule(
         this IServiceCollection services,
-        AppRegistrationContext registrationContext)
+        AppRegistrationContext registrationContext,
+        IConfiguration configuration)
     {
+        if (configuration["Auth:Mode"] == "Mock")
+        {
+            services.AddSingleton<MockedAuthSession>();
+            services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
+        }
+        else if (configuration["Auth:Mode"] == "Graph")
+        {
+
+        }
         services.AddMemoryCache();
         services.AddMongoCollection<MongoFunctionalAccessGrant>("FunctionalAccessGrants");
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();

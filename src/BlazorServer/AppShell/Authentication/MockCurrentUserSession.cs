@@ -1,4 +1,5 @@
 using BlazorServer.AppShell.Routes;
+using BlazorServer.Modules.Access.Authentication.Mock;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;

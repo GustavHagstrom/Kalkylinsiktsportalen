@@ -63,7 +63,7 @@ public class ViewAccessDecisionHandlersTests
             userId: "admin-1",
             organizationId: "org-1",
             roleIds: [],
-            appRoles: [AccessPolicies.ApplicationAdminRoleClaimValue]);
+            isAdmin: true);
 
         var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
         var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(admin, "view-1"));
@@ -82,17 +82,22 @@ public class ViewAccessDecisionHandlersTests
         string organizationId,
         IReadOnlyCollection<string>? roleIds = null,
         IReadOnlyCollection<string>? accessClaims = null,
-        IReadOnlyCollection<string>? appRoles = null)
+        IReadOnlyCollection<string>? appRoles = null,
+        bool isAdmin = false)
     {
         var claims = new List<Claim>
         {
-            new(ClaimConstants.ObjectId, userId),
-            new(ClaimConstants.TenantId, organizationId)
+            new(Microsoft.Identity.Web.ClaimConstants.ObjectId, userId),
+            new(Microsoft.Identity.Web.ClaimConstants.TenantId, organizationId)
         };
 
         claims.AddRange((roleIds ?? []).Select(roleId => new Claim("groups", roleId)));
-        claims.AddRange((accessClaims ?? []).Select(value => new Claim(ApplicationClaimTypes.AccessClaim, value)));
+        claims.AddRange((accessClaims ?? []).Select(value => new Claim(BlazorServer.Modules.Access.Authentication.ApplicationClaimConstants.AccessClaimType, value)));
         claims.AddRange((appRoles ?? []).Select(role => new Claim(ClaimTypes.Role, role)));
+        if (isAdmin)
+        {
+            claims.Add(new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue));
+        }
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "test"));
     }

@@ -1,11 +1,11 @@
-using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.AppShell.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
-namespace BlazorServer.AppShell.Authentication;
+namespace BlazorServer.Modules.Access.Authentication.Mock;
 
 public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -44,7 +44,7 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         };
         if(user.Id.ToLower() == "admin")
         {
-            claims.Add(new Claim(ApplicationClaimTypes.ExternalDirectoryRole, AccessPolicies.ApplicationAdminRoleClaimValue));
+            claims.Add(new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue));
         }
         claims.AddRange(roles);
 

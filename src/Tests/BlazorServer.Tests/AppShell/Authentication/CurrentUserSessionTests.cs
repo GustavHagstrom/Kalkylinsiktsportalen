@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Authentication;
+using BlazorServer.Kernel.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Web;

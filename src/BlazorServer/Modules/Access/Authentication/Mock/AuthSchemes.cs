@@ -1,4 +1,4 @@
-namespace BlazorServer.AppShell.Authentication;
+namespace BlazorServer.Modules.Access.Authentication.Mock;
 
 public static class AuthSchemes
 {
