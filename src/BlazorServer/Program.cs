@@ -1,6 +1,6 @@
 using BlazorServer;
+using BlazorServer.AppShell;
 using BlazorServer.Middlewares;
-using BlazorServer.Shared.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;

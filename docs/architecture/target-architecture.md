@@ -80,7 +80,7 @@ Data, rättigheter, integrationer och konfiguration ska utformas så att organis
 
 Den långsiktiga riktningen är tydliga produktmoduler med avsiktliga kontrakt mellan sig.
 
-App shell är en egen top-level boundary bredvid produktmodulerna och `Shared`.
+App shell, neutrala UI-primitiver, teknisk infrastruktur och stabil kärna är egna top-level boundaries bredvid produktmodulerna.
 
 ```text
 AppShell/
@@ -89,13 +89,19 @@ AppShell/
 Modules/
   Äger produktförmågor och kan bidra metadata till app shell via composition-kontrakt.
 
-Shared/
-  Äger stabila, neutrala byggblock som kan användas av både app shell och moduler.
+UiKit/
+  Äger neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap.
+
+Kernel/
+  Äger små, stabila och teknikneutrala systemprimitiver.
+
+Infrastructure/
+  Äger neutral teknisk infrastruktur, till exempel klientskapande och conventions.
 ```
 
-Moduler ska inte bero på kod i `AppShell`. När en modul behöver synas i app shell ska den bidra metadata via `Shared/Composition`, till exempel en settings area. App shell konsumerar sedan metadata och renderar den konkreta shell-ytan.
+Moduler ska inte bero på kod i `AppShell`. När en modul behöver synas i app shell ska den bidra metadata via AppShells composition-kontrakt, till exempel en settings area. App shell konsumerar sedan metadata och renderar den konkreta shell-ytan.
 
-Om både app shell och moduler behöver samma primitiv ska den primitiva bo i `Shared`. Konkreta shell-routes, shell-bootstrap och hubbflöden ska inte flyttas till `Shared` bara för att flera delar av applikationen relaterar till dem.
+Om både app shell och moduler behöver samma UI-primitiv ska den primitiva bara ligga i `UiKit` när den är neutral och fri från produktstruktur. Konkreta shell-routes, shell-bootstrap och hubbflöden ska ligga i `AppShell`, även när flera delar av applikationen relaterar till dem.
 
 Målmodulerna är:
 
@@ -123,25 +129,25 @@ Den praktiska arbetsregeln för när kod ska ligga kvar nära dagens feature och
 
 | Äldre feature | Målmodul/riktning |
 |---|---|
-| `Settings` | `AppShell` / generisk shared UI |
+| `Settings` | `AppShell` / neutral `UiKit` |
 | `Access` | `Access` |
 | `BidconAccess` | `Bidcon` + `Organizations` |
 | `BidconBrowser` | `Bidcon`, senare delvis `Projects` |
 | `ViewSettings` | `Reports` |
 
-## Shared Och Gemensamma Byggblock
+## Gemensamma Byggblock
 
 Gemensamma byggblock ska hållas små, stabila och avsiktliga.
 
-### SharedKernel
+### Kernel
 
 Får innehålla små och stabila begrepp som används över modulgränser, till exempel identiteter och enkla kontraktstyper.
 
-SharedKernel ska vara litet och får inte bli en plats för produktflöden.
+Kernel ska vara litet och får inte bli en plats för produktflöden.
 
-### Shared UI
+### UiKit
 
-Får innehålla generella UI-primitiver utan produktspecifik affärslogik.
+Får innehålla generella UI-primitiver utan produktspecifik affärslogik, modulkunskap, routeägarskap eller shellbeteende.
 
 ### Gemensam Infrastruktur
 
@@ -173,10 +179,12 @@ Rekommenderad riktning:
 ```text
 Web
   -> Modules
-  -> Shared UI
+  -> AppShell
+  -> UiKit
 
 Modules
-  -> SharedKernel
+  -> UiKit
+  -> Kernel
   -> avsiktliga publika modulkontrakt
 
 Infrastructure

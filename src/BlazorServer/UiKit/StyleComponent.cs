@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace BlazorServer.Shared.Abstractions;
+namespace BlazorServer.UiKit;
 
 public abstract class StyleComponent : ComponentBase
 {

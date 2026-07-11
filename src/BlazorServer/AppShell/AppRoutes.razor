@@ -11,7 +11,7 @@
 <GlobalStateManager>
 
 
-    <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(BlazorServer.AppShell.Pages.NotFound)">
 
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">

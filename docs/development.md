@@ -88,12 +88,12 @@ Praktiska regler för nya feature slices:
 - handlers returnerar application-resultat som kan visas av Blazor idag och mappas till HTTP senare
 - framtida endpoints ska vara tunna adapters över samma handlers, inte en alternativ plats för produktlogik
 
-Använd `Shared` restriktivt:
+Använd gemensamma ytor restriktivt:
 
-- lägg bara sådant i `Shared` som faktiskt är stabilt och tvärgående
-- använd `Shared/UI` för generiska UI-primitiver
-- använd `Shared/Kernel` för små stabila gemensamma typer
-- använd `Shared/Infrastructure` för teknisk implementation som delas av flera moduler
+- lägg inte ny kod i `Shared`; befintlig `Shared`-kod är en migreringsyta som ska få tydligare ägare
+- använd `UiKit` för generiska, neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap
+- använd `Kernel` för små stabila gemensamma typer när de har verkligt systemövergripande ansvar
+- använd `Infrastructure` för neutral teknisk implementation som delas av flera moduler
 - `Shared/DTOs` är befintlig intern/legacy-modell och inte en defaultplats för ny kod
 - externa integrations-DTO:er ska ligga i modulen som äger integrationen
 
