@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Authentication;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Web;
 
 namespace BlazorServer.Tests.AppShell.Authentication;
@@ -28,5 +30,77 @@ public class CurrentUserSessionTests
             Assert.That(currentUser.Email, Is.EqualTo("ada@example.com"));
             Assert.That(principal.GetOrganizationId(), Is.EqualTo("org-1"));
         });
+    }
+
+    [Test]
+    public async Task CurrentUserSessionUsesProfileLookupForAvatar()
+    {
+        var authProvider = new FixedAuthenticationStateProvider(new ClaimsPrincipal(new ClaimsIdentity(
+        [
+            new Claim(ClaimConstants.ObjectId, "user-1"),
+            new Claim(ClaimConstants.TenantId, "org-1"),
+            new Claim(ClaimTypes.Name, "Ada Lovelace"),
+            new Claim(CurrentUserSessionClaimTypes.Email, "ada@example.com")
+        ], "test")));
+        var profileLookup = new FixedProfileLookup(new SessionUser(
+            "user-1",
+            "Ada Lovelace",
+            "ada@example.com",
+            "photo-base64"));
+        using var session = new CurrentUserSession(
+            authProvider,
+            new TestNavigationManager(),
+            profileLookup);
+
+        var user = await session.UpdateUserAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(user?.Name, Is.EqualTo("Ada Lovelace"));
+            Assert.That(user?.AvatarBase64, Is.EqualTo("photo-base64"));
+        });
+    }
+
+    private sealed class FixedAuthenticationStateProvider : AuthenticationStateProvider
+    {
+        private readonly AuthenticationState state;
+
+        public FixedAuthenticationStateProvider(ClaimsPrincipal principal)
+        {
+            state = new AuthenticationState(principal);
+        }
+
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            return Task.FromResult(state);
+        }
+    }
+
+    private sealed class FixedProfileLookup : ICurrentUserProfileLookup
+    {
+        private readonly SessionUser user;
+
+        public FixedProfileLookup(SessionUser user)
+        {
+            this.user = user;
+        }
+
+        public Task<SessionUser> GetProfileAsync(CurrentUser currentUser)
+        {
+            return Task.FromResult(user);
+        }
+    }
+
+    private sealed class TestNavigationManager : NavigationManager
+    {
+        public TestNavigationManager()
+        {
+            Initialize("https://example.test/", "https://example.test/");
+        }
+
+        protected override void NavigateToCore(string uri, NavigationOptions options)
+        {
+            Uri = ToAbsoluteUri(uri).ToString();
+        }
     }
 }

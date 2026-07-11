@@ -8,14 +8,18 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
 {
     private readonly AuthenticationStateProvider _authProvider;
     private readonly NavigationManager _navigationManager;
+    private readonly ICurrentUserProfileLookup _profileLookup;
     private AuthenticationState? _cachedAuthState;
+    private SessionUser? _cachedUser;
 
     public CurrentUserSession(
         AuthenticationStateProvider authProvider,
-        NavigationManager navigationManager)
+        NavigationManager navigationManager,
+        ICurrentUserProfileLookup profileLookup)
     {
         _authProvider = authProvider;
         _navigationManager = navigationManager;
+        _profileLookup = profileLookup;
         _authProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
     }
 
@@ -27,9 +31,7 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
 
     public CurrentUser? CurrentUser => _cachedAuthState?.User.ToCurrentUser();
 
-    public SessionUser? User => CurrentUser is null
-        ? null
-        : new SessionUser(CurrentUser.UserId, CurrentUser.DisplayName, CurrentUser.Email, null);
+    public SessionUser? User => _cachedUser;
 
     public IReadOnlyList<Claim> Claims => _cachedAuthState?.User.Claims.ToList() ?? new List<Claim>();
 
@@ -72,7 +74,10 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
         _cachedAuthState = await task;
         if (!IsAuthenticated)
         {
+            _cachedUser = null;
             return;
         }
+
+        _cachedUser = CurrentUser is null ? null : await _profileLookup.GetProfileAsync(CurrentUser);
     }
 }

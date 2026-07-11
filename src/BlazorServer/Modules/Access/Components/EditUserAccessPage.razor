@@ -4,7 +4,7 @@
 <SettingsPageBase>
 
     <SettingsSection Title="@Localizer["Användare"]">
-        <UserAvatarWithName Name="User?.Name" AvatarBase64="User?.AvatarBase64"/>
+        <UserAvatarWithName Name="@User?.Name" AvatarBase64="@User?.AvatarBase64"/>
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadUserDataAsync">

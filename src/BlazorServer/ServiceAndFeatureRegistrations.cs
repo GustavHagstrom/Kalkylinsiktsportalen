@@ -43,6 +43,7 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped<MockCurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
+            builder.Services.AddSingleton<ICurrentUserProfileLookup, ClaimsCurrentUserProfileLookup>();
             builder.Services.AddSingleton<MockedAuthSession>();
             builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
             builder.Services.AddSingleton<IApplicationAdminLookup, MockApplicationAdminLookup>();
@@ -56,6 +57,7 @@ public static class ServiceAndFeatureRegistrations
             builder.Services.AddScoped<CurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<CurrentUserSession>());
+            builder.Services.AddTransient<ICurrentUserProfileLookup, GraphCurrentUserProfileLookup>();
             builder.Services.AddSingleton<IApplicationAdminCache, MemoryApplicationAdminCache>();
             builder.Services.AddTransient<IApplicationAdminLookup, GraphApplicationAdminLookup>();
             builder.Services.AddGraphAccessDirectory();

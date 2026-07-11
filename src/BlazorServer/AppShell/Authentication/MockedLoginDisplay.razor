@@ -2,7 +2,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <UserAvatar Name="user?.Name" AvatarBase64="user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@user?.Name" AvatarBase64="@user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
