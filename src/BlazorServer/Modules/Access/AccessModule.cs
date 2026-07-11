@@ -23,7 +23,7 @@ public static class AccessModule
         services.AddMongoCollection<MongoFunctionalAccessGrant>("FunctionalAccessGrants");
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
-        services.AddTransient<IClaimsTransformation, AccessClaimsTransformation>();
+        services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddTransient<FunctionalAccessGrantHandler>();
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
         services.AddTransient<ViewAccessGrantHandler>();

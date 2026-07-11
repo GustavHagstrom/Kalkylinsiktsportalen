@@ -1,21 +1,23 @@
-using BlazorServer.Modules.Access.Domain;
+using BlazorServer.AppShell.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using BlazorServer.AppShell.Authentication;
 
 namespace BlazorServer.Modules.Access.Authentication;
 
-public class AccessClaimsTransformation : IClaimsTransformation
+public class ClaimsTransformation : IClaimsTransformation
 {
     private readonly FunctionalAccessGrantHandler functionalAccessGrants;
+    private readonly IApplicationAdminLookup _applicationAdminLookup;
     private readonly IAccessClaimsCache _cache;
 
-    public AccessClaimsTransformation(
+    public ClaimsTransformation(
         FunctionalAccessGrantHandler functionalAccessGrants,
+        IApplicationAdminLookup applicationAdminLookup,
         IAccessClaimsCache cache)
     {
         this.functionalAccessGrants = functionalAccessGrants;
+        _applicationAdminLookup = applicationAdminLookup;
         _cache = cache;
     }
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -29,19 +31,11 @@ public class AccessClaimsTransformation : IClaimsTransformation
         if (!_cache.TryGetAccessClaims(userId, orgId, out List<string>? accessClaimValues))
         {
             _cache.ClearAccessClaims(userId, orgId);
-            var accessClaims = await functionalAccessGrants.HandleAsync(
-                new GetEffectiveFunctionalAccessClaimsQuery(userId, groupIds, orgId));
-            foreach (var claim in accessClaims)
-            {
-                if (!principal.HasClaim(claim.ValueType, claim.Value))
-                {
-                    ((ClaimsIdentity)principal.Identity!).AddClaim(claim);
-                }
-            }
-            var values = accessClaims.Select(c => c.Value).ToList();
-            _cache.SetAccessClaims(userId, orgId, values);
+            var accessClaims = await functionalAccessGrants.HandleAsync(new GetEffectiveFunctionalAccessClaimsQuery(userId, groupIds, orgId));
+            accessClaimValues = [.. accessClaims.Select(x => x.Value)];
+            _cache.SetAccessClaims(userId, orgId, accessClaimValues);
         }
-        else if (accessClaimValues is not null)
+        if (accessClaimValues is not null)
         {
             foreach (var value in accessClaimValues)
             {
@@ -50,7 +44,12 @@ public class AccessClaimsTransformation : IClaimsTransformation
                     ((ClaimsIdentity)principal.Identity!).AddClaim(new AccessClaim(value));
                 }
             }
-        }        
+        }
+        var isAdmin = await _applicationAdminLookup.IsApplicationAdminAsync(userId, orgId);
+        if (isAdmin && !principal.HasClaim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue))
+        {
+            ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue));
+        }
         return principal;
     }
     

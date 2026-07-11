@@ -1,6 +1,5 @@
 using BlazorServer;
 using BlazorServer.AppShell;
-using BlazorServer.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
@@ -52,6 +51,5 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
         }
     }
 });
-app.UseClaimsLoader();
 
 app.Run();
