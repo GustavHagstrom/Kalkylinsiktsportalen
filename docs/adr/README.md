@@ -65,7 +65,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 ### Global
 
 - [0001 - Use feature slices with target modules](global/0001-use-feature-slices-with-target-modules.md)
-- [0002 - Limit Shared to stable cross-cutting building blocks](global/0002-limit-shared-to-stable-cross-cutting-building-blocks.md)
+- [0002 - Limit Shared to stable cross-cutting building blocks](global/0002-limit-shared-to-stable-cross-cutting-building-blocks.md) - superseded by ADR-0042; historical context only
 - [0018 - Split active state building from report rendering](global/0018-split-active-state-building-from-report-rendering.md)
 - [0019 - Pass view change settings to Projects](global/0019-pass-view-change-settings-to-projects.md)
 - [0027 - Keep domain models persistence-independent](global/0027-keep-domain-models-persistence-independent.md)
@@ -76,6 +76,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0039 - Keep persistence APIs behind store contracts](global/0039-keep-persistence-apis-behind-store-contracts.md)
 - [0040 - Use static module registration functions](global/0040-use-static-module-registration-functions.md)
 - [0041 - Use access claim registry](global/0041-use-access-claim-registry.md)
+- [0042 - Remove Shared and establish explicit ownership](global/0042-remove-shared-and-establish-explicit-ownership.md)
 
 ### Bidcon
 
