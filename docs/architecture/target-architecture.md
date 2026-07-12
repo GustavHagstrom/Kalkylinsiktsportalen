@@ -1,14 +1,10 @@
-﻿# Målarkitektur
+# Målarkitektur
 
 ## Syfte
 
 Det här dokumentet beskriver den övergripande målarkitekturen för Kalkylinsiktsportalen.
 
-Det fokuserar på arkitekturriktning, modulgränser, beroenderiktningar och ansvarsfördelning mellan större delar av systemet.
-
-Det här dokumentet äger inte den detaljerade domänmodellen. Aktuella domänbegrepp, aggregates, relationer, invariants och modulnära policyer ägs av `docs/domain/*.md`. Långlivade och svårbackade trade-offs dokumenteras i ADR:er.
-
-Det här dokumentet äger inte heller lokal setup eller dagliga arbetsregler. Praktiska kodriktlinjer och lokalt arbetssätt ägs av [../development.md](../development.md).
+Det fokuserar på arkitekturriktning, modulgränser, beroenderiktningar och ansvarsfördelning mellan större delar av systemet. Detaljerad domänmodell ägs av `docs/domain/*.md`, praktiska kodregler av [../development.md](../development.md) och långlivade trade-offs av ADR:er.
 
 Den sammanfattande riktningen är:
 
@@ -16,116 +12,79 @@ Den sammanfattande riktningen är:
 - vertical slices som huvudsaklig arbetsform
 - pragmatisk CQRS för nya feature slices
 - clean architecture som beroendeprincip
-- DDD-light för domänmodellering där det ger verkligt värde
+- DDD-light där domänmodellering ger verkligt värde
 
-Målbilden utgår från produktinriktningen:
-
-1. rapportportal
-2. projekt- och versionshantering
-3. kalkylutforskare
-
-Blazor Server används fortsatt som första UI-host, men backend, kontrakt och affärslogik ska kunna bära framtida klienter som Blazor WASM eller React.
+Blazor Server används fortsatt som första UI-host, men backend, kontrakt och affärslogik ska kunna bära framtida klienter.
 
 ## Arkitekturprinciper
 
 ### 1. Modulär Monolit Först
 
-Systemet utvecklas som en modulär monolit innan det eventuellt delas upp i fler deploybara delar.
-
-Det innebär att:
-
-- lösningen kan köras som en applikation
-- koden organiseras i tydliga moduler
-- modulgränser respekteras även innan de är separata projekt
-- externa integrationer och persistence ligger bakom avsiktliga kontrakt
+Systemet utvecklas som en applikation med tydliga interna moduler. Modulgränser ska respekteras även innan modulerna är separata projekt. Externa integrationer och persistence ligger bakom avsiktliga kontrakt.
 
 ### 2. Produktområden Och Use Cases Före Global Lagerstruktur
 
-Lösningen ska i första hand organiseras runt produktområden och användningsfall, inte runt en global teknisk lagerindelning.
+Lösningen organiseras runt produktområden och användningsfall, inte runt en global teknisk lagerindelning. Moduler får interna lager som `Domain`, `Infrastructure`, `Features` och `Components` när de löser ett konkret behov.
 
-Moduler får ha interna lager när det hjälper, till exempel `Domain`, `Application`, `Infrastructure` och `Components`, men tomma eller symmetriska lager ska inte skapas utan behov.
-
-Vertical slices är den praktiska arbetsformen för ny produktlogik. Clean architecture används som riktning för beroenden, inte som krav på en global mappstruktur.
-
-Pragmatisk CQRS är den föredragna formen för nya feature slices: kommandon uttrycker förändringsintention, queries uttrycker läsintention, och handlers utgör en tydlig testyta utan att lösningen för den skull behöver ett tungt mediator- eller pipeline-ramverk.
+Vertical slices är den praktiska arbetsformen. Pragmatisk CQRS används för att skilja förändrings- och läsintention utan krav på ett tungt mediator- eller pipeline-ramverk.
 
 ### 3. UI Är Utbytbart
 
-Blazor-komponenter ska inte vara platsen där central produktlogik bor.
-
-UI ska främst:
-
-- rendera data
-- hantera användarinteraktion
-- anropa use cases
-- visa laddning, fel och resultat
-
-Produktlogik ska kunna återanvändas av flera klienter, tester och andra gränssnitt.
+Blazor-komponenter ska främst rendera data, hantera interaktion, anropa use cases och visa resultat. Central produktlogik ska kunna återanvändas av tester, endpoints och framtida klienter.
 
 ### 4. Tydliga Ägargränser
 
-Varje viktig del av produktlogiken ska ha en tydlig modulägare.
+Varje production-typ ska ha en explicit ägare. `Shared` är avvecklat och får inte återintroduceras som generell samlingsplats.
 
-Tvärgående kod ska hållas liten och stabil. `Shared` är inte en defaultplats för otydligt ägarskap.
-
-Modulernas detaljerade modeller och policyer ska beskrivas i domändokumenten, medan detta dokument bara anger ansvarsfördelningen på hög nivå.
+Tvärgående kod ska ägas av en av de avsiktliga top-level-gränserna: `Kernel`, `AppShell`, `UiKit` eller `Infrastructure`. Produktnära kod ägs av en modul.
 
 ### 5. Organisation Är Hård Systemgräns
 
-Organisationen är den grundläggande tenant-gränsen i systemet.
-
-Data, rättigheter, integrationer och konfiguration ska utformas så att organisationsgränsen förblir tydlig och genomgående.
+Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integrationer och konfiguration ska utformas så att organisationsgränsen förblir tydlig.
 
 ## Målstruktur
 
-Den långsiktiga riktningen är tydliga produktmoduler med avsiktliga kontrakt mellan sig.
-
-App shell, neutrala UI-primitiver, teknisk infrastruktur och stabil kärna är egna top-level boundaries bredvid produktmodulerna.
-
 ```text
 AppShell/
-  Äger konkret applikationsram, till exempel appbar-navigation, layouts och Settings Hub.
+  Äger host- och portalansvar: composition-kontrakt, layout, navigation,
+  shell-pages, loginpresentation, aktuell användarsession och portalpreferenser.
 
-Modules/
-  Äger produktförmågor och kan bidra metadata till app shell via composition-kontrakt.
-
-UiKit/
-  Äger neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap.
+Infrastructure/
+  Äger neutral teknisk infrastruktur, till exempel Mongo-klient,
+  databas-provider, serializers och conventions.
 
 Kernel/
   Äger små, stabila och teknikneutrala systemprimitiver.
 
-Infrastructure/
-  Äger neutral teknisk infrastruktur, till exempel klientskapande och conventions.
+Modules/
+  Äger produktförmågor, use cases, persistence, integrationer,
+  feature-UI och avsiktliga publika kontrakt.
+
+UiKit/
+  Äger neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap.
 ```
 
-Moduler ska inte bero på kod i `AppShell`. När en modul behöver synas i app shell ska den bidra metadata via AppShells composition-kontrakt, till exempel en settings area. App shell konsumerar sedan metadata och renderar den konkreta shell-ytan.
+`Kernel` får inte bero på `Modules`, `AppShell`, `UiKit` eller `Infrastructure`.
 
-Om både app shell och moduler behöver samma UI-primitiv ska den primitiva bara ligga i `UiKit` när den är neutral och fri från produktstruktur. Konkreta shell-routes, shell-bootstrap och hubbflöden ska ligga i `AppShell`, även när flera delar av applikationen relaterar till dem.
+Moduler ska inte bero på implementation i `AppShell`. När en modul behöver synas i shell bidrar den metadata via AppShells composition-kontrakt. AppShell äger registreringsmekanismen; respektive modul äger betydelsen i sitt bidrag.
 
-Målmodulerna är:
+En UI-komponent hör bara hemma i `UiKit` när den är neutral och antingen har flera verkliga konsumenter eller är en avsiktlig design-systemprimitiv. Feature-specifika komponenter stannar i ägande modul.
 
-- `Projects`
-- `Reports`
-- `Bidcon`
-- `Access`
-- `Organizations`
+## Målmoduler
 
-Detta dokument äger modulernas ansvar på översiktsnivå:
+- `Projects` äger projekt, versioner, snapshots och aktiv renderbar kalkylstate.
+- `Reports` äger views, rapportstruktur, rendering och export.
+- `Bidcon` äger extern Bidcon-integration, credentials, import och integrations-DTO:er.
+- `Access` äger portalclaims, authorization policies, application-admin-semantik, grants och accessbeslut.
+- `Organizations` äger tenant-kontext och organisationsinställningar.
 
-- `Projects` äger projekt, versioner, snapshots och aktiv renderbar kalkylstate
-- `Reports` äger views, rapportstruktur, rendering och export
-- `Bidcon` äger extern integration, credentials och import
-- `Access` äger funktions- och view-rättigheter
-- `Organizations` äger tenant-kontext och organisationsinställningar
+Den detaljerade modellen inom varje modul beskrivs i `docs/domain/*`.
 
-Den detaljerade modellen inom varje modul ska beskrivas i `docs/domain/*`.
+## Övergång Från Äldre Feature-Struktur
 
-### Övergång Från Äldre Feature-Struktur
+Äldre produktkod kan fortfarande ligga i `Features/*`. För små ändringar kan det vara rätt att arbeta nära befintlig kod, men ny eller flyttad production-kod ska placeras hos en explicit ägare.
 
-Äldre produktkod kan fortfarande ligga i `Features/*` och `Shared/*`. För små ändringar är det ofta rätt att arbeta nära den befintliga koden, medan ny produktlogik bör röra sig mot målmodulerna ovan.
-
-Den praktiska arbetsregeln för när kod ska ligga kvar nära dagens feature och när den ska flyttas mot `Modules/*` ägs av [../development.md](../development.md).
+Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `BlazorServer.Shared`.
 
 | Äldre feature | Målmodul/riktning |
 |---|---|
@@ -137,93 +96,74 @@ Den praktiska arbetsregeln för när kod ska ligga kvar nära dagens feature och
 
 ## Gemensamma Byggblock
 
-Gemensamma byggblock ska hållas små, stabila och avsiktliga.
-
 ### Kernel
 
-Får innehålla små och stabila begrepp som används över modulgränser, till exempel identiteter och enkla kontraktstyper.
-
-Kernel ska vara litet och får inte bli en plats för produktflöden.
+Får innehålla små och stabila systemövergripande typer, till exempel starka identiteter och minimala CQRS-kontrakt. Att en typ används av två moduler är inte i sig skäl att lägga den i Kernel.
 
 ### UiKit
 
-Får innehålla generella UI-primitiver utan produktspecifik affärslogik, modulkunskap, routeägarskap eller shellbeteende.
+Får innehålla generella UI-primitiver utan produktspecifik logik, modulkunskap, routeägarskap eller shellbeteende.
 
-### Gemensam Infrastruktur
+### Top-level Infrastructure
 
-Får innehålla teknisk implementation som delas av flera moduler, till exempel registrering, konfiguration och adapters.
+Får innehålla neutral teknisk implementation som flera ägare kan använda. Den får inte känna till modulernas entities, stores, collection names eller externa integrationsmodeller.
 
-Produktnära regler eller flöden ska inte placeras här bara för att de används från flera skärmar.
+Varje modul äger sin egen persistence-implementation, mappings, collections och registrering. Modulintern `Infrastructure` får bero på modulens egna kontrakt och på neutral top-level-infrastruktur.
 
-### Modulregistrering Och UI Composition
+## Modulregistrering Och UI Composition
 
-Nya målmoduler ska registreras explicit och bidra metadata till app shell genom neutrala composition-kontrakt.
+Målmoduler registreras explicit och bidrar metadata till AppShell genom composition-kontrakt. Den praktiska kodformen ägs av [../development.md](../development.md), och det historiska beslutet finns i [../adr/global/0040-use-static-module-registration-functions.md](../adr/global/0040-use-static-module-registration-functions.md).
 
-Den praktiska kodformen för modulregistrering ägs av [../development.md](../development.md). Det historiska trade-off-beslutet finns i [../adr/global/0040-use-static-module-registration-functions.md](../adr/global/0040-use-static-module-registration-functions.md).
+`AppRegistrationContext` samlar composition-bidrag för exempelvis navigation, settings-ytor samt registrering av claims och policies. AppShell äger composition-mekanismen. Access äger authorization-vokabulären och tolkningen av claims, policies och adminrättigheter.
 
-`AppRegistrationContext` är den gemensamma samlingspunkten för modulens bidrag till:
+Navigation och settings areas registreras som data, inte som godtyckliga komponenttyper.
 
-- dependency injection
-- app shell och settings-UI composition
-- access claims
-- authorization policies
+## Authentication Och Authorization
 
-Äldre `IFeature`-registrering får finnas kvar under migrationen, men är en separat kompatibilitetsväg och ska inte vara modellen för ny modulär kod.
+Ansvar delas vid en tydlig gräns:
 
-Navigation i app shell och settings areas ska registreras som data, inte som godtyckliga komponenttyper.
+- AppShell mappar generell extern identitet till en smal aktuell användarsession och äger loginpresentation.
+- Access tolkar portalclaims, policies, application-admin och accessbeslut.
+- Featurekod konsumerar sessions- och authorization-kontrakt i stället för att tolka `ClaimsPrincipal` direkt.
+- Råa Entra- och Microsoft Graph-modeller hålls privata i integrationsadaptern.
 
 ## Beroenderiktningar
-
-Rekommenderad riktning:
 
 ```text
 Web
   -> Modules
   -> AppShell
   -> UiKit
+  -> Infrastructure
 
 Modules
+  -> UiKit
+  -> Kernel
+  -> neutral Infrastructure
+  -> avsiktliga publika modulkontrakt
+
+AppShell
   -> UiKit
   -> Kernel
   -> avsiktliga publika modulkontrakt
 
 Infrastructure
-  -> modulkontrakt
+  -> Kernel, vid behov
   -> externa paket
 ```
 
-Moduler ska undvika att nå in i varandras interna implementationer.
-
-När en modul behöver något från en annan modul ska det ske via den andra modulens publika interface under `Modules/{Module}/Public`, inte via interna use cases, persistens- eller UI-struktur. Den praktiska arbetsregeln ägs av [../development.md](../development.md).
+Moduler får inte nå in i varandras interna use cases, persistence, integrationer eller UI. Cross-module-interaktion sker genom den ägande modulens avsiktliga yta under `Modules/{Module}/Public`.
 
 ## Frontendstrategi
 
-### Nu: Blazor Server
-
-Blazor Server behålls som snabbaste utvecklingsmiljö under den nuvarande fasen.
-
-Komponenterna kan ligga kvar i Blazor-projektet under övergången, men de ska stegvis göras tunnare.
-
-### Senare: API Och Utbytbar Frontend
-
-När produktmodellen stabiliserats bör use cases kunna exponeras via HTTP API eller motsvarande tydliga backend-gränssnitt.
-
-Det ska möjliggöra framtida klienter som:
-
-- Blazor WASM
-- React
-- andra klienter
-
-De praktiska kodreglerna för hur vi stödjer detta redan nu hör hemma i [../development.md](../development.md).
+Blazor Server behålls som snabbaste utvecklingsmiljö i nuvarande fas. Komponenterna ska stegvis göras tunnare och use cases ska kunna exponeras genom HTTP API eller andra adapters när produktmodellen stabiliserats.
 
 ## Öppna Arkitekturfrågor
 
 - när lösningen, om någonsin, bör delas i fler deploybara delar
-- hur långt modulernas interna projektuppdelning ska drivas under migreringen
-- vilka backend-gränssnitt som först bör exponeras för framtida alternativa klienter
+- hur långt modulernas interna projektuppdelning ska drivas
+- vilka backend-gränssnitt som först bör exponeras för alternativa klienter
 
 ## Slutsats
 
-Bygg vidare som Blazor Server nu, men strukturera koden som en modulär monolit med tydliga moduler, use cases och kontrakt.
-
-Det ger snabb utveckling idag och en tydligare väg mot en mer utbytbar frontend och renare ansvarsfördelning över tid.
+Bygg vidare som Blazor Server, men håll varje typ hos en explicit ägare och skydda modulgränser med små publika kontrakt. Det ger snabb utveckling idag och en tydlig väg mot utbytbara klienter och renare ansvarsfördelning.
