@@ -1,7 +1,6 @@
 using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Authentication;
-using BlazorServer.Modules.Access.Authentication.Mock;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
@@ -18,18 +17,8 @@ public static class AccessModule
 {
     public static IServiceCollection AddAccessModule(
         this IServiceCollection services,
-        AppRegistrationContext registrationContext,
-        IConfiguration configuration)
+        AppRegistrationContext registrationContext)
     {
-        if (configuration["Auth:Mode"] == "Mock")
-        {
-            services.AddSingleton<MockedAuthSession>();
-            services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
-        }
-        else if (configuration["Auth:Mode"] == "Graph")
-        {
-
-        }
         services.AddMemoryCache();
         services.AddFunctionalAccessGrantCollection();
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();

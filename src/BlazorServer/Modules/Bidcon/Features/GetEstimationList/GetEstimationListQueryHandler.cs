@@ -1,6 +1,5 @@
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Kernel.CQRS;
-using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 

@@ -2,7 +2,7 @@
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 
-namespace BlazorServer.Shared.Services.Authentication;
+namespace BlazorServer.AppShell.Authentication;
 /// <summary>
 /// Consumed by MSAL
 /// </summary>

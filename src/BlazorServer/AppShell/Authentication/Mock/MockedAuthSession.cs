@@ -1,6 +1,6 @@
 using BlazorServer.AppShell.Authentication;
 
-namespace BlazorServer.Modules.Access.Authentication.Mock;
+namespace BlazorServer.AppShell.Authentication.Mock;
 
 public class MockedAuthSession
 {

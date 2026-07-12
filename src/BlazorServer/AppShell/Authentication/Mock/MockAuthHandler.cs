@@ -1,11 +1,12 @@
 using BlazorServer.AppShell.Authentication;
+using BlazorServer.Modules.Access.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
-namespace BlazorServer.Modules.Access.Authentication.Mock;
+namespace BlazorServer.AppShell.Authentication.Mock;
 
 public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
