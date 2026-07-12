@@ -1,5 +1,6 @@
-﻿@page "/settings/bidcon"
+@page "/settings/bidcon"
 @attribute [Authorize(Policy = "ApiPolicy")]
+@using BlazorServer.Kernel.Validation
 @using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<BidconSettingsPage> Localizer
 
@@ -60,14 +61,26 @@
                 new OrganizationId(CurrentUserSession.OrganizationId)),
             CancellationToken.None);
 
-        if (!result.IsSuccess || result.OrganizationId is null)
+        if (result is Features.GetBidconCredentials.InvalidGetBidconCredentialsRequest invalidRequest)
         {
+            ShowValidationErrors(invalidRequest.ValidationErrors);
             return;
         }
 
-        currentKey = result.ApiKey ?? string.Empty;
-        currentSecret = result.ApiSecret ?? string.Empty;
-        isConfigured = result.IsConfigured;
+        if (result is Features.GetBidconCredentials.BidconCredentialsFound found)
+        {
+            currentKey = found.ApiKey;
+            currentSecret = found.ApiSecret;
+            isConfigured = true;
+            return;
+        }
+
+        if (result is Features.GetBidconCredentials.BidconCredentialsNotConfigured notConfigured)
+        {
+            currentKey = notConfigured.ApiKey;
+            currentSecret = notConfigured.ApiSecret;
+            isConfigured = false;
+        }
     }
 
     private async Task SaveAsync()
@@ -87,10 +100,16 @@
                 newSecret),
             CancellationToken.None);
 
-        if (!result.IsSuccess)
+        if (result is Features.UpsertBidconCredentials.InvalidUpsertBidconCredentialsRequest invalidRequest)
+        {
+            ShowValidationErrors(invalidRequest.ValidationErrors);
+            return;
+        }
+
+        if (result is Features.UpsertBidconCredentials.BidconCredentialsVerificationFailed verificationFailed)
         {
             statusColor = Color.Error;
-            statusMessage = string.Join(" ", result.Errors.Select(error => error.Message));
+            statusMessage = verificationFailed.Message;
             return;
         }
 
@@ -115,10 +134,9 @@
             new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(organizationId),
             CancellationToken.None);
 
-        if (!result.IsSuccess)
+        if (result is Features.RemoveBidconCredentials.InvalidRemoveBidconCredentialsRequest invalidRequest)
         {
-            statusColor = Color.Error;
-            statusMessage = string.Join(" ", result.Errors.Select(error => error.Message));
+            ShowValidationErrors(invalidRequest.ValidationErrors);
             return;
         }
 
@@ -129,5 +147,11 @@
         isConfigured = false;
         statusColor = Color.Success;
         statusMessage = Localizer["Borttaget."];
+    }
+
+    private void ShowValidationErrors(IReadOnlyList<ValidationError> validationErrors)
+    {
+        statusColor = Color.Error;
+        statusMessage = string.Join(" ", validationErrors.Select(error => error.Message));
     }
 }

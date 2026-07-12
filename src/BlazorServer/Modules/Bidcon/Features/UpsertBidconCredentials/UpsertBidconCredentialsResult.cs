@@ -3,18 +3,17 @@ using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 
-public sealed record UpsertBidconCredentialsResult(
-    OrganizationId? OrganizationId,
-    bool IsConfigured,
-    IReadOnlyList<ValidationError> Errors) : IValidationResult
+public abstract record UpsertBidconCredentialsResult;
+
+public sealed record BidconCredentialsSaved(
+    OrganizationId OrganizationId) : UpsertBidconCredentialsResult
 {
-    public bool IsValid => Errors.Count == 0;
-
-    public bool IsSuccess => IsValid;
-
-    public static UpsertBidconCredentialsResult Success(OrganizationId organizationId, bool isConfigured)
-        => new(organizationId, isConfigured, Array.Empty<ValidationError>());
-
-    public static UpsertBidconCredentialsResult Invalid(params ValidationError[] errors)
-        => new(null, false, errors);
+    public bool WasSaved => true;
 }
+
+public sealed record BidconCredentialsVerificationFailed(
+    OrganizationId OrganizationId,
+    string Message) : UpsertBidconCredentialsResult;
+
+public sealed record InvalidUpsertBidconCredentialsRequest(
+    IReadOnlyList<ValidationError> ValidationErrors) : UpsertBidconCredentialsResult;

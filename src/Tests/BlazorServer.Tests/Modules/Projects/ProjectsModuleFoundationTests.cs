@@ -25,10 +25,11 @@ public class ProjectsModuleFoundationTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.ProjectId, Is.EqualTo(projectId));
-            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.Name, Is.EqualTo("Kvarteret Linden"));
+            Assert.That(result, Is.TypeOf<ProjectCreated>());
+            var created = (ProjectCreated)result;
+            Assert.That(created.ProjectId, Is.EqualTo(projectId));
+            Assert.That(created.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(created.Name, Is.EqualTo("Kvarteret Linden"));
         });
 
         var storedProject = await store.GetAsync(projectId, CancellationToken.None);
@@ -57,8 +58,9 @@ public class ProjectsModuleFoundationTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
+            Assert.That(result, Is.TypeOf<InvalidCreateProjectRequest>());
+            var invalidRequest = (InvalidCreateProjectRequest)result;
+            Assert.That(invalidRequest.ValidationErrors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "project.name.required" &&
                 error.Field == nameof(CreateProjectCommand.Name)));
         });

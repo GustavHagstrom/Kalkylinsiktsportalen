@@ -2,20 +2,21 @@ using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 
-public sealed record GetEstimationListResult(
-    IReadOnlyList<GetEstimationListItem> Estimations,
-    IReadOnlyList<ValidationError> Errors) : IValidationResult
+public abstract record GetEstimationListResult;
+
+public sealed record EstimationListLoaded(
+    IReadOnlyList<GetEstimationListItem> Estimations) : GetEstimationListResult
 {
-    public bool IsValid => Errors.Count == 0;
-
-    public bool IsSuccess => IsValid;
-
-    public static GetEstimationListResult Success(IReadOnlyList<GetEstimationListItem> estimations)
-        => new(estimations, Array.Empty<ValidationError>());
-
-    public static GetEstimationListResult Invalid(params ValidationError[] errors)
-        => new(Array.Empty<GetEstimationListItem>(), errors);
+    public bool WasLoaded => true;
 }
+
+public sealed record InvalidGetEstimationListRequest(
+    IReadOnlyList<ValidationError> ValidationErrors) : GetEstimationListResult;
+
+public sealed record EstimationListBidconUnavailable(
+    string ErrorCode,
+    string ErrorField,
+    string ErrorMessage) : GetEstimationListResult;
 
 public sealed record GetEstimationListItem(
     string Id,

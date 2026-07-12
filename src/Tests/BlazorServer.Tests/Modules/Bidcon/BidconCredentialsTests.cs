@@ -22,11 +22,12 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.IsConfigured, Is.False);
-            Assert.That(result.ApiKey, Is.Empty);
-            Assert.That(result.ApiSecret, Is.Empty);
+            Assert.That(result, Is.TypeOf<BidconCredentialsNotConfigured>());
+            var notConfigured = (BidconCredentialsNotConfigured)result;
+            Assert.That(notConfigured.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(notConfigured.IsConfigured, Is.False);
+            Assert.That(notConfigured.ApiKey, Is.Empty);
+            Assert.That(notConfigured.ApiSecret, Is.Empty);
         });
     }
 
@@ -50,11 +51,12 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.IsConfigured, Is.True);
-            Assert.That(result.ApiKey, Is.EqualTo("****ey-1"));
-            Assert.That(result.ApiSecret, Is.EqualTo("****et-1"));
+            Assert.That(result, Is.TypeOf<BidconCredentialsFound>());
+            var found = (BidconCredentialsFound)result;
+            Assert.That(found.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(found.IsConfigured, Is.True);
+            Assert.That(found.ApiKey, Is.EqualTo("****ey-1"));
+            Assert.That(found.ApiSecret, Is.EqualTo("****et-1"));
         });
     }
 
@@ -70,8 +72,9 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
+            Assert.That(result, Is.TypeOf<InvalidGetBidconCredentialsRequest>());
+            var invalidRequest = (InvalidGetBidconCredentialsRequest)result;
+            Assert.That(invalidRequest.ValidationErrors, Has.One.Matches<ValidationError>(error =>
                 error.Code == "bidcon.credentials.organization.required" &&
                 error.Field == nameof(GetBidconCredentialsQuery.OrganizationId)));
             Assert.That(store.WasRead, Is.False);
@@ -93,9 +96,10 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.IsConfigured, Is.True);
+            Assert.That(result, Is.TypeOf<BidconCredentialsSaved>());
+            var saved = (BidconCredentialsSaved)result;
+            Assert.That(saved.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(saved.WasSaved, Is.True);
             Assert.That(store.SavedCredentials, Is.Not.Null);
             Assert.That(store.SavedCredentials!.OrganizationId, Is.EqualTo(organizationId.Value.ToString()));
             Assert.That(store.SavedCredentials.ApiKey, Is.EqualTo("key-1"));
@@ -131,10 +135,10 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
-                error.Code == "bidcon.credentials.verification.failed" &&
-                error.Field == nameof(UpsertBidconCredentialsCommand.ApiKey)));
+            Assert.That(result, Is.TypeOf<BidconCredentialsVerificationFailed>());
+            var verificationFailed = (BidconCredentialsVerificationFailed)result;
+            Assert.That(verificationFailed.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(verificationFailed.Message, Is.EqualTo("Bidcon credentials could not be verified."));
             Assert.That(store.SavedCredentials!.ApiKey, Is.EqualTo("old-key"));
             Assert.That(store.SavedCredentials.ApiSecret, Is.EqualTo("old-secret"));
             Assert.That(tokenCache.InvalidatedOrganizationId, Is.Null);
@@ -156,8 +160,9 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors.Select(error => error.Code), Is.EquivalentTo(new[]
+            Assert.That(result, Is.TypeOf<InvalidUpsertBidconCredentialsRequest>());
+            var invalidRequest = (InvalidUpsertBidconCredentialsRequest)result;
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Is.EquivalentTo(new[]
             {
                 "bidcon.credentials.organization.required",
                 "bidcon.credentials.apiKey.required",
@@ -188,9 +193,10 @@ public class BidconCredentialsTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.OrganizationId, Is.EqualTo(organizationId));
-            Assert.That(result.IsConfigured, Is.False);
+            Assert.That(result, Is.TypeOf<BidconCredentialsRemoved>());
+            var removed = (BidconCredentialsRemoved)result;
+            Assert.That(removed.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(removed.IsConfigured, Is.False);
             Assert.That(store.SavedCredentials, Is.Null);
             Assert.That(tokenCache.InvalidatedOrganizationId, Is.EqualTo(organizationId));
         });

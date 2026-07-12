@@ -29,10 +29,9 @@ public sealed class UpsertBidconCredentialsCommandHandler
         CancellationToken cancellationToken)
     {
         var errors = validator.Validate(command);
-
         if (errors.Count > 0)
         {
-            return UpsertBidconCredentialsResult.Invalid([.. errors]);
+            return new InvalidUpsertBidconCredentialsRequest(errors);
         }
 
         var credentials = new BidconApiCredentials
@@ -46,16 +45,14 @@ public sealed class UpsertBidconCredentialsCommandHandler
 
         if (!isVerified)
         {
-            return UpsertBidconCredentialsResult.Invalid(
-                new ValidationError(
-                    "bidcon.credentials.verification.failed",
-                    nameof(UpsertBidconCredentialsCommand.ApiKey),
-                    "Bidcon credentials could not be verified."));
+            return new BidconCredentialsVerificationFailed(
+                command.OrganizationId,
+                "Bidcon credentials could not be verified.");
         }
 
         await credentialsStore.UpsertAsync(credentials);
         accessTokenCache.Invalidate(command.OrganizationId);
 
-        return UpsertBidconCredentialsResult.Success(command.OrganizationId, true);
+        return new BidconCredentialsSaved(command.OrganizationId);
     }
 }

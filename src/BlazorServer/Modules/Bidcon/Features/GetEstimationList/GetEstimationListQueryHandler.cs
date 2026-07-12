@@ -17,10 +17,9 @@ internal sealed class GetEstimationListQueryHandler(
         CancellationToken cancellationToken)
     {
         var errors = _validator.Validate(query);
-
         if (errors.Count > 0)
         {
-            return GetEstimationListResult.Invalid([.. errors]);
+            return new InvalidGetEstimationListRequest(errors);
         }
 
         try
@@ -30,7 +29,7 @@ internal sealed class GetEstimationListQueryHandler(
                 query.OrganizationId,
                 cancellationToken);
 
-            return GetEstimationListResult.Success(
+            return new EstimationListLoaded(
                 estimations
                     .Select(estimation => new GetEstimationListItem(
                         estimation.Id.ToString(),
@@ -40,8 +39,7 @@ internal sealed class GetEstimationListQueryHandler(
         }
         catch (BidconEstimationClientException exception)
         {
-            return GetEstimationListResult.Invalid(
-                new ValidationError(exception.Code, exception.Field, exception.Message));
+            return new EstimationListBidconUnavailable(exception.Code, exception.Field, exception.Message);
         }
     }
 }

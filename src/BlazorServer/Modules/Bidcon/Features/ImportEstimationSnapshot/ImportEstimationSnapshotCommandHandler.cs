@@ -24,10 +24,9 @@ internal sealed class ImportEstimationSnapshotCommandHandler(
         CancellationToken cancellationToken)
     {
         var errors = _validator.Validate(command);
-
         if (errors.Count > 0)
         {
-            return ImportEstimationSnapshotResult.Invalid([.. errors]);
+            return new InvalidImportEstimationSnapshotRequest(errors);
         }
 
         EstimationDetailsDto? estimationDetails;
@@ -41,17 +40,18 @@ internal sealed class ImportEstimationSnapshotCommandHandler(
         }
         catch (BidconEstimationClientException exception)
         {
-            return ImportEstimationSnapshotResult.Invalid(
-                new ValidationError(exception.Code, exception.Field, exception.Message));
+            return new ImportEstimationSnapshotBidconUnavailable(
+                exception.Code,
+                exception.Field,
+                exception.Message);
         }
 
         if (estimationDetails is null)
         {
-            return ImportEstimationSnapshotResult.Invalid(
-                new ValidationError(
-                    "bidcon.estimation.notFound",
-                    nameof(command.BidconEstimationId),
-                    "Bidcon estimation was not found."));
+            return new ImportEstimationSnapshotNotFound(
+                "bidcon.estimation.notFound",
+                nameof(command.BidconEstimationId),
+                "Bidcon estimation was not found.");
         }
 
         var importedAt = DateTimeOffset.UtcNow;
@@ -65,7 +65,7 @@ internal sealed class ImportEstimationSnapshotCommandHandler(
 
         await _estimationSnapshotStore.AddAsync(snapshot, cancellationToken);
 
-        return ImportEstimationSnapshotResult.Success(
+        return new EstimationSnapshotImported(
             snapshot.Id,
             snapshot.BidconEstimationId,
             snapshot.SourceEditDate,

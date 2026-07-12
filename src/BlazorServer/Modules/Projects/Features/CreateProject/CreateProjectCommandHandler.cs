@@ -23,10 +23,9 @@ public sealed class CreateProjectCommandHandler : ICommandHandler<CreateProjectC
         CancellationToken cancellationToken)
     {
         var errors = validator.Validate(command);
-
         if (errors.Count > 0)
         {
-            return CreateProjectResult.Invalid([.. errors]);
+            return new InvalidCreateProjectRequest(errors);
         }
 
         var project = Project.Create(
@@ -38,6 +37,6 @@ public sealed class CreateProjectCommandHandler : ICommandHandler<CreateProjectC
 
         await projectStore.AddAsync(project, cancellationToken);
 
-        return CreateProjectResult.Success(project.Id, project.OrganizationId, project.Name);
+        return new ProjectCreated(project.Id, project.OrganizationId, project.Name);
     }
 }

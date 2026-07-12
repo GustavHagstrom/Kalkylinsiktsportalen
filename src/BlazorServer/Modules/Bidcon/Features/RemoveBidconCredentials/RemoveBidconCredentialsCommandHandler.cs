@@ -1,6 +1,7 @@
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 
@@ -26,15 +27,14 @@ public sealed class RemoveBidconCredentialsCommandHandler
         CancellationToken cancellationToken)
     {
         var errors = validator.Validate(command);
-
         if (errors.Count > 0)
         {
-            return RemoveBidconCredentialsResult.Invalid([.. errors]);
+            return new InvalidRemoveBidconCredentialsRequest(errors);
         }
 
         await credentialsStore.DeleteAsync(command.OrganizationId.Value.ToString());
         accessTokenCache.Invalidate(command.OrganizationId);
 
-        return RemoveBidconCredentialsResult.Success(command.OrganizationId, false);
+        return new BidconCredentialsRemoved(command.OrganizationId);
     }
 }

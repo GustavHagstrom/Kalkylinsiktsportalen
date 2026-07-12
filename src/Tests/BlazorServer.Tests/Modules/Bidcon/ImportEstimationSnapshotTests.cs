@@ -29,18 +29,20 @@ public class ImportEstimationSnapshotTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.SnapshotId!.Value.IsEmpty, Is.False);
-            Assert.That(result.BidconEstimationId, Is.EqualTo(bidconEstimationId));
-            Assert.That(result.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
-            Assert.That(result.ImportedAt, Is.InRange(beforeImport, afterImport));
+            Assert.That(result, Is.TypeOf<EstimationSnapshotImported>());
+            var imported = (EstimationSnapshotImported)result;
+            Assert.That(imported.WasImported, Is.True);
+            Assert.That(imported.SnapshotId.Value.IsEmpty, Is.False);
+            Assert.That(imported.BidconEstimationId, Is.EqualTo(bidconEstimationId));
+            Assert.That(imported.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
+            Assert.That(imported.ImportedAt, Is.InRange(beforeImport, afterImport));
 
             Assert.That(store.SavedSnapshot, Is.Not.Null);
-            Assert.That(store.SavedSnapshot!.Id, Is.EqualTo(result.SnapshotId));
+            Assert.That(store.SavedSnapshot!.Id, Is.EqualTo(imported.SnapshotId));
             Assert.That(store.SavedSnapshot.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(store.SavedSnapshot.BidconEstimationId, Is.EqualTo(bidconEstimationId));
             Assert.That(store.SavedSnapshot.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
-            Assert.That(store.SavedSnapshot.ImportedAt, Is.EqualTo(result.ImportedAt));
+            Assert.That(store.SavedSnapshot.ImportedAt, Is.EqualTo(imported.ImportedAt));
             Assert.That(store.SavedSnapshot.Payload.Name, Is.EqualTo("Kvarteret Linden"));
             Assert.That(store.SavedSnapshot.Payload.Discipline, Is.EqualTo(DisciplineType.Bygg));
             Assert.That(store.SavedSnapshot.Payload.BidPhaseResources[0].Remark, Is.EqualTo("{replace:mark}"));
@@ -66,11 +68,10 @@ public class ImportEstimationSnapshotTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.SnapshotId, Is.Null);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
-                error.Code == "bidcon.estimation.notFound" &&
-                error.Field == nameof(ImportEstimationSnapshotCommand.BidconEstimationId)));
+            Assert.That(result, Is.TypeOf<ImportEstimationSnapshotNotFound>());
+            var notFound = (ImportEstimationSnapshotNotFound)result;
+            Assert.That(notFound.ErrorCode, Is.EqualTo("bidcon.estimation.notFound"));
+            Assert.That(notFound.ErrorField, Is.EqualTo(nameof(ImportEstimationSnapshotCommand.BidconEstimationId)));
             Assert.That(store.SavedSnapshot, Is.Null);
         });
     }
@@ -90,8 +91,9 @@ public class ImportEstimationSnapshotTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors.Select(error => error.Code), Is.EquivalentTo(
+            Assert.That(result, Is.TypeOf<InvalidImportEstimationSnapshotRequest>());
+            var invalidRequest = (InvalidImportEstimationSnapshotRequest)result;
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Is.EquivalentTo(
             [
                 "bidcon.import.organization.required",
                 "bidcon.import.estimation.required"
@@ -121,10 +123,10 @@ public class ImportEstimationSnapshotTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
-                error.Code == "bidcon.credentials.missing" &&
-                error.Field == nameof(ImportEstimationSnapshotCommand.OrganizationId)));
+            Assert.That(result, Is.TypeOf<ImportEstimationSnapshotBidconUnavailable>());
+            var unavailable = (ImportEstimationSnapshotBidconUnavailable)result;
+            Assert.That(unavailable.ErrorCode, Is.EqualTo("bidcon.credentials.missing"));
+            Assert.That(unavailable.ErrorField, Is.EqualTo(nameof(ImportEstimationSnapshotCommand.OrganizationId)));
             Assert.That(store.SavedSnapshot, Is.Null);
         });
     }

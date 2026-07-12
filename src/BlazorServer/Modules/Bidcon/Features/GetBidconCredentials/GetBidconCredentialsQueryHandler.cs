@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 
@@ -22,10 +23,9 @@ public sealed class GetBidconCredentialsQueryHandler
         CancellationToken cancellationToken)
     {
         var errors = validator.Validate(query);
-
         if (errors.Count > 0)
         {
-            return GetBidconCredentialsResult.Invalid([.. errors]);
+            return new InvalidGetBidconCredentialsRequest(errors);
         }
 
         var credentials = await credentialsStore.GetAsync(query.OrganizationId.Value.ToString());
@@ -34,14 +34,13 @@ public sealed class GetBidconCredentialsQueryHandler
             string.IsNullOrWhiteSpace(credentials.ApiKey) ||
             string.IsNullOrWhiteSpace(credentials.ApiSecret))
         {
-            return GetBidconCredentialsResult.Success(query.OrganizationId, string.Empty, string.Empty, false);
+            return new BidconCredentialsNotConfigured(query.OrganizationId);
         }
 
-        return GetBidconCredentialsResult.Success(
+        return new BidconCredentialsFound(
             query.OrganizationId,
             MaskCredential(credentials.ApiKey),
-            MaskCredential(credentials.ApiSecret),
-            true);
+            MaskCredential(credentials.ApiSecret));
     }
 
     private static string MaskCredential(string value)

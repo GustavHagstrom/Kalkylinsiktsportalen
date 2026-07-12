@@ -36,13 +36,15 @@ public class GetEstimationListTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Estimations, Has.Count.EqualTo(2));
-            Assert.That(result.Estimations[0], Is.EqualTo(new GetEstimationListItem(
+            Assert.That(result, Is.TypeOf<EstimationListLoaded>());
+            var loaded = (EstimationListLoaded)result;
+            Assert.That(loaded.WasLoaded, Is.True);
+            Assert.That(loaded.Estimations, Has.Count.EqualTo(2));
+            Assert.That(loaded.Estimations[0], Is.EqualTo(new GetEstimationListItem(
                 "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                 "Beta",
                 "Second")));
-            Assert.That(result.Estimations[1], Is.EqualTo(new GetEstimationListItem(
+            Assert.That(loaded.Estimations[1], Is.EqualTo(new GetEstimationListItem(
                 "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                 "Alpha",
                 "First")));
@@ -63,8 +65,9 @@ public class GetEstimationListTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Errors.Select(error => error.Code), Is.EquivalentTo(
+            Assert.That(result, Is.TypeOf<InvalidGetEstimationListRequest>());
+            var invalidRequest = (InvalidGetEstimationListRequest)result;
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Is.EquivalentTo(
             [
                 "bidcon.estimationList.organization.required",
                 "bidcon.estimationList.userEmail.required"
@@ -91,11 +94,10 @@ public class GetEstimationListTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Estimations, Is.Empty);
-            Assert.That(result.Errors, Has.One.Matches<ValidationError>(error =>
-                error.Code == "bidcon.credentials.missing" &&
-                error.Field == nameof(GetEstimationListQuery.OrganizationId)));
+            Assert.That(result, Is.TypeOf<EstimationListBidconUnavailable>());
+            var unavailable = (EstimationListBidconUnavailable)result;
+            Assert.That(unavailable.ErrorCode, Is.EqualTo("bidcon.credentials.missing"));
+            Assert.That(unavailable.ErrorField, Is.EqualTo(nameof(GetEstimationListQuery.OrganizationId)));
         });
     }
 
@@ -112,8 +114,10 @@ public class GetEstimationListTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Estimations, Is.Empty);
+            Assert.That(result, Is.TypeOf<EstimationListLoaded>());
+            var loaded = (EstimationListLoaded)result;
+            Assert.That(loaded.WasLoaded, Is.True);
+            Assert.That(loaded.Estimations, Is.Empty);
         });
     }
 

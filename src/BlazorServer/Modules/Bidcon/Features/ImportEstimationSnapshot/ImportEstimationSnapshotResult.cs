@@ -1,26 +1,28 @@
-using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Kernel.Validation;
+using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
-public sealed record ImportEstimationSnapshotResult(
-    EstimationSnapshotId? SnapshotId,
-    BidconEstimationId? BidconEstimationId,
-    DateTime? SourceEditDate,
-    DateTimeOffset? ImportedAt,
-    IReadOnlyList<ValidationError> Errors) : IValidationResult
+public abstract record ImportEstimationSnapshotResult;
+
+public sealed record EstimationSnapshotImported(
+    EstimationSnapshotId SnapshotId,
+    BidconEstimationId BidconEstimationId,
+    DateTime SourceEditDate,
+    DateTimeOffset ImportedAt) : ImportEstimationSnapshotResult
 {
-    public bool IsValid => Errors.Count == 0;
-
-    public bool IsSuccess => IsValid;
-
-    public static ImportEstimationSnapshotResult Success(
-        EstimationSnapshotId snapshotId,
-        BidconEstimationId bidconEstimationId,
-        DateTime sourceEditDate,
-        DateTimeOffset importedAt)
-        => new(snapshotId, bidconEstimationId, sourceEditDate, importedAt, Array.Empty<ValidationError>());
-
-    public static ImportEstimationSnapshotResult Invalid(params ValidationError[] errors)
-        => new(null, null, null, null, errors);
+    public bool WasImported => true;
 }
+
+public sealed record InvalidImportEstimationSnapshotRequest(
+    IReadOnlyList<ValidationError> ValidationErrors) : ImportEstimationSnapshotResult;
+
+public sealed record ImportEstimationSnapshotBidconUnavailable(
+    string ErrorCode,
+    string ErrorField,
+    string ErrorMessage) : ImportEstimationSnapshotResult;
+
+public sealed record ImportEstimationSnapshotNotFound(
+    string ErrorCode,
+    string ErrorField,
+    string ErrorMessage) : ImportEstimationSnapshotResult;

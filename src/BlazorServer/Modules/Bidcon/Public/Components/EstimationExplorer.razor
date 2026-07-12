@@ -75,12 +75,12 @@
                     CurrentUserSession.CurrentUser.Email),
                 CancellationToken.None);
 
-            if (!result.IsSuccess)
+            if (result is not EstimationListLoaded loaded)
             {
                 return;
             }
 
-            EstimationListState.Estimations = result.Estimations
+            EstimationListState.Estimations = loaded.Estimations
                 .Select(DtoToModel)
                 .OrderBy(x => x.Name)
                 .ToList();
