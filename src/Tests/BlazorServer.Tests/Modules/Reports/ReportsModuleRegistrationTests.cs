@@ -1,8 +1,6 @@
 using BlazorServer.AppShell.Composition;
 using BlazorServer.Modules.Reports;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence.Entities;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence.Stores;
+using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 

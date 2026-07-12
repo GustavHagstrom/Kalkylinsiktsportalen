@@ -75,7 +75,7 @@ public static class ServiceAndFeatureRegistrations
 
         builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddSingleton<RenderService>();
+        builder.Services.AddSingleton<IComponentHtmlRenderer, ComponentHtmlRenderer>();
         builder.Services.AddLocalization();
         builder.Services.AddMudServices();
         builder.Services.ApplyAppRegistrationContext(registrationContext);

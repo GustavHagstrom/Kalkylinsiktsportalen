@@ -2,7 +2,7 @@ using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.SheetSection;
 
-namespace BlazorServer.Modules.Reports.Components.Views;
+namespace BlazorServer.Modules.Reports.Views.Components;
 
 public class ViewEditor
 {

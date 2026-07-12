@@ -4,5 +4,5 @@ public static class ReportsRoutes
 {
     public const string SettingsPage = "/settings/Views";
 
-    public static string EditViewPage(string viewId) => $"/Settings/Views/{viewId}";
+    public static string EditViewPage(ViewId viewId) => $"/Settings/Views/{viewId}";
 }

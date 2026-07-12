@@ -17,7 +17,7 @@
             foreach (var component in HeaderComponents)
             {
                 <div class="header-block">
-                    @RenderService.Render(component.ComponentType, component.Parameters)
+                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
                 </div>
             }
             foreach (var component in BodyComponents)
@@ -25,13 +25,13 @@
                 BodyComponentId += 1;
                 IdComponentMap.Add(BodyComponentId, component);
                 <div class="body-block" data-id="@BodyComponentId">
-                    @RenderService.Render(component.ComponentType, component.Parameters)
+                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
                 </div>
             }
             foreach (var component in FooterComponents)
             {
                 <div class="footer-block">
-                    @RenderService.Render(component.ComponentType, component.Parameters)
+                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
                 </div>
             }
         }
@@ -44,21 +44,21 @@
                     <div class="header">
                         @foreach (var component in HeaderComponents)
                         {
-                            @RenderService.Render(component.ComponentType, component.Parameters)
+                            @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
                         }
                     </div>
 
                     <div class="body">
                         @foreach (var id in PageMap[pageIndex])
                         {
-                            @RenderService.Render(IdComponentMap[int.Parse(id)].ComponentType, IdComponentMap[int.Parse(id)].Parameters)
+                            @IComponentHtmlRenderer.Render(IdComponentMap[int.Parse(id)].ComponentType, IdComponentMap[int.Parse(id)].Parameters)
                         }
                     </div>
 
                     <div class="footer">
                         @foreach (var component in FooterComponents)
                         {
-                            @RenderService.Render(component.ComponentType, component.Parameters)
+                            @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
                         }
                     </div>
                 </div>
@@ -72,7 +72,7 @@
 
 
 @inject IJSRuntime JS
-@inject RenderService RenderService
+@inject IComponentHtmlRenderer IComponentHtmlRenderer
 
 @code {
 

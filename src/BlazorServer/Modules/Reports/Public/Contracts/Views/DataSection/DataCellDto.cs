@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Reports.Public.Contracts.Views;
+
 namespace BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 
 public class DataCellDto

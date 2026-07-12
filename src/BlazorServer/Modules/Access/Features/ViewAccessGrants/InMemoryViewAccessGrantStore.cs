@@ -1,10 +1,12 @@
+using BlazorServer.Modules.Reports.Public;
+
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
 public sealed class InMemoryViewAccessGrantStore : IViewAccessGrantStore
 {
     private readonly HashSet<ViewAccessGrant> grants = [];
 
-    public Task<IReadOnlyList<ViewAccessGrant>> GetGrantsForViewAsync(string viewId, string organizationId)
+    public Task<IReadOnlyList<ViewAccessGrant>> GetGrantsForViewAsync(ViewId viewId, string organizationId)
     {
         var matchingGrants = grants
             .Where(grant =>

@@ -1,7 +1,7 @@
 @using BlazorServer.AppShell.Composition.UI;
 @inherits LayoutComponentBase
 @inject UiRegistry Ui
-@inject RenderService RenderService
+@inject IComponentHtmlRenderer IComponentHtmlRenderer
 
 
 <div style="height: 100dvh;">
@@ -42,7 +42,7 @@
 
         <MudSpacer />
 
-        @RenderService.Render(Ui.LoginDisplayComponent ?? throw new Exception("Login display component not found"))
+        @IComponentHtmlRenderer.Render(Ui.LoginDisplayComponent ?? throw new Exception("Login display component not found"))
 
     </MudToolBar>
 

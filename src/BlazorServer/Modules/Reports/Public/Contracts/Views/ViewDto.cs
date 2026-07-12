@@ -5,7 +5,7 @@ namespace BlazorServer.Modules.Reports.Public.Contracts.Views;
 
 public class ViewDto
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public ViewId Id { get; set; } = ViewId.New();
     public string OrganizationId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

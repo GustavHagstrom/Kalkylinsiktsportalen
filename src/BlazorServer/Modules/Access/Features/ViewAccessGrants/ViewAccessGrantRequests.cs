@@ -1,25 +1,27 @@
+using BlazorServer.Modules.Reports.Public;
+
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
 public sealed record GrantUserViewAccessCommand(
-    string ViewId,
+    ViewId ViewId,
     string UserId,
     string OrganizationId,
     ViewAccessRight Right);
 
 public sealed record GrantRoleViewAccessCommand(
-    string ViewId,
+    ViewId ViewId,
     string RoleId,
     string OrganizationId,
     ViewAccessRight Right);
 
 public sealed record RevokeUserViewAccessCommand(
-    string ViewId,
+    ViewId ViewId,
     string UserId,
     string OrganizationId,
     ViewAccessRight Right);
 
 public sealed record RevokeRoleViewAccessCommand(
-    string ViewId,
+    ViewId ViewId,
     string RoleId,
     string OrganizationId,
     ViewAccessRight Right);

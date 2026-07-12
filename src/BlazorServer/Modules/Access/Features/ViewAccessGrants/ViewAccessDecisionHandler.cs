@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using BlazorServer.Kernel.Authentication;
 using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.Modules.Reports.Public;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
@@ -32,7 +33,7 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
 
     async Task<bool> HasViewAccessAsync(
         ClaimsPrincipal user,
-        string viewId,
+        ViewId viewId,
         ViewAccessRight right)
     {
         if (user.IsApplicationAdmin())

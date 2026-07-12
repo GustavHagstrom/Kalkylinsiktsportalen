@@ -2,7 +2,15 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorServer.AppShell.Rendering;
 
-public class RenderService
+public interface IComponentHtmlRenderer
+{
+    RenderFragment Render<TComponent>(Dictionary<string, object>? parameters = null)
+        where TComponent : ComponentBase;
+
+    RenderFragment Render(Type type, Dictionary<string, object>? parameters = null);
+}
+
+public class ComponentHtmlRenderer : IComponentHtmlRenderer
 {
     public RenderFragment Render<TComponent>(Dictionary<string, object>? parameters = null)
         where TComponent : ComponentBase

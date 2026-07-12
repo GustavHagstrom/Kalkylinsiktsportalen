@@ -1,9 +1,7 @@
 ﻿using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence.Entities;
-using BlazorServer.Modules.Reports.Infrastructure.Persistence.Stores;
+using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 using BlazorServer.AppShell.Composition;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
