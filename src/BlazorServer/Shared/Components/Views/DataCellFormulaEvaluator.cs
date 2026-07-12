@@ -1,7 +1,6 @@
 using System.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using BlazorServer.Shared.DTOs.Bidcon;
 using BlazorServer.Shared.DTOs.Views;
 using BlazorServer.Shared.DTOs.Views.DataSection;
 
@@ -9,15 +8,19 @@ namespace BlazorServer.Shared.Components.Views;
 
 public static partial class DataCellFormulaEvaluator
 {
-    public static string GetDisplayValue(DataCellDto dataCellDto, EstimationDto? estimationDto = null)
+    public static string GetDisplayValue(
+        DataCellDto dataCellDto,
+        IReadOnlyDictionary<string, object?>? estimationProperties = null)
     {
         ArgumentNullException.ThrowIfNull(dataCellDto);
 
-        var evaluatedValue = EvaluateRawValue(dataCellDto.RawValue, estimationDto);
+        var evaluatedValue = EvaluateRawValue(dataCellDto.RawValue, estimationProperties);
         return FormatValue(evaluatedValue, dataCellDto.TextFormat);
     }
 
-    private static object? EvaluateRawValue(string? rawValue, EstimationDto? estimationDto)
+    private static object? EvaluateRawValue(
+        string? rawValue,
+        IReadOnlyDictionary<string, object?>? estimationProperties)
     {
         if (string.IsNullOrWhiteSpace(rawValue))
             return string.Empty;
@@ -29,14 +32,14 @@ public static partial class DataCellFormulaEvaluator
         if (string.IsNullOrWhiteSpace(expression))
             return string.Empty;
 
-        var resolvedExpression = ReplaceEstimationReferences(expression, estimationDto, out var singleResolvedValue);
+        var resolvedExpression = ReplaceEstimationReferences(expression, estimationProperties, out var singleResolvedValue);
         if (singleResolvedValue is not null)
             return singleResolvedValue;
 
         if (TryEvaluateExpression(resolvedExpression, out var expressionResult))
             return expressionResult;
 
-        if (TryEvaluateConcatenation(expression, estimationDto, out var concatenationResult))
+        if (TryEvaluateConcatenation(expression, estimationProperties, out var concatenationResult))
             return concatenationResult;
 
         return rawValue;
@@ -63,17 +66,20 @@ public static partial class DataCellFormulaEvaluator
         return rawValue.TrimStart().StartsWith('=');
     }
 
-    private static string ReplaceEstimationReferences(string expression, EstimationDto? estimationDto, out object? singleResolvedValue)
+    private static string ReplaceEstimationReferences(
+        string expression,
+        IReadOnlyDictionary<string, object?>? estimationProperties,
+        out object? singleResolvedValue)
     {
         singleResolvedValue = null;
 
-        if (estimationDto is null)
+        if (estimationProperties is null)
             return expression;
 
         var trimmedExpression = expression.Trim();
         if (IsSingleEstimationReference(trimmedExpression))
         {
-            var singlePropertyValue = GetEstimationPropertyValue(trimmedExpression, estimationDto);
+            var singlePropertyValue = GetEstimationPropertyValue(trimmedExpression, estimationProperties);
             if (singlePropertyValue is not null)
             {
                 singleResolvedValue = singlePropertyValue;
@@ -83,12 +89,15 @@ public static partial class DataCellFormulaEvaluator
 
         return EstimationReferenceRegex().Replace(expression, match =>
         {
-            var propertyValue = GetEstimationPropertyValue(match.Value, estimationDto);
+            var propertyValue = GetEstimationPropertyValue(match.Value, estimationProperties);
             return ConvertToFormulaLiteral(propertyValue);
         });
     }
 
-    private static bool TryEvaluateConcatenation(string expression, EstimationDto? estimationDto, out object? result)
+    private static bool TryEvaluateConcatenation(
+        string expression,
+        IReadOnlyDictionary<string, object?>? estimationProperties,
+        out object? result)
     {
         result = null;
 
@@ -99,7 +108,7 @@ public static partial class DataCellFormulaEvaluator
         var parts = new List<string>(segments.Count);
         foreach (var segment in segments)
         {
-            if (!TryEvaluateConcatenationSegment(segment, estimationDto, out var segmentValue))
+            if (!TryEvaluateConcatenationSegment(segment, estimationProperties, out var segmentValue))
                 return false;
 
             parts.Add(Convert.ToString(segmentValue, CultureInfo.CurrentCulture) ?? string.Empty);
@@ -109,7 +118,10 @@ public static partial class DataCellFormulaEvaluator
         return true;
     }
 
-    private static bool TryEvaluateConcatenationSegment(string segment, EstimationDto? estimationDto, out object? result)
+    private static bool TryEvaluateConcatenationSegment(
+        string segment,
+        IReadOnlyDictionary<string, object?>? estimationProperties,
+        out object? result)
     {
         result = null;
 
@@ -123,13 +135,13 @@ public static partial class DataCellFormulaEvaluator
             return true;
         }
 
-        if (estimationDto is not null && IsSingleEstimationReference(trimmedSegment))
+        if (estimationProperties is not null && IsSingleEstimationReference(trimmedSegment))
         {
-            result = GetEstimationPropertyValue(trimmedSegment, estimationDto) ?? string.Empty;
+            result = GetEstimationPropertyValue(trimmedSegment, estimationProperties) ?? string.Empty;
             return true;
         }
 
-        var resolvedSegment = ReplaceEstimationReferences(trimmedSegment, estimationDto, out var singleResolvedValue);
+        var resolvedSegment = ReplaceEstimationReferences(trimmedSegment, estimationProperties, out var singleResolvedValue);
         if (singleResolvedValue is not null)
         {
             result = singleResolvedValue;
@@ -198,15 +210,18 @@ public static partial class DataCellFormulaEvaluator
         return true;
     }
 
-    private static object? GetEstimationPropertyValue(string reference, EstimationDto estimationDto)
+    private static object? GetEstimationPropertyValue(
+        string reference,
+        IReadOnlyDictionary<string, object?> estimationProperties)
     {
         const string prefix = "Estimation.";
         if (!reference.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             return null;
 
         var propertyName = reference[prefix.Length..];
-        var property = typeof(EstimationDto).GetProperty(propertyName);
-        return property?.GetValue(estimationDto);
+        return estimationProperties.TryGetValue(propertyName, out var value)
+            ? value
+            : null;
     }
 
     private static string ConvertToFormulaLiteral(object? value)

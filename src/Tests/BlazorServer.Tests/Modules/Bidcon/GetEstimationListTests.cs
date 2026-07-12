@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Kernel.Validation;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 

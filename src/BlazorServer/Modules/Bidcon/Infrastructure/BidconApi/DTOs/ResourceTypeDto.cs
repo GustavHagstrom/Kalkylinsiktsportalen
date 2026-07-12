@@ -1,0 +1,27 @@
+using System.Text.Json.Serialization;
+
+namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+internal enum ResourceTypeDto
+{
+    None = 0,
+
+    Labor = 1,
+
+    Officer = 2,
+
+    Material = 3,
+
+    Machine = 6,
+    
+    Information = 8,
+
+    Subcontractor = 9,
+
+    MaterialTender = 10,
+
+    SubcontractorTender = 11,
+
+    Adjustment = 99
+}

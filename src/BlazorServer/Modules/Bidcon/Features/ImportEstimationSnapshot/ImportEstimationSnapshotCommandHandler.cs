@@ -1,6 +1,7 @@
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Mapping;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Kernel.CQRS;
@@ -8,7 +9,7 @@ using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
-public sealed class ImportEstimationSnapshotCommandHandler(
+internal sealed class ImportEstimationSnapshotCommandHandler(
     BidconEstimationClient estimationDetailsClient,
     IEstimationSnapshotStore estimationSnapshotStore,
     ImportEstimationSnapshotCommandValidator? validator = null)

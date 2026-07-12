@@ -9,7 +9,7 @@ using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public;
 using BlazorServer.Modules.Bidcon.Public.Components;

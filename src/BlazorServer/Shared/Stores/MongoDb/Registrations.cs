@@ -10,7 +10,6 @@ public static class Registrations
     static IServiceCollection RegisterSharedMongoCollections(this IServiceCollection services)
     {
         services.AddMongoCollection<MongoUserSettings>("UserSettings");
-        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
         services.AddMongoCollection<MongoView>("Views");
         return services;
     }
@@ -18,7 +17,6 @@ public static class Registrations
     {
         services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
         services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
-        services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         services.AddSingleton<IViewStore, MongoViewStore>();
         return services;
     }

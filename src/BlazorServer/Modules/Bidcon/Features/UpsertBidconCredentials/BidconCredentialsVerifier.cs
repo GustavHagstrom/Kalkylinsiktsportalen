@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.ExternalDTOs;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
 namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;

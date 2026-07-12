@@ -1,6 +1,5 @@
 using System.Globalization;
 using BlazorServer.Shared.Components.Views;
-using BlazorServer.Shared.DTOs.Bidcon;
 using BlazorServer.Shared.DTOs.Views;
 using BlazorServer.Shared.DTOs.Views.DataSection;
 
@@ -33,7 +32,7 @@ public class DataCellFormulaEvaluatorTests
     public void GetDisplayValue_ReturnsEstimationProperty_WhenFormulaContainsSingleReference()
     {
         var cell = CreateCell("=Estimation.Customer");
-        var estimation = new EstimationDto { Customer = "ACME" };
+        var estimation = CreateEstimationProperties(customer: "ACME");
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
 
@@ -44,7 +43,7 @@ public class DataCellFormulaEvaluatorTests
     public void GetDisplayValue_EvaluatesEstimationReferenceInsideArithmeticExpression()
     {
         var cell = CreateCell("=Estimation.Reconciled + 5", textType: TextType.Number, decimalCount: 0, hasThousandsSeparator: false);
-        var estimation = new EstimationDto { Reconciled = true };
+        var estimation = CreateEstimationProperties(reconciled: true);
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
 
@@ -55,7 +54,7 @@ public class DataCellFormulaEvaluatorTests
     public void GetDisplayValue_ConcatenatesStringLiteralAndEstimationValue()
     {
         var cell = CreateCell("=\"Hej, det kostar \" + Estimation.Customer");
-        var estimation = new EstimationDto { Customer = "1200 kr" };
+        var estimation = CreateEstimationProperties(customer: "1200 kr");
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
 
@@ -66,7 +65,7 @@ public class DataCellFormulaEvaluatorTests
     public void GetDisplayValue_FormatsDateTime_UsingTextFormat()
     {
         var cell = CreateCell("=Estimation.CreateDate", textType: TextType.DateTime, dateTimeFormat: "yyyy-MM-dd");
-        var estimation = new EstimationDto { CreateDate = new DateTime(2025, 02, 03, 10, 30, 00) };
+        var estimation = CreateEstimationProperties(createDate: new DateTime(2025, 02, 03, 10, 30, 00));
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
 
@@ -125,6 +124,19 @@ public class DataCellFormulaEvaluatorTests
                 HasThoasandsSeparator = hasThousandsSeparator,
                 DayTimeFormat = dateTimeFormat
             }
+        };
+    }
+
+    private static IReadOnlyDictionary<string, object?> CreateEstimationProperties(
+        string customer = "",
+        bool reconciled = false,
+        DateTime? createDate = null)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["Customer"] = customer,
+            ["Reconciled"] = reconciled,
+            ["CreateDate"] = createDate
         };
     }
 }

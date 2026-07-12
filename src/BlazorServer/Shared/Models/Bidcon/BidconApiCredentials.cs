@@ -1,8 +1,0 @@
-﻿namespace BlazorServer.Shared.Models.Bidcon;
-
-public class BidconApiCredentials
-{
-    public string OrganizationId { get; set; } = string.Empty;
-    public string ApiKey { get; set; } = string.Empty;
-    public string ApiSecret { get; set; } = string.Empty;
-}

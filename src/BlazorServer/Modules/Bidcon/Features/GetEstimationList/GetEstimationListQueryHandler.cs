@@ -1,10 +1,10 @@
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Kernel.CQRS;
 using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 
-public sealed class GetEstimationListQueryHandler(
+internal sealed class GetEstimationListQueryHandler(
     BidconEstimationClient estimationClient,
     GetEstimationListQueryValidator? validator = null)
         : IQueryHandler<GetEstimationListQuery, GetEstimationListResult>
