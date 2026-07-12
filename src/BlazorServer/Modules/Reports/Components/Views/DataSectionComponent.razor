@@ -1,0 +1,49 @@
+<table class="@Class">
+    <colgroup>
+        @foreach (var column in DataSectionDto.ColumnDefinitions.OrderBy(x => x.ColumnIndex))
+        {
+            <col style="@ColumnPercentWidth(column)"/>
+        }
+    </colgroup>
+    <tbody>
+        @foreach(var row in DataSectionDto.RowDefinitions.OrderBy(x => x.RowIndex))
+        {
+            <tr style="@RowHeight(row)">
+                @foreach(var column in DataSectionDto.ColumnDefinitions.OrderBy(x => x.ColumnIndex))
+                {
+                    var cellDto = GetDataCellDto(row, column);
+                    <DataCellComponent DataCellDto="cellDto" EditMode="@EditMode" IsSelected="cellDto == SelectedDataCellDto" OnClick="() => OnCellClick.InvokeAsync(new DataSectionSelection(DataSectionDto, cellDto))"/>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public DataSectionDto DataSectionDto { get; set; } = new DataSectionDto();
+    [Parameter] public DataCellDto? SelectedDataCellDto { get; set; }
+    [Parameter] public bool EditMode { get; set; } = false;
+    [Parameter] public EventCallback<DataSectionSelection> OnCellClick { get; set; }
+
+    DataSectionEditor Editor { get; set; } = null!;
+    string Class => EditMode ? (SelectedDataCellDto is not null ? "data-table edit-mode selected" : "data-table edit-mode") : "data-table";
+
+    protected override void OnParametersSet()
+    {
+        Editor = new DataSectionEditor(DataSectionDto);
+    }
+
+    int TableWidth => DataSectionDto.ColumnDefinitions.Sum(x => x.Width);
+    string ColumnPercentWidth(DataColumnDefinition column) => $"""width: {((double)column.Width / TableWidth * 100).ToString("F2")}%""";
+
+    //row height in mm, 
+    string RowHeight(RowDefinition row) => $"""height: {row.Height}mm""";
+
+    DataCellDto GetDataCellDto(RowDefinition row, DataColumnDefinition column)
+    {
+        return DataSectionDto.DataCells[$"R{row.RowIndex}C{column.ColumnIndex}"];
+    }
+
+
+
+}

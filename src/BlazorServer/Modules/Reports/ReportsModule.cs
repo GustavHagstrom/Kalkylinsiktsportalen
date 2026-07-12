@@ -1,8 +1,12 @@
-using BlazorServer.AppShell.Composition.Settings;
+ï»¿using BlazorServer.AppShell.Composition.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Reports.Public;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence.Entities;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence.Stores;
 using BlazorServer.AppShell.Composition;
 using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.Shared.Stores.MongoDb;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Reports;
@@ -11,7 +15,7 @@ public static class ReportsModule
 {
     public static void AddReportsModule(this IServiceCollection services, AppRegistrationContext context)
     {
-        context.AccessClaims.Register(new AccessClaimInfo(Authorization.AccessClaimValue, "EditReportsGrant", "Ger användaren tillgång till att hantera och redigera vyer i rapportmodulen."));
+        context.AccessClaims.Register(new AccessClaimInfo(Authorization.AccessClaimValue, "EditReportsGrant", "Ger anvÃ¤ndaren tillgÃ¥ng till att hantera och redigera vyer i rapportmodulen."));
         context.Policies.AddPolicy(Authorization.PolicyName, policy => policy.RequireAssertion(context => context.User.HasAccessClaimOrApplicationAdmin(Authorization.AccessClaimValue)));
         context.Ui.AddSettingsArea(
             new SettingsAreaContribution(
@@ -23,6 +27,9 @@ public static class ReportsModule
                 Icons.Material.Sharp.Article,
                 Authorization.PolicyName), 
             "reportsModule");
+
+        services.AddMongoCollection<MongoView>("Views");
+        services.AddSingleton<IViewStore, MongoViewStore>();
     }
     public static class Authorization
     {

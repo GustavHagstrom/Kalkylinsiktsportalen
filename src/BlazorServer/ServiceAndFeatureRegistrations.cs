@@ -4,7 +4,7 @@ using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Composition;
-using BlazorServer.Shared.Services;
+using BlazorServer.AppShell.Rendering;
 using BlazorServer.Shared.Services.Authentication;
 using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;

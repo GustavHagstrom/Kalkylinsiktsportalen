@@ -1,7 +1,7 @@
 using System.Globalization;
-using BlazorServer.Shared.Components.Views;
-using BlazorServer.Shared.DTOs.Views;
-using BlazorServer.Shared.DTOs.Views.DataSection;
+using BlazorServer.Modules.Reports.Components.Views;
+using BlazorServer.Modules.Reports.Public.Contracts.Views;
+using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 
 namespace BlazorServer.Tests;
 

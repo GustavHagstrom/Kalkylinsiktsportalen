@@ -1,0 +1,33 @@
+using BlazorServer.AppShell.Composition;
+using BlazorServer.Modules.Reports;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence.Entities;
+using BlazorServer.Modules.Reports.Infrastructure.Persistence.Stores;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+
+namespace BlazorServer.Tests.Modules.Reports;
+
+[TestFixture]
+public class ReportsModuleRegistrationTests
+{
+    [Test]
+    public void ServicesCanRegisterReportsViewPersistence()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = services.AddAppRegistrationContext();
+
+        services.AddReportsModule(registrationContext);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoView>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IViewStore) &&
+                service.ImplementationType == typeof(MongoViewStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+        });
+    }
+}
