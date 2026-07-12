@@ -1,6 +1,9 @@
-using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Composition;
+using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Routes;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Stores;
+using MongoDB.Driver;
 
 namespace BlazorServer.AppShell.Settings;
 
@@ -16,6 +19,27 @@ public static class SettingsShell
                 AppShellRoutes.Settings,
                 10));
 
+        services.AddUserSettingsCollection();
+        services.AddSingleton<IUserSettingsStore, MongoUserSettingsStore>();
+        services.AddSingleton<IDarkmodeStore, MongoUserSettingsStore>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddUserSettingsCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "UserSettings";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoUserSettings>(collectionName);
+        });
         return services;
     }
 }

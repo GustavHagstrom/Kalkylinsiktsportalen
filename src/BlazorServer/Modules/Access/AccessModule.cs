@@ -8,8 +8,8 @@ using BlazorServer.Modules.Access.Infrastructure.Identity;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Modules.Access.Public.Contracts;
-using BlazorServer.Shared.Stores.MongoDb;
 using Microsoft.AspNetCore.Authentication;
+using MongoDB.Driver;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Access;
@@ -31,7 +31,7 @@ public static class AccessModule
 
         }
         services.AddMemoryCache();
-        services.AddMongoCollection<MongoFunctionalAccessGrant>("FunctionalAccessGrants");
+        services.AddFunctionalAccessGrantCollection();
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
@@ -73,5 +73,22 @@ public static class AccessModule
     public static IServiceCollection AddGraphAccessDirectory(this IServiceCollection services)
     {
         return services.AddTransient<IAccessDirectory, GraphAccessDirectory>();
+    }
+
+    private static IServiceCollection AddFunctionalAccessGrantCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "FunctionalAccessGrants";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoFunctionalAccessGrant>(collectionName);
+        });
+        return services;
     }
 }

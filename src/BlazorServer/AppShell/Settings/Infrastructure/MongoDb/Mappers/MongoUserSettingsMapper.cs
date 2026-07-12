@@ -1,7 +1,6 @@
-﻿using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores.MongoDb.Enteties;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Mappers;
+namespace BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Mappers;
 
 public static class MongoUserSettingsMapper
 {
@@ -13,6 +12,7 @@ public static class MongoUserSettingsMapper
             IsDarkMode = model.IsDarkMode
         };
     }
+
     public static UserSettings ToModel(MongoUserSettings mongo)
     {
         return new UserSettings

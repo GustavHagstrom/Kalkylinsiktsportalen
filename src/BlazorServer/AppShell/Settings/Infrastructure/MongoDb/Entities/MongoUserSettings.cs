@@ -1,6 +1,6 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Enteties;
+namespace BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
 
 public class MongoUserSettings
 {

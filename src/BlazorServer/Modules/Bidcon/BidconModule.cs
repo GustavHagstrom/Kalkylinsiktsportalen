@@ -1,5 +1,7 @@
+using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
@@ -11,10 +13,7 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public;
-using BlazorServer.AppShell.Composition;
-using BlazorServer.Modules.Access.Authentication;
-using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores.MongoDb;
+using MongoDB.Driver;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Bidcon;
@@ -43,9 +42,9 @@ public static class BidconModule
             });
         }
 
-        services.AddMongoCollection<MongoBidconApiCredentials>("BidconApiCredentials");
+        services.AddBidconApiCredentialsCollection();
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
-        services.AddMongoCollection<MongoEstimationSnapshot>("EstimationSnapshots");
+        services.AddEstimationSnapshotsCollection();
         services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
 
         registrationContext.AccessClaims.Register(new AccessClaimInfo(
@@ -72,6 +71,40 @@ public static class BidconModule
                 Icons.Material.Sharp.Api,
                 "ApiPolicy"),
             typeof(BidconModule).FullName ?? nameof(BidconModule));
+        return services;
+    }
+
+    private static IServiceCollection AddBidconApiCredentialsCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "BidconApiCredentials";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoBidconApiCredentials>(collectionName);
+        });
+        return services;
+    }
+
+    private static IServiceCollection AddEstimationSnapshotsCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "EstimationSnapshots";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoEstimationSnapshot>(collectionName);
+        });
         return services;
     }
 }

@@ -1,9 +1,8 @@
-﻿using BlazorServer.Shared.Models;
-using BlazorServer.Shared.Stores.MongoDb.Enteties;
-using BlazorServer.Shared.Stores.MongoDb.Mappers;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Mappers;
 using MongoDB.Driver;
 
-namespace BlazorServer.Shared.Stores.MongoDb.Stores;
+namespace BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Stores;
 
 public class MongoUserSettingsStore(IMongoCollection<MongoUserSettings> mongoCollection) : IUserSettingsStore, IDarkmodeStore
 {
@@ -34,8 +33,8 @@ public class MongoUserSettingsStore(IMongoCollection<MongoUserSettings> mongoCol
             await UpsertAsync(defaultSettings);
             return defaultSettings;
         }
-        return MongoUserSettingsMapper.ToModel(result);
 
+        return MongoUserSettingsMapper.ToModel(result);
     }
 
     public Task UpsertAsync(UserSettings model)

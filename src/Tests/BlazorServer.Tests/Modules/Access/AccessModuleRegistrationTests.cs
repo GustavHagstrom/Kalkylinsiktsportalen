@@ -6,6 +6,7 @@ using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
+using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
@@ -50,7 +51,13 @@ public class AccessModuleRegistrationTests
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
                     Constants.Authorization.PolicyName)));
             Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantHandler)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(IMongoCollection<MongoFunctionalAccessGrant>)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoFunctionalAccessGrant>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IFunctionalAccessGrantStore) &&
+                service.ImplementationType == typeof(MongoAccessStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);

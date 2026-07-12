@@ -1,10 +1,10 @@
-﻿using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.AppShell.Composition;
+using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
-using BlazorServer.AppShell.Composition;
-using BlazorServer.Modules.Access.Authentication;
-using BlazorServer.Shared.Stores.MongoDb;
+using MongoDB.Driver;
 using MudBlazor;
 
 namespace BlazorServer.Modules.Reports;
@@ -18,17 +18,35 @@ public static class ReportsModule
         context.Ui.AddSettingsArea(
             new SettingsAreaContribution(
                 "reports",
-                "Vyer", 
-                "Hantera vyer", 
+                "Vyer",
+                "Hantera vyer",
                 ReportsRoutes.SettingsPage,
                 30,
                 Icons.Material.Sharp.Article,
-                Authorization.PolicyName), 
+                Authorization.PolicyName),
             "reportsModule");
 
-        services.AddMongoCollection<MongoView>("Views");
+        services.AddViewCollection();
         services.AddSingleton<IViewStore, MongoViewStore>();
     }
+
+    private static IServiceCollection AddViewCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "Views";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoView>(collectionName);
+        });
+        return services;
+    }
+
     public static class Authorization
     {
         public const string PolicyName = "ReportsAccessPolicy";

@@ -15,11 +15,11 @@ using BlazorServer.Modules.Bidcon.Public;
 using BlazorServer.Modules.Bidcon.Public.Components;
 using BlazorServer.Modules.Bidcon.Settings;
 using BlazorServer.AppShell.Composition;
-using BlazorServer.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 
@@ -41,8 +41,20 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(ImportEstimationSnapshotCommandHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(BidconEstimationClient)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(IBidconApiCredentialsStore)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(IEstimationSnapshotStore)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoBidconApiCredentials>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IBidconApiCredentialsStore) &&
+                service.ImplementationType == typeof(MongoBidconApiCredentialsStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoEstimationSnapshot>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IEstimationSnapshotStore) &&
+                service.ImplementationType == typeof(MongoEstimationSnapshotStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(EstimationListState) &&
                 service.Lifetime == ServiceLifetime.Scoped));

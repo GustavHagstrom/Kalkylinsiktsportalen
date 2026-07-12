@@ -1,9 +1,12 @@
+using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Composition.UI;
-using BlazorServer.AppShell.Settings;
-using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Routes;
+using BlazorServer.AppShell.Settings;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
+using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Stores;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace BlazorServer.Tests.AppShell.Settings;
 
@@ -23,6 +26,30 @@ public class SettingsShellTests
                 "Inställningar",
                 AppShellRoutes.Settings,
                 10)));
+    }
+
+    [Test]
+    public void SettingsShellRegistersAppOwnedPersistence()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = services.AddAppRegistrationContext();
+
+        services.AddSettingsShell(registrationContext);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoUserSettings>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IUserSettingsStore) &&
+                service.ImplementationType == typeof(MongoUserSettingsStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IDarkmodeStore) &&
+                service.ImplementationType == typeof(MongoUserSettingsStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+        });
     }
 
     [Test]

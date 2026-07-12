@@ -1,4 +1,4 @@
-﻿namespace BlazorServer.Shared.Stores;
+namespace BlazorServer.AppShell.Settings;
 
 public interface IDarkmodeStore
 {
