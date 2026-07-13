@@ -6,7 +6,7 @@ namespace BlazorServer.Modules.Access.Authentication;
 public sealed class AccessClaim : Claim
 {
     public AccessClaim(string value)
-        : base(AccessAuthorizationClaims.AccessClaimType, value)
+        : base(AccessAuthorizationConstants.AccessClaimType, value)
     {
     }
 }

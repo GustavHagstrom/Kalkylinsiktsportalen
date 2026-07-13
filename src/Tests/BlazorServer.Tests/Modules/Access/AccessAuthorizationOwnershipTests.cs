@@ -11,10 +11,10 @@ public class AccessAuthorizationOwnershipTests
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(AccessAuthorizationClaims.AccessClaimType, "CanDoThing"),
+            new Claim(AccessAuthorizationConstants.AccessClaimType, "CanDoThing"),
             new Claim(
-                AccessAuthorizationClaims.ExternalDirectoryRoleType,
-                AccessAuthorizationClaims.ApplicationAdminRoleClaimValue)
+                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
 
         Assert.Multiple(() =>

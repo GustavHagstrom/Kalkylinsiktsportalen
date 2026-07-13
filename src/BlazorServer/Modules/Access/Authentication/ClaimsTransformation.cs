@@ -48,7 +48,7 @@ public class ClaimsTransformation : IClaimsTransformation
         {
             foreach (var value in accessClaimValues)
             {
-                if (!principal.HasClaim(AccessAuthorizationClaims.AccessClaimType, value))
+                if (!principal.HasClaim(AccessAuthorizationConstants.AccessClaimType, value))
                 {
                     ((ClaimsIdentity)principal.Identity!).AddClaim(new AccessClaim(value));
                 }

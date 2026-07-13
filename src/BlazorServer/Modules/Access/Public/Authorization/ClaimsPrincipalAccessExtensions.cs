@@ -6,12 +6,12 @@ public static class ClaimsPrincipalAccessExtensions
 {
     public static bool IsApplicationAdmin(this ClaimsPrincipal principal)
         => principal.HasClaim(
-            AccessAuthorizationClaims.ExternalDirectoryRoleType,
-            AccessAuthorizationClaims.ApplicationAdminRoleClaimValue);
+            AccessAuthorizationConstants.ExternalDirectoryRoleType,
+            AccessAuthorizationConstants.ApplicationAdminRoleClaimValue);
 
     public static bool HasAccessClaimOrApplicationAdmin(
         this ClaimsPrincipal principal,
         string accessClaimValue)
-        => principal.HasClaim(AccessAuthorizationClaims.AccessClaimType, accessClaimValue)
+        => principal.HasClaim(AccessAuthorizationConstants.AccessClaimType, accessClaimValue)
             || principal.IsApplicationAdmin();
 }

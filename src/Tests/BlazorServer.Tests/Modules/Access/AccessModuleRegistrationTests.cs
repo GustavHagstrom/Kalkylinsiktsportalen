@@ -114,7 +114,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(AccessAuthorizationClaims.AccessClaimType, Constants.Authorization.AccessClaimValue)
+            new Claim(AccessAuthorizationConstants.AccessClaimType, Constants.Authorization.AccessClaimValue)
         ], "test"));
     }
 
@@ -123,8 +123,8 @@ public class AccessModuleRegistrationTests
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(
-                AccessAuthorizationClaims.ExternalDirectoryRoleType,
-                AccessAuthorizationClaims.ApplicationAdminRoleClaimValue)
+                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 
