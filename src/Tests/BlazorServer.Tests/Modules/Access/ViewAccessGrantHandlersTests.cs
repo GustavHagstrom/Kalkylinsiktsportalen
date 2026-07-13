@@ -44,15 +44,15 @@ public class ViewAccessGrantHandlersTests
     {
         var store = new InMemoryViewAccessGrantStore();
         var grantHandler = new ViewAccessGrantHandler(store);
-        var decisionHandler = new ViewAccessDecisionHandler(store);
+        var decisionService = new ViewAccessDecisionHandler(store);
         var subject = Subject("user-1", "org-1", ["role-1"]);
 
         await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
         await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(subject, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(subject, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(subject, "view-1"));
+        var canUse = await decisionService.CanUseViewAsync(subject, "view-1");
+        var canEdit = await decisionService.CanEditViewAsync(subject, "view-1");
+        var canAdminister = await decisionService.CanAdministerViewAccessAsync(subject, "view-1");
 
         Assert.Multiple(() =>
         {
@@ -67,13 +67,13 @@ public class ViewAccessGrantHandlersTests
     {
         var store = new InMemoryViewAccessGrantStore();
         var grantHandler = new ViewAccessGrantHandler(store);
-        var decisionHandler = new ViewAccessDecisionHandler(store);
+        var decisionService = new ViewAccessDecisionHandler(store);
         var subject = Subject("user-1", "org-1");
 
         await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
         await grantHandler.HandleAsync(new RevokeUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(subject, "view-1"));
+        var canUse = await decisionService.CanUseViewAsync(subject, "view-1");
 
         Assert.That(canUse, Is.False);
     }
@@ -83,16 +83,14 @@ public class ViewAccessGrantHandlersTests
         AccessSubject subject,
         string viewId)
     {
-        var decisionHandler = new ViewAccessDecisionHandler(store);
-        var decisions = new Dictionary<ViewAccessRight, bool>
+        var decisionService = new ViewAccessDecisionHandler(store);
+        return new Dictionary<ViewAccessRight, bool>
         {
-            [ViewAccessRight.UseView] = await decisionHandler.HandleAsync(new CanUseViewQuery(subject, viewId)),
-            [ViewAccessRight.EditView] = await decisionHandler.HandleAsync(new CanEditViewQuery(subject, viewId)),
+            [ViewAccessRight.UseView] = await decisionService.CanUseViewAsync(subject, viewId),
+            [ViewAccessRight.EditView] = await decisionService.CanEditViewAsync(subject, viewId),
             [ViewAccessRight.AdministerViewAccess] =
-                await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(subject, viewId))
+                await decisionService.CanAdministerViewAccessAsync(subject, viewId)
         };
-
-        return decisions;
     }
 
     private static AccessSubject Subject(
