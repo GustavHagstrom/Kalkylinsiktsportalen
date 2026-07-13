@@ -1,4 +1,5 @@
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Public.Authorization;
 
 namespace BlazorServer.Tests.Modules.Access;
 
