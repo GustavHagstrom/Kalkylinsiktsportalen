@@ -74,11 +74,11 @@ public class ViewAccessDecisionHandlersTests
     private static AccessSubject Subject(
         string userId,
         string organizationId,
-        IReadOnlySet<string>? roleIds = null,
+        string[]? roleIds = null,
         bool isAdmin = false)
         => new(
             userId,
             organizationId,
-            roleIds ?? new HashSet<string>(StringComparer.Ordinal),
+            (roleIds ?? []).ToHashSet(StringComparer.Ordinal),
             isAdmin);
 }
