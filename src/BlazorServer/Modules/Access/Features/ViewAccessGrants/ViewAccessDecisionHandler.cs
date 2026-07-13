@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Reports.Public;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -6,29 +7,20 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
 {
     public Task<bool> HandleAsync(CanUseViewQuery query)
     {
-        return HasViewAccessAsync(
-            query.Subject,
-            query.ViewId,
-            ViewAccessRight.UseView);
+        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.UseView);
     }
 
     public Task<bool> HandleAsync(CanEditViewQuery query)
     {
-        return HasViewAccessAsync(
-            query.Subject,
-            query.ViewId,
-            ViewAccessRight.EditView);
+        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.EditView);
     }
 
     public Task<bool> HandleAsync(CanAdministerViewAccessQuery query)
     {
-        return HasViewAccessAsync(
-            query.Subject,
-            query.ViewId,
-            ViewAccessRight.AdministerViewAccess);
+        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.AdministerViewAccess);
     }
 
-    async Task<bool> HasViewAccessAsync(
+    private async Task<bool> HasViewAccessAsync(
         AccessSubject subject,
         ViewId viewId,
         ViewAccessRight right)
@@ -45,7 +37,7 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
             IsGrantForUserOrRole(grant, subject.UserId, subject.RoleIds));
     }
 
-    static bool IsGrantForUserOrRole(
+    private static bool IsGrantForUserOrRole(
         ViewAccessGrant grant,
         string userId,
         IReadOnlySet<string> roleIds)
