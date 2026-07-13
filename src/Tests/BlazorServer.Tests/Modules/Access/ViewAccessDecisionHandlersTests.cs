@@ -1,8 +1,6 @@
-using System.Security.Claims;
-using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
-using Microsoft.Identity.Web;
+using BlazorServer.Modules.Access.Public.Authorization;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -14,15 +12,15 @@ public class ViewAccessDecisionHandlersTests
     {
         var store = new InMemoryViewAccessGrantStore();
         var grantHandler = new ViewAccessGrantHandler(store);
-        var decisionHandler = new ViewAccessDecisionHandler(store);
-        var user = Principal(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
+        var decisionService = new ViewAccessDecisionHandler(store);
+        var subject = Subject(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
 
         await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
         await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionService.CanUseViewAsync(subject, "view-1");
+        var canEdit = await decisionService.CanEditViewAsync(subject, "view-1");
+        var canAdminister = await decisionService.CanAdministerViewAccessAsync(subject, "view-1");
 
         Assert.Multiple(() =>
         {
@@ -36,15 +34,12 @@ public class ViewAccessDecisionHandlersTests
     public async Task GlobalViewSettingsFeatureAccessDoesNotImplyPerViewAccess()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var decisionHandler = new ViewAccessDecisionHandler(store);
-        var user = Principal(
-            userId: "user-1",
-            organizationId: "org-1",
-            accessClaims: [BlazorServer.Modules.Access.Constants.Authorization.AccessClaimValue]);
+        var decisionService = new ViewAccessDecisionHandler(store);
+        var subject = Subject(userId: "user-1", organizationId: "org-1");
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionService.CanUseViewAsync(subject, "view-1");
+        var canEdit = await decisionService.CanEditViewAsync(subject, "view-1");
+        var canAdminister = await decisionService.CanAdministerViewAccessAsync(subject, "view-1");
 
         Assert.Multiple(() =>
         {
@@ -58,16 +53,15 @@ public class ViewAccessDecisionHandlersTests
     public async Task AdminBypassExplicitlyAllowsViewFlowsWithoutStoredGrant()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var decisionHandler = new ViewAccessDecisionHandler(store);
-        var admin = Principal(
+        var decisionService = new ViewAccessDecisionHandler(store);
+        var admin = Subject(
             userId: "admin-1",
             organizationId: "org-1",
-            roleIds: [],
             isAdmin: true);
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(admin, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(admin, "view-1"));
+        var canUse = await decisionService.CanUseViewAsync(admin, "view-1");
+        var canEdit = await decisionService.CanEditViewAsync(admin, "view-1");
+        var canAdminister = await decisionService.CanAdministerViewAccessAsync(admin, "view-1");
 
         Assert.Multiple(() =>
         {
@@ -77,28 +71,14 @@ public class ViewAccessDecisionHandlersTests
         });
     }
 
-    private static ClaimsPrincipal Principal(
+    private static AccessSubject Subject(
         string userId,
         string organizationId,
-        IReadOnlyCollection<string>? roleIds = null,
-        IReadOnlyCollection<string>? accessClaims = null,
-        IReadOnlyCollection<string>? appRoles = null,
+        string[]? roleIds = null,
         bool isAdmin = false)
-    {
-        var claims = new List<Claim>
-        {
-            new(Microsoft.Identity.Web.ClaimConstants.ObjectId, userId),
-            new(Microsoft.Identity.Web.ClaimConstants.TenantId, organizationId)
-        };
-
-        claims.AddRange((roleIds ?? []).Select(roleId => new Claim("groups", roleId)));
-        claims.AddRange((accessClaims ?? []).Select(value => new Claim(BlazorServer.Modules.Access.Authentication.ApplicationClaimConstants.AccessClaimType, value)));
-        claims.AddRange((appRoles ?? []).Select(role => new Claim(ClaimTypes.Role, role)));
-        if (isAdmin)
-        {
-            claims.Add(new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue));
-        }
-
-        return new ClaimsPrincipal(new ClaimsIdentity(claims, "test"));
-    }
+        => new(
+            userId,
+            organizationId,
+            (roleIds ?? []).ToHashSet(StringComparer.Ordinal),
+            isAdmin);
 }

@@ -1,63 +1,37 @@
-using System.Security.Claims;
-using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Reports.Public;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
-public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
+public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store) : IViewAccessDecisionService
 {
-    public Task<bool> HandleAsync(CanUseViewQuery query)
-    {
-        return HasViewAccessAsync(
-            query.User,
-            query.ViewId,
-            ViewAccessRight.UseView);
-    }
+    public Task<bool> CanUseViewAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.UseView);
 
-    public Task<bool> HandleAsync(CanEditViewQuery query)
-    {
-        return HasViewAccessAsync(
-            query.User,
-            query.ViewId,
-            ViewAccessRight.EditView);
-    }
+    public Task<bool> CanEditViewAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.EditView);
 
-    public Task<bool> HandleAsync(CanAdministerViewAccessQuery query)
-    {
-        return HasViewAccessAsync(
-            query.User,
-            query.ViewId,
-            ViewAccessRight.AdministerViewAccess);
-    }
+    public Task<bool> CanAdministerViewAccessAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.AdministerViewAccess);
 
-    async Task<bool> HasViewAccessAsync(
-        ClaimsPrincipal user,
+    private async Task<bool> HasViewAccessAsync(
+        AccessSubject subject,
         ViewId viewId,
         ViewAccessRight right)
     {
-        if (user.IsApplicationAdmin())
+        if (subject.IsApplicationAdmin)
         {
             return true;
         }
 
-        var userId = user.GetUserId();
-        var organizationId = user.GetOrganizationId();
-        if (userId is null || organizationId is null)
-        {
-            return false;
-        }
-
-        var roleIds = user.FindAll("groups")
-            .Select(claim => claim.Value)
-            .ToHashSet(StringComparer.Ordinal);
-        var grants = await store.GetGrantsForViewAsync(viewId, organizationId);
+        var grants = await store.GetGrantsForViewAsync(viewId, subject.OrganizationId);
 
         return grants.Any(grant =>
             grant.Right == right &&
-            IsGrantForUserOrRole(grant, userId, roleIds));
+            IsGrantForUserOrRole(grant, subject.UserId, subject.RoleIds));
     }
 
-    static bool IsGrantForUserOrRole(
+    private static bool IsGrantForUserOrRole(
         ViewAccessGrant grant,
         string userId,
         IReadOnlySet<string> roleIds)

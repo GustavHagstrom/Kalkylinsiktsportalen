@@ -1,6 +1,6 @@
-namespace BlazorServer.Modules.Access.Authentication;
+namespace BlazorServer.Modules.Access.Public.Authorization;
 
-public static class ApplicationClaimConstants
+public static class AccessAuthorizationConstants
 {
     public const string AccessClaimType = "AccessClaim";
     public const string ExternalDirectoryRoleType = "wids";

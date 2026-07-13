@@ -1,6 +1,5 @@
 using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
-using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
@@ -9,6 +8,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.AppShell.Composition;
+using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 using BlazorServer.Modules.Access.Public.Contracts;
-using Microsoft.Extensions.Configuration;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -28,8 +27,7 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-        IConfiguration configuration = new ConfigurationBuilder().Build();
-        services.AddAccessModule(registrationContext, configuration);
+        services.AddAccessModule(registrationContext);
 
         Assert.Multiple(() =>
         {
@@ -69,9 +67,8 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-        IConfiguration configuration = new ConfigurationBuilder().Build();
 
-        services.AddAccessModule(registrationContext, configuration);
+        services.AddAccessModule(registrationContext);
         services.AddLogging();
         services.ApplyAppRegistrationContext(registrationContext);
 
@@ -117,7 +114,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimConstants.AccessClaimType, Constants.Authorization.AccessClaimValue)
+            new Claim(AccessAuthorizationConstants.AccessClaimType, Constants.Authorization.AccessClaimValue)
         ], "test"));
     }
 
@@ -125,7 +122,9 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue)
+            new Claim(
+                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 

@@ -1,4 +1,5 @@
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
+using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 
@@ -19,29 +20,35 @@ public class ClaimsTransformation : IClaimsTransformation
 
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var userId = principal.GetUserId();
-        var orgId = principal.GetOrganizationId();
-        var groupIds = principal.FindAll("groups").Select(c => c.Value).ToList();
-
-        if (userId is null || orgId is null)
+        var subject = principal.ToAccessSubject();
+        if (subject is null)
         {
             return principal;
         }
 
-        if (!_cache.TryGetAccessClaims(userId, orgId, out List<string>? accessClaimValues))
+        if (!_cache.TryGetAccessClaims(
+            subject.UserId,
+            subject.OrganizationId,
+            out List<string>? accessClaimValues))
         {
-            _cache.ClearAccessClaims(userId, orgId);
+            _cache.ClearAccessClaims(subject.UserId, subject.OrganizationId);
             var accessClaims = await functionalAccessGrants.HandleAsync(
-                new GetEffectiveFunctionalAccessClaimsQuery(userId, groupIds, orgId));
+                new GetEffectiveFunctionalAccessClaimsQuery(
+                    subject.UserId,
+                    subject.RoleIds.ToList(),
+                    subject.OrganizationId));
             accessClaimValues = [.. accessClaims.Select(x => x.Value)];
-            _cache.SetAccessClaims(userId, orgId, accessClaimValues);
+            _cache.SetAccessClaims(
+                subject.UserId,
+                subject.OrganizationId,
+                accessClaimValues);
         }
 
         if (accessClaimValues is not null)
         {
             foreach (var value in accessClaimValues)
             {
-                if (!principal.HasClaim(ApplicationClaimConstants.AccessClaimType, value))
+                if (!principal.HasClaim(AccessAuthorizationConstants.AccessClaimType, value))
                 {
                     ((ClaimsIdentity)principal.Identity!).AddClaim(new AccessClaim(value));
                 }

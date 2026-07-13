@@ -1,31 +1,26 @@
 @page "/Settings/views/{ViewId}"
 
-    
 @if(View is not null)
 {
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
-            
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["Lägg till sidbrytning"]</MudButton>
 
             <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
-            
-            
+
             @if (SelectedItem is DataSectionSelection selection)
             {
                 <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
                                     IsActive="@TextFormatIsEnabled"
                                     OnClick="@ToggleTextFormat"
                                     Class="mx-2" />
-                
+
                 <CellFormatEditor FormatDto="selection.DataCellDto.CellFormat" Enabled="@TextFormatIsEnabled" />
                 <MudDivider Vertical="true" FlexItem="true" Class="mx-2"/>
                 <TextFormatEditor FormatDto="selection.DataCellDto.TextFormat" Enabled="@TextFormatIsEnabled" />
-                
             }
-            
         </LeftToolbarContent>
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
@@ -34,29 +29,26 @@
                     {
                         var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSectionDto == section ? selection.DataCellDto : null;
                         <DataSectionComponent DataSectionDto="section" EditMode="true" SelectedDataCellDto="selectedCell" OnCellClick="x => SelectedItem = x"/>
-                       
                     }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
-                    <PrintableDocument  />
+                    <PrintableDocument />
                 </div>
             </div>
         </ChildContent>
     </ToolbarPage>
 }
-    
-
 
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IViewStore ViewStore
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject ViewAccessDecisionHandler ViewAccessDecisions
+@inject IViewAccessDecisionService ViewAccessDecisions
 
 @code {
     [Parameter] public string? ViewId { get; set; }
 
     ViewDto? View { get; set; }
-    ViewEditor? Editor { get; set; } 
+    ViewEditor? Editor { get; set; }
     bool isLoading = false;
     bool TextFormatIsEnabled = true;
     object? SelectedItem = null;
@@ -82,8 +74,10 @@
     {
         if (ViewId is null) return;
         SetLoading(true);
+
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        if (!await ViewAccessDecisions.HandleAsync(new CanEditViewQuery(authenticationState.User, ViewId)))
+        var subject = authenticationState.User.ToAccessSubject();
+        if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, ViewId))
         {
             View = null;
             Editor = null;
@@ -98,25 +92,27 @@
         }
         SetLoading(false);
     }
+
     void SetLoading(bool loading)
     {
         isLoading = loading;
         StateHasChanged();
     }
+
     void AddSection(SectionType type)
     {
-            if(Editor is null) return;
-            switch(type)
-            {
-                case SectionType.Data:
-                    Editor.AddDataSection();
-                    break;
-                case SectionType.Sheet:
-                    Editor.AddSheetSection();
-                    break;
-                case SectionType.PageBreak:
-                    Editor.AddPageBreakSection();
-                    break;
+        if(Editor is null) return;
+        switch(type)
+        {
+            case SectionType.Data:
+                Editor.AddDataSection();
+                break;
+            case SectionType.Sheet:
+                Editor.AddSheetSection();
+                break;
+            case SectionType.PageBreak:
+                Editor.AddPageBreakSection();
+                break;
         }
     }
 }

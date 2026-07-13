@@ -81,7 +81,11 @@ public sealed partial class FinalArchitectureBoundaryTests
     public void ModulePublicContractsMustNotExposeOwnerInternals()
     {
         var violations = new List<string>();
-        foreach (var file in FilesUnder("Modules").Where(file => RelativePath(file).Split('/').ElementAtOrDefault(2) == "Public"))
+        var publicContractFiles = FilesUnder("Modules")
+            .Where(file => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .Where(file => RelativePath(file).Split('/').ElementAtOrDefault(2) == "Public");
+
+        foreach (var file in publicContractFiles)
         {
             var owner = RelativePath(file).Split('/')[1];
             foreach (var reference in NamespaceReferences(file))
