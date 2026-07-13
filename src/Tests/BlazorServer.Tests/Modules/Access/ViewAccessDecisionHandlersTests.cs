@@ -1,8 +1,5 @@
-using System.Security.Claims;
-using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
-using Microsoft.Identity.Web;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -15,14 +12,14 @@ public class ViewAccessDecisionHandlersTests
         var store = new InMemoryViewAccessGrantStore();
         var grantHandler = new ViewAccessGrantHandler(store);
         var decisionHandler = new ViewAccessDecisionHandler(store);
-        var user = Principal(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
+        var subject = Subject(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
 
         await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
         await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(subject, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(subject, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(subject, "view-1"));
 
         Assert.Multiple(() =>
         {
@@ -37,14 +34,11 @@ public class ViewAccessDecisionHandlersTests
     {
         var store = new InMemoryViewAccessGrantStore();
         var decisionHandler = new ViewAccessDecisionHandler(store);
-        var user = Principal(
-            userId: "user-1",
-            organizationId: "org-1",
-            accessClaims: [BlazorServer.Modules.Access.Constants.Authorization.AccessClaimValue]);
+        var subject = Subject(userId: "user-1", organizationId: "org-1");
 
-        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(user, "view-1"));
-        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(user, "view-1"));
-        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(user, "view-1"));
+        var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(subject, "view-1"));
+        var canEdit = await decisionHandler.HandleAsync(new CanEditViewQuery(subject, "view-1"));
+        var canAdminister = await decisionHandler.HandleAsync(new CanAdministerViewAccessQuery(subject, "view-1"));
 
         Assert.Multiple(() =>
         {
@@ -59,10 +53,9 @@ public class ViewAccessDecisionHandlersTests
     {
         var store = new InMemoryViewAccessGrantStore();
         var decisionHandler = new ViewAccessDecisionHandler(store);
-        var admin = Principal(
+        var admin = Subject(
             userId: "admin-1",
             organizationId: "org-1",
-            roleIds: [],
             isAdmin: true);
 
         var canUse = await decisionHandler.HandleAsync(new CanUseViewQuery(admin, "view-1"));
@@ -77,28 +70,14 @@ public class ViewAccessDecisionHandlersTests
         });
     }
 
-    private static ClaimsPrincipal Principal(
+    private static AccessSubject Subject(
         string userId,
         string organizationId,
-        IReadOnlyCollection<string>? roleIds = null,
-        IReadOnlyCollection<string>? accessClaims = null,
-        IReadOnlyCollection<string>? appRoles = null,
+        IReadOnlySet<string>? roleIds = null,
         bool isAdmin = false)
-    {
-        var claims = new List<Claim>
-        {
-            new(Microsoft.Identity.Web.ClaimConstants.ObjectId, userId),
-            new(Microsoft.Identity.Web.ClaimConstants.TenantId, organizationId)
-        };
-
-        claims.AddRange((roleIds ?? []).Select(roleId => new Claim("groups", roleId)));
-        claims.AddRange((accessClaims ?? []).Select(value => new Claim(BlazorServer.Modules.Access.Authentication.ApplicationClaimConstants.AccessClaimType, value)));
-        claims.AddRange((appRoles ?? []).Select(role => new Claim(ClaimTypes.Role, role)));
-        if (isAdmin)
-        {
-            claims.Add(new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue));
-        }
-
-        return new ClaimsPrincipal(new ClaimsIdentity(claims, "test"));
-    }
+        => new(
+            userId,
+            organizationId,
+            roleIds ?? new HashSet<string>(StringComparer.Ordinal),
+            isAdmin);
 }
