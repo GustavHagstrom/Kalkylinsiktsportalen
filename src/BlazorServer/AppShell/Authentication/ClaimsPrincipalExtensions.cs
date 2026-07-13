@@ -1,8 +1,7 @@
 using System.Security.Claims;
-using BlazorServer.AppShell.Authentication;
 using Microsoft.Identity.Web;
 
-namespace BlazorServer.Kernel.Authentication;
+namespace BlazorServer.AppShell.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {
@@ -16,7 +15,7 @@ public static class ClaimsPrincipalExtensions
         => principal.FindFirstValue(CurrentUserSessionClaimTypes.Email);
 
     public static List<string> GetDirectoryRoles(this ClaimsPrincipal principal)
-        => principal.FindAll(CurrentUserSessionClaimTypes.DirectoryRoles).Select(c => c.Value).ToList();
+        => principal.FindAll(CurrentUserSessionClaimTypes.DirectoryRoles).Select(claim => claim.Value).ToList();
 
     public static CurrentUser? ToCurrentUser(this ClaimsPrincipal principal)
     {

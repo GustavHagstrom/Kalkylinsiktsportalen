@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using BlazorServer.Kernel.Authentication;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Reports.Public;
 
