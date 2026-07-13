@@ -178,6 +178,6 @@ public sealed partial class FinalArchitectureBoundaryTests
     [GeneratedRegex(@"\bBlazorServer(?:\.[A-Za-z_][A-Za-z0-9_]*)+")]
     private static partial Regex NamespaceReferenceRegex();
 
-    [GeneratedRegex(@"^BlazorServer\.Modules\.(?<module>[A-Za-z_][A-Za-z0-9_]*)\.(?<remainder>.+)$")]
+    [GeneratedRegex(@"^BlazorServer\.Modules\.(?<module>[A-Za-z_][A-Za-z0-9_]*)(?:\.(?<remainder>.+))?$")]
     private static partial Regex ModuleReferenceRegex();
 }
