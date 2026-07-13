@@ -1,6 +1,6 @@
-using BlazorServer.Kernel.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace BlazorServer.Modules.Access.Authentication;
@@ -19,8 +19,8 @@ public class ClaimsTransformation : IClaimsTransformation
     }
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var userId = principal.GetUserId();
-        var orgId = principal.GetOrganizationId();
+        var userId = principal.FindFirstValue(ClaimConstants.ObjectId);
+        var orgId = principal.FindFirstValue(ClaimConstants.TenantId);
         var groupIds = principal.FindAll("groups").Select(c => c.Value).ToList();
         
         if(userId is null || orgId is null) return principal;        
@@ -43,12 +43,6 @@ public class ClaimsTransformation : IClaimsTransformation
             }
         }
 
-        //var isAdmin = await _applicationAdminLookup.IsApplicationAdminAsync(principal);
-        //if (isAdmin && !principal.HasClaim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue))
-        //{
-        //    ((ClaimsIdentity)principal.Identity!).AddClaim(new Claim(ClaimTypes.Role, AccessPolicies.ApplicationAdminRoleClaimValue));
-        //}
         return principal;
     }
-    
 }
