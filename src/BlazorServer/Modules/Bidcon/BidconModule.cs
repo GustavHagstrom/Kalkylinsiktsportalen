@@ -1,7 +1,7 @@
 using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Composition.Navigation;
 using BlazorServer.AppShell.Composition.Settings;
-using BlazorServer.Modules.Access.Authentication;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon.Components;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
