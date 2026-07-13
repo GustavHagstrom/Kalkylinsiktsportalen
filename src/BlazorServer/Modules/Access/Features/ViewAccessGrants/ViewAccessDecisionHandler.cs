@@ -3,22 +3,25 @@ using BlazorServer.Modules.Reports.Public;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
-public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
+public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store) : IViewAccessDecisionService
 {
     public Task<bool> HandleAsync(CanUseViewQuery query)
-    {
-        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.UseView);
-    }
+        => CanUseViewAsync(query.Subject, query.ViewId);
 
     public Task<bool> HandleAsync(CanEditViewQuery query)
-    {
-        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.EditView);
-    }
+        => CanEditViewAsync(query.Subject, query.ViewId);
 
     public Task<bool> HandleAsync(CanAdministerViewAccessQuery query)
-    {
-        return HasViewAccessAsync(query.Subject, query.ViewId, ViewAccessRight.AdministerViewAccess);
-    }
+        => CanAdministerViewAccessAsync(query.Subject, query.ViewId);
+
+    public Task<bool> CanUseViewAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.UseView);
+
+    public Task<bool> CanEditViewAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.EditView);
+
+    public Task<bool> CanAdministerViewAccessAsync(AccessSubject subject, ViewId viewId)
+        => HasViewAccessAsync(subject, viewId, ViewAccessRight.AdministerViewAccess);
 
     private async Task<bool> HasViewAccessAsync(
         AccessSubject subject,
