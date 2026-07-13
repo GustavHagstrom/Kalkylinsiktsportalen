@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 using BlazorServer.Modules.Access.Public.Contracts;
-using Microsoft.Extensions.Configuration;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -28,8 +27,7 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-        IConfiguration configuration = new ConfigurationBuilder().Build();
-        services.AddAccessModule(registrationContext, configuration);
+        services.AddAccessModule(registrationContext);
 
         Assert.Multiple(() =>
         {
@@ -69,9 +67,8 @@ public class AccessModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
-        IConfiguration configuration = new ConfigurationBuilder().Build();
 
-        services.AddAccessModule(registrationContext, configuration);
+        services.AddAccessModule(registrationContext);
         services.AddLogging();
         services.ApplyAppRegistrationContext(registrationContext);
 
