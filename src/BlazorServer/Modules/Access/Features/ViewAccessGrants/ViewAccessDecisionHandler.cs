@@ -5,15 +5,6 @@ namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
 public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store) : IViewAccessDecisionService
 {
-    public Task<bool> HandleAsync(CanUseViewQuery query)
-        => CanUseViewAsync(query.Subject, query.ViewId);
-
-    public Task<bool> HandleAsync(CanEditViewQuery query)
-        => CanEditViewAsync(query.Subject, query.ViewId);
-
-    public Task<bool> HandleAsync(CanAdministerViewAccessQuery query)
-        => CanAdministerViewAccessAsync(query.Subject, query.ViewId);
-
     public Task<bool> CanUseViewAsync(AccessSubject subject, ViewId viewId)
         => HasViewAccessAsync(subject, viewId, ViewAccessRight.UseView);
 
