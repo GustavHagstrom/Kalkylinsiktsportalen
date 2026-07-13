@@ -1,20 +1,9 @@
 @page "/"
 
-@using BlazorServer.Modules.Reports.Views.Rendering
-
 <AuthorizeView>
     <Authorized>
-        <MudStack Spacing="2" Row="true" Class="pa-4 full-height">
-         
-            <div>
-                <CurrentSession />
-            </div>
-            <div class="full-height" style="overflow: auto;">
-                <MudStack Spacing="2">
-                    <PrintableDocument />
-                </MudStack>
-            </div>
-           
+        <MudStack Spacing="2" Class="pa-4">
+            <CurrentSession />
         </MudStack>
     </Authorized>
 </AuthorizeView>
