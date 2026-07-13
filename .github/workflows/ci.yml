@@ -51,5 +51,25 @@ jobs:
           exit 1
 
       - name: Test
+        id: test
         if: steps.build.outputs.exit_code == '0'
-        run: dotnet test src/Kalkylinsiktsportalen.sln --configuration Release --no-build
+        continue-on-error: true
+        run: |
+          set +e
+          dotnet test src/Kalkylinsiktsportalen.sln --configuration Release --no-build > test.log 2>&1
+          exit_code=$?
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload test log
+        if: always() && steps.build.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-log
+          path: test.log
+
+      - name: Fail when tests failed
+        if: steps.build.outputs.exit_code == '0' && steps.test.outputs.exit_code != '0'
+        run: |
+          cat test.log
+          exit 1
