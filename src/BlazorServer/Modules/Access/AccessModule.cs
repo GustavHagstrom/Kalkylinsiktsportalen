@@ -29,6 +29,7 @@ public static class AccessModule
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
         services.AddTransient<ViewAccessGrantHandler>();
         services.AddTransient<ViewAccessDecisionHandler>();
+        services.AddTransient<IViewAccessDecisionService>(sp => sp.GetRequiredService<ViewAccessDecisionHandler>());
 
         registrationContext.Policies.AddPolicy(Constants.Authorization.PolicyName, config =>
         {
