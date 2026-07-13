@@ -1,6 +1,5 @@
 using BlazorServer.AppShell.Composition.Settings;
 using System.Security.Claims;
-using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
@@ -9,6 +8,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.AppShell.Composition;
+using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -117,7 +117,7 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimConstants.AccessClaimType, Constants.Authorization.AccessClaimValue)
+            new Claim(AccessAuthorizationClaims.AccessClaimType, Constants.Authorization.AccessClaimValue)
         ], "test"));
     }
 
@@ -125,7 +125,9 @@ public class AccessModuleRegistrationTests
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue)
+            new Claim(
+                AccessAuthorizationClaims.ExternalDirectoryRoleType,
+                AccessAuthorizationClaims.ApplicationAdminRoleClaimValue)
         ], "test"));
     }
 
