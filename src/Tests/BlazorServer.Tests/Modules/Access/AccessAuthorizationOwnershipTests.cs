@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Access.Authentication;
 using System.Security.Claims;
+using BlazorServer.Modules.Access.Public.Authorization;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -11,8 +11,10 @@ public class AccessAuthorizationOwnershipTests
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ApplicationClaimConstants.AccessClaimType, "CanDoThing"),
-            new Claim(ApplicationClaimConstants.ExternalDirectoryRoleType, ApplicationClaimConstants.ApplicationAdminRoleClaimValue)
+            new Claim(AccessAuthorizationClaims.AccessClaimType, "CanDoThing"),
+            new Claim(
+                AccessAuthorizationClaims.ExternalDirectoryRoleType,
+                AccessAuthorizationClaims.ApplicationAdminRoleClaimValue)
         ], "test"));
 
         Assert.Multiple(() =>
