@@ -46,12 +46,11 @@ Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integ
 
 ```text
 Composition/
-  Äger gemensam bootstrap-state, bidragsmodeller och registries som används
-  när hosten, AppShell och produktmoduler sätts samman.
+  Äger gemensam bootstrap-state, bidragsmodeller och registries.
 
 AppShell/
-  Äger konkreta portalytor: layout, navigation rendering, shell-pages,
-  loginpresentation, aktuell användarsession och portalpreferenser.
+  Äger konkreta portalytor, loginpresentation, aktuell användarsession
+  och portalpreferenser.
 
 Infrastructure/
   Äger neutral teknisk infrastruktur, till exempel Mongo-klient,
@@ -68,13 +67,9 @@ UiKit/
   Äger neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap.
 ```
 
-`Composition` införs tills vidare som top-level-mapp och namespace i samma assembly. Den ska kunna extraheras till ett eget projekt senare utan att dess ansvar eller beroenderiktning behöver ändras.
+`Composition` införs tills vidare som top-level-mapp och namespace i samma assembly. Den samlar generella bidrag från moduler och AppShell genom `AppRegistrationContext`, men äger ingen produktsemantik eller konkret shell-presentation.
 
-`Kernel` får inte bero på `Composition`, `Modules`, `AppShell`, `UiKit` eller `Infrastructure`.
-
-Moduler får inte bero på `AppShell`, inte heller på en publik del av AppShell. När en modul behöver synas i portalen bidrar den metadata genom den neutrala `Composition`-gränsen. AppShell konsumerar den färdiga composition-staten och äger konkreta shell-ytor.
-
-En UI-komponent hör bara hemma i `UiKit` när den är neutral och antingen har flera verkliga konsumenter eller är en avsiktlig design-systemprimitiv. Feature-specifika komponenter stannar i ägande modul.
+`AppRegistrationContext` förblir en samlad bootstrap-fasad för UI-, access-claim- och authorization-policy-bidrag. Access äger betydelsen och runtime-tolkningen av authorization-bidrag; AppShell äger loginpresentationen; hostens composition root applicerar den färdiga registreringsstaten på DI och ASP.NET Core.
 
 ## Målmoduler
 
@@ -102,14 +97,6 @@ Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `
 
 ## Gemensamma Byggblock
 
-### Composition
-
-`Composition` äger den generella mekanismen för att samla modulbidrag under bootstrap. Den får innehålla `AppRegistrationContext`, UI-bidragsmodeller, navigation- och settings-registries samt generella registries för access-claim- och authorization-policy-bidrag.
-
-`Composition` äger inte produktsemantik eller runtime-accessbeslut. En modul äger betydelsen av sina bidrag och `Access` äger tolkning av portalclaims, policies och accessbeslut.
-
-`Composition` får inte bero på `Modules`, framtida `*.Contracts`-projekt eller `AppShell`. Detta förhindrar cirkulära projektreferenser vid en framtida projektuppdelning.
-
 ### Kernel
 
 Får innehålla små och stabila systemövergripande typer, till exempel starka identiteter och minimala CQRS-kontrakt. Att en typ används av två moduler är inte i sig skäl att lägga den i Kernel.
@@ -126,20 +113,13 @@ Varje modul äger sin egen persistence-implementation, mappings, collections och
 
 ## Modulregistrering Och UI Composition
 
-Målmoduler registreras explicit genom statiska `IServiceCollection`-extensions och bidrar metadata till `AppRegistrationContext`. Det historiska beslutet om registreringsformen finns i [../adr/global/0040-use-static-module-registration-functions.md](../adr/global/0040-use-static-module-registration-functions.md), medan ägarskap och beroenderiktning för composition beskrivs i [../adr/global/0043-introduce-dedicated-composition-boundary.md](../adr/global/0043-introduce-dedicated-composition-boundary.md).
+Målmoduler registreras explicit genom statiska `IServiceCollection`-extensions och bidrar metadata till `AppRegistrationContext`. Registreringsformen beskrivs i [ADR-0040](../adr/global/0040-use-static-module-registration-functions.md) och ägarskapet för composition-kontrakten i [ADR-0043](../adr/global/0043-introduce-dedicated-composition-boundary.md).
 
-`AppRegistrationContext` behåller sitt namn och fungerar som en samlad bootstrap-fasad för UI-, access-claim- och authorization-policy-bidrag. Den delas inte upp förrän ett konkret behov motiverar det.
-
-Navigation och settings areas registreras som data. Loginpresentation är inte ett modulbidrag och ägs av AppShell/hostens auth-konfiguration.
-
-`Composition` samlar bidragen, men hostens composition root i `ServiceAndFeatureRegistrations` äger hela livscykeln: skapa context, registrera AppShell och moduler, välja hostspecifik auth/loginpresentation och applicera den färdiga staten på DI och ASP.NET Core Authorization. Ingen separat `Bootstrap`-gräns införs.
+Navigation och settings areas registreras som data. Loginpresentation är host-/AppShell-ansvar och inte ett modulbidrag.
 
 ## Authentication Och Authorization
 
-Ansvar delas vid en tydlig gräns:
-
 - AppShell mappar generell extern identitet till en smal aktuell användarsession och äger loginpresentation.
-- Composition äger generiska bootstrap-modeller och registries för claim- och policybidrag.
 - Access tolkar portalclaims, policies, application-admin och accessbeslut.
 - Featurekod konsumerar sessions- och authorization-kontrakt i stället för att tolka `ClaimsPrincipal` direkt.
 - Råa Entra- och Microsoft Graph-modeller hålls privata i integrationsadaptern.
@@ -168,19 +148,18 @@ AppShell
   -> avsiktliga publika modulkontrakt
 
 Composition
-  -> frameworktyper som krävs av bidragsmodellerna
   -X-> Modules
   -X-> AppShell
 
-Infrastructure
-  -> Kernel, vid behov
-  -> externa paket
-
 Kernel
   -X-> Composition
+  -X-> Modules
+  -X-> AppShell
+  -X-> UiKit
+  -X-> Infrastructure
 ```
 
-Moduler får inte nå in i varandras interna use cases, persistence, integrationer eller UI. Cross-module-interaktion sker genom den ägande modulens avsiktliga yta under `Modules/{Module}/Public`.
+Moduler får inte bero på `AppShell` eller nå in i andra modulers interna use cases, persistence, integrationer eller UI. Cross-module-interaktion sker genom den ägande modulens avsiktliga yta under `Modules/{Module}/Public`.
 
 ## Frontendstrategi
 
@@ -195,4 +174,4 @@ Blazor Server behålls som snabbaste utvecklingsmiljö i nuvarande fas. Komponen
 
 ## Slutsats
 
-Bygg vidare som Blazor Server, men håll varje typ hos en explicit ägare. Moduler bidrar genom en neutral Composition-gräns och får aldrig bero på AppShell. Det ger snabb utveckling idag och en tydlig väg mot projektbaserade moduler, utbytbara klienter och renare ansvarsfördelning.
+Bygg vidare som Blazor Server, men håll varje typ hos en explicit ägare och skydda modulgränserna. Det ger snabb utveckling idag och en tydlig väg mot projektbaserade moduler och utbytbara klienter.
