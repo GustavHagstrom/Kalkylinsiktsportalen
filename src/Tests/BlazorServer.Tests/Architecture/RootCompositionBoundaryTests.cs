@@ -21,7 +21,7 @@ public sealed partial class RootCompositionBoundaryTests
     [Test]
     public void BootstrapMayOnlyReferenceModuleEntrypointsOrPublicContracts()
     {
-        var bootstrapFile = Path.Combine(ProductionRoot, "ServiceAndFeatureRegistrations.cs");
+        var bootstrapFile = Path.Combine(ProductionRoot, "ServiceRegistrations.cs");
 
         AssertNoForbiddenModuleReferences(
             bootstrapFile,

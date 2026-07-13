@@ -1,9 +1,8 @@
-using BlazorServer.AppShell.Composition.Navigation;
-using BlazorServer.AppShell.Composition.Settings;
-using BlazorServer.AppShell.Composition.UI;
+using BlazorServer.Composition.Navigation;
+using BlazorServer.Composition.Settings;
+using BlazorServer.Composition.UI;
 using System.Security.Claims;
 using BlazorServer.AppShell.Settings;
-using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BlazorServer.Tests.AppShell.Settings;
@@ -80,7 +79,7 @@ public class SettingsHubTests
 
     private sealed class PolicyAuthorizationService(params string[] allowedPolicies) : IAuthorizationService
     {
-        private readonly HashSet<string> allowedPolicies = allowedPolicies.ToHashSet(StringComparer.Ordinal);
+        private readonly HashSet<string> _allowedPolicies = allowedPolicies.ToHashSet(StringComparer.Ordinal);
 
         public Task<AuthorizationResult> AuthorizeAsync(
             ClaimsPrincipal user,
@@ -96,7 +95,7 @@ public class SettingsHubTests
             string policyName)
         {
             return Task.FromResult(
-                allowedPolicies.Contains(policyName)
+                _allowedPolicies.Contains(policyName)
                     ? AuthorizationResult.Success()
                     : AuthorizationResult.Failed());
         }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-namespace BlazorServer.AppShell.Composition;
+namespace BlazorServer.Composition;
 
-public class PolicyCollection
+public class AuthorizationPolicyRegistry
 {
     private readonly List<(string Name, Action<AuthorizationPolicyBuilder> Builder)> policies = [];
 

@@ -1,8 +1,7 @@
-using BlazorServer.AppShell.Composition.Settings;
-using BlazorServer.AppShell.Composition.UI;
 using System.Security.Claims;
-using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
+using BlazorServer.Composition.Settings;
+using BlazorServer.Composition.UI;
 
 namespace BlazorServer.AppShell.Settings;
 

@@ -1,4 +1,4 @@
-namespace BlazorServer.AppShell.Composition.Navigation;
+namespace BlazorServer.Composition.Navigation;
 
 public sealed class NavigationRegistry
 {

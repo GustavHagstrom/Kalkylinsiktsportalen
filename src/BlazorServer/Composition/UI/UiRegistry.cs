@@ -1,8 +1,8 @@
-using BlazorServer.AppShell.Composition.Navigation;
-using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Composition.Navigation;
+using BlazorServer.Composition.Settings;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorServer.AppShell.Composition.UI;
+namespace BlazorServer.Composition.UI;
 
 public sealed class UiRegistry
 {
@@ -19,8 +19,6 @@ public sealed class UiRegistry
 
     public IReadOnlyList<SettingsAreaContribution> SettingsAreas => settingsAreaRegistry.SettingsAreas;
 
-    public Type? LoginDisplayComponent { get; private set; }
-
     public void AddTopNavigation(NavigationItem item)
     {
         navigation.AddTopNavigation(item);
@@ -36,16 +34,5 @@ public sealed class UiRegistry
         settingsAreaRegistry.Add(area, moduleKey);
     }
 
-    public void SetLoginDisplay<T>()
-        where T : ComponentBase
-    {
-        var type = typeof(T);
-        if (LoginDisplayComponent is not null && LoginDisplayComponent != type)
-        {
-            throw new InvalidOperationException(
-                $"Login display component is already registered as {LoginDisplayComponent.FullName}.");
-        }
-
-        LoginDisplayComponent = type;
-    }
+   
 }

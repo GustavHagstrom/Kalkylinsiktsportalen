@@ -1,5 +1,5 @@
-using BlazorServer.AppShell.Composition;
-using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Composition;
+using BlazorServer.Composition.Settings;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -37,7 +37,7 @@ public static class AccessModule
                 context.User.HasAccessClaimOrApplicationAdmin(Constants.Authorization.AccessClaimValue));
         });
 
-        registrationContext.AccessClaims.Register(new AccessClaimInfo(
+        registrationContext.AccessClaims.Register(new AccessClaimContribution(
             Constants.Authorization.AccessClaimValue,
             "Rättigheter",
             "Skapa, ändra och ta bort användarrättigheter och roller."));

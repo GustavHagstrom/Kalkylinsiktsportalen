@@ -1,4 +1,4 @@
-using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Composition.Settings;
 using System.Security.Claims;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Components;
@@ -7,15 +7,14 @@ using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.AppShell.Settings;
-using BlazorServer.AppShell.Composition;
 using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using AccessSettingsPage = BlazorServer.Modules.Access.Components.SettingsPage;
 using BlazorServer.Modules.Access.Public.Contracts;
+using BlazorServer.Composition;
 
 namespace BlazorServer.Tests.Modules.Access;
 
@@ -29,7 +28,7 @@ public class AccessModuleRegistrationTests
         var registrationContext = services.AddAppRegistrationContext();
         services.AddAccessModule(registrationContext);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(registrationContext.AccessClaims.Claims, Has.One.EqualTo(
                 new AccessClaimInfo(
@@ -59,7 +58,7 @@ public class AccessModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
-        });
+        }
     }
 
     [Test]
@@ -88,18 +87,18 @@ public class AccessModuleRegistrationTests
             new ClaimsPrincipal(new ClaimsIdentity("test")),
             authorizationService);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(visibleForClaim.Select(area => area.Id), Has.One.EqualTo("access"));
             Assert.That(visibleForAdmin.Select(area => area.Id), Has.One.EqualTo("access"));
             Assert.That(hiddenForUnprivilegedUser, Is.Empty);
-        });
+        };
     }
 
     [Test]
     public void AccessSettingsPagesUseModuleRoutesWithAuthorizationPolicy()
     {
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(RouteTemplatesFor<AccessSettingsPage>(), Is.EquivalentTo(["/settings/access"]));
             Assert.That(RouteTemplatesFor<EditUserAccessPage>(), Is.EquivalentTo(["/settings/access/users/{UserId}"]));
@@ -107,7 +106,7 @@ public class AccessModuleRegistrationTests
             Assert.That(AuthorizationPoliciesFor<AccessSettingsPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
             Assert.That(AuthorizationPoliciesFor<EditUserAccessPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
             Assert.That(AuthorizationPoliciesFor<EditRoleAccessPage>(), Has.One.EqualTo(Constants.Authorization.PolicyName));
-        });
+        };
     }
 
     private static ClaimsPrincipal PrincipalWithClaim()
@@ -130,19 +129,17 @@ public class AccessModuleRegistrationTests
 
     private static string[] RouteTemplatesFor<TComponent>()
     {
-        return typeof(TComponent)
+        return [.. typeof(TComponent)
             .GetCustomAttributes(typeof(RouteAttribute), inherit: false)
             .Cast<RouteAttribute>()
-            .Select(attribute => attribute.Template)
-            .ToArray();
+            .Select(attribute => attribute.Template)];
     }
 
     private static string?[] AuthorizationPoliciesFor<TComponent>()
     {
-        return typeof(TComponent)
+        return [.. typeof(TComponent)
             .GetCustomAttributes(typeof(AuthorizeAttribute), inherit: false)
             .Cast<AuthorizeAttribute>()
-            .Select(attribute => attribute.Policy)
-            .ToArray();
+            .Select(attribute => attribute.Policy)];
     }
 }

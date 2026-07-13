@@ -1,15 +1,15 @@
 using BlazorServer.Modules.Access.Public.Contracts;
 
-namespace BlazorServer.AppShell.Composition;
+namespace BlazorServer.Composition;
 
 public sealed class AccessClaimRegistry
 {
-    private readonly Dictionary<string, AccessClaimInfo> claimsByValue = new(StringComparer.Ordinal);
-    private readonly List<AccessClaimInfo> claims = [];
+    private readonly Dictionary<string, AccessClaimContribution> claimsByValue = new(StringComparer.Ordinal);
+    private readonly List<AccessClaimContribution> claims = [];
 
-    public IReadOnlyList<AccessClaimInfo> Claims => claims;
+    public IReadOnlyList<AccessClaimContribution> Claims => claims;
 
-    public void Register(AccessClaimInfo claimInfo)
+    public void Register(AccessClaimContribution claimInfo)
     {
         if (!claimsByValue.TryGetValue(claimInfo.Value, out var existingClaimInfo))
         {
@@ -27,3 +27,4 @@ public sealed class AccessClaimRegistry
             $"Access claim {claimInfo.Value} is already registered with different metadata.");
     }
 }
+public sealed record AccessClaimContribution(string Value, string Name, string Description);
