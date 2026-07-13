@@ -32,7 +32,7 @@ public class ImportEstimationSnapshotTests
             Assert.That(result, Is.TypeOf<EstimationSnapshotImported>());
             var imported = (EstimationSnapshotImported)result;
             Assert.That(imported.WasImported, Is.True);
-            Assert.That(imported.SnapshotId.Value.IsEmpty, Is.False);
+            Assert.That(imported.SnapshotId.Value, Is.Not.EqualTo(Guid.Empty));
             Assert.That(imported.BidconEstimationId, Is.EqualTo(bidconEstimationId));
             Assert.That(imported.SourceEditDate, Is.EqualTo(new DateTime(2026, 06, 29, 08, 30, 00, DateTimeKind.Utc)));
             Assert.That(imported.ImportedAt, Is.InRange(beforeImport, afterImport));
@@ -130,7 +130,6 @@ public class ImportEstimationSnapshotTests
             Assert.That(store.SavedSnapshot, Is.Null);
         });
     }
-
 
     [Test]
     public void BidconExternalEnums_MatchSnapshotEnums()
