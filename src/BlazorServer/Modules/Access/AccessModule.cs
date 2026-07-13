@@ -6,6 +6,7 @@ using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using MongoDB.Driver;
