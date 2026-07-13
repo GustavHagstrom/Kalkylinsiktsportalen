@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Reports.Public;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
