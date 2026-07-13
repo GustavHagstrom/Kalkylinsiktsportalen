@@ -22,54 +22,85 @@ public class CurrentUserSessionTests
 
         var currentUser = principal.ToCurrentUser();
 
-        Assert.That(currentUser, Is.Not.Null);
-        Assert.That(currentUser!.Id, Is.EqualTo("user-1"));
-        Assert.That(currentUser.Name, Is.EqualTo("Ada Lovelace"));
-        Assert.That(currentUser.Email, Is.EqualTo("ada@example.com"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(currentUser, Is.Not.Null);
+            Assert.That(currentUser!.UserId, Is.EqualTo("user-1"));
+            Assert.That(currentUser.DisplayName, Is.EqualTo("Ada Lovelace"));
+            Assert.That(currentUser.Email, Is.EqualTo("ada@example.com"));
+            Assert.That(principal.GetOrganizationId(), Is.EqualTo("org-1"));
+        });
     }
 
     [Test]
-    public async Task RefreshAsyncUpdatesCurrentSessionProjection()
+    public async Task CurrentUserSessionUsesProfileLookupForAvatar()
     {
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(
+        var authProvider = new FixedAuthenticationStateProvider(new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(ClaimConstants.ObjectId, "user-1"),
             new Claim(ClaimConstants.TenantId, "org-1"),
-            new Claim(ClaimTypes.Name, "Ada Lovelace")
-        ], "test"));
-        var authenticationStateProvider = new TestAuthenticationStateProvider(principal);
-        var profileLookup = new TestCurrentUserProfileLookup();
-        var session = new CurrentUserSession(authenticationStateProvider, new TestNavigationManager(), profileLookup);
+            new Claim(ClaimTypes.Name, "Ada Lovelace"),
+            new Claim(CurrentUserSessionClaimTypes.Email, "ada@example.com")
+        ], "test")));
+        var profileLookup = new FixedProfileLookup(new SessionUser(
+            "user-1",
+            "Ada Lovelace",
+            "ada@example.com",
+            "photo-base64"));
+        using var session = new CurrentUserSession(
+            authProvider,
+            new TestNavigationManager(),
+            profileLookup);
 
-        var currentUser = await session.RefreshAsync();
+        var user = await session.UpdateUserAsync();
 
-        Assert.That(currentUser, Is.Not.Null);
-        Assert.That(session.OrganizationId, Is.EqualTo("org-1"));
-        Assert.That(session.IsAuthenticated, Is.True);
-        Assert.That(session.User?.Id, Is.EqualTo("user-1"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(user?.Name, Is.EqualTo("Ada Lovelace"));
+            Assert.That(user?.AvatarBase64, Is.EqualTo("photo-base64"));
+        });
     }
 
-    private sealed class TestAuthenticationStateProvider(ClaimsPrincipal principal) : AuthenticationStateProvider
+    private sealed class FixedAuthenticationStateProvider : AuthenticationStateProvider
     {
+        private readonly AuthenticationState state;
+
+        public FixedAuthenticationStateProvider(ClaimsPrincipal principal)
+        {
+            state = new AuthenticationState(principal);
+        }
+
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
-            => Task.FromResult(new AuthenticationState(principal));
+        {
+            return Task.FromResult(state);
+        }
     }
 
-    private sealed class TestCurrentUserProfileLookup : ICurrentUserProfileLookup
+    private sealed class FixedProfileLookup : ICurrentUserProfileLookup
     {
-        public Task<SessionUser?> GetProfileAsync(CurrentUser user)
-            => Task.FromResult<SessionUser?>(new SessionUser(user.Id, user.Name, user.Email, []));
+        private readonly SessionUser user;
+
+        public FixedProfileLookup(SessionUser user)
+        {
+            this.user = user;
+        }
+
+        public Task<SessionUser> GetProfileAsync(CurrentUser currentUser)
+        {
+            return Task.FromResult(user);
+        }
     }
 
     private sealed class TestNavigationManager : NavigationManager
     {
         public TestNavigationManager()
         {
-            Initialize("https://localhost/", "https://localhost/");
+            Initialize("https://example.test/", "https://example.test/");
         }
 
         protected override void NavigateToCore(string uri, NavigationOptions options)
         {
+            Uri = ToAbsoluteUri(uri).ToString();
         }
     }
 }
