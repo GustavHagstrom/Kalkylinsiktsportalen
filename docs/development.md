@@ -63,7 +63,7 @@ Följ befintlig kod när ändringen är liten:
 Följ målarkitekturen när du lägger ny produktlogik:
 
 - lägg ny produktlogik i relevant `Modules/*`
-- registrera modulen via dess statiska `IServiceCollection`-extension och `AppRegistrationContext` från `BlazorServer.Composition`
+- registrera modulen via dess statiska `IServiceCollection`-extension och `AppRegistrationContext`
 - strukturera modulär logik som feature/use case-slices
 - skapa interna mappar som `Domain`, `Infrastructure`, `Features` och `Components` bara vid konkret behov
 - exponera cross-module-ytor under `Modules/{Module}/Public`
@@ -72,29 +72,21 @@ Följ målarkitekturen när du lägger ny produktlogik:
 ## Hårda Ägar- Och Modulregler
 
 - ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `BlazorServer.Shared`
-- varje production-typ ska ägas av en modul, `Composition`, `AppShell`, `Kernel`, `UiKit` eller top-level `Infrastructure`
-- production-kod under `Modules/*` får inte referera till något namespace under `BlazorServer.AppShell.*`
-- moduler får bero på `BlazorServer.Composition` för generella bootstrap-bidrag
-- `Composition` får inte bero på `Modules/*`, framtida modulkontraktsprojekt eller `AppShell`
-- andra moduler får bara referera till avsiktligt exponerad kod under `Modules/{Module}/Public`
+- varje production-typ ska ha en explicit ägare
+- moduler får inte referera `BlazorServer.AppShell.*`
+- moduler får använda `BlazorServer.Composition` för bootstrap-bidrag
+- andra moduler får bara referera avsiktligt exponerad kod under `Modules/{Module}/Public`
 - använd `Public/Contracts` för modulkontrakt och `Public/Components` för avsiktliga entry components
 - moduler får inte anropa varandras interna use cases, stores, integrationsklienter eller helper components
-- om en annan modul behöver beteende ska ägaren exponera ett smalare kontrakt
 - råa externa DTO:er och provider-modeller ska vara privata för integrationsägande modul
 
-## Composition Och Modulregistrering
+## Modulregistrering
 
-- `Composition` är en top-level-mapp och namespace i befintligt BlazorServer-projekt tills projektuppdelning ger konkret värde
-- `AppRegistrationContext` behåller sitt namn och är den samlade bootstrap-fasaden
-- contexten samlar UI-, access-claim- och authorization-policy-bidrag
-- bidragstyperna i `Composition` ska vara generella och får inte importera produktsemantik från en modul
-- en modul äger betydelsen av sina registrerade bidrag; `Access` äger runtime-tolkning och accessbeslut
-- navigation och settings areas registreras som data
-- loginpresentation är host-/AppShell-ansvar och får inte registreras genom den delade `UiRegistry`
-- `ServiceAndFeatureRegistrations` är composition root och äger ordningen: skapa context, registrera shell och moduler, konfigurera auth/loginpresentation och applicera contexten på DI och ASP.NET Core
-- skapa inte en separat `Bootstrap`-gräns för detta
-- hostspecifika helpers för att applicera contexten ska ligga tillsammans med eller integreras i `ServiceAndFeatureRegistrations`
-- använd namnet `AuthorizationPolicyRegistry` i stället för `PolicyCollection`
+- registrera navigation och settings areas som data i `AppRegistrationContext`
+- håll bidragstyper i `Composition` generella och fria från modulernas produktsemantik
+- välj loginpresentation i host-/AppShell-konfigurationen, inte genom `UiRegistry`
+- låt `ServiceAndFeatureRegistrations` skapa contexten, registrera shell och moduler samt applicera färdig state på DI och authorization
+- skapa inte en separat bootstrap-abstraktion utan konkret behov
 
 ## Feature Slices Och Resultattyper
 
@@ -110,10 +102,9 @@ Följ målarkitekturen när du lägger ny produktlogik:
 
 ## Gemensamma Ytor
 
-- använd `Composition` för generella bootstrap-bidrag och registries som delas av host, AppShell och moduler
+- använd `Composition` för generella bootstrap-bidrag och registries
 - använd `UiKit` för neutrala UI-primitiver utan modul-, domän-, route- eller shellkunskap
 - använd `Kernel` endast för små, stabila och teknikneutrala systemprimitiver
-- `Kernel` får inte bero på `Composition`
 - använd top-level `Infrastructure` för neutral teknisk implementation, exempelvis Mongo-klient, provider, serializers och conventions
 - top-level `Infrastructure` får inte känna till modulernas entities, stores, collection names eller integrationsmodeller
 - komponenter med endast en verklig konsument ska normalt ligga hos konsumenten
@@ -122,7 +113,6 @@ Följ målarkitekturen när du lägger ny produktlogik:
 ## Authentication Och Authorization
 
 - AppShell äger aktuell användarsession, generell identity mapping och loginpresentation
-- Composition äger generella registreringsmodeller för access-claim- och policybidrag
 - Access äger portalclaims, authorization policies, application-admin-semantik och accessbeslut
 - feature- och UI-kod ska konsumera sessions- och authorization-kontrakt i stället för att tolka `ClaimsPrincipal` direkt
 - claims parsing ska begränsas till auth-/authorization-gränsen
@@ -136,7 +126,6 @@ Följ målarkitekturen när du lägger ny produktlogik:
 - flytta testbar logik till use cases, tjänster, helpers eller state-objekt
 - undvik integrationslogik direkt i UI
 - undvik att ny produktlogik kräver Blazor-specifika typer
-- registrera navigation och settings areas som data i `AppRegistrationContext`
 - registrera settings area med explicit module key
 - följ befintliga modulregistreringar, till exempel `Modules/Access/AccessModule.cs`
 
@@ -163,14 +152,7 @@ Prioritera tester för:
 - snapshot-/rapportlogik
 - dependency direction och publika modulgränser
 
-Arkitekturtester ska verifiera meningsfulla regler, särskilt:
-
-- ingen production-`Shared`-kod eller `BlazorServer.Shared`-namespace
-- `Kernel` är oberoende av Composition, moduler, AppShell, UiKit och Infrastructure
-- `Modules/*` refererar inte `AppShell/*`
-- `Composition` refererar varken `Modules/*` eller `AppShell/*`
-- moduler når inte in i varandras interna implementationer
-- cross-module-interaktion sker genom publika modulkontrakt
+Arkitekturtester ska verifiera reglerna i målarkitekturens beroendediagram, särskilt modulgränser, `Composition` och `Kernel`.
 
 Undvik tester som låser implementationen i exakta filplaceringar när en tydligare beroenderegel kan testas.
 
