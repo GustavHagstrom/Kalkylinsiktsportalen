@@ -1,4 +1,4 @@
-namespace BlazorServer.AppShell.Composition;
+namespace BlazorServer.Composition;
 
 public static class AppRegistrationServiceCollectionExtensions
 {

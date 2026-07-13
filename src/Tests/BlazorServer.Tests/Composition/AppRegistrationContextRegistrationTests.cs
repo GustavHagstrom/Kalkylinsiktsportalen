@@ -1,12 +1,12 @@
-using BlazorServer.AppShell.Composition.UI;
-using BlazorServer.AppShell.Composition.Navigation;
-using BlazorServer.AppShell.Composition.Settings;
-using BlazorServer.AppShell.Composition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using BlazorServer.Composition;
+using BlazorServer.Composition.Navigation;
+using BlazorServer.Composition.Settings;
+using BlazorServer.Composition.UI;
 
-namespace BlazorServer.Tests.AppShell.Composition;
+namespace BlazorServer.Tests.Composition;
 
 [TestFixture]
 public class AppRegistrationContextRegistrationTests

@@ -1,7 +1,7 @@
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
-using BlazorServer.AppShell.Composition;
+using BlazorServer.Composition;
 
 namespace BlazorServer.Modules.Projects;
 

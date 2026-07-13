@@ -1,8 +1,8 @@
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Authentication.Mock;
-using BlazorServer.AppShell.Composition;
 using BlazorServer.AppShell.Rendering;
 using BlazorServer.AppShell.Settings;
+using BlazorServer.Composition;
 using BlazorServer.Infrastructure.MongoDb;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
@@ -18,7 +18,7 @@ using MudBlazor.Services;
 
 namespace BlazorServer;
 
-public static class ServiceAndFeatureRegistrations
+public static class ServiceRegistrations
 {
     public static WebApplicationBuilder AddKipServicesAndFeatures(this WebApplicationBuilder builder)
     {
@@ -36,7 +36,7 @@ public static class ServiceAndFeatureRegistrations
         if (builder.Configuration["Auth:Mode"] == "Mock")
         {
             var mockOrganizationId = builder.Configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
-            registrationContext.Ui.SetLoginDisplay<MockedLoginDisplay>();
+            builder.Services.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<MockCurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
@@ -50,7 +50,7 @@ public static class ServiceAndFeatureRegistrations
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
-            registrationContext.Ui.SetLoginDisplay<LoginDisplay>();
+            builder.Services.SetLoginDisplay<LoginDisplay>();
             builder.Services.AddScoped<CurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<CurrentUserSession>());

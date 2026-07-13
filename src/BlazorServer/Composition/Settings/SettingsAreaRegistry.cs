@@ -1,4 +1,4 @@
-namespace BlazorServer.AppShell.Composition.Settings;
+namespace BlazorServer.Composition.Settings;
 
 public sealed class SettingsAreaRegistry
 {

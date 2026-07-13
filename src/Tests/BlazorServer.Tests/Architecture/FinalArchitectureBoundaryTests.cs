@@ -1,3 +1,4 @@
+using NetArchTest.Rules;
 using System.Text.RegularExpressions;
 
 namespace BlazorServer.Tests.Architecture;
@@ -103,7 +104,30 @@ public sealed partial class FinalArchitectureBoundaryTests
             "Module Public contracts must not expose internal DTOs, stores, persistence entities or implementations. Violations:\n"
             + string.Join('\n', violations));
     }
+    [Test]
+    public void ModulesMayNotReferenseAppShell() 
+    {
+        var assemblyy = typeof(Program).Assembly;
+        var result = Types.InAssembly(assemblyy).That().ResideInNamespace("BlazorServer.Modules").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
 
+        Assert.That(result.IsSuccessful, Is.True, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+    }
+    [Test]
+    public void CompositionMustBeSelfContained()
+    {
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespace("BlazorServer.Composition").ShouldNot().HaveDependenciesOtherThan("BlazorServer.Composition").GetResult();
+
+        Assert.That(result.IsSuccessful, Is.True, "Composition must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+    }
+    [Test]
+    public void KernelMustBeSelfContained()
+    {
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespace("BlazorServer.Kernel").ShouldNot().HaveDependenciesOtherThan("BlazorServer.Kernel").GetResult();
+
+        Assert.That(result.IsSuccessful, Is.True, "Kernel must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+    }
     [Test]
     public void CentralMongoInfrastructureMustNotKnowModulePersistence()
         => AssertNoReferences(

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace BlazorServer.AppShell.Composition.Navigation;
+namespace BlazorServer.Composition.Navigation;
 
 public sealed record NavigationItem(
     string Text,

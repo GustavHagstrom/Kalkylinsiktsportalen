@@ -1,6 +1,6 @@
-using BlazorServer.AppShell.Composition.UI;
+using BlazorServer.Composition.UI;
 
-namespace BlazorServer.AppShell.Composition;
+namespace BlazorServer.Composition;
 
 public sealed class AppRegistrationContext
 {
@@ -8,5 +8,5 @@ public sealed class AppRegistrationContext
 
     public AccessClaimRegistry AccessClaims { get; } = new();
 
-    public PolicyCollection Policies { get; } = new();
+    public AuthorizationPolicyRegistry Policies { get; } = new();
 }

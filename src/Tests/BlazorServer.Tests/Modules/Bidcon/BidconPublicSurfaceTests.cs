@@ -6,7 +6,7 @@ namespace BlazorServer.Tests.Modules.Bidcon;
 [TestFixture]
 public class BidconPublicSurfaceTests
 {
-    private static readonly Assembly AppAssembly = typeof(ServiceAndFeatureRegistrations).Assembly;
+    private static readonly Assembly AppAssembly = typeof(ServiceRegistrations).Assembly;
 
     [Test]
     public void BidconKeepsUpstreamDtosPrivateToInfrastructure()
