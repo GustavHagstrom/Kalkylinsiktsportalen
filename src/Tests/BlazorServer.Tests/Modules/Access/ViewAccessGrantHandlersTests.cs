@@ -98,11 +98,11 @@ public class ViewAccessGrantHandlersTests
     private static AccessSubject Subject(
         string userId,
         string organizationId,
-        IReadOnlySet<string>? roleIds = null)
+        string[]? roleIds = null)
         => new(
             userId,
             organizationId,
-            roleIds ?? new HashSet<string>(StringComparer.Ordinal),
+            (roleIds ?? []).ToHashSet(StringComparer.Ordinal),
             false);
 
     private static void AssertOnlyGrantedRightIsAllowed(
