@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Reports.Public;
-using Microsoft.Identity.Web;
 
 namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
@@ -41,8 +40,8 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store)
             return true;
         }
 
-        var userId = user.FindFirstValue(ClaimConstants.ObjectId);
-        var organizationId = user.FindFirstValue(ClaimConstants.TenantId);
+        var userId = user.GetUserId();
+        var organizationId = user.GetOrganizationId();
         if (userId is null || organizationId is null)
         {
             return false;
