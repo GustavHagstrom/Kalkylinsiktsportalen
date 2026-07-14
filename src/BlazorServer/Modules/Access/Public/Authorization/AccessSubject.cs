@@ -1,11 +1,12 @@
-using System.Security.Claims;
+using BlazorServer.Identity;
 using Microsoft.Identity.Web;
+using System.Security.Claims;
 
 namespace BlazorServer.Modules.Access.Public.Authorization;
 
 public sealed record AccessSubject(
-    string UserId,
-    string OrganizationId,
+    UserId UserId,
+    OrganizationId OrganizationId,
     IReadOnlySet<string> RoleIds,
     bool IsApplicationAdmin);
 
@@ -25,8 +26,8 @@ public static class ClaimsPrincipalAccessSubjectExtensions
             .ToHashSet(StringComparer.Ordinal);
 
         return new AccessSubject(
-            userId,
-            organizationId,
+            new UserId(userId),
+            new OrganizationId(organizationId),
             roleIds,
             principal.IsApplicationAdmin());
     }

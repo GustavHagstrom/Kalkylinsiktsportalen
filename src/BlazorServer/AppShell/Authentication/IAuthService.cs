@@ -1,12 +1,13 @@
+using BlazorServer.Identity;
+using System.Security.Claims;
+
 namespace BlazorServer.AppShell.Authentication;
 
-public interface IAuthService
+public interface IAuthService : ICurrentUserContext
 {
     Task LoginAsync();
     Task LogoutAsync();
-    bool IsAuthenticated { get; }
-    SessionUser? User { get; }
-    string? OrganizationId { get; }
-    string? UserEmail { get; }
-    Task<SessionUser?> UpdateUserAsync();
+    Task<CurrentUser?> RefreshAsync();
+    IReadOnlyList<Claim> Claims { get; }
+
 }

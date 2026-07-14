@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Reports.Public;
 
@@ -24,7 +25,7 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store) : IVi
             return true;
         }
 
-        var grants = await store.GetGrantsForViewAsync(viewId, subject.OrganizationId);
+        var grants = await store.GetGrantsForViewAsync(viewId, subject.OrganizationId.Value);
 
         return grants.Any(grant =>
             grant.Right == right &&
@@ -33,12 +34,12 @@ public sealed class ViewAccessDecisionHandler(IViewAccessGrantStore store) : IVi
 
     private static bool IsGrantForUserOrRole(
         ViewAccessGrant grant,
-        string userId,
+        UserId userId,
         IReadOnlySet<string> roleIds)
     {
         return grant.TargetType switch
         {
-            ViewAccessGrantTargetType.User => grant.TargetId == userId,
+            ViewAccessGrantTargetType.User => grant.TargetId == userId.Value,
             ViewAccessGrantTargetType.Role => roleIds.Contains(grant.TargetId),
             _ => false
         };

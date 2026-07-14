@@ -2,10 +2,10 @@
 
 <AuthorizeView>
     <Authorized>
-        <UserAvatar Name="@user?.Name" AvatarBase64="@user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@user?.DisplayName" AvatarBase64="@user?.Avatar" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
             <DarkmodeSwitch ThemeManagerBackup="ThemeProvider" />
             <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
@@ -40,11 +40,11 @@
     bool ShowLogoutPopover = false;
     bool ShowLoginPopover = false;
 
-    string LoginText(SessionUser user) => $"{Localizer["Logga in med"]} : {user.Name}";
-    SessionUser? user => AuthService.User;
+    string LoginText(CurrentUser user) => $"{Localizer["Logga in med"]} : {user.DisplayName}";
+    CurrentUser? user => AuthService.CurrentUser;
 
     Task LogoutAsync() => AuthService.LogoutAsync();
-    void Login(SessionUser user)
+    void Login(CurrentUser user)
     {
         if(AuthService is MockCurrentUserSession mockedAuthService)
         {

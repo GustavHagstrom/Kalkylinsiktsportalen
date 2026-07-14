@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Public.Authorization;
 
@@ -98,8 +99,8 @@ public class ViewAccessGrantHandlersTests
         string organizationId,
         string[]? roleIds = null)
         => new(
-            userId,
-            organizationId,
+            new UserId(userId),
+            new OrganizationId(organizationId),
             (roleIds ?? []).ToHashSet(StringComparer.Ordinal),
             false);
 

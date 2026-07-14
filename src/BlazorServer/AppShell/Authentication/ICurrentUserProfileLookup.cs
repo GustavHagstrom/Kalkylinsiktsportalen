@@ -1,6 +1,8 @@
+using BlazorServer.Identity;
+
 namespace BlazorServer.AppShell.Authentication;
 
 public interface ICurrentUserProfileLookup
 {
-    Task<SessionUser> GetProfileAsync(CurrentUser currentUser);
+    Task<CurrentUser> GetProfileAsync(CurrentUser currentUser);
 }

@@ -8,6 +8,13 @@
     <UserSecretsId>f8d31cc2-fe61-4f0d-ac11-0ce93a86f83d</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Modules\Bidcon\Contracts\**" />
+    <Content Remove="Modules\Bidcon\Contracts\**" />
+    <EmbeddedResource Remove="Modules\Bidcon\Contracts\**" />
+    <None Remove="Modules\Bidcon\Contracts\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Graph" Version="6.2.0" />
@@ -19,8 +26,6 @@
 
 
   <ItemGroup>
-    <Folder Include="Identity\" />
-    <Folder Include="Modules\Bidcon\Contracts\" />
     <Folder Include="Modules\Bidcon\Features\GetEstimationList\" />
   </ItemGroup>
 

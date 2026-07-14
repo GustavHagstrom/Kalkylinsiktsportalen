@@ -3,6 +3,7 @@ using BlazorServer.AppShell.Authentication.Mock;
 using BlazorServer.AppShell.Rendering;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
+using BlazorServer.Identity;
 using BlazorServer.Infrastructure.MongoDb;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
@@ -39,13 +40,12 @@ public static class ServiceRegistrations
             builder.Services.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<MockCurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
-            builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<MockCurrentUserSession>());
-            builder.Services.AddSingleton<ICurrentUserProfileLookup, ClaimsCurrentUserProfileLookup>();
-            builder.Services.AddSingleton<MockedAuthSession>();
+            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<MockCurrentUserSession>());
+            builder.Services.AddSingleton<ICurrentUserProfileLookup, MockProfileLookup>();
             builder.Services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
             builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
-            builder.Services.AddMockAccessDirectory(mockOrganizationId);
+            builder.Services.AddMockAccessDirectory(new OrganizationId(mockOrganizationId));
             builder.Services.AddMemoryCache();
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
@@ -53,7 +53,7 @@ public static class ServiceRegistrations
             builder.Services.SetLoginDisplay<LoginDisplay>();
             builder.Services.AddScoped<CurrentUserSession>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
-            builder.Services.AddScoped<ICurrentUserSession>(sp => sp.GetRequiredService<CurrentUserSession>());
+            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddTransient<ICurrentUserProfileLookup, GraphCurrentUserProfileLookup>();
             builder.Services.AddGraphAccessDirectory();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)

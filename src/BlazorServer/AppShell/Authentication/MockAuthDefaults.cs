@@ -1,3 +1,5 @@
+using BlazorServer.Identity;
+
 namespace BlazorServer.AppShell.Authentication;
 
 public class MockAuthDefaults
@@ -9,11 +11,11 @@ public class MockAuthDefaults
 
     public string OrganizationId { get; }
 
-    public IReadOnlyList<SessionUser> Users { get; } =
+    public IReadOnlyList<CurrentUser> Users =>
     [
-        new("Admin", "Admin", "gustav@rorvikshus.se", null),
-        new("User", "User", "gustav@rorvikshus.se", null),
-        new("Guest", "Guest", "gustav@rorvikshus.se", null)
+        new(new("Admin"), new(OrganizationId), "Admin", "gustav@rorvikshus.se", null),
+        new(new("User"), new(OrganizationId), "User", "gustav@rorvikshus.se", null),
+        new(new("Guest"), new(OrganizationId), "Guest", "gustav@rorvikshus.se", null)
     ];
 
     public IReadOnlyDictionary<string, IReadOnlyList<string>> RoleIdsByUserId { get; } =

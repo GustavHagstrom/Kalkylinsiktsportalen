@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Domain;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 
@@ -11,7 +12,7 @@ public static class MongoFunctionalAccessGrantMapper
         {
             TargetType = model.Target.Type,
             TargetId = model.Target.Id,
-            OrganizationId = model.OrganizationId,
+            OrganizationId = model.OrganizationId.Value,
             AccessClaimValues = model.AccessClaimValues.ToList()
         };
     }
@@ -20,7 +21,7 @@ public static class MongoFunctionalAccessGrantMapper
     {
         return new FunctionalAccessGrant(
             new FunctionalAccessGrantTarget(entity.TargetType, entity.TargetId),
-            entity.OrganizationId,
+            new OrganizationId(entity.OrganizationId),
             entity.AccessClaimValues);
     }
 }

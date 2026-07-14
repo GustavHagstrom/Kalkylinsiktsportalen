@@ -26,7 +26,7 @@
 @inject IViewStore ViewStore
 @inject IDialogService DialogService
 @inject IStringLocalizer<SettingsPage> Localizer
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserSession
 @inject NavigationManager Navigation
 @code {
     bool isLoading = false;
@@ -39,9 +39,7 @@
 
     async Task NewView()
     {
-        await CurrentUserSession.RefreshAsync();
-
-        if(CurrentUserSession.OrganizationId is null) return;
+        if(CurrentUserSession.CurrentUser?.OrganizationId is null) return;
 
         var parameters = new DialogParameters<StringInputDialog>()
         {
@@ -54,7 +52,7 @@
             var view = new ViewDto()
             {
                 Name = name,
-                OrganizationId = CurrentUserSession.OrganizationId
+                OrganizationId = CurrentUserSession.CurrentUser.OrganizationId
             };
             await ViewStore.UpsertAsync(view);
             Navigation.NavigateTo(ReportsRoutes.EditViewPage(view.Id));
@@ -64,11 +62,9 @@
 
     async Task LoadDataAsync()
     {
-        await CurrentUserSession.RefreshAsync();
-
-        if (CurrentUserSession.OrganizationId is null) return;
+        if (CurrentUserSession.CurrentUser?.OrganizationId is null) return;
         SetLoading(true);
-        var views = await ViewStore.GetAllAsync(CurrentUserSession.OrganizationId);
+        var views = await ViewStore.GetAllAsync(CurrentUserSession.CurrentUser.OrganizationId);
         Views = views;
         SetLoading(false);
     }

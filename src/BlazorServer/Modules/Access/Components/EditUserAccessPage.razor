@@ -21,11 +21,11 @@
 
 @inject FunctionalAccessGrantHandler FunctionalAccessGrants
 @inject IAccessDirectory AccessDirectory
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserContext
 @inject NavigationManager NavigationManager
 
 @code{
-    [Parameter] public string? UserId { get; set; }
+    [Parameter] public UserId? UserId { get; set; }
     AccessDirectoryUser? User { get; set; }
     FunctionalAccessGrant? UserAccessGrant { get; set; }
     List<AccessDirectoryRole> AllRoles { get; set; } = [];
@@ -36,15 +36,13 @@
     async Task LoadUserDataAsync()
     {
         SetIsLoading(true);
-        await CurrentUserSession.RefreshAsync();
 
-        if (UserId is not null && CurrentUserSession.OrganizationId is not null)
+        if (UserId is not null && CurrentUserContext.CurrentUser is not null)
         {
-            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetUserFunctionalAccessQuery(UserId, CurrentUserSession.OrganizationId));
-            User = await AccessDirectory.GetUserAsync(UserId);
-            AllRoles = await AccessDirectory.GetRolesAsync(CurrentUserSession.OrganizationId);
-            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId, CurrentUserSession.OrganizationId);
+            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId));
+            User = await AccessDirectory.GetUserAsync(UserId.Value);
+            AllRoles = await AccessDirectory.GetRolesAsync(CurrentUserContext.CurrentUser.OrganizationId);
+            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId);
             PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);
@@ -64,7 +62,7 @@
                 UserAccessGrant.OrganizationId,
                 UserAccessGrant.AccessClaimValues.Append(pickedRecord.Data.Value));
             return FunctionalAccessGrants.HandleAsync(new GrantUserFunctionalAccessCommand(
-                UserAccessGrant.Target.Id,
+                new UserId(UserAccessGrant.Target.Id),
                 UserAccessGrant.OrganizationId,
                 pickedRecord.Data.Value));
         }
@@ -75,7 +73,7 @@
                 UserAccessGrant.OrganizationId,
                 UserAccessGrant.AccessClaimValues.Where(value => value != pickedRecord.Data.Value));
             return FunctionalAccessGrants.HandleAsync(new RevokeUserFunctionalAccessCommand(
-                UserAccessGrant.Target.Id,
+                new UserId(UserAccessGrant.Target.Id),
                 UserAccessGrant.OrganizationId,
                 pickedRecord.Data.Value));
         }

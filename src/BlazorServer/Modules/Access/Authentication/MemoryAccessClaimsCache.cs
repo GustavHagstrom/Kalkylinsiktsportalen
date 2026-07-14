@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlazorServer.Modules.Access.Authentication;
@@ -14,11 +15,11 @@ public class MemoryAccessClaimsCache : IAccessClaimsCache
     {
         _memoryCache = memoryCache;
     }
-    public void SetAccessClaims(string userId, string orgId, List<string> claimValues)
+    public void SetAccessClaims(UserId userId, OrganizationId orgId, List<string> claimValues)
     {
         _memoryCache.Set($"accessClaims:{userId}:{orgId}", claimValues, _cacheOptions);
     }
-    public bool TryGetAccessClaims(string userId, string orgId, out List<string>? claimValues)
+    public bool TryGetAccessClaims(UserId userId, OrganizationId orgId, out List<string>? claimValues)
     {
         if (_memoryCache.TryGetValue($"accessClaims:{userId}:{orgId}", out var cachedClaimsObj) && cachedClaimsObj is List<string> accessClaimValues)
         {
@@ -28,7 +29,7 @@ public class MemoryAccessClaimsCache : IAccessClaimsCache
         claimValues = null;
         return false;
     }
-    public void ClearAccessClaims(string userId, string orgId)
+    public void ClearAccessClaims(UserId userId, OrganizationId orgId)
     {
         _memoryCache.Remove($"accessClaims:{userId}:{orgId}");
     }

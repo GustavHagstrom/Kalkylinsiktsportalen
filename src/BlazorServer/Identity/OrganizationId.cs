@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Bidcon.Public.Contracts;
+namespace BlazorServer.Identity;
 
 public readonly record struct OrganizationId(string Value)
 {

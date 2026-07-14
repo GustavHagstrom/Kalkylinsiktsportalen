@@ -1,16 +1,16 @@
+using BlazorServer.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 
 namespace BlazorServer.AppShell.Authentication;
 
-public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
+public class CurrentUserSession : ICurrentUserContext, IAuthService, IDisposable
 {
     private readonly AuthenticationStateProvider _authProvider;
     private readonly NavigationManager _navigationManager;
     private readonly ICurrentUserProfileLookup _profileLookup;
     private AuthenticationState? _cachedAuthState;
-    private SessionUser? _cachedUser;
 
     public CurrentUserSession(
         AuthenticationStateProvider authProvider,
@@ -23,15 +23,8 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
         _authProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
     }
 
-    public string? OrganizationId => _cachedAuthState?.User.GetOrganizationId();
 
-    public string? UserEmail => CurrentUser?.Email;
-
-    public bool IsAuthenticated => _cachedAuthState?.User.Identity?.IsAuthenticated ?? false;
-
-    public CurrentUser? CurrentUser => _cachedAuthState?.User.ToCurrentUser();
-
-    public SessionUser? User => _cachedUser;
+    public CurrentUser? CurrentUser { get; private set; }
 
     public IReadOnlyList<Claim> Claims => _cachedAuthState?.User.Claims.ToList() ?? new List<Claim>();
 
@@ -58,12 +51,6 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
         return CurrentUser;
     }
 
-    public async Task<SessionUser?> UpdateUserAsync()
-    {
-        await RefreshAsync();
-        return User;
-    }
-
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
     {
         _ = UpdateCachedStateAsync(task);
@@ -72,12 +59,16 @@ public class CurrentUserSession : ICurrentUserSession, IAuthService, IDisposable
     private async Task UpdateCachedStateAsync(Task<AuthenticationState> task)
     {
         _cachedAuthState = await task;
-        if (!IsAuthenticated)
+        if(_cachedAuthState.User.Identity?.IsAuthenticated != true)
         {
-            _cachedUser = null;
+            CurrentUser = null;
             return;
         }
+        CurrentUser = _cachedAuthState.User.ToCurrentUser();
+        if (CurrentUser != null && CurrentUser.Avatar == null)
+        {
+            CurrentUser = await _profileLookup.GetProfileAsync(CurrentUser);
+        }
 
-        _cachedUser = CurrentUser is null ? null : await _profileLookup.GetProfileAsync(CurrentUser);
     }
 }
