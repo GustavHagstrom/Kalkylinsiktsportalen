@@ -1,6 +1,6 @@
 using BlazorServer.Identity;
 
-namespace BlazorServer.AppShell.Authentication;
+namespace BlazorServer.AppShell.Authentication.Mock;
 
 public class MockAuthDefaults
 {

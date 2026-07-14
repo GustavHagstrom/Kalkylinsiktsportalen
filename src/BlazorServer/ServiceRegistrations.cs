@@ -39,6 +39,7 @@ public static class ServiceRegistrations
             var mockOrganizationId = builder.Configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
             builder.Services.SetLoginDisplay<MockedLoginDisplay>();
             builder.Services.AddScoped<MockCurrentUserSession>();
+            builder.Services.AddSingleton<MockAuthenticationState>();
             builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<MockCurrentUserSession>());
             builder.Services.AddSingleton<ICurrentUserProfileLookup, MockProfileLookup>();

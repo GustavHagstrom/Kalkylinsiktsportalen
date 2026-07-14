@@ -1,4 +1,3 @@
-using BlazorServer.AppShell.Authentication;
 using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
@@ -10,14 +9,14 @@ namespace BlazorServer.AppShell.Authentication.Mock;
 
 public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly CurrentUserSession _session;
+    private readonly MockCurrentUserSession _session;
     private readonly MockAuthDefaults _defaults;
 
     public MockAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        CurrentUserSession session,
+        MockCurrentUserSession session,
         MockAuthDefaults defaults) : base(options, logger, encoder)
     {
         _session = session;
