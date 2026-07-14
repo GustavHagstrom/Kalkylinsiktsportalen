@@ -19,6 +19,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Identity\" />
     <Folder Include="Modules\Bidcon\Contracts\" />
     <Folder Include="Modules\Bidcon\Features\GetEstimationList\" />
   </ItemGroup>
