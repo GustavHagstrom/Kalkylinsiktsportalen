@@ -36,7 +36,7 @@ Blazor-komponenter ska främst rendera data, hantera interaktion, anropa use cas
 
 Varje production-typ ska ha en explicit ägare. `Shared` är avvecklat och får inte återintroduceras som generell samlingsplats.
 
-Tvärgående kod ska ägas av en av de avsiktliga top-level-gränserna: `Composition`, `Kernel`, `AppShell`, `UiKit` eller `Infrastructure`. Produktnära kod ägs av en modul.
+Tvärgående kod ska ägas av en av de avsiktliga top-level-gränserna: `Composition`, `Identity`, `Kernel`, `AppShell`, `UiKit` eller `Infrastructure`. Produktnära kod ägs av en modul.
 
 ### 5. Organisation Är Hård Systemgräns
 
@@ -48,16 +48,20 @@ Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integ
 Composition/
   Äger gemensam bootstrap-state, bidragsmodeller och registries.
 
+Identity/
+  Äger gemensamma identitetsvärden och ett teknikneutralt kontrakt
+  för aktuell användare i en aktiv organisationskontext.
+
 AppShell/
-  Äger konkreta portalytor, loginpresentation, aktuell användarsession
-  och portalpreferenser.
+  Äger konkreta portalytor, authentication-adaptern, sessionslivscykel,
+  loginpresentation och portalpreferenser.
 
 Infrastructure/
   Äger neutral teknisk infrastruktur, till exempel Mongo-klient,
   databas-provider, serializers och conventions.
 
 Kernel/
-  Äger små, stabila och teknikneutrala systemprimitiver.
+  Äger små, stabila och teknikneutrala systemprimitiver utan tydligare ägare.
 
 Modules/
   Äger produktförmågor, use cases, persistence, integrationer,
@@ -70,6 +74,8 @@ UiKit/
 `Composition` införs tills vidare som top-level-mapp och namespace i samma assembly. Den samlar generella bidrag från moduler och AppShell genom `AppRegistrationContext`, men äger ingen produktsemantik eller konkret shell-presentation.
 
 `AppRegistrationContext` förblir en samlad bootstrap-fasad för UI-, access-claim- och authorization-policy-bidrag. Access äger betydelsen och runtime-tolkningen av authorization-bidrag; AppShell äger loginpresentationen; hostens composition root applicerar den färdiga registreringsstaten på DI och ASP.NET Core.
+
+`Identity` är en neutral runtime-gräns, inte en authentication- eller authorization-modul. Den äger `UserId`, `OrganizationId`, `CurrentUser` och det läsbara `ICurrentUserContext`. En `CurrentUser` finns bara i en aktiv organisationskontext. Claims, refresh, providerintegration och accessbeslut ligger utanför gränsen.
 
 ## Målmoduler
 
@@ -97,9 +103,13 @@ Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `
 
 ## Gemensamma Byggblock
 
+### Identity
+
+Får innehålla gemensamma identitetsvärden och smala, teknikneutrala runtime-kontrakt. Den får inte innehålla `ClaimsPrincipal`, claim-tolkning, authentication providers, sessionsuppdatering, login-UI eller authorization-regler.
+
 ### Kernel
 
-Får innehålla små och stabila systemövergripande typer, till exempel starka identiteter och minimala CQRS-kontrakt. Att en typ används av två moduler är inte i sig skäl att lägga den i Kernel.
+Får innehålla små och stabila systemövergripande typer utan tydligare ägare, till exempel minimala CQRS-kontrakt. Att en typ används av två moduler är inte i sig skäl att lägga den i Kernel.
 
 ### UiKit
 
@@ -117,11 +127,12 @@ Målmoduler registreras explicit genom statiska `IServiceCollection`-extensions 
 
 Navigation och settings areas registreras som data. Loginpresentation är host-/AppShell-ansvar och inte ett modulbidrag.
 
-## Authentication Och Authorization
+## Identity, Authentication Och Authorization
 
-- AppShell mappar generell extern identitet till en smal aktuell användarsession och äger loginpresentation.
+- `Identity` beskriver aktuell användares identitet och organisation genom ett läsbart, teknikneutralt kontrakt.
+- AppShell mappar extern identitet till `CurrentUser` och äger authentication, refresh, sessionslivscykel och loginpresentation.
 - Access tolkar portalclaims, policies, application-admin och accessbeslut.
-- Featurekod konsumerar sessions- och authorization-kontrakt i stället för att tolka `ClaimsPrincipal` direkt.
+- Featurekod konsumerar `ICurrentUserContext` och explicita authorization-kontrakt i stället för `AuthenticationStateProvider`, `ClaimsPrincipal` eller råa claims.
 - Råa Entra- och Microsoft Graph-modeller hålls privata i integrationsadaptern.
 
 ## Beroenderiktningar
@@ -129,6 +140,7 @@ Navigation och settings areas registreras som data. Loginpresentation är host-/
 ```text
 Web / composition root
   -> Composition
+  -> Identity
   -> Modules
   -> AppShell
   -> UiKit
@@ -136,6 +148,7 @@ Web / composition root
 
 Modules
   -> Composition
+  -> Identity
   -> UiKit
   -> Kernel
   -> neutral Infrastructure
@@ -143,9 +156,16 @@ Modules
 
 AppShell
   -> Composition
+  -> Identity
   -> UiKit
   -> Kernel
   -> avsiktliga publika modulkontrakt
+
+Identity
+  -X-> Composition
+  -X-> Modules
+  -X-> AppShell
+  -X-> Access
 
 Composition
   -X-> Modules
@@ -153,6 +173,7 @@ Composition
 
 Kernel
   -X-> Composition
+  -X-> Identity
   -X-> Modules
   -X-> AppShell
   -X-> UiKit

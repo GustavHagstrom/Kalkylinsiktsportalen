@@ -78,6 +78,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0041 - Use access claim registry](global/0041-use-access-claim-registry.md)
 - [0042 - Remove Shared and establish explicit ownership](global/0042-remove-shared-and-establish-explicit-ownership.md)
 - [0043 - Introduce dedicated Composition boundary](global/0043-introduce-dedicated-composition-boundary.md)
+- [0044 - Introduce Identity boundary](global/0044-introduce-identity-boundary.md)
 
 ### Bidcon
 
