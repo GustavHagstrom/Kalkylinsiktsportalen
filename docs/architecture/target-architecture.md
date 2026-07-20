@@ -168,7 +168,8 @@ Identity
   -X-> Access
 
 Composition
-  -X-> Modules
+  -> avsiktliga publika modulkontrakt
+  -X-> modulernas interna implementation
   -X-> AppShell
 
 Kernel
@@ -179,6 +180,8 @@ Kernel
   -X-> UiKit
   -X-> Infrastructure
 ```
+
+`Composition` får bara använda modulernas avsiktliga publika registreringskontrakt under `Modules/{Module}/Public`; intern implementation och `AppShell` är fortsatt förbjudna beroenden.
 
 Moduler får inte bero på `AppShell` eller nå in i andra modulers interna use cases, persistence, integrationer eller UI. Cross-module-interaktion sker genom den ägande modulens avsiktliga yta under `Modules/{Module}/Public`.
 
