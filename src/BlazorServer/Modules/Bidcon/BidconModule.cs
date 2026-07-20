@@ -47,11 +47,11 @@ public static class BidconModule
         services.AddEstimationSnapshotsCollection();
         services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
 
-        registrationContext.AccessClaims.Register(new AccessClaimContribution(
+        registrationContext.AccessClaims.Register(new AccessClaimDefinition(
             "BrowserAccess",
             "Bidconutforskaren",
             "Använda kalkylutforskaren"));
-        registrationContext.AccessClaims.Register(new AccessClaimContribution("BidconApiWritePermission", "Bidcon Api Write permission", "Grants permission to edit Bidcon API credentials."));
+        registrationContext.AccessClaims.Register(new AccessClaimDefinition("BidconApiWritePermission", "Bidcon Api Write permission", "Grants permission to edit Bidcon API credentials."));
         registrationContext.Policies.AddPolicy(
             "ApiPolicy",
             policy => policy.RequireAssertion(context => context.User.HasAccessClaimOrApplicationAdmin("BidconApiWritePermission")));

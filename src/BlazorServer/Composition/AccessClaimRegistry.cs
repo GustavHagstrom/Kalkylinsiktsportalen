@@ -4,12 +4,12 @@ namespace BlazorServer.Composition;
 
 public sealed class AccessClaimRegistry
 {
-    private readonly Dictionary<string, AccessClaimContribution> claimsByValue = new(StringComparer.Ordinal);
-    private readonly List<AccessClaimContribution> claims = [];
+    private readonly Dictionary<string, AccessClaimDefinition> claimsByValue = new(StringComparer.Ordinal);
+    private readonly List<AccessClaimDefinition> claims = [];
 
-    public IReadOnlyList<AccessClaimContribution> Claims => claims;
+    public IReadOnlyList<AccessClaimDefinition> Claims => claims;
 
-    public void Register(AccessClaimContribution claimInfo)
+    public void Register(AccessClaimDefinition claimInfo)
     {
         if (!claimsByValue.TryGetValue(claimInfo.Value, out var existingClaimInfo))
         {
@@ -27,4 +27,3 @@ public sealed class AccessClaimRegistry
             $"Access claim {claimInfo.Value} is already registered with different metadata.");
     }
 }
-public sealed record AccessClaimContribution(string Value, string Name, string Description);

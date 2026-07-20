@@ -58,7 +58,7 @@
         IsLoading = isLoading;
         StateHasChanged();
     }
-    Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimContribution> checkedRecord)
+    Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimDefinition> checkedRecord)
     {
         if (RoleAccessGrant is null) return Task.CompletedTask;
         if (checkedRecord.IsPicked && !RoleAccessGrant.AccessClaimValues.Contains(checkedRecord.Data.Value))

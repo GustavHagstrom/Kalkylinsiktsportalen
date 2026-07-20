@@ -57,7 +57,7 @@ public class BidconModuleRegistrationTests
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(EstimationListState) &&
                 service.Lifetime == ServiceLifetime.Scoped));
-            Assert.That(registrationContext.AccessClaims.Claims, Has.Member(new AccessClaimContribution(
+            Assert.That(registrationContext.AccessClaims.Claims, Has.Member(new AccessClaimDefinition(
                 "BrowserAccess",
                 "Bidconutforskaren",
                 "Använda kalkylutforskaren")));

@@ -52,7 +52,7 @@
         IsLoading = isLoading;
         StateHasChanged();
     }
-    Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimContribution> pickedRecord)
+    Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimDefinition> pickedRecord)
     {
         if (UserAccessGrant is null) return Task.CompletedTask;
         if (pickedRecord.IsPicked && !UserAccessGrant.AccessClaimValues.Contains(pickedRecord.Data.Value))

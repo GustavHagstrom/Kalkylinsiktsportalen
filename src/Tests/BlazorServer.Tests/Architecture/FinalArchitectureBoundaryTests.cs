@@ -117,13 +117,33 @@ public sealed partial class FinalArchitectureBoundaryTests
     {
         var assembly = typeof(Program).Assembly;
         var result = Types.InAssembly(assembly).That().ResideInNamespace("BlazorServer.Composition").ShouldNot()
-            .HaveDependencyOnAll(
-            "BlazorServer.Modules", 
-            "BlazorServer.AppShell", 
-            "BlazorServer.Kernel", 
+            .HaveDependencyOnAny(
+            "BlazorServer.Modules.Access.Domain",
+            "BlazorServer.Modules.Access.Features",
+            "BlazorServer.Modules.Access.Infrastructure",
+            "BlazorServer.Modules.Access.Components",
+
+            "BlazorServer.Modules.Bidcon.Domain",
+            "BlazorServer.Modules.Bidcon.Features",
+            "BlazorServer.Modules.Bidcon.Infrastructure",
+            "BlazorServer.Modules.Bidcon.Components",
+
+            "BlazorServer.Modules.Projects.Domain",
+            "BlazorServer.Modules.Projects.Features",
+            "BlazorServer.Modules.Projects.Infrastructure",
+            "BlazorServer.Modules.Projects.Components",
+
+            "BlazorServer.Modules.Reports.Domain",
+            "BlazorServer.Modules.Reports.Features",
+            "BlazorServer.Modules.Reports.Infrastructure",
+            "BlazorServer.Modules.Reports.Components",
+
+            "BlazorServer.AppShell",
+            "BlazorServer.Kernel",
             "BlazorServer.UiKit",
             "BlazorServer.Infrastructure",
-            "BlazorServer.Identity").GetResult();
+            "BlazorServer.Identity")
+            .GetResult();
 
         Assert.That(result.IsSuccessful, Is.True);//, "Composition must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames));
     }

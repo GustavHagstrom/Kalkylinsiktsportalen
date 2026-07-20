@@ -31,7 +31,7 @@ public class AccessModuleRegistrationTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(registrationContext.AccessClaims.Claims, Has.One.EqualTo(
-                new AccessClaimContribution(
+                new AccessClaimDefinition(
                     Constants.Authorization.AccessClaimValue,
                     "Rättigheter",
                     "Skapa, ändra och ta bort användarrättigheter och roller.")));
