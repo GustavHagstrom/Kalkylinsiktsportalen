@@ -46,7 +46,7 @@ Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integ
 
 ```text
 Composition/
-  Äger gemensam bootstrap-state, bidragsmodeller och registries.
+  Composition äger gemensam bootstrap-state och registries. Generella bidragsmodeller kan ägas av Composition, medan produktspecifika bidragskontrakt ägs av den modul som definierar deras betydelse
 
 Identity/
   Äger gemensamma identitetsvärden och ett teknikneutralt kontrakt
