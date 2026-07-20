@@ -110,7 +110,7 @@ public sealed partial class FinalArchitectureBoundaryTests
         var assemblyy = typeof(Program).Assembly;
         var result = Types.InAssembly(assemblyy).That().ResideInNamespace("BlazorServer.Modules").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
 
-        Assert.That(result.IsSuccessful, Is.True, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+        Assert.That(result.IsSuccessful, Is.True);//, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames));
     }
     [Test]
     public void CompositionShouldNotReferenceOtherLayers()
