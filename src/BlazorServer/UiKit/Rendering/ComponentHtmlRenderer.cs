@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorServer.AppShell.Rendering;
+namespace BlazorServer.UiKit.Rendering;
 
 public interface IComponentHtmlRenderer
 {

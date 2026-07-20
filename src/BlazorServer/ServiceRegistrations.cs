@@ -1,6 +1,5 @@
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Authentication.Mock;
-using BlazorServer.AppShell.Rendering;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
 using BlazorServer.Identity;
@@ -9,6 +8,7 @@ using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Reports;
+using BlazorServer.UiKit.Rendering;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Graph;
