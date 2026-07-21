@@ -20,7 +20,7 @@
 @inject FunctionalAccessGrantHandler FunctionalAccessGrants
 @inject IAccessDirectory AccessDirectory
 @inject IDialogService DialogService
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserSession
 @inject NavigationManager NavigationManager
 
 @code{
@@ -43,14 +43,13 @@
     async Task LoadDataAsync()
     {
         SetIsLoading(true);
-        await CurrentUserSession.RefreshAsync();
 
-        if (RoleId is not null && CurrentUserSession.OrganizationId is not null)
+        if (RoleId is not null && CurrentUserSession.CurrentUser?.OrganizationId.IsEmpty == false)
         {
             RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetRoleFunctionalAccessQuery(RoleId, CurrentUserSession.OrganizationId));
+                new GetRoleFunctionalAccessQuery(RoleId, CurrentUserSession.CurrentUser.OrganizationId));
             Role = await AccessDirectory.GetRoleAsync(RoleId);
-            PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, CurrentUserSession.OrganizationId);
+            PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, CurrentUserSession.CurrentUser.OrganizationId);
         }
         SetIsLoading(false);
     }
@@ -59,7 +58,7 @@
         IsLoading = isLoading;
         StateHasChanged();
     }
-    Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimInfo> checkedRecord)
+    Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimDefinition> checkedRecord)
     {
         if (RoleAccessGrant is null) return Task.CompletedTask;
         if (checkedRecord.IsPicked && !RoleAccessGrant.AccessClaimValues.Contains(checkedRecord.Data.Value))

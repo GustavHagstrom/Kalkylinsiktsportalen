@@ -1,6 +1,5 @@
-using BlazorServer.AppShell.Composition.Navigation;
-using BlazorServer.AppShell.Composition.UI;
-using BlazorServer.AppShell.Composition;
+using BlazorServer.Composition.Navigation;
+using BlazorServer.Composition.UI;
 
 namespace BlazorServer.AppShell.Settings;
 

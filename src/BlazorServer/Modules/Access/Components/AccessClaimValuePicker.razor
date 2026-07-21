@@ -23,9 +23,9 @@
     /// Picked access claim values for role or user.
     /// </summary>
     [Parameter] public IReadOnlyCollection<string> PickedAccessClaimValues { get; set; } = [];
-    [Parameter] public EventCallback<PickChangedRecord<AccessClaimInfo>> PickChanged { get; set; }
+    [Parameter] public EventCallback<PickChangedRecord<AccessClaimDefinition>> PickChanged { get; set; }
 
-    Task OnCheckChanged(AccessClaimInfo info, bool isChecked)
+    Task OnCheckChanged(AccessClaimDefinition info, bool isChecked)
     {
         return PickChanged.InvokeAsync(new (info, isChecked));
     }

@@ -1,3 +1,5 @@
+using BlazorServer.Identity;
+
 namespace BlazorServer.Modules.Access.Domain;
 
 public sealed record FunctionalAccessGrantTarget
@@ -13,8 +15,8 @@ public sealed record FunctionalAccessGrantTarget
     public FunctionalAccessGrantTargetType Type { get; }
     public string Id { get; }
 
-    public static FunctionalAccessGrantTarget User(string userId) =>
-        new(FunctionalAccessGrantTargetType.User, userId);
+    public static FunctionalAccessGrantTarget User(UserId userId) =>
+        new(FunctionalAccessGrantTargetType.User, userId.Value);
 
     public static FunctionalAccessGrantTarget Role(string roleId) =>
         new(FunctionalAccessGrantTargetType.Role, roleId);

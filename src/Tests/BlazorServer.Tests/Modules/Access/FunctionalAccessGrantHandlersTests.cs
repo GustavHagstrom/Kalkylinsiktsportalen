@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Domain;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
@@ -13,18 +14,18 @@ public class FunctionalAccessGrantHandlersTests
         var store = new RecordingAccessStore();
         var handler = new FunctionalAccessGrantHandler(store);
 
-        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
-        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
 
-        var granted = await handler.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
+        var granted = await handler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")));
 
-        await handler.HandleAsync(new RevokeUserFunctionalAccessCommand("user-1", "org-1", "CanManageAccess"));
-        var revoked = await handler.HandleAsync(new GetUserFunctionalAccessQuery("user-1", "org-1"));
+        await handler.HandleAsync(new RevokeUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
+        var revoked = await handler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")));
 
         Assert.Multiple(() =>
         {
             Assert.That(granted.AccessClaimValues, Is.EqualTo(new[] { "CanManageAccess" }));
-            Assert.That(granted.Target, Is.EqualTo(FunctionalAccessGrantTarget.User("user-1")));
+            Assert.That(granted.Target, Is.EqualTo(FunctionalAccessGrantTarget.User(new UserId("user-1"))));
             Assert.That(revoked.AccessClaimValues, Is.Empty);
             Assert.That(store.GrantCalls, Is.EqualTo(2));
             Assert.That(store.RevokeCalls, Is.EqualTo(1));
@@ -37,13 +38,13 @@ public class FunctionalAccessGrantHandlersTests
         var store = new RecordingAccessStore();
         var handler = new FunctionalAccessGrantHandler(store);
 
-        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
-        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", new OrganizationId("org-1"), "CanManageAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", new OrganizationId("org-1"), "CanManageAccess"));
 
-        var granted = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
+        var granted = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", new OrganizationId("org-1")));
 
-        await handler.HandleAsync(new RevokeRoleFunctionalAccessCommand("role-1", "org-1", "CanManageAccess"));
-        var revoked = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", "org-1"));
+        await handler.HandleAsync(new RevokeRoleFunctionalAccessCommand("role-1", new OrganizationId("org-1"), "CanManageAccess"));
+        var revoked = await handler.HandleAsync(new GetRoleFunctionalAccessQuery("role-1", new OrganizationId("org-1")));
 
         Assert.Multiple(() =>
         {
@@ -61,14 +62,14 @@ public class FunctionalAccessGrantHandlersTests
         var store = new RecordingAccessStore();
         var handler = new FunctionalAccessGrantHandler(store);
 
-        await handler.HandleAsync(new GrantUserFunctionalAccessCommand("user-1", "org-1", "DirectAccess"));
-        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", "org-1", "GroupAccess"));
-        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-2", "org-1", "GroupAccess"));
+        await handler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "DirectAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-1", new OrganizationId("org-1"), "GroupAccess"));
+        await handler.HandleAsync(new GrantRoleFunctionalAccessCommand("role-2", new OrganizationId("org-1"), "GroupAccess"));
 
         var effectiveClaims = await handler.HandleAsync(new GetEffectiveFunctionalAccessClaimsQuery(
-            "user-1",
+            new UserId("user-1"),
             ["role-1", "role-2"],
-            "org-1"));
+            new OrganizationId("org-1")));
 
         Assert.That(effectiveClaims.Select(claim => claim.Value), Is.EquivalentTo([
             "DirectAccess",
@@ -78,12 +79,12 @@ public class FunctionalAccessGrantHandlersTests
 
     private sealed class RecordingAccessStore : IFunctionalAccessGrantStore
     {
-        private readonly Dictionary<(FunctionalAccessGrantTarget Target, string OrgId), HashSet<string>> accessGrants = [];
+        private readonly Dictionary<(FunctionalAccessGrantTarget Target, OrganizationId OrgId), HashSet<string>> accessGrants = [];
 
         public int GrantCalls { get; private set; }
         public int RevokeCalls { get; private set; }
 
-        public Task<FunctionalAccessGrant> GetAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId)
+        public Task<FunctionalAccessGrant> GetAccessGrantAsync(FunctionalAccessGrantTarget target, OrganizationId orgId)
         {
             return Task.FromResult(new FunctionalAccessGrant(
                 target,
@@ -91,7 +92,7 @@ public class FunctionalAccessGrantHandlersTests
                 ValuesFor(accessGrants, (target, orgId))));
         }
 
-        public Task<List<AccessClaim>> GetAccessClaimsForUserAsync(string userId, IEnumerable<string> roleIds, string orgId)
+        public Task<List<AccessClaim>> GetAccessClaimsForUserAsync(UserId userId, IEnumerable<string> roleIds, OrganizationId orgId)
         {
             var values = ValuesFor(accessGrants, (FunctionalAccessGrantTarget.User(userId), orgId))
                 .ToHashSet(StringComparer.Ordinal);
@@ -103,14 +104,14 @@ public class FunctionalAccessGrantHandlersTests
             return Task.FromResult(values.Select(value => new AccessClaim(value)).ToList());
         }
 
-        public Task AddAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
+        public Task AddAccessGrantAsync(FunctionalAccessGrantTarget target, OrganizationId orgId, string accessClaimValue)
         {
             GrantCalls++;
             ValuesForMutation(accessGrants, (target, orgId)).Add(accessClaimValue);
             return Task.CompletedTask;
         }
 
-        public Task DeleteAccessGrantAsync(FunctionalAccessGrantTarget target, string orgId, string accessClaimValue)
+        public Task DeleteAccessGrantAsync(FunctionalAccessGrantTarget target, OrganizationId orgId, string accessClaimValue)
         {
             RevokeCalls++;
             ValuesForMutation(accessGrants, (target, orgId)).Remove(accessClaimValue);

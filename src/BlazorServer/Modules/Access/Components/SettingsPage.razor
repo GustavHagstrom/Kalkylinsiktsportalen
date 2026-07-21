@@ -17,7 +17,7 @@
 
 </SettingsPageBase>
 
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserSession
 @inject IAccessDirectory AccessDirectory
 @inject NavigationManager NavigationManager
 
@@ -28,27 +28,25 @@
     async Task LoadUserDataAsync()
     {
         Users.Clear();
-        await CurrentUserSession.RefreshAsync();
 
-        if (CurrentUserSession.OrganizationId is null)
+        if (CurrentUserSession.CurrentUser?.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Users = await AccessDirectory.GetUsersAsync(CurrentUserSession.OrganizationId);
+        Users = await AccessDirectory.GetUsersAsync(CurrentUserSession.CurrentUser.OrganizationId);
         StateHasChanged();
     }
     async Task LoadRoleDataAsync()
     {
         Roles.Clear();
-        await CurrentUserSession.RefreshAsync();
 
-        if (CurrentUserSession.OrganizationId is null)
+        if (CurrentUserSession.CurrentUser?.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Roles.AddRange(await AccessDirectory.GetRolesAsync(CurrentUserSession.OrganizationId));
+        Roles.AddRange(await AccessDirectory.GetRolesAsync(CurrentUserSession.CurrentUser.OrganizationId));
         StateHasChanged();
     }
     void EditUserAccess(AccessDirectoryUser user)

@@ -1,5 +1,6 @@
-using BlazorServer.AppShell.Composition;
-using BlazorServer.AppShell.Composition.Settings;
+using BlazorServer.Composition;
+using BlazorServer.Composition.Settings;
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -37,7 +38,7 @@ public static class AccessModule
                 context.User.HasAccessClaimOrApplicationAdmin(Constants.Authorization.AccessClaimValue));
         });
 
-        registrationContext.AccessClaims.Register(new AccessClaimInfo(
+        registrationContext.AccessClaims.Register(new AccessClaimDefinition(
             Constants.Authorization.AccessClaimValue,
             "Rättigheter",
             "Skapa, ändra och ta bort användarrättigheter och roller."));
@@ -56,7 +57,7 @@ public static class AccessModule
         return services;
     }
 
-    public static IServiceCollection AddMockAccessDirectory(this IServiceCollection services, string organizationId)
+    public static IServiceCollection AddMockAccessDirectory(this IServiceCollection services, OrganizationId organizationId)
     {
         return services.AddSingleton<IAccessDirectory>(_ => new MockAccessDirectory(organizationId));
     }

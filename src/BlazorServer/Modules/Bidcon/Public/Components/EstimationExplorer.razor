@@ -39,7 +39,7 @@
 </ToolbarPage>
 
 @inject GetEstimationListQueryHandler GetEstimationListHandler
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserSession
 @inject EstimationListState EstimationListState
 
 @code {
@@ -62,16 +62,14 @@
 
         try
         {
-            await CurrentUserSession.RefreshAsync();
 
-            if (CurrentUserSession.CurrentUser?.Email is null || CurrentUserSession.OrganizationId is null)
+            if (CurrentUserSession.CurrentUser?.Email is null)
             {
                 return;
             }
 
             var result = await GetEstimationListHandler.HandleAsync(
-                new GetEstimationListQuery(
-                    new OrganizationId(CurrentUserSession.OrganizationId),
+                new GetEstimationListQuery(CurrentUserSession.CurrentUser.OrganizationId,
                     CurrentUserSession.CurrentUser.Email),
                 CancellationToken.None);
 

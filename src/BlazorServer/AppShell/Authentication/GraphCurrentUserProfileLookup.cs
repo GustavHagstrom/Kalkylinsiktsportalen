@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using Microsoft.Graph;
 
 namespace BlazorServer.AppShell.Authentication;
@@ -11,14 +12,15 @@ public class GraphCurrentUserProfileLookup : ICurrentUserProfileLookup
         this.graph = graph;
     }
 
-    public async Task<SessionUser> GetProfileAsync(CurrentUser currentUser)
+    public async Task<CurrentUser> GetProfileAsync(CurrentUser currentUser)
     {
-        var graphUser = await graph.Users[currentUser.UserId].GetAsync();
-        return new SessionUser(
+        var graphUser = await graph.Users[currentUser.UserId.Value].GetAsync();
+        return new CurrentUser(
             currentUser.UserId,
+            currentUser.OrganizationId,
             graphUser?.DisplayName ?? currentUser.DisplayName,
             currentUser.Email,
-            await GetUserPhotoAsync(currentUser.UserId));
+            await GetUserPhotoAsync(currentUser.UserId.Value));
     }
 
     private async Task<string?> GetUserPhotoAsync(string userId)

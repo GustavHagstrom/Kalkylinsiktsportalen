@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
@@ -15,7 +16,7 @@ public class ReportsViewPersistenceTests
         var view = new ViewDto
         {
             Id = new ViewId("view-1"),
-            OrganizationId = "org-1",
+            OrganizationId = new OrganizationId("org-1"),
             Name = "Tender report",
             Description = "For review",
             DataSections =
@@ -76,7 +77,7 @@ public class ReportsViewPersistenceTests
         {
             Assert.That(mongoView.Id, Is.EqualTo("view-1"));
             Assert.That(roundTripped.Id, Is.EqualTo(new ViewId("view-1")));
-            Assert.That(roundTripped.OrganizationId, Is.EqualTo("org-1"));
+            Assert.That(roundTripped.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
             Assert.That(roundTripped.DataSections, Has.Count.EqualTo(1));

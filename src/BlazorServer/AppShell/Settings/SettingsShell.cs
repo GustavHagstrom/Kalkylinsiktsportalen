@@ -1,8 +1,8 @@
-using BlazorServer.AppShell.Composition;
-using BlazorServer.AppShell.Composition.Navigation;
+using BlazorServer.Composition.Navigation;
 using BlazorServer.AppShell.Routes;
 using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Entities;
 using BlazorServer.AppShell.Settings.Infrastructure.MongoDb.Stores;
+using BlazorServer.Composition;
 using MongoDB.Driver;
 
 namespace BlazorServer.AppShell.Settings;

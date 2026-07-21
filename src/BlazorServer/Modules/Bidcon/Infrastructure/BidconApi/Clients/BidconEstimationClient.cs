@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using BlazorServer.Identity;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;

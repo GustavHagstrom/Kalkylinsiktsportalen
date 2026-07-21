@@ -46,7 +46,7 @@ Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integ
 
 ```text
 Composition/
-  Äger gemensam bootstrap-state, bidragsmodeller och registries.
+  Composition äger gemensam bootstrap-state och registries. Generella bidragsmodeller kan ägas av Composition, medan produktspecifika bidragskontrakt ägs av den modul som definierar deras betydelse
 
 Identity/
   Äger gemensamma identitetsvärden och ett teknikneutralt kontrakt
@@ -168,7 +168,8 @@ Identity
   -X-> Access
 
 Composition
-  -X-> Modules
+  -> avsiktliga publika modulkontrakt
+  -X-> modulernas interna implementation
   -X-> AppShell
 
 Kernel
@@ -179,6 +180,8 @@ Kernel
   -X-> UiKit
   -X-> Infrastructure
 ```
+
+`Composition` får bara använda modulernas avsiktliga publika registreringskontrakt under `Modules/{Module}/Public`; intern implementation och `AppShell` är fortsatt förbjudna beroenden.
 
 Moduler får inte bero på `AppShell` eller nå in i andra modulers interna use cases, persistence, integrationer eller UI. Cross-module-interaktion sker genom den ägande modulens avsiktliga yta under `Modules/{Module}/Public`.
 
