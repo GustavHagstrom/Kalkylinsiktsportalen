@@ -105,10 +105,10 @@ public sealed partial class FinalArchitectureBoundaryTests
             + string.Join('\n', violations));
     }
     [Test]
-    public void ModulesMayNotReferenseAppShell() 
+    public void ModulesMayNotReferenceAppShell() 
     {
-        var assemblyy = typeof(Program).Assembly;
-        var result = Types.InAssembly(assemblyy).That().ResideInNamespaceMatching(@"^BlazorServer\.Modules(\.|$)").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Modules(\.|$)").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
 
         Assert.That(result.IsSuccessful, Is.True, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
     }

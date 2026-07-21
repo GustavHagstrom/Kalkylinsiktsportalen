@@ -17,11 +17,11 @@ public class MemoryAccessClaimsCache : IAccessClaimsCache
     }
     public void SetAccessClaims(UserId userId, OrganizationId orgId, List<string> claimValues)
     {
-        _memoryCache.Set($"accessClaims:{userId}:{orgId}", claimValues, _cacheOptions);
+        _memoryCache.Set($"accessClaims:{userId.Value}:{orgId.Value}", claimValues, _cacheOptions);
     }
     public bool TryGetAccessClaims(UserId userId, OrganizationId orgId, out List<string>? claimValues)
     {
-        if (_memoryCache.TryGetValue($"accessClaims:{userId}:{orgId}", out var cachedClaimsObj) && cachedClaimsObj is List<string> accessClaimValues)
+        if (_memoryCache.TryGetValue($"accessClaims:{userId.Value}:{orgId.Value}", out var cachedClaimsObj) && cachedClaimsObj is List<string> accessClaimValues)
         {
             claimValues = accessClaimValues;
             return true;
@@ -31,7 +31,7 @@ public class MemoryAccessClaimsCache : IAccessClaimsCache
     }
     public void ClearAccessClaims(UserId userId, OrganizationId orgId)
     {
-        _memoryCache.Remove($"accessClaims:{userId}:{orgId}");
+        _memoryCache.Remove($"accessClaims:{userId.Value}:{orgId.Value}");
     }
 
 }
