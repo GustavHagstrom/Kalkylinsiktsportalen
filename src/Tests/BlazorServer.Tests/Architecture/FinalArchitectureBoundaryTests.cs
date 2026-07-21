@@ -108,15 +108,15 @@ public sealed partial class FinalArchitectureBoundaryTests
     public void ModulesMayNotReferenseAppShell() 
     {
         var assemblyy = typeof(Program).Assembly;
-        var result = Types.InAssembly(assemblyy).That().ResideInNamespace("BlazorServer.Modules").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
+        var result = Types.InAssembly(assemblyy).That().ResideInNamespaceMatching(@"^BlazorServer\.Modules(\.|$)").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
 
-        Assert.That(result.IsSuccessful, Is.True);//, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+        Assert.That(result.IsSuccessful, Is.True, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
     }
     [Test]
     public void CompositionShouldNotReferenceOtherLayers()
     {
         var assembly = typeof(Program).Assembly;
-        var result = Types.InAssembly(assembly).That().ResideInNamespace("BlazorServer.Composition").ShouldNot()
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Composition(\.|$)").ShouldNot()
             .HaveDependencyOnAny(
             "BlazorServer.Modules.Access.Domain",
             "BlazorServer.Modules.Access.Features",
@@ -145,13 +145,13 @@ public sealed partial class FinalArchitectureBoundaryTests
             "BlazorServer.Identity")
             .GetResult();
 
-        Assert.That(result.IsSuccessful, Is.True);//, "Composition must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+        Assert.That(result.IsSuccessful, Is.True, "Composition must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
     }
     [Test]
     public void KernelShouldNotReferenceOtherLayers()
     {
         var assembly = typeof(Program).Assembly;
-        var result = Types.InAssembly(assembly).That().ResideInNamespace("BlazorServer.Kernel").ShouldNot()
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Kernel(\.|$)").ShouldNot()
             .HaveDependencyOnAll(
             "BlazorServer.Modules",
             "BlazorServer.AppShell",
@@ -160,7 +160,7 @@ public sealed partial class FinalArchitectureBoundaryTests
             "BlazorServer.Infrastructure",
             "BlazorServer.Identity").GetResult();
 
-        Assert.That(result.IsSuccessful, Is.True);//, "Kernel must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames));
+        Assert.That(result.IsSuccessful, Is.True, "Kernel must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
     }
     [Test]
     public void CentralMongoInfrastructureMustNotKnowModulePersistence()

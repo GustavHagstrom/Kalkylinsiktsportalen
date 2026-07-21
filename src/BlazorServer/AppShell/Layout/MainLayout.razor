@@ -43,7 +43,7 @@
 
         <MudSpacer />
 
-        @IComponentHtmlRenderer.Render(LoginDisplay.Type ?? throw new Exception("Login display component not found"))
+        @IComponentHtmlRenderer.Render(LoginDisplay.ComponentType ?? throw new Exception("Login display component not found"))
 
     </MudToolBar>
 
