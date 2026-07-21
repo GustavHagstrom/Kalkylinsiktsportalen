@@ -2,11 +2,11 @@
 
 public sealed record LoginDisplayRecord
 {
-    public Type Type { get; init; }
+    public Type ComponentType { get; init; }
 
     private LoginDisplayRecord(Type loginDisplayComponent)
     {
-        Type = loginDisplayComponent;
+        ComponentType = loginDisplayComponent;
     }
     public static LoginDisplayRecord Create<T>()
         where T : Microsoft.AspNetCore.Components.ComponentBase
