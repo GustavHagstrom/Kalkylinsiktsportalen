@@ -1,5 +1,7 @@
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
+using BlazorServer.Identity;
+
 public static class MongoBidconApiCredentialsMapper
 {
     public static BidconApiCredentials? ToModel(this MongoBidconApiCredentials? entity)
@@ -11,7 +13,7 @@ public static class MongoBidconApiCredentialsMapper
 
         return new BidconApiCredentials
         {
-            OrganizationId = entity.OrganizationId,
+            OrganizationId = new OrganizationId(entity.OrganizationId),
             ApiKey = entity.ApiKey,
             ApiSecret = entity.ApiSecret
         };
@@ -21,7 +23,7 @@ public static class MongoBidconApiCredentialsMapper
     {
         return new MongoBidconApiCredentials
         {
-            OrganizationId = model.OrganizationId,
+            OrganizationId = model.OrganizationId.Value,
             ApiKey = model.ApiKey,
             ApiSecret = model.ApiSecret
         };

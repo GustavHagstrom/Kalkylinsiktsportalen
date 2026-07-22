@@ -28,7 +28,7 @@ public sealed class GetBidconCredentialsQueryHandler
             return new InvalidGetBidconCredentialsRequest(errors);
         }
 
-        var credentials = await credentialsStore.GetAsync(query.OrganizationId.Value.ToString());
+        var credentials = await credentialsStore.GetAsync(query.OrganizationId);
 
         if (credentials is null ||
             string.IsNullOrWhiteSpace(credentials.ApiKey) ||

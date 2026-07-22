@@ -39,7 +39,7 @@ public class BidconCredentialsTests
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
-            OrganizationId = organizationId.Value.ToString(),
+            OrganizationId = organizationId,
             ApiKey = "key-1",
             ApiSecret = "secret-1"
         });
@@ -102,7 +102,7 @@ public class BidconCredentialsTests
             Assert.That(saved.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(saved.WasSaved, Is.True);
             Assert.That(store.SavedCredentials, Is.Not.Null);
-            Assert.That(store.SavedCredentials!.OrganizationId, Is.EqualTo(organizationId.Value.ToString()));
+            Assert.That(store.SavedCredentials!.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(store.SavedCredentials.ApiKey, Is.EqualTo("key-1"));
             Assert.That(store.SavedCredentials.ApiSecret, Is.EqualTo("secret-1"));
             Assert.That(verifier.VerifiedCredentials, Is.Not.Null);
@@ -119,7 +119,7 @@ public class BidconCredentialsTests
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
-            OrganizationId = organizationId.Value.ToString(),
+            OrganizationId = organizationId,
             ApiKey = "old-key",
             ApiSecret = "old-secret"
         });
@@ -180,7 +180,7 @@ public class BidconCredentialsTests
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
-            OrganizationId = organizationId.Value.ToString(),
+            OrganizationId = organizationId,
             ApiKey = "key-1",
             ApiSecret = "secret-1"
         });
@@ -209,7 +209,7 @@ public class BidconCredentialsTests
 
         public bool WasRead { get; private set; }
 
-        public Task<BidconApiCredentials?> GetAsync(string orgId)
+        public Task<BidconApiCredentials?> GetAsync(OrganizationId orgId)
         {
             WasRead = true;
             return Task.FromResult(SavedCredentials?.OrganizationId == orgId ? SavedCredentials : null);
@@ -221,7 +221,7 @@ public class BidconCredentialsTests
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(string orgId)
+        public Task DeleteAsync(OrganizationId orgId)
         {
             if (SavedCredentials?.OrganizationId == orgId)
             {
@@ -246,6 +246,16 @@ public class BidconCredentialsTests
     private sealed class RecordingBidconAccessTokenCache : IBidconAccessTokenCache
     {
         public OrganizationId? InvalidatedOrganizationId { get; private set; }
+
+        public bool TryGet(OrganizationId organizationId, out string? accessToken)
+        {
+            accessToken = null;
+            return false;
+        }
+
+        public void Set(OrganizationId organizationId, string accessToken, TimeSpan lifetime)
+        {
+        }
 
         public void Invalidate(OrganizationId organizationId)
         {

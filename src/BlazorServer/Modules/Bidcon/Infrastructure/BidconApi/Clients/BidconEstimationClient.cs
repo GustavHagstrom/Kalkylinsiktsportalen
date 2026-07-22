@@ -4,15 +4,15 @@ using BlazorServer.Identity;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
+using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 
 internal class BidconEstimationClient
 {
     private readonly IHttpClientFactory? httpClientFactory;
-    private readonly IMemoryCache? cache;
+    private readonly IBidconAccessTokenCache? accessTokenCache;
     private readonly IBidconApiCredentialsStore? credentialsStore;
 
     protected BidconEstimationClient()
@@ -21,11 +21,11 @@ internal class BidconEstimationClient
 
     public BidconEstimationClient(
         IHttpClientFactory httpClientFactory,
-        IMemoryCache cache,
+        IBidconAccessTokenCache accessTokenCache,
         IBidconApiCredentialsStore credentialsStore)
     {
         this.httpClientFactory = httpClientFactory;
-        this.cache = cache;
+        this.accessTokenCache = accessTokenCache;
         this.credentialsStore = credentialsStore;
     }
 
@@ -107,17 +107,14 @@ internal class BidconEstimationClient
         CancellationToken cancellationToken)
     {
         var client = httpClientFactory!.CreateClient(BidconHttpClientNames.ApiClient);
-        var orgId = organizationId.Value.ToString();
-        var cacheKey = $"bidconAccessToken_{orgId}";
 
-        if (cache!.TryGetValue<string>(cacheKey, out var cachedAccessToken) &&
-            !string.IsNullOrWhiteSpace(cachedAccessToken))
+        if (accessTokenCache!.TryGet(organizationId, out var cachedAccessToken))
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cachedAccessToken);
             return client;
         }
 
-        var credentials = await credentialsStore!.GetAsync(orgId);
+        var credentials = await credentialsStore!.GetAsync(organizationId);
 
         if (credentials is null)
         {
@@ -147,7 +144,10 @@ internal class BidconEstimationClient
                 "Failed to retrieve Bidcon access token.");
         }
 
-        cache!.Set(cacheKey, token.AccessToken, TimeSpan.FromSeconds(Math.Max(1, token.ExpireInSeconds - 20)));
+        accessTokenCache.Set(
+            organizationId,
+            token.AccessToken,
+            TimeSpan.FromSeconds(Math.Max(1, token.ExpireInSeconds - 20)));
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         return client;
     }
