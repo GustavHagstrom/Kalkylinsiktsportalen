@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Authentication;
+using BlazorServer.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Web;
@@ -25,7 +26,7 @@ public class CurrentUserSessionTests
         Assert.Multiple(() =>
         {
             Assert.That(currentUser, Is.Not.Null);
-            Assert.That(currentUser!.UserId, Is.EqualTo("user-1"));
+            Assert.That(currentUser!.UserId.Value, Is.EqualTo("user-1"));
             Assert.That(currentUser.DisplayName, Is.EqualTo("Ada Lovelace"));
             Assert.That(currentUser.Email, Is.EqualTo("ada@example.com"));
             Assert.That(principal.GetOrganizationId(), Is.EqualTo("org-1"));
@@ -42,8 +43,9 @@ public class CurrentUserSessionTests
             new Claim(ClaimTypes.Name, "Ada Lovelace"),
             new Claim(CurrentUserSessionClaimTypes.Email, "ada@example.com")
         ], "test")));
-        var profileLookup = new FixedProfileLookup(new SessionUser(
-            "user-1",
+        var profileLookup = new FixedProfileLookup(new CurrentUser(
+            new("user-1"),
+            new("org-1"), 
             "Ada Lovelace",
             "ada@example.com",
             "photo-base64"));
@@ -52,12 +54,12 @@ public class CurrentUserSessionTests
             new TestNavigationManager(),
             profileLookup);
 
-        var user = await session.UpdateUserAsync();
+        var user = await session.RefreshAsync();
 
         Assert.Multiple(() =>
         {
-            Assert.That(user?.Name, Is.EqualTo("Ada Lovelace"));
-            Assert.That(user?.AvatarBase64, Is.EqualTo("photo-base64"));
+            Assert.That(user?.DisplayName, Is.EqualTo("Ada Lovelace"));
+            Assert.That(user?.Avatar, Is.EqualTo("photo-base64"));
         });
     }
 
@@ -78,14 +80,14 @@ public class CurrentUserSessionTests
 
     private sealed class FixedProfileLookup : ICurrentUserProfileLookup
     {
-        private readonly SessionUser user;
+        private readonly CurrentUser user;
 
-        public FixedProfileLookup(SessionUser user)
+        public FixedProfileLookup(CurrentUser user)
         {
             this.user = user;
         }
 
-        public Task<SessionUser> GetProfileAsync(CurrentUser currentUser)
+        public Task<CurrentUser> GetProfileAsync(CurrentUser currentUser)
         {
             return Task.FromResult(user);
         }

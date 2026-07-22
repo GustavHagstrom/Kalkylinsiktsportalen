@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Projects.Domain;
 using BlazorServer.Kernel.Validation;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Modules.Projects.Features.CreateProject;
 

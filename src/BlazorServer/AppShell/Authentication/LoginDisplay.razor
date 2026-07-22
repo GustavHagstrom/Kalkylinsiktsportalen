@@ -1,9 +1,9 @@
 ﻿<AuthorizeView>
     <Authorized>
-        <UserAvatar Name="@user?.Name" AvatarBase64="@user?.AvatarBase64" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@user?.DisplayName" AvatarBase64="@user?.Avatar" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.Name</MudText>
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
             <DarkmodeSwitch  ThemeManagerBackup="ThemeProvider" />
             <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
@@ -19,11 +19,11 @@
 </AuthorizeView>
 
 @inject IAuthService AuthService
-@inject IStringLocalizer<MockedLoginDisplay> Localizer
+@inject IStringLocalizer<LoginDisplay> Localizer
 
 @code {
     bool ShowLogoutPopover = false;
-    SessionUser? user => AuthService.User;
+    CurrentUser? user => AuthService.CurrentUser;
     [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
 
     Task LogoutAsync() => AuthService.LogoutAsync();
@@ -31,6 +31,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await AuthService.UpdateUserAsync();
+        await AuthService.RefreshAsync();
     }
 }

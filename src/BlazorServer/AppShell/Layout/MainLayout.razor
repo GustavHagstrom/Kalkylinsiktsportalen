@@ -1,6 +1,7 @@
-@using BlazorServer.AppShell.Composition.UI;
+@using BlazorServer.Composition.UI;
 @inherits LayoutComponentBase
 @inject UiRegistry Ui
+@inject LoginDisplayRecord LoginDisplay
 @inject IComponentHtmlRenderer IComponentHtmlRenderer
 
 
@@ -42,7 +43,7 @@
 
         <MudSpacer />
 
-        @IComponentHtmlRenderer.Render(Ui.LoginDisplayComponent ?? throw new Exception("Login display component not found"))
+        @IComponentHtmlRenderer.Render(LoginDisplay.ComponentType ?? throw new Exception("Login display component not found"))
 
     </MudToolBar>
 

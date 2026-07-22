@@ -13,7 +13,7 @@ namespace BlazorServer.Tests.Modules.Reports;
 [TestFixture]
 public class ReportsViewOwnershipTests
 {
-    private static readonly Assembly AppAssembly = typeof(ServiceAndFeatureRegistrations).Assembly;
+    private static readonly Assembly AppAssembly = typeof(ServiceRegistrations).Assembly;
 
     [Test]
     public void ReportsOwnsViewContractsComponentsAndPersistence()

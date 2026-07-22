@@ -1,8 +1,8 @@
 using BlazorServer.Modules.Projects.Domain;
 using BlazorServer.Modules.Projects.Features.CreateProject;
 using BlazorServer.Modules.Projects.Infrastructure.InMemory;
-using BlazorServer.Kernel.Identity;
 using BlazorServer.Kernel.Validation;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Tests.Modules.Projects;
 
@@ -16,7 +16,7 @@ public class ProjectsModuleFoundationTests
         var commandHandler = new CreateProjectCommandHandler(store);
         var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
         var projectId = new ProjectId(Guid.Parse("0c67ee33-0924-4515-937f-8dd77efc1dc5"));
-        var createdBy = new UserId(Guid.Parse("9178ba3d-461f-440e-9388-6deef941767b"));
+        var createdBy = new UserId("9178ba3d-461f-440e-9388-6deef941767b");
         var createdAt = new DateTimeOffset(2026, 06, 25, 13, 30, 00, TimeSpan.Zero);
 
         var result = await commandHandler.HandleAsync(
@@ -51,7 +51,7 @@ public class ProjectsModuleFoundationTests
             new CreateProjectCommand(
                 new OrganizationId(Guid.NewGuid().ToString()),
                 new ProjectId(Guid.NewGuid()),
-                new UserId(Guid.NewGuid()),
+                new UserId(Guid.NewGuid().ToString()),
                 DateTimeOffset.UtcNow,
                 " "),
             CancellationToken.None);
@@ -73,7 +73,7 @@ public class ProjectsModuleFoundationTests
             Project.Create(
                 new ProjectId(Guid.NewGuid()),
                 new OrganizationId(string.Empty),
-                new UserId(Guid.NewGuid()),
+                new UserId(Guid.NewGuid().ToString()),
                 DateTimeOffset.UtcNow,
                 "Kvarteret Linden"));
 

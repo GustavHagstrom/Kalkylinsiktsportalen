@@ -2,6 +2,7 @@ using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 
@@ -19,9 +20,9 @@ public class MongoViewStore : IViewStore
         var mongoView = await _collection.Find(filter).FirstOrDefaultAsync();
         return ViewMappings.ToDto(mongoView);
     }
-    public async Task<List<ViewDto>> GetAllAsync(string orgId)
+    public async Task<List<ViewDto>> GetAllAsync(OrganizationId orgId)
     {
-        var filter = Builders<MongoView>.Filter.Eq(v => v.OrganizationId, orgId);
+        var filter = Builders<MongoView>.Filter.Eq(v => v.OrganizationId, orgId.Value);
         var mongoViews = await _collection.Find(filter).ToListAsync();
         var viewDtos = mongoViews.Select(ViewMappings.ToDto).ToList();
         return viewDtos;

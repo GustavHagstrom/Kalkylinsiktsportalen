@@ -1,0 +1,56 @@
+﻿@using BlazorServer.AppShell.Authentication
+
+<AuthorizeView>
+    <Authorized>
+        <UserAvatar Name="@user?.DisplayName" AvatarBase64="@user?.Avatar" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+
+        <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
+            <DarkmodeSwitch ThemeManagerBackup="ThemeProvider" />
+            <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
+        </MudPopover>
+
+        <MudOverlay Visible="ShowLogoutPopover" LockScroll="true" OnClick="() => ShowLogoutPopover = false" />
+    </Authorized>
+
+    <NotAuthorized>
+        <MudButton Style="height: 100%" OnClick="() => ShowLoginPopover = !ShowLoginPopover">
+            @Localizer["Logga in"]
+        </MudButton>
+
+        <MudPopover Open="ShowLoginPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudStack Spacing="2">
+                @foreach (var user in MockDefaults.Users)
+                {
+                    <MudButton OnClick="() => Login(user)">@LoginText(user)</MudButton>
+                }
+            </MudStack>
+        </MudPopover>
+
+        <MudOverlay Visible="ShowLoginPopover" LockScroll="true" OnClick="() => ShowLoginPopover = false" />
+    </NotAuthorized>
+</AuthorizeView>
+
+@inject IAuthService AuthService
+@inject MockAuthDefaults MockDefaults
+@inject IStringLocalizer<MockedLoginDisplay> Localizer
+
+@code {
+    [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
+    bool ShowLogoutPopover = false;
+    bool ShowLoginPopover = false;
+
+    string LoginText(CurrentUser user) => $"{Localizer["Logga in med"]} : {user.DisplayName}";
+    CurrentUser? user => AuthService.CurrentUser;
+
+    Task LogoutAsync() => AuthService.LogoutAsync();
+    void Login(CurrentUser user)
+    {
+        if(AuthService is MockCurrentUserSession mockedAuthService)
+        {
+            mockedAuthService.Login(user);
+            ShowLoginPopover = false;
+            ShowLogoutPopover = false;
+        }
+    }
+}

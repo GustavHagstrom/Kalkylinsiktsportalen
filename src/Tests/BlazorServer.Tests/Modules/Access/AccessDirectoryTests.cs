@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
 
 namespace BlazorServer.Tests.Modules.Access;
@@ -5,7 +6,7 @@ namespace BlazorServer.Tests.Modules.Access;
 [TestFixture]
 public class AccessDirectoryTests
 {
-    private const string OrganizationId = "org-1";
+    private static readonly OrganizationId OrganizationId = new("org-1");
 
     [Test]
     public async Task MockAccessDirectoryReturnsIsolatedUserLists()
@@ -25,7 +26,7 @@ public class AccessDirectoryTests
     {
         var directory = new MockAccessDirectory(OrganizationId);
 
-        var adminRoles = await directory.GetRolesForUserAsync("Admin", OrganizationId);
+        var adminRoles = await directory.GetRolesForUserAsync(new UserId("Admin"), OrganizationId);
         var adminUsers = await directory.GetUsersInRoleAsync("Admin", OrganizationId);
 
         Assert.Multiple(() =>
@@ -40,7 +41,7 @@ public class AccessDirectoryTests
     {
         var directory = new MockAccessDirectory(OrganizationId);
 
-        var users = await directory.GetUsersAsync("other-org");
+        var users = await directory.GetUsersAsync(new OrganizationId("other-org"));
 
         Assert.That(users, Is.Empty);
     }

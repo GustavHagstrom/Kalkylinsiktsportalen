@@ -3,6 +3,7 @@ using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Kernel.Validation;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 

@@ -4,6 +4,7 @@ using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Kernel.Validation;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
 

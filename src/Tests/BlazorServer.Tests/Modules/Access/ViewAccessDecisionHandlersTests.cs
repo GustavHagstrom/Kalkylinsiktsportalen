@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 using BlazorServer.Modules.Access.Public.Authorization;
@@ -77,8 +78,8 @@ public class ViewAccessDecisionHandlersTests
         string[]? roleIds = null,
         bool isAdmin = false)
         => new(
-            userId,
-            organizationId,
+            new UserId(userId),
+            new OrganizationId(organizationId),
             (roleIds ?? []).ToHashSet(StringComparer.Ordinal),
             isAdmin);
 }

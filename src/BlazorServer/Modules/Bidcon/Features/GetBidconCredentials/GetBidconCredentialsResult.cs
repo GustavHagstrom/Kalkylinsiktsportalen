@@ -1,5 +1,5 @@
+using BlazorServer.Identity;
 using BlazorServer.Kernel.Validation;
-using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 

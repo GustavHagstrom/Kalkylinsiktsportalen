@@ -1,3 +1,4 @@
+using NetArchTest.Rules;
 using System.Text.RegularExpressions;
 
 namespace BlazorServer.Tests.Architecture;
@@ -103,7 +104,64 @@ public sealed partial class FinalArchitectureBoundaryTests
             "Module Public contracts must not expose internal DTOs, stores, persistence entities or implementations. Violations:\n"
             + string.Join('\n', violations));
     }
+    [Test]
+    public void ModulesMayNotReferenceAppShell() 
+    {
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Modules(\.|$)").ShouldNot().HaveDependencyOn("BlazorServer.AppShell").GetResult();
 
+        Assert.That(result.IsSuccessful, Is.True, "Modules must not depend on AppShell. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
+    }
+    [Test]
+    public void CompositionShouldNotReferenceOtherLayers()
+    {
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Composition(\.|$)").ShouldNot()
+            .HaveDependencyOnAny(
+            "BlazorServer.Modules.Access.Domain",
+            "BlazorServer.Modules.Access.Features",
+            "BlazorServer.Modules.Access.Infrastructure",
+            "BlazorServer.Modules.Access.Components",
+
+            "BlazorServer.Modules.Bidcon.Domain",
+            "BlazorServer.Modules.Bidcon.Features",
+            "BlazorServer.Modules.Bidcon.Infrastructure",
+            "BlazorServer.Modules.Bidcon.Components",
+
+            "BlazorServer.Modules.Projects.Domain",
+            "BlazorServer.Modules.Projects.Features",
+            "BlazorServer.Modules.Projects.Infrastructure",
+            "BlazorServer.Modules.Projects.Components",
+
+            "BlazorServer.Modules.Reports.Domain",
+            "BlazorServer.Modules.Reports.Features",
+            "BlazorServer.Modules.Reports.Infrastructure",
+            "BlazorServer.Modules.Reports.Components",
+
+            "BlazorServer.AppShell",
+            "BlazorServer.Kernel",
+            "BlazorServer.UiKit",
+            "BlazorServer.Infrastructure",
+            "BlazorServer.Identity")
+            .GetResult();
+
+        Assert.That(result.IsSuccessful, Is.True, "Composition must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
+    }
+    [Test]
+    public void KernelShouldNotReferenceOtherLayers()
+    {
+        var assembly = typeof(Program).Assembly;
+        var result = Types.InAssembly(assembly).That().ResideInNamespaceMatching(@"^BlazorServer\.Kernel(\.|$)").ShouldNot()
+            .HaveDependencyOnAll(
+            "BlazorServer.Modules",
+            "BlazorServer.AppShell",
+            "BlazorServer.Composition",
+            "BlazorServer.UiKit",
+            "BlazorServer.Infrastructure",
+            "BlazorServer.Identity").GetResult();
+
+        Assert.That(result.IsSuccessful, Is.True, "Kernel must be self-contained. Violations:\n" + string.Join('\n', result.FailingTypeNames ?? Array.Empty<string>()));
+    }
     [Test]
     public void CentralMongoInfrastructureMustNotKnowModulePersistence()
         => AssertNoReferences(

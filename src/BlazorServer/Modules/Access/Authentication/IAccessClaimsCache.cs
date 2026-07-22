@@ -1,9 +1,11 @@
 
+using BlazorServer.Identity;
+
 namespace BlazorServer.Modules.Access.Authentication;
 
 public interface IAccessClaimsCache
 {
-    void ClearAccessClaims(string userId, string orgId);
-    void SetAccessClaims(string userId, string orgId, List<string> claimValues);
-    bool TryGetAccessClaims(string userId, string orgId, out List<string>? claimValues);
+    void ClearAccessClaims(UserId userId, OrganizationId orgId);
+    void SetAccessClaims(UserId userId, OrganizationId orgId, List<string> claimValues);
+    bool TryGetAccessClaims(UserId userId, OrganizationId orgId, out List<string>? claimValues);
 }

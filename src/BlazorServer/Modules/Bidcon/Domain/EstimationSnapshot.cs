@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Domain;

@@ -1,4 +1,4 @@
-using BlazorServer.AppShell.Composition;
+using BlazorServer.Composition;
 using BlazorServer.Modules.Reports;
 using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 using Microsoft.Extensions.DependencyInjection;

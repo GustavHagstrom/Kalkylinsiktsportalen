@@ -1,32 +1,32 @@
-using BlazorServer.Modules.Access.Domain;
+using BlazorServer.Identity;
 
 namespace BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 
 public sealed record GrantUserFunctionalAccessCommand(
-    string UserId,
-    string OrganizationId,
+    UserId UserId,
+    OrganizationId OrganizationId,
     string AccessClaimValue);
 
 public sealed record GrantRoleFunctionalAccessCommand(
     string RoleId,
-    string OrganizationId,
+    OrganizationId OrganizationId,
     string AccessClaimValue);
 
 public sealed record RevokeUserFunctionalAccessCommand(
-    string UserId,
-    string OrganizationId,
+    UserId UserId,
+    OrganizationId OrganizationId,
     string AccessClaimValue);
 
 public sealed record RevokeRoleFunctionalAccessCommand(
     string RoleId,
-    string OrganizationId,
+    OrganizationId OrganizationId,
     string AccessClaimValue);
 
-public sealed record GetUserFunctionalAccessQuery(string UserId, string OrganizationId);
+public sealed record GetUserFunctionalAccessQuery(UserId UserId, OrganizationId OrganizationId);
 
-public sealed record GetRoleFunctionalAccessQuery(string RoleId, string OrganizationId);
+public sealed record GetRoleFunctionalAccessQuery(string RoleId, OrganizationId OrganizationId);
 
 public sealed record GetEffectiveFunctionalAccessClaimsQuery(
-    string UserId,
+    UserId UserId,
     IReadOnlyCollection<string> RoleIds,
-    string OrganizationId);
+    OrganizationId OrganizationId);

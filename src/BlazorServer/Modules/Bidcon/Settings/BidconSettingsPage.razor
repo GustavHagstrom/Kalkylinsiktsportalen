@@ -1,7 +1,6 @@
 @page "/settings/bidcon"
 @attribute [Authorize(Policy = "ApiPolicy")]
 @using BlazorServer.Kernel.Validation
-@using BlazorServer.Modules.Bidcon.Public.Contracts
 @inject IStringLocalizer<BidconSettingsPage> Localizer
 
 <SettingsPageBase Title="@Localizer["Bidcon API"]">
@@ -24,7 +23,7 @@
 @inject Features.GetBidconCredentials.GetBidconCredentialsQueryHandler GetCredentialsHandler
 @inject Features.UpsertBidconCredentials.UpsertBidconCredentialsCommandHandler UpsertCredentialsHandler
 @inject Features.RemoveBidconCredentials.RemoveBidconCredentialsCommandHandler RemoveCredentialsHandler
-@inject ICurrentUserSession CurrentUserSession
+@inject ICurrentUserContext CurrentUserContext
 
 @code {
     private string currentKey = string.Empty;
@@ -49,16 +48,14 @@
 
     private async Task LoadDataAsync()
     {
-        await CurrentUserSession.RefreshAsync();
-
-        if (CurrentUserSession.OrganizationId is null)
+        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
         {
             return;
         }
 
         var result = await GetCredentialsHandler.HandleAsync(
             new Features.GetBidconCredentials.GetBidconCredentialsQuery(
-                new OrganizationId(CurrentUserSession.OrganizationId)),
+                CurrentUserContext.CurrentUser.OrganizationId),
             CancellationToken.None);
 
         if (result is Features.GetBidconCredentials.InvalidGetBidconCredentialsRequest invalidRequest)
@@ -85,17 +82,14 @@
 
     private async Task SaveAsync()
     {
-        await CurrentUserSession.RefreshAsync();
-
-        if (CurrentUserSession.OrganizationId is null)
+        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
         {
             return;
         }
 
-        var organizationId = new OrganizationId(CurrentUserSession.OrganizationId);
         var result = await UpsertCredentialsHandler.HandleAsync(
             new Features.UpsertBidconCredentials.UpsertBidconCredentialsCommand(
-                organizationId,
+                CurrentUserContext.CurrentUser.OrganizationId,
                 newKey,
                 newSecret),
             CancellationToken.None);
@@ -122,16 +116,13 @@
 
     private async Task RemoveAsync()
     {
-        await CurrentUserSession.RefreshAsync();
-
-        if (CurrentUserSession.OrganizationId is null)
+        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
         {
             return;
         }
 
-        var organizationId = new OrganizationId(CurrentUserSession.OrganizationId);
         var result = await RemoveCredentialsHandler.HandleAsync(
-            new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(organizationId),
+            new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(CurrentUserContext.CurrentUser.OrganizationId),
             CancellationToken.None);
 
         if (result is Features.RemoveBidconCredentials.InvalidRemoveBidconCredentialsRequest invalidRequest)
