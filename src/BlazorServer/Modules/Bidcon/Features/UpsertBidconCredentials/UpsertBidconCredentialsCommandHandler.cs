@@ -36,7 +36,7 @@ public sealed class UpsertBidconCredentialsCommandHandler
 
         var credentials = new BidconApiCredentials
         {
-            OrganizationId = command.OrganizationId.Value.ToString(),
+            OrganizationId = command.OrganizationId,
             ApiKey = command.ApiKey,
             ApiSecret = command.ApiSecret
         };

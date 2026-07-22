@@ -1,10 +1,12 @@
+using BlazorServer.Identity;
+
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
 public interface IBidconApiCredentialsStore
 {
-    Task<BidconApiCredentials?> GetAsync(string orgId);
+    Task<BidconApiCredentials?> GetAsync(OrganizationId orgId);
 
     Task UpsertAsync(BidconApiCredentials credentials);
 
-    Task DeleteAsync(string orgId);
+    Task DeleteAsync(OrganizationId orgId);
 }

@@ -1,8 +1,10 @@
+using BlazorServer.Identity;
+
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
 public sealed class BidconApiCredentials
 {
-    public string OrganizationId { get; set; } = string.Empty;
+    public OrganizationId OrganizationId { get; set; }
 
     public string ApiKey { get; set; } = string.Empty;
 

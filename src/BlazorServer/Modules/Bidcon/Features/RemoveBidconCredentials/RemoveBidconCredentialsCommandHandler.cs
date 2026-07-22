@@ -32,7 +32,7 @@ public sealed class RemoveBidconCredentialsCommandHandler
             return new InvalidRemoveBidconCredentialsRequest(errors);
         }
 
-        await credentialsStore.DeleteAsync(command.OrganizationId.Value.ToString());
+        await credentialsStore.DeleteAsync(command.OrganizationId);
         accessTokenCache.Invalidate(command.OrganizationId);
 
         return new BidconCredentialsRemoved(command.OrganizationId);

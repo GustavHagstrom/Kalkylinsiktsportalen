@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using MongoDB.Driver;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
@@ -11,10 +12,10 @@ public sealed class MongoBidconApiCredentialsStore : IBidconApiCredentialsStore
         this.collection = collection;
     }
 
-    public async Task<BidconApiCredentials?> GetAsync(string orgId)
+    public async Task<BidconApiCredentials?> GetAsync(OrganizationId orgId)
     {
         var credentials = await collection
-            .Find(credentials => credentials.OrganizationId == orgId)
+            .Find(credentials => credentials.OrganizationId == orgId.Value)
             .FirstOrDefaultAsync();
 
         return credentials.ToModel();
@@ -24,13 +25,13 @@ public sealed class MongoBidconApiCredentialsStore : IBidconApiCredentialsStore
     {
         var mongoCredentials = credentials.ToMongo();
         return collection.ReplaceOneAsync(
-            existing => existing.OrganizationId == credentials.OrganizationId,
+            existing => existing.OrganizationId == credentials.OrganizationId.Value,
             mongoCredentials,
             new ReplaceOptions { IsUpsert = true });
     }
 
-    public Task DeleteAsync(string orgId)
+    public Task DeleteAsync(OrganizationId orgId)
     {
-        return collection.DeleteOneAsync(credentials => credentials.OrganizationId == orgId);
+        return collection.DeleteOneAsync(credentials => credentials.OrganizationId == orgId.Value);
     }
 }
