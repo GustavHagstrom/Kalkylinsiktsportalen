@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Headers;
 using BlazorServer.Identity;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
+using BlazorServer.Modules.Bidcon.AccessTokens;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
-using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;

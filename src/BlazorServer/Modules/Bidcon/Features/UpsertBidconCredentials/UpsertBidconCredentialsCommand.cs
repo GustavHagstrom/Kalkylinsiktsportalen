@@ -5,5 +5,6 @@ namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 
 public sealed record UpsertBidconCredentialsCommand(
     OrganizationId OrganizationId,
+    UserId ActorId,
     string ApiKey,
     string ApiSecret) : ICommand<UpsertBidconCredentialsResult>;

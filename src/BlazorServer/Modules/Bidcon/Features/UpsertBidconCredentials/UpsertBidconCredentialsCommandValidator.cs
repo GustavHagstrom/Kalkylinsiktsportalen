@@ -16,6 +16,14 @@ public sealed class UpsertBidconCredentialsCommandValidator
                 "Organization id is required."));
         }
 
+        if (command.ActorId.IsEmpty)
+        {
+            errors.Add(new ValidationError(
+                "bidcon.credentials.actor.required",
+                nameof(UpsertBidconCredentialsCommand.ActorId),
+                "Actor id is required."));
+        }
+
         if (string.IsNullOrWhiteSpace(command.ApiKey))
         {
             errors.Add(new ValidationError(

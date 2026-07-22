@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Bidcon.CredentialAdministration;
+using BlazorServer.Modules.Bidcon.AccessTokens;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Kernel.CQRS;
 using BlazorServer.Kernel.Validation;
@@ -10,17 +12,20 @@ public sealed class UpsertBidconCredentialsCommandHandler
     private readonly IBidconApiCredentialsStore credentialsStore;
     private readonly IBidconCredentialsVerifier credentialsVerifier;
     private readonly IBidconAccessTokenCache accessTokenCache;
+    private readonly IBidconCredentialsAuditLog auditLog;
     private readonly UpsertBidconCredentialsCommandValidator validator;
 
     public UpsertBidconCredentialsCommandHandler(
         IBidconApiCredentialsStore credentialsStore,
         IBidconCredentialsVerifier credentialsVerifier,
         IBidconAccessTokenCache accessTokenCache,
+        IBidconCredentialsAuditLog auditLog,
         UpsertBidconCredentialsCommandValidator? validator = null)
     {
         this.credentialsStore = credentialsStore;
         this.credentialsVerifier = credentialsVerifier;
         this.accessTokenCache = accessTokenCache;
+        this.auditLog = auditLog;
         this.validator = validator ?? new UpsertBidconCredentialsCommandValidator();
     }
 
@@ -34,6 +39,7 @@ public sealed class UpsertBidconCredentialsCommandHandler
             return new InvalidUpsertBidconCredentialsRequest(errors);
         }
 
+        var existingCredentials = await credentialsStore.GetAsync(command.OrganizationId);
         var credentials = new BidconApiCredentials
         {
             OrganizationId = command.OrganizationId,
@@ -45,6 +51,13 @@ public sealed class UpsertBidconCredentialsCommandHandler
 
         if (!isVerified)
         {
+            await WriteAuditEntryAsync(
+                command,
+                BidconCredentialsAuditAction.VerificationFailed,
+                BidconCredentialsAuditResult.Failure,
+                "Bidcon credentials verification failed.",
+                cancellationToken);
+
             return new BidconCredentialsVerificationFailed(
                 command.OrganizationId,
                 "Bidcon credentials could not be verified.");
@@ -53,6 +66,35 @@ public sealed class UpsertBidconCredentialsCommandHandler
         await credentialsStore.UpsertAsync(credentials);
         accessTokenCache.Invalidate(command.OrganizationId);
 
+        await WriteAuditEntryAsync(
+            command,
+            existingCredentials is null
+                ? BidconCredentialsAuditAction.Create
+                : BidconCredentialsAuditAction.Replace,
+            BidconCredentialsAuditResult.Success,
+            existingCredentials is null
+                ? "Bidcon credentials were created."
+                : "Bidcon credentials were replaced.",
+            cancellationToken);
+
         return new BidconCredentialsSaved(command.OrganizationId);
+    }
+
+    private Task WriteAuditEntryAsync(
+        UpsertBidconCredentialsCommand command,
+        BidconCredentialsAuditAction action,
+        BidconCredentialsAuditResult result,
+        string details,
+        CancellationToken cancellationToken)
+    {
+        return auditLog.WriteAsync(
+            new BidconCredentialsAuditEntry(
+                command.OrganizationId,
+                command.ActorId,
+                DateTimeOffset.UtcNow,
+                action,
+                result,
+                details),
+            cancellationToken);
     }
 }

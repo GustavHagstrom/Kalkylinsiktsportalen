@@ -1,6 +1,6 @@
 using BlazorServer.Identity;
 
-namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+namespace BlazorServer.Modules.Bidcon.AccessTokens;
 
 public interface IBidconAccessTokenCache
 {

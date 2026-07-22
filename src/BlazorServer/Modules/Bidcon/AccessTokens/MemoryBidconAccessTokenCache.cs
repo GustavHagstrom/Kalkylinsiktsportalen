@@ -1,7 +1,7 @@
 using BlazorServer.Identity;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+namespace BlazorServer.Modules.Bidcon.AccessTokens;
 
 public sealed class MemoryBidconAccessTokenCache(IMemoryCache cache) : IBidconAccessTokenCache
 {
