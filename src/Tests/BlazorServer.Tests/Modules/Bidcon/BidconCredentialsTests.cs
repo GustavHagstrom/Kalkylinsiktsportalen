@@ -1,6 +1,8 @@
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.CredentialAdministration;
+using BlazorServer.Modules.Bidcon.AccessTokens;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Kernel.Validation;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
@@ -86,13 +88,15 @@ public class BidconCredentialsTests
     public async Task UpsertBidconCredentials_SavesCredentials_WhenCommandIsValid()
     {
         var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
+        var actorId = new UserId("admin-1");
         var store = new RecordingBidconApiCredentialsStore();
         var verifier = new RecordingBidconCredentialsVerifier(true);
         var tokenCache = new RecordingBidconAccessTokenCache();
-        var handler = new UpsertBidconCredentialsCommandHandler(store, verifier, tokenCache);
+        var auditLog = new RecordingBidconCredentialsAuditLog();
+        var handler = new UpsertBidconCredentialsCommandHandler(store, verifier, tokenCache, auditLog);
 
         var result = await handler.HandleAsync(
-            new UpsertBidconCredentialsCommand(organizationId, "key-1", "secret-1"),
+            new UpsertBidconCredentialsCommand(organizationId, actorId, "key-1", "secret-1"),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -116,6 +120,7 @@ public class BidconCredentialsTests
     public async Task UpsertBidconCredentials_KeepsExistingCredentials_WhenVerificationFails()
     {
         var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
+        var actorId = new UserId("admin-1");
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
@@ -128,10 +133,11 @@ public class BidconCredentialsTests
         var handler = new UpsertBidconCredentialsCommandHandler(
             store,
             new RecordingBidconCredentialsVerifier(false),
-            tokenCache);
+            tokenCache,
+            new RecordingBidconCredentialsAuditLog());
 
         var result = await handler.HandleAsync(
-            new UpsertBidconCredentialsCommand(organizationId, "new-key", "new-secret"),
+            new UpsertBidconCredentialsCommand(organizationId, actorId, "new-key", "new-secret"),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -150,13 +156,15 @@ public class BidconCredentialsTests
     public async Task UpsertBidconCredentials_ReturnsValidationErrors_WhenCommandIsIncomplete()
     {
         var store = new RecordingBidconApiCredentialsStore();
+        var verifier = new RecordingBidconCredentialsVerifier(true);
         var handler = new UpsertBidconCredentialsCommandHandler(
             store,
-            new RecordingBidconCredentialsVerifier(true),
-            new RecordingBidconAccessTokenCache());
+            verifier,
+            new RecordingBidconAccessTokenCache(),
+            new RecordingBidconCredentialsAuditLog());
 
         var result = await handler.HandleAsync(
-            new UpsertBidconCredentialsCommand(new OrganizationId(string.Empty), " ", string.Empty),
+            new UpsertBidconCredentialsCommand(new OrganizationId(string.Empty), new UserId(string.Empty), " ", string.Empty),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -166,10 +174,12 @@ public class BidconCredentialsTests
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Is.EquivalentTo(new[]
             {
                 "bidcon.credentials.organization.required",
+                "bidcon.credentials.actor.required",
                 "bidcon.credentials.apiKey.required",
                 "bidcon.credentials.apiSecret.required"
             }));
             Assert.That(store.SavedCredentials, Is.Null);
+            Assert.That(verifier.VerifiedCredentials, Is.Null);
         });
     }
 
@@ -177,6 +187,7 @@ public class BidconCredentialsTests
     public async Task RemoveBidconCredentials_RemovesCredentialsAndInvalidatesToken_WhenOrganizationExists()
     {
         var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
+        var actorId = new UserId("admin-1");
         var store = new RecordingBidconApiCredentialsStore();
         await store.UpsertAsync(new BidconApiCredentials
         {
@@ -186,10 +197,13 @@ public class BidconCredentialsTests
         });
 
         var tokenCache = new RecordingBidconAccessTokenCache();
-        var handler = new RemoveBidconCredentialsCommandHandler(store, tokenCache);
+        var handler = new RemoveBidconCredentialsCommandHandler(
+            store,
+            tokenCache,
+            new RecordingBidconCredentialsAuditLog());
 
         var result = await handler.HandleAsync(
-            new RemoveBidconCredentialsCommand(organizationId),
+            new RemoveBidconCredentialsCommand(organizationId, actorId),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -203,11 +217,118 @@ public class BidconCredentialsTests
         });
     }
 
+    [Test]
+    public async Task RemoveBidconCredentials_ReturnsValidationErrorAndDoesNotMutateCredentials_WhenActorIsMissing()
+    {
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
+        var store = new RecordingBidconApiCredentialsStore();
+        await store.UpsertAsync(new BidconApiCredentials
+        {
+            OrganizationId = organizationId,
+            ApiKey = "key-1",
+            ApiSecret = "secret-1"
+        });
+        var tokenCache = new RecordingBidconAccessTokenCache();
+        var auditLog = new RecordingBidconCredentialsAuditLog();
+        var handler = new RemoveBidconCredentialsCommandHandler(store, tokenCache, auditLog);
+
+        var result = await handler.HandleAsync(
+            new RemoveBidconCredentialsCommand(organizationId, new UserId(string.Empty)),
+            CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.TypeOf<InvalidRemoveBidconCredentialsRequest>());
+            var invalidRequest = (InvalidRemoveBidconCredentialsRequest)result;
+            Assert.That(invalidRequest.ValidationErrors, Has.One.Matches<ValidationError>(error =>
+                error.Code == "bidcon.credentials.actor.required" &&
+                error.Field == nameof(RemoveBidconCredentialsCommand.ActorId)));
+            Assert.That(store.SavedCredentials, Is.Not.Null);
+            Assert.That(store.DeleteAttempts, Is.Zero);
+            Assert.That(tokenCache.InvalidatedOrganizationId, Is.Null);
+            Assert.That(auditLog.Entries, Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task BidconCredentialsAdministration_WritesSecretFreeAuditEntries_ForCredentialChanges()
+    {
+        var organizationId = new OrganizationId("1c928774-3e22-4a94-9146-8784fb54d67a");
+        var actorId = new UserId("admin-1");
+        var changedAt = new DateTimeOffset(2026, 07, 22, 10, 30, 00, TimeSpan.Zero);
+        var store = new RecordingBidconApiCredentialsStore();
+        var auditLog = new RecordingBidconCredentialsAuditLog(changedAt);
+        var tokenCache = new RecordingBidconAccessTokenCache();
+
+        var createHandler = new UpsertBidconCredentialsCommandHandler(
+            store,
+            new RecordingBidconCredentialsVerifier(true),
+            tokenCache,
+            auditLog);
+        await createHandler.HandleAsync(
+            new UpsertBidconCredentialsCommand(organizationId, actorId, "create-key", "create-secret"),
+            CancellationToken.None);
+
+        var replaceHandler = new UpsertBidconCredentialsCommandHandler(
+            store,
+            new RecordingBidconCredentialsVerifier(true),
+            tokenCache,
+            auditLog);
+        await replaceHandler.HandleAsync(
+            new UpsertBidconCredentialsCommand(organizationId, actorId, "replace-key", "replace-secret"),
+            CancellationToken.None);
+
+        var failureHandler = new UpsertBidconCredentialsCommandHandler(
+            store,
+            new RecordingBidconCredentialsVerifier(false),
+            tokenCache,
+            auditLog);
+        await failureHandler.HandleAsync(
+            new UpsertBidconCredentialsCommand(organizationId, actorId, "bad-key", "bad-secret"),
+            CancellationToken.None);
+
+        var removeHandler = new RemoveBidconCredentialsCommandHandler(store, tokenCache, auditLog);
+        await removeHandler.HandleAsync(
+            new RemoveBidconCredentialsCommand(organizationId, actorId),
+            CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(auditLog.Entries.Select(entry => entry.Action), Is.EqualTo(new[]
+            {
+                BidconCredentialsAuditAction.Create,
+                BidconCredentialsAuditAction.Replace,
+                BidconCredentialsAuditAction.VerificationFailed,
+                BidconCredentialsAuditAction.Remove
+            }));
+            Assert.That(auditLog.Entries.Select(entry => entry.Result), Is.EqualTo(new[]
+            {
+                BidconCredentialsAuditResult.Success,
+                BidconCredentialsAuditResult.Success,
+                BidconCredentialsAuditResult.Failure,
+                BidconCredentialsAuditResult.Success
+            }));
+            Assert.That(auditLog.Entries, Has.All.Matches<BidconCredentialsAuditEntry>(entry =>
+                entry.ActorId == actorId &&
+                entry.OrganizationId == organizationId &&
+                entry.OccurredAt == changedAt));
+            var auditDetails = string.Join(Environment.NewLine, auditLog.Entries.Select(entry => entry.Details));
+            Assert.That(auditDetails, Does.Not.Contain("create-secret"));
+            Assert.That(auditDetails, Does.Not.Contain("replace-secret"));
+            Assert.That(auditDetails, Does.Not.Contain("bad-secret"));
+            Assert.That(auditDetails, Does.Not.Contain("create-key"));
+            Assert.That(auditDetails, Does.Not.Contain("replace-key"));
+            Assert.That(auditDetails, Does.Not.Contain("bad-key"));
+        });
+    }
+
     private sealed class RecordingBidconApiCredentialsStore : IBidconApiCredentialsStore
     {
         public BidconApiCredentials? SavedCredentials { get; private set; }
 
         public bool WasRead { get; private set; }
+
+        public int DeleteAttempts { get; private set; }
 
         public Task<BidconApiCredentials?> GetAsync(OrganizationId orgId)
         {
@@ -223,6 +344,8 @@ public class BidconCredentialsTests
 
         public Task DeleteAsync(OrganizationId orgId)
         {
+            DeleteAttempts++;
+
             if (SavedCredentials?.OrganizationId == orgId)
             {
                 SavedCredentials = null;
@@ -260,6 +383,20 @@ public class BidconCredentialsTests
         public void Invalidate(OrganizationId organizationId)
         {
             InvalidatedOrganizationId = organizationId;
+        }
+    }
+
+    private sealed class RecordingBidconCredentialsAuditLog(
+        DateTimeOffset? occurredAt = null) : IBidconCredentialsAuditLog
+    {
+        public List<BidconCredentialsAuditEntry> Entries { get; } = [];
+
+        public Task WriteAsync(
+            BidconCredentialsAuditEntry entry,
+            CancellationToken cancellationToken)
+        {
+            Entries.Add(entry with { OccurredAt = occurredAt ?? entry.OccurredAt });
+            return Task.CompletedTask;
         }
     }
 }

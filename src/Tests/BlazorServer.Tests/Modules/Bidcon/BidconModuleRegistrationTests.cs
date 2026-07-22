@@ -5,7 +5,9 @@ using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon;
+using BlazorServer.Modules.Bidcon.AccessTokens;
 using BlazorServer.Modules.Bidcon.Components;
+using BlazorServer.Modules.Bidcon.CredentialAdministration;
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
@@ -41,7 +43,14 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(BidconEstimationClient)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IBidconCredentialsAuditLog) &&
+                service.ImplementationType == typeof(MongoBidconCredentialsAuditLog) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IMongoCollection<MongoBidconApiCredentials>) &&
+                service.Lifetime == ServiceLifetime.Singleton));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IMongoCollection<MongoBidconCredentialsAuditEntry>) &&
                 service.Lifetime == ServiceLifetime.Singleton));
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IBidconApiCredentialsStore) &&

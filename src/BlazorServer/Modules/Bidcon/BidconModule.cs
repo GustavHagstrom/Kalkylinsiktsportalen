@@ -1,9 +1,11 @@
 using BlazorServer.Composition;
 using BlazorServer.Composition.Navigation;
 using BlazorServer.Composition.Settings;
+using BlazorServer.Modules.Bidcon.AccessTokens;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Bidcon.Components;
+using BlazorServer.Modules.Bidcon.CredentialAdministration;
 using BlazorServer.Modules.Bidcon.Features.GetBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
@@ -31,6 +33,7 @@ public static class BidconModule
         services.AddTransient<RemoveBidconCredentialsCommandHandler>();
         services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
         services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
+        services.AddSingleton<IBidconCredentialsAuditLog, MongoBidconCredentialsAuditLog>();
         services.AddTransient<ImportEstimationSnapshotCommandHandler>();
         services.AddTransient<BidconEstimationClient>();
         services.AddScoped<EstimationListState>();
@@ -43,6 +46,7 @@ public static class BidconModule
         }
 
         services.AddBidconApiCredentialsCollection();
+        services.AddBidconCredentialsAuditCollection();
         services.AddSingleton<IBidconApiCredentialsStore, MongoBidconApiCredentialsStore>();
         services.AddEstimationSnapshotsCollection();
         services.AddSingleton<IEstimationSnapshotStore, MongoEstimationSnapshotStore>();
@@ -87,6 +91,23 @@ public static class BidconModule
             }
 
             return database.GetCollection<MongoBidconApiCredentials>(collectionName);
+        });
+        return services;
+    }
+
+    private static IServiceCollection AddBidconCredentialsAuditCollection(this IServiceCollection services)
+    {
+        services.AddSingleton(sp =>
+        {
+            var database = sp.GetRequiredService<IMongoDatabase>();
+            const string collectionName = "BidconCredentialsAudit";
+            var names = database.ListCollectionNames().ToList();
+            if (!names.Contains(collectionName))
+            {
+                database.CreateCollection(collectionName);
+            }
+
+            return database.GetCollection<MongoBidconCredentialsAuditEntry>(collectionName);
         });
         return services;
     }
