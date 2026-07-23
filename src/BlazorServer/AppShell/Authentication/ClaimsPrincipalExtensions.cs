@@ -1,23 +1,10 @@
 using System.Security.Claims;
 using BlazorServer.Identity;
-using Microsoft.Identity.Web;
 
 namespace BlazorServer.AppShell.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string? GetUserId(this ClaimsPrincipal principal)
-        => principal.FindFirstValue(ClaimConstants.ObjectId);
-
-    public static string? GetOrganizationId(this ClaimsPrincipal principal)
-        => principal.FindFirstValue(ClaimConstants.TenantId);
-
-    public static string? GetUserEmail(this ClaimsPrincipal principal)
-        => principal.FindFirstValue(CurrentUserSessionClaimTypes.Email);
-
-    public static List<string> GetDirectoryRoles(this ClaimsPrincipal principal)
-        => principal.FindAll(CurrentUserSessionClaimTypes.DirectoryRoles).Select(claim => claim.Value).ToList();
-
     public static CurrentUser? ToCurrentUser(this ClaimsPrincipal principal)
     {
         if (principal.Identity?.IsAuthenticated != true)

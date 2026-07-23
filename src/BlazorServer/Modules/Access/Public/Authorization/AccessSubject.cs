@@ -1,5 +1,4 @@
 using BlazorServer.Identity;
-using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace BlazorServer.Modules.Access.Public.Authorization;
@@ -14,15 +13,14 @@ public static class ClaimsPrincipalAccessSubjectExtensions
 {
     public static AccessSubject? ToAccessSubject(this ClaimsPrincipal principal)
     {
-        var userId = principal.FindFirstValue(ClaimConstants.ObjectId);
-        var organizationId = principal.FindFirstValue(ClaimConstants.TenantId);
+        var userId = principal.GetUserId();
+        var organizationId = principal.GetOrganizationId();
         if (userId is null || organizationId is null)
         {
             return null;
         }
 
-        var roleIds = principal.FindAll("groups")
-            .Select(claim => claim.Value)
+        var roleIds = principal.GetGroupIds()
             .ToHashSet(StringComparer.Ordinal);
 
         return new AccessSubject(
