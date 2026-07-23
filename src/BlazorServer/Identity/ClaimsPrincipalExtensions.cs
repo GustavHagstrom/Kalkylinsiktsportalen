@@ -13,8 +13,7 @@ public static class ClaimsPrincipalExtensions
     public static string? GetUserEmail(this ClaimsPrincipal principal)
         => principal.FindFirstValue(IdentityClaimTypes.Email);
 
-    public static IReadOnlyCollection<string> GetGroupIds(this ClaimsPrincipal principal)
+    public static IEnumerable<string> GetGroupIds(this ClaimsPrincipal principal)
         => principal.FindAll(IdentityClaimTypes.Groups)
-            .Select(claim => claim.Value)
-            .ToArray();
+            .Select(claim => claim.Value);
 }
