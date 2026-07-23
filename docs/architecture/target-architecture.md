@@ -16,6 +16,66 @@ Den sammanfattande riktningen är:
 
 Blazor Server används fortsatt som första UI-host, men backend, kontrakt och affärslogik ska kunna bära framtida klienter.
 
+## Vad Riktningen Betyder I Praktiken
+
+### Modulär Monolit Som Systemform
+
+Systemet deployas och körs som en sammanhållen applikation, men koden ska behandlas som flera interna produktmoduler med tydliga ägare. Modulgränser är alltså en designregel redan innan modulerna eventuellt blir separata projekt eller deploybara tjänster.
+
+En modul äger sin domänlogik, sina use cases, sin persistence, sina integrationer, sitt feature-UI och sina avsiktliga publika kontrakt. Annan kod får bara använda modulens publika yta, inte dess interna implementation.
+
+Varje modul äger sina egna collection names, dokumentformer, mappings och store-implementationer. Top-level `Infrastructure` får tillhandahålla neutral teknik som Mongo-klient, conventions och serialization, men får inte äga modulernas datamodeller eller produktsemantik.
+
+Cross-module-interaktion ska gå via den ägande modulens avsiktliga publika yta, till exempel kontrakt under `Modules/{Module}/Public`. Andra moduler får inte anropa interna handlers, stores, adapters, components eller domäntyper bara för att de är nåbara i samma assembly.
+
+Modulär monolit betyder inte att all kod får dela datamodeller, stores eller hjälpklasser fritt bara för att den ligger i samma process.
+
+### Vertical Slices Som Huvudsaklig Arbetsform
+
+Nya features organiseras i första hand som vertical slices inom den modul som äger beteendet. En slice samlar use case-koden kring ett konkret användningsfall och är UI-oberoende.
+
+En feature slice har minst en tydlig användningsfallsgräns och en primär körbar ingång, normalt en command/query och en handler. När behov finns kompletteras slicen med result-typ, validator, slice-nära store-port, adapter och tester. Alla delar ska inte skapas av vana; de ska finnas när de gör användningsfallet tydligare, testbart eller adapteroberoende.
+
+Handlers returnerar normalt slice-ägda result contracts i stället för domänentiteter direkt. Domänmodellen ska inte behöva formas av UI-, API- eller serializationbehov, och klientkontrakt ska kunna hållas stabila även när den interna modellen ändras. Helt intern modulnära kod får returnera domäntyper när det är lokalt, avsiktligt och inte etablerar ett externt kontrakt.
+
+Validators i en slice ansvarar för request- och input-validering, till exempel obligatoriska fält, format och enkla gränsvärden. Affärsinvarianter som måste gälla oavsett klient eller use case hör hemma i domänmodellen och ska inte bara skyddas av en validator.
+
+Store-portar ligger nära slicen när de bara behövs av ett användningsfall. När flera slices i samma modul behöver samma persistence-förmåga kan porten flyttas upp till en avsiktlig modulnivå. Store-implementationer, dokumentmodeller och mappings ligger fortsatt i modulens `Infrastructure`.
+
+Handlern är den primära testytan för use case-beteende i en slice. Domänmodellen testas separat när den bär affärsregler eller invariants. UI-komponenttester ska fokusera på presentation och interaktion, inte vara den enda verifieringen av affärsregler.
+
+Blazor-komponenter får inte placeras i feature slices. UI-komponenter hör hemma i modulens separata komponent-/UI-yta och anropar slicens use case-kontrakt. Slice-resultat får vara klientvänliga men inte Blazor-specifika. View models, komponent-state, tabell-state, dialog-state, rendering helpers och annan presentationsnära state hör hemma på UI-sidan.
+
+Den här gränsen gör att slicen kan återanvändas av andra klienter, till exempel React, HTTP endpoints eller tester, utan att dra med sig Blazor.
+
+Delad domänlogik som behövs av flera slices inom samma modul hör hemma i modulens `Domain`. Slice-specifik logik ska stanna i slicen tills den faktiskt behöver delas.
+
+Vertical slices betyder inte att varje teknisk typ måste dupliceras per feature. Det betyder att användningsfallet är den primära samlingspunkten och att breda horisontella `Application`-lager inte är målformen för ny produktkod.
+
+### Pragmatisk CQRS För Nya Feature Slices
+
+Nya feature slices använder normalt separata commands och queries när det finns tydliga förändrings- respektive läsintentioner. Commands beskriver avsikten att ändra systemets tillstånd. Queries beskriver avsikten att läsa fram data utan sidoeffekter. Handlers är den primära testytan för modulens use case-beteende.
+
+CQRS används här för tydligare intention, smalare kontrakt och bättre testbarhet. Det kräver inte separat read database, event sourcing, mediator-ramverk eller generell pipeline. Sådant införs först när upprepad orchestration eller verkliga prestanda-/skalningsbehov motiverar det.
+
+För trivial read-only kod, enkel intern logik eller små ändringar nära äldre kod får enklare former användas. Avvikelsen ska vara lokal och begriplig; ny produktlogik som etablerar ett användningsfall bör däremot formas som en command- eller query-slice.
+
+### Clean Architecture Som Beroendeprincip
+
+Clean architecture används som beroendeprincip, inte som obligatorisk global lagerstruktur. Domänmodell och use case-beteende ska kunna förstås, testas och utvecklas utan beroenden på Blazor, MongoDB, Microsoft Graph, HTTP, sessions-UI eller andra tekniska adapters.
+
+Inom en modul får mappar som `Domain`, `Features`, `Infrastructure` och `Components` användas när de gör ägarskap och beroenden tydligare. Små slices behöver inte skapa alla lager i förväg, men beroenden ska fortfarande peka inåt mot stabilare policy och utåt mot adapters via avsiktliga kontrakt.
+
+Clean architecture betyder inte att varje modul behöver en egen abstraktion för varje teknisk detalj. Abstraktioner ska introduceras när de skyddar ett use case, bevarar modulgränsen eller gör testbarheten väsentligt bättre.
+
+### DDD-Light Där Domänmodellering Ger Verkligt Värde
+
+DDD-light betyder att domänspråk, ägarskap och affärsinvarianter modelleras noggrant där de påverkar beteende, beslut eller samarbete mellan moduler. Domäntermer ska hållas konsekventa med `CONTEXT.md` och fördjupas i `docs/domain/*.md` när en modul behöver mer precision.
+
+När ett område har verkliga regler ska modellen uttrycka dem genom tydliga typer, value objects, entities, aggregates eller domain services efter behov. Use cases ska be domänmodellen göra affärsbeslut i stället för att sprida regler i UI, persistence eller integrationer.
+
+DDD-light betyder inte att varje datatyp måste bli en aggregate root eller att CRUD-, integrations- och presentationsnära kod ska få onödig domänceremoni. Där beteendet är enkelt räcker enklare modeller, så länge språket är tydligt och ägarskapet är explicit.
+
 ## Arkitekturprinciper
 
 ### 1. Modulär Monolit Först
@@ -90,6 +150,10 @@ Den detaljerade modellen inom varje modul beskrivs i `docs/domain/*`.
 ## Övergång Från Äldre Feature-Struktur
 
 Äldre produktkod kan fortfarande ligga i `Features/*`. För små ändringar kan det vara rätt att arbeta nära befintlig kod, men ny eller flyttad production-kod ska placeras hos en explicit ägare.
+
+Målarkitekturen är normativ för ny eller flyttad production-kod från och med nu. Det innebär att nya användningsfall ska följa modulägarskap, vertical slices, pragmatisk CQRS, clean architecture som beroendeprincip och DDD-light där domänen motiverar det.
+
+Små ändringar i äldre `Features/*` behöver inte starta en modulmigrering. De ska däremot inte introducera nya beroenden, delade modeller, stores eller UI-bunden affärslogik som går emot målarkitekturen.
 
 Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `BlazorServer.Shared`.
 
