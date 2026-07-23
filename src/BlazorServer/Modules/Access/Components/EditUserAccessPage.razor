@@ -25,24 +25,25 @@
 @inject NavigationManager NavigationManager
 
 @code{
-    [Parameter] public UserId? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
     AccessDirectoryUser? User { get; set; }
     FunctionalAccessGrant? UserAccessGrant { get; set; }
     List<AccessDirectoryRole> AllRoles { get; set; } = [];
     List<AccessDirectoryRole> PickedRoles { get; set; } = [];
 
+    UserId? strongUserId => UserId is not null ? new UserId(UserId) : null;
     bool IsLoading { get; set; } = false;
 
     async Task LoadUserDataAsync()
     {
         SetIsLoading(true);
 
-        if (UserId is not null && CurrentUserContext.CurrentUser is not null)
+        if (strongUserId is not null && CurrentUserContext.CurrentUser is not null)
         {
-            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId));
-            User = await AccessDirectory.GetUserAsync(UserId.Value);
+            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(strongUserId.Value, CurrentUserContext.CurrentUser.OrganizationId));
+            User = await AccessDirectory.GetUserAsync(strongUserId.Value);
             AllRoles = await AccessDirectory.GetRolesAsync(CurrentUserContext.CurrentUser.OrganizationId);
-            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId);
+            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(strongUserId.Value, CurrentUserContext.CurrentUser.OrganizationId);
             PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);
