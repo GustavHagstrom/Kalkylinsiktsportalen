@@ -1,9 +1,12 @@
 using BlazorServer.Composition;
 using BlazorServer.Composition.Settings;
 using BlazorServer.Identity;
+using BlazorServer.Modules.Access.Application;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Infrastructure.Caching;
+using BlazorServer.Modules.Access.Infrastructure.Entra;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
@@ -25,6 +28,7 @@ public static class AccessModule
         services.AddFunctionalAccessGrantCollection();
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
+        services.AddSingleton<IApplicationAdminCache, MemoryApplicationAdminCache>();
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddTransient<FunctionalAccessGrantHandler>();
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
@@ -62,9 +66,23 @@ public static class AccessModule
         return services.AddSingleton<IAccessDirectory>(_ => new MockAccessDirectory(organizationId));
     }
 
+    public static IServiceCollection AddMockApplicationAdminResolver(
+        this IServiceCollection services,
+        OrganizationId organizationId,
+        IEnumerable<UserId> applicationAdminUserIds)
+    {
+        return services.AddSingleton<IApplicationAdminResolver>(
+            _ => new MockApplicationAdminResolver(organizationId, applicationAdminUserIds));
+    }
+
     public static IServiceCollection AddGraphAccessDirectory(this IServiceCollection services)
     {
         return services.AddTransient<IAccessDirectory, GraphAccessDirectory>();
+    }
+
+    public static IServiceCollection AddGraphApplicationAdminResolver(this IServiceCollection services)
+    {
+        return services.AddTransient<IApplicationAdminResolver, GraphApplicationAdminResolver>();
     }
 
     private static IServiceCollection AddFunctionalAccessGrantCollection(this IServiceCollection services)

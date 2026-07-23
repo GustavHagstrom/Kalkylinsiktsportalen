@@ -46,7 +46,9 @@ public static class ServiceRegistrations
             builder.Services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
             builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
-            builder.Services.AddMockAccessDirectory(new OrganizationId(mockOrganizationId));
+            var mockOrganization = new OrganizationId(mockOrganizationId);
+            builder.Services.AddMockAccessDirectory(mockOrganization);
+            builder.Services.AddMockApplicationAdminResolver(mockOrganization, [new UserId("Admin")]);
             builder.Services.AddMemoryCache();
         }
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
@@ -57,6 +59,7 @@ public static class ServiceRegistrations
             builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<CurrentUserSession>());
             builder.Services.AddTransient<ICurrentUserProfileLookup, GraphCurrentUserProfileLookup>();
             builder.Services.AddGraphAccessDirectory();
+            builder.Services.AddGraphApplicationAdminResolver();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(options =>
                 {
