@@ -38,11 +38,11 @@ public static class ServiceRegistrations
         {
             var mockOrganizationId = builder.Configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
             builder.Services.SetLoginDisplay<MockedLoginDisplay>();
-            builder.Services.AddScoped<MockCurrentUserSession>();
+            builder.Services.AddScoped<MockCurrentUserContext>();
+            builder.Services.AddScoped<MockCurrentUserSwitcher>();
+            builder.Services.AddScoped<IAuthenticationActions, AuthenticationActions>();
             builder.Services.AddSingleton<MockAuthenticationState>();
-            builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<MockCurrentUserSession>());
-            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<MockCurrentUserSession>());
-            builder.Services.AddSingleton<ICurrentUserProfileLookup, MockProfileLookup>();
+            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<MockCurrentUserContext>());
             builder.Services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
             builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
@@ -52,10 +52,9 @@ public static class ServiceRegistrations
         else if (builder.Configuration["Auth:Mode"] == "EntraId")
         {
             builder.Services.SetLoginDisplay<LoginDisplay>();
-            builder.Services.AddScoped<CurrentUserSession>();
-            builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<CurrentUserSession>());
-            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<CurrentUserSession>());
-            builder.Services.AddTransient<ICurrentUserProfileLookup, GraphCurrentUserProfileLookup>();
+            builder.Services.AddScoped<BlazorCurrentUserContext>();
+            builder.Services.AddScoped<IAuthenticationActions, AuthenticationActions>();
+            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<BlazorCurrentUserContext>());
             builder.Services.AddGraphAccessDirectory();
             builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(options =>

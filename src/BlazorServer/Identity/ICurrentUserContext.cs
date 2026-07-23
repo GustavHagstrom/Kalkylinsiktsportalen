@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace BlazorServer.Identity;
 
 public interface ICurrentUserContext
@@ -8,5 +6,6 @@ public interface ICurrentUserContext
     /// Gets the current authenticated user, or null if the user is not authenticated.
     /// </summary>
     CurrentUser? CurrentUser { get; }
-    //bool IsAuthenticated { get; }
+
+    ValueTask<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default);
 }

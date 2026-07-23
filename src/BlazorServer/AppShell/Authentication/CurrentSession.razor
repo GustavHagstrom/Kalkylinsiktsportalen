@@ -1,13 +1,13 @@
-<AuthorizeView>
+<AuthorizeView Context="authenticationState">
     <Authorized>
         @if (CurrentUserSession.CurrentUser is not null)
         {
             <MudText Typo="Typo.h6">@CurrentUserSession.CurrentUser.DisplayName</MudText>
             <MudText Typo="Typo.subtitle2" Class="mb-0">@CurrentUserSession.CurrentUser.Email</MudText>
-            @if (CurrentUserSession.Claims.Any())
+            @if (authenticationState.User.Claims.Any())
             {
                 <ul>
-                    @foreach (var claim in CurrentUserSession.Claims)
+                    @foreach (var claim in authenticationState.User.Claims)
                     {
                         <li>@claim.Type: @claim.Value</li>
                     }
@@ -20,4 +20,4 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@inject IAuthService CurrentUserSession
+@inject ICurrentUserContext CurrentUserSession

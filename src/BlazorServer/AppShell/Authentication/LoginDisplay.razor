@@ -1,11 +1,11 @@
-﻿<AuthorizeView>
+<AuthorizeView>
     <Authorized>
-        <UserAvatar Name="@user?.DisplayName" AvatarBase64="@user?.Avatar" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@user?.DisplayName" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
             <DarkmodeSwitch  ThemeManagerBackup="ThemeProvider" />
-            <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
+            <MudButton OnClick="Logout" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
 
         <MudOverlay Visible="ShowLogoutPopover" LockScroll="true" OnClick="() => ShowLogoutPopover = false" />
@@ -18,19 +18,15 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@inject IAuthService AuthService
+@inject ICurrentUserContext CurrentUserContext
+@inject IAuthenticationActions AuthenticationActions
 @inject IStringLocalizer<LoginDisplay> Localizer
 
 @code {
     bool ShowLogoutPopover = false;
-    CurrentUser? user => AuthService.CurrentUser;
+    CurrentUser? user => CurrentUserContext.CurrentUser;
     [CascadingParameter] CascadingThemeManager? ThemeProvider { get; set; }
 
-    Task LogoutAsync() => AuthService.LogoutAsync();
-    Task Login() => AuthService.LoginAsync();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await AuthService.RefreshAsync();
-    }
+    void Logout() => AuthenticationActions.Logout();
+    void Login() => AuthenticationActions.Login();
 }
