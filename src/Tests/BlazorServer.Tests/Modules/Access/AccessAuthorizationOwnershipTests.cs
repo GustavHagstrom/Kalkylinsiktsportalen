@@ -13,7 +13,7 @@ public class AccessAuthorizationOwnershipTests
         [
             new Claim(AccessAuthorizationConstants.AccessClaimType, "CanDoThing"),
             new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
                 AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
 

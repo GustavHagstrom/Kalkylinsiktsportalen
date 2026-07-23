@@ -195,7 +195,7 @@ public class BidconModuleRegistrationTests
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
                 AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
         ], "test"));
     }

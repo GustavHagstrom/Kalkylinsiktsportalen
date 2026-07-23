@@ -45,7 +45,7 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         if (user.UserId.Value.Equals("admin", StringComparison.OrdinalIgnoreCase))
         {
             claims.Add(new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
                 AccessAuthorizationConstants.ApplicationAdminRoleClaimValue));
         }
         claims.AddRange(roles);
