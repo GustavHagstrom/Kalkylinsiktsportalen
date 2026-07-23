@@ -1,7 +1,7 @@
 using BlazorServer.Modules.Access.Public.Authorization;
+using BlazorServer.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using Microsoft.Identity.Web;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -32,20 +32,20 @@ public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         }
 
         var roles = _defaults.RoleIdsByUserId.TryGetValue(user.UserId.Value, out var roleIds)
-            ? roleIds.Select(roleId => new Claim("groups", roleId))
+            ? roleIds.Select(roleId => new Claim(IdentityClaimTypes.Groups, roleId))
             : [];
 
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, user.DisplayName),
-            new(ClaimConstants.ObjectId, user.UserId.Value),
-            new(ClaimConstants.TenantId, _defaults.OrganizationId),
-            new(CurrentUserSessionClaimTypes.Email, user.Email ?? string.Empty)
+            new(IdentityClaimTypes.UserId, user.UserId.Value),
+            new(IdentityClaimTypes.OrganizationId, _defaults.OrganizationId),
+            new(IdentityClaimTypes.Email, user.Email ?? string.Empty)
         };
         if (user.UserId.Value.Equals("admin", StringComparison.OrdinalIgnoreCase))
         {
             claims.Add(new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleType,
+                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
                 AccessAuthorizationConstants.ApplicationAdminRoleClaimValue));
         }
         claims.AddRange(roles);

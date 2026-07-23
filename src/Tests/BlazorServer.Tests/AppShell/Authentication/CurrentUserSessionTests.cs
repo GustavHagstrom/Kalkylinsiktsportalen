@@ -3,7 +3,6 @@ using BlazorServer.AppShell.Authentication;
 using BlazorServer.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Identity.Web;
 
 namespace BlazorServer.Tests.AppShell.Authentication;
 
@@ -15,10 +14,10 @@ public class CurrentUserSessionTests
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimConstants.ObjectId, "user-1"),
-            new Claim(ClaimConstants.TenantId, "org-1"),
+            new Claim(IdentityClaimTypes.UserId, "user-1"),
+            new Claim(IdentityClaimTypes.OrganizationId, "org-1"),
             new Claim(ClaimTypes.Name, "Ada Lovelace"),
-            new Claim(CurrentUserSessionClaimTypes.Email, "ada@example.com")
+            new Claim(IdentityClaimTypes.Email, "ada@example.com")
         ], "test"));
 
         var currentUser = principal.ToCurrentUser();
@@ -38,10 +37,10 @@ public class CurrentUserSessionTests
     {
         var authProvider = new FixedAuthenticationStateProvider(new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimConstants.ObjectId, "user-1"),
-            new Claim(ClaimConstants.TenantId, "org-1"),
+            new Claim(IdentityClaimTypes.UserId, "user-1"),
+            new Claim(IdentityClaimTypes.OrganizationId, "org-1"),
             new Claim(ClaimTypes.Name, "Ada Lovelace"),
-            new Claim(CurrentUserSessionClaimTypes.Email, "ada@example.com")
+            new Claim(IdentityClaimTypes.Email, "ada@example.com")
         ], "test")));
         var profileLookup = new FixedProfileLookup(new CurrentUser(
             new("user-1"),

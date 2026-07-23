@@ -169,7 +169,7 @@ Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `
 
 ### Identity
 
-Får innehålla gemensamma identitetsvärden och smala, teknikneutrala runtime-kontrakt. Den får inte innehålla `ClaimsPrincipal`, claim-tolkning, authentication providers, sessionsuppdatering, login-UI eller authorization-regler.
+Får innehålla gemensamma identitetsvärden, neutrala identitetsclaim-namn, helpers som projicerar `ClaimsPrincipal` till identitetsvärden och smala, teknikneutrala runtime-kontrakt. Den får inte innehålla access-claim-tolkning, authentication providers, sessionsuppdatering, login-UI eller authorization-regler.
 
 ### Kernel
 
