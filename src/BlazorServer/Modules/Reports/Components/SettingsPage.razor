@@ -39,7 +39,8 @@
 
     async Task NewView()
     {
-        if(CurrentUserSession.CurrentUser?.OrganizationId is null) return;
+        var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+        if(currentUser?.OrganizationId is null) return;
 
         var parameters = new DialogParameters<StringInputDialog>()
         {
@@ -52,7 +53,7 @@
             var view = new ViewDto()
             {
                 Name = name,
-                OrganizationId = CurrentUserSession.CurrentUser.OrganizationId
+                OrganizationId = currentUser.OrganizationId
             };
             await ViewStore.UpsertAsync(view);
             Navigation.NavigateTo(ReportsRoutes.EditViewPage(view.Id));
@@ -62,9 +63,10 @@
 
     async Task LoadDataAsync()
     {
-        if (CurrentUserSession.CurrentUser?.OrganizationId is null) return;
+        var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null) return;
         SetLoading(true);
-        var views = await ViewStore.GetAllAsync(CurrentUserSession.CurrentUser.OrganizationId);
+        var views = await ViewStore.GetAllAsync(currentUser.OrganizationId);
         Views = views;
         SetLoading(false);
     }

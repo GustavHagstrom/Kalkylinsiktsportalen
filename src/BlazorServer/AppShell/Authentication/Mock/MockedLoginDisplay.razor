@@ -1,11 +1,11 @@
-﻿@using BlazorServer.AppShell.Authentication
+@using BlazorServer.AppShell.Authentication
 
-<AuthorizeView>
+<AuthorizeView Context="authenticationState">
     <Authorized>
-        <UserAvatar Name="@user?.DisplayName" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@CurrentUser(authenticationState.User)?.DisplayName" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@CurrentUser(authenticationState.User)?.DisplayName</MudText>
             <DarkmodeSwitch ThemeManagerBackup="ThemeProvider" />
             <MudButton OnClick="Logout" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
@@ -31,7 +31,6 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@inject ICurrentUserContext CurrentUserContext
 @inject MockCurrentUserSwitcher MockCurrentUserSwitcher
 @inject MockAuthDefaults MockDefaults
 @inject IStringLocalizer<MockedLoginDisplay> Localizer
@@ -42,7 +41,6 @@
     bool ShowLoginPopover = false;
 
     string LoginText(CurrentUser user) => $"{Localizer["Logga in med"]} : {user.DisplayName}";
-    CurrentUser? user => CurrentUserContext.CurrentUser;
 
     void Logout() => MockCurrentUserSwitcher.Logout();
 
@@ -52,4 +50,6 @@
         ShowLoginPopover = false;
         ShowLogoutPopover = false;
     }
+
+    static CurrentUser? CurrentUser(System.Security.Claims.ClaimsPrincipal principal) => principal.ToCurrentUser();
 }

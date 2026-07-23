@@ -33,7 +33,7 @@ public class BlazorCurrentUserContextTests
     }
 
     [Test]
-    public void CurrentUserReadsOnlyClaimsFromAuthenticationState()
+    public async Task CurrentUserReadsOnlyClaimsFromAuthenticationState()
     {
         var authProvider = new FixedAuthenticationStateProvider(new ClaimsPrincipal(new ClaimsIdentity(
         [
@@ -44,7 +44,7 @@ public class BlazorCurrentUserContextTests
         ], "test")));
         using var currentUserContext = new BlazorCurrentUserContext(authProvider);
 
-        var user = currentUserContext.CurrentUser;
+        var user = await currentUserContext.GetCurrentUserAsync();
 
         Assert.Multiple(() =>
         {
@@ -77,7 +77,9 @@ public class BlazorCurrentUserContextTests
         currentUserContext.Dispose();
         await authProvider.SetPrincipalAsync(changedPrincipal);
 
-        Assert.That(currentUserContext.CurrentUser?.UserId.Value, Is.EqualTo("user-1"));
+        var user = await currentUserContext.GetCurrentUserAsync();
+
+        Assert.That(user?.UserId.Value, Is.EqualTo("user-1"));
     }
 
     [Test]

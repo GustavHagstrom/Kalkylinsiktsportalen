@@ -28,12 +28,10 @@ public sealed class BlazorCurrentUserContext : ICurrentUserContext, IDisposable
         }
     }
 
-    public CurrentUser? CurrentUser => currentState.User.ToCurrentUser();
-
     public async ValueTask<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default)
     {
         currentState = await currentStateTask.WaitAsync(cancellationToken);
-        return CurrentUser;
+        return currentState.User.ToCurrentUser();
     }
 
     public void Dispose()

@@ -37,12 +37,13 @@
     {
         SetIsLoading(true);
 
-        if (UserId is not null && CurrentUserContext.CurrentUser is not null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (UserId is not null && currentUser is not null)
         {
-            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId));
+            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(UserId.Value, currentUser.OrganizationId));
             User = await AccessDirectory.GetUserAsync(UserId.Value);
-            AllRoles = await AccessDirectory.GetRolesAsync(CurrentUserContext.CurrentUser.OrganizationId);
-            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId.Value, CurrentUserContext.CurrentUser.OrganizationId);
+            AllRoles = await AccessDirectory.GetRolesAsync(currentUser.OrganizationId);
+            var pickedRoles = await AccessDirectory.GetRolesForUserAsync(UserId.Value, currentUser.OrganizationId);
             PickedRoles = AllRoles.Where(r => pickedRoles.Any(pr => pr.Id == r.Id)).ToList();
         }
         SetIsLoading(false);

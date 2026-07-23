@@ -44,12 +44,13 @@
     {
         SetIsLoading(true);
 
-        if (RoleId is not null && CurrentUserSession.CurrentUser?.OrganizationId.IsEmpty == false)
+        var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+        if (RoleId is not null && currentUser?.OrganizationId.IsEmpty == false)
         {
             RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetRoleFunctionalAccessQuery(RoleId, CurrentUserSession.CurrentUser.OrganizationId));
+                new GetRoleFunctionalAccessQuery(RoleId, currentUser.OrganizationId));
             Role = await AccessDirectory.GetRoleAsync(RoleId);
-            PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, CurrentUserSession.CurrentUser.OrganizationId);
+            PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, currentUser.OrganizationId);
         }
         SetIsLoading(false);
     }
