@@ -1,5 +1,4 @@
 using BlazorServer.AppShell.Authentication;
-using BlazorServer.AppShell.Authentication.Mock;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
 using BlazorServer.Identity;
@@ -9,12 +8,6 @@ using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Reports;
 using BlazorServer.UiKit.Rendering;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Graph;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
-using Microsoft.Kiota.Abstractions.Authentication;
 using MudBlazor.Services;
 
 namespace BlazorServer;
@@ -34,40 +27,14 @@ public static class ServiceRegistrations
         builder.Services.AddProjectsModule(registrationContext);
         builder.Services.AddReportsModule(registrationContext);
 
-        if (builder.Configuration["Auth:Mode"] == "Mock")
+        var authenticationSelection = builder.Services.AddAppShellAuthentication(builder.Configuration);
+        if (authenticationSelection.MockOrganizationId is { } mockOrganizationId)
         {
-            var mockOrganizationId = builder.Configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
-            builder.Services.SetLoginDisplay<MockedLoginDisplay>();
-            builder.Services.AddScoped<MockCurrentUserContext>();
-            builder.Services.AddScoped<MockCurrentUserSwitcher>();
-            builder.Services.AddScoped<IAuthenticationActions, AuthenticationActions>();
-            builder.Services.AddSingleton<MockAuthenticationState>();
-            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<MockCurrentUserContext>());
-            builder.Services.AddAuthentication()
-                .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(AuthSchemes.Mock, null);
-            builder.Services.AddSingleton(new MockAuthDefaults(mockOrganizationId));
             builder.Services.AddMockAccessDirectory(new OrganizationId(mockOrganizationId));
-            builder.Services.AddMemoryCache();
         }
-        else if (builder.Configuration["Auth:Mode"] == "EntraId")
+        else if (authenticationSelection.IsEntraId)
         {
-            builder.Services.SetLoginDisplay<LoginDisplay>();
-            builder.Services.AddScoped<BlazorCurrentUserContext>();
-            builder.Services.AddScoped<IAuthenticationActions, AuthenticationActions>();
-            builder.Services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<BlazorCurrentUserContext>());
             builder.Services.AddGraphAccessDirectory();
-            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(options =>
-                {
-                    var section = builder.Configuration.GetSection("AzureAd");
-                    section.Bind(options);
-                    options.Scope.Add("email");
-                })
-                .EnableTokenAcquisitionToCallDownstreamApi()
-                .AddInMemoryTokenCaches();
-            builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
-            builder.Services.AddTransient<IAuthenticationProvider, GraphClientAuthProvider>();
-            builder.Services.AddScoped(sp => new GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
         }
 
         builder.UseMongoDb();

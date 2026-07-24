@@ -2,7 +2,8 @@
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 
-namespace BlazorServer.AppShell.Authentication;
+namespace BlazorServer.AppShell.Authentication.Entra;
+
 /// <summary>
 /// Consumed by MSAL
 /// </summary>
@@ -16,7 +17,7 @@ internal class GraphClientAuthProvider(ITokenAcquisition tokenAcquisition, IConf
         if (scopes is not null)
         {
             var token = await tokenAcquisition.GetAccessTokenForUserAsync(scopes);
-            if(token is not null)
+            if (token is not null)
             {
                 request.Headers.Add("Authorization", $"Bearer {token}");
             }
