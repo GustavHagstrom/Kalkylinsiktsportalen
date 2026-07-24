@@ -42,7 +42,7 @@ public class BlazorCurrentUserContextTests
             new Claim(ClaimTypes.Name, "Ada Lovelace"),
             new Claim(IdentityClaimTypes.Email, "ada@example.com")
         ], "test")));
-        using var currentUserContext = new BlazorCurrentUserContext(authProvider);
+        var currentUserContext = new BlazorCurrentUserContext(authProvider);
 
         var user = await currentUserContext.GetCurrentUserAsync();
 
@@ -58,7 +58,7 @@ public class BlazorCurrentUserContextTests
     public async Task CurrentUserCanBeAwaitedWhenAuthenticationStateIsAsynchronous()
     {
         var authProvider = new DeferredAuthenticationStateProvider();
-        using var currentUserContext = new BlazorCurrentUserContext(authProvider);
+        var currentUserContext = new BlazorCurrentUserContext(authProvider);
 
         authProvider.Complete(Principal("user-1", "Ada Lovelace"));
         var user = await currentUserContext.GetCurrentUserAsync();
@@ -67,19 +67,18 @@ public class BlazorCurrentUserContextTests
     }
 
     [Test]
-    public async Task DisposedContextDoesNotObserveAuthenticationStateChanges()
+    public async Task CurrentUserReflectsLatestAuthenticationStateProviderValue()
     {
         var initialPrincipal = Principal("user-1", "Ada Lovelace");
         var changedPrincipal = Principal("user-2", "Grace Hopper");
         var authProvider = new MutableAuthenticationStateProvider(initialPrincipal);
         var currentUserContext = new BlazorCurrentUserContext(authProvider);
 
-        currentUserContext.Dispose();
         await authProvider.SetPrincipalAsync(changedPrincipal);
 
         var user = await currentUserContext.GetCurrentUserAsync();
 
-        Assert.That(user?.UserId.Value, Is.EqualTo("user-1"));
+        Assert.That(user?.UserId.Value, Is.EqualTo("user-2"));
     }
 
     [Test]

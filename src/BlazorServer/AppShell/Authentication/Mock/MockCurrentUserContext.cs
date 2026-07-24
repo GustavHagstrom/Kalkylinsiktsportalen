@@ -11,6 +11,6 @@ public sealed class MockCurrentUserContext : ICurrentUserContext
         this.authenticationState = authenticationState;
     }
 
-    public ValueTask<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default)
-        => ValueTask.FromResult(authenticationState.CurrentUser);
+    public Task<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(authenticationState.CurrentUser);
 }
