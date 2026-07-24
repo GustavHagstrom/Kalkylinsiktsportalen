@@ -1,7 +1,5 @@
-using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
-using BlazorServer.Identity;
 using BlazorServer.Infrastructure.MongoDb;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Bidcon;
@@ -18,6 +16,7 @@ public static class ServiceRegistrations
     {
         var registrationContext = builder.Services.AddAppRegistrationContext();
 
+        builder.Services.AddAppAuthentication(builder.Configuration, registrationContext);
         builder.Services.AddSettingsShell(registrationContext);
         builder.Services.AddAccessModule(registrationContext);
         builder.Services.AddBidconModule(
@@ -26,16 +25,6 @@ public static class ServiceRegistrations
                 ?? throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
         builder.Services.AddProjectsModule(registrationContext);
         builder.Services.AddReportsModule(registrationContext);
-
-        var authenticationSelection = builder.Services.AddAppShellAuthentication(builder.Configuration);
-        if (authenticationSelection.MockOrganizationId is { } mockOrganizationId)
-        {
-            builder.Services.AddMockAccessDirectory(new OrganizationId(mockOrganizationId));
-        }
-        else if (authenticationSelection.IsEntraId)
-        {
-            builder.Services.AddGraphAccessDirectory();
-        }
 
         builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();

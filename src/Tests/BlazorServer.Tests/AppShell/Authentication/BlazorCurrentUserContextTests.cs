@@ -2,6 +2,7 @@ using System.Security.Claims;
 using BlazorServer.AppShell.Authentication;
 using BlazorServer.AppShell.Authentication.Entra;
 using BlazorServer.AppShell.Authentication.Mock;
+using BlazorServer.Composition;
 using BlazorServer.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -104,8 +105,9 @@ public class BlazorCurrentUserContextTests
     {
         var services = new ServiceCollection();
         services.AddSingleton<NavigationManager>(new TestNavigationManager());
+        var registrationContext = new AppRegistrationContext();
 
-        services.AddMockAuthentication("org-1");
+        services.AddMockAuthentication("org-1", registrationContext);
 
         using var provider = services.BuildServiceProvider();
         var loginDisplay = provider.GetRequiredService<LoginDisplayRecord>();
@@ -124,6 +126,7 @@ public class BlazorCurrentUserContextTests
     public void EntraAuthenticationRegistrationKeepsEntraServicesTogether()
     {
         var services = new ServiceCollection();
+        var registrationContext = new AppRegistrationContext();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -134,7 +137,7 @@ public class BlazorCurrentUserContextTests
             })
             .Build();
 
-        services.AddEntraAuthentication(configuration);
+        services.AddEntraAuthentication(configuration, registrationContext);
 
         var loginDisplay = services.Single(descriptor => descriptor.ServiceType == typeof(LoginDisplayRecord));
         var graphProvider = services.Single(descriptor => descriptor.ServiceType == typeof(IAuthenticationProvider));
@@ -147,6 +150,29 @@ public class BlazorCurrentUserContextTests
             Assert.That(services.Any(descriptor => descriptor.ServiceType == typeof(ICurrentUserContext)), Is.True);
             Assert.That(services.Any(descriptor => descriptor.ServiceType == typeof(IAuthenticationActions)), Is.True);
         });
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("WindowsIntegrated")]
+    public void AppShellAuthenticationRegistrationRejectsUnsupportedAuthenticationMode(string? mode)
+    {
+        var services = new ServiceCollection();
+        var registrationContext = new AppRegistrationContext();
+        var values = new Dictionary<string, string?>();
+        if (mode is not null)
+        {
+            values["Auth:Mode"] = mode;
+        }
+
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values)
+            .Build();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            services.AddAppShellAuthentication(configuration, registrationContext));
+
+        Assert.That(exception!.Message, Does.Contain("Unsupported authentication mode"));
     }
 
     private static ClaimsPrincipal Principal(string userId, string displayName)

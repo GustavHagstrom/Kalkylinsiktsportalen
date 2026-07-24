@@ -1,3 +1,4 @@
+using BlazorServer.Composition;
 using BlazorServer.Identity;
 using Microsoft.AspNetCore.Authentication;
 
@@ -7,10 +8,12 @@ public static class MockAuthenticationRegistration
 {
     public static IServiceCollection AddMockAuthentication(
         this IServiceCollection services,
-        string organizationId)
+        string organizationId,
+        AppRegistrationContext registrationContext)
     {
         ArgumentNullException.ThrowIfNull(services, nameof(services));
         ArgumentException.ThrowIfNullOrWhiteSpace(organizationId, nameof(organizationId));
+        ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
 
         services.SetLoginDisplay<MockedLoginDisplay>();
         services.AddScoped<MockCurrentUserContext>();
