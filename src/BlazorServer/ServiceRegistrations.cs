@@ -41,7 +41,7 @@ public static class ServiceRegistrations
 
         RequireApplicationAdminEvaluator(services);
 
-        services.AddAccessModule(registrationContext);
+        services.AddAccessModule(registrationContext); //this needs to be first so that the access module can register its policies before other modules are registered
         services.AddBidconModule(
             registrationContext,
             configuration["Bidcon:BaseUrl"]
