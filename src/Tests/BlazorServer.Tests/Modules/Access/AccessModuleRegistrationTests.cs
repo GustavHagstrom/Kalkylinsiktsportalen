@@ -1,6 +1,7 @@
 using BlazorServer.Composition.Settings;
 using System.Security.Claims;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -58,6 +59,10 @@ public class AccessModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IAccessSubjectFactory) &&
+                service.ImplementationType == typeof(AccessSubjectFactory) &&
+                service.Lifetime == ServiceLifetime.Transient));
             Assert.That(services.Any(service => service.ServiceType == typeof(IApplicationAdminPrincipalEvaluator)), Is.False);
         }
     }

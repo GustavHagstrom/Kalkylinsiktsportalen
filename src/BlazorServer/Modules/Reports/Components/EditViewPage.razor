@@ -41,9 +41,8 @@
 
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IViewStore ViewStore
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ICurrentAccessSubject CurrentAccessSubject
 @inject IViewAccessDecisionService ViewAccessDecisions
-@inject IApplicationAdminPrincipalEvaluator ApplicationAdminEvaluator
 
 @code {
     [Parameter] public string? ViewId { get; set; }
@@ -76,8 +75,7 @@
         if (ViewId is null) return;
         SetLoading(true);
 
-        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var subject = authenticationState.User.ToAccessSubject(ApplicationAdminEvaluator);
+        var subject = await CurrentAccessSubject.GetAsync();
         if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, ViewId))
         {
             View = null;

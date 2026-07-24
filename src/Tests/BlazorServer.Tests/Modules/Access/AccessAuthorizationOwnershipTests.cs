@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using BlazorServer.Identity;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Public.Authorization;
 
 namespace BlazorServer.Tests.Modules.Access;
@@ -12,14 +14,24 @@ public class AccessAuthorizationOwnershipTests
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(AccessAuthorizationConstants.AccessClaimType, "CanDoThing"),
+            new Claim(IdentityClaimTypes.UserId, "user-1"),
+            new Claim(IdentityClaimTypes.OrganizationId, "org-1"),
+            new Claim(IdentityClaimTypes.Groups, "role-1"),
             new Claim("test-admin", "true")
         ], "test"));
-        IApplicationAdminPrincipalEvaluator evaluator = new ClaimTypeApplicationAdminPrincipalEvaluator("test-admin");
+        IAccessSubjectFactory subjectFactory = new AccessSubjectFactory(
+            new ClaimTypeApplicationAdminPrincipalEvaluator("test-admin"));
 
+        var subject = subjectFactory.Create(principal);
+
+        Assert.That(subject, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(principal.HasClaim(AccessAuthorizationConstants.AccessClaimType, "CanDoThing"), Is.True);
-            Assert.That(evaluator.IsApplicationAdmin(principal), Is.True);
+            Assert.That(subject!.UserId, Is.EqualTo(new UserId("user-1")));
+            Assert.That(subject.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
+            Assert.That(subject.RoleIds, Has.One.EqualTo("role-1"));
+            Assert.That(subject.IsApplicationAdmin, Is.True);
         });
     }
 

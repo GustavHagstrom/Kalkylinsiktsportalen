@@ -26,6 +26,7 @@ public static class AccessModule
         services.AddFunctionalAccessGrantCollection();
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
+        services.AddTransient<IAccessSubjectFactory, AccessSubjectFactory>();
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddTransient<IAuthorizationHandler, AccessClaimOrApplicationAdminHandler>();
         services.AddTransient<FunctionalAccessGrantHandler>();
