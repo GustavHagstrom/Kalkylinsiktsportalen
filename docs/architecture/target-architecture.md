@@ -196,6 +196,7 @@ Navigation och settings areas registreras som data. Loginpresentation är host-/
 - `Identity` beskriver aktuell användares identitet och organisation genom ett läsbart, teknikneutralt kontrakt.
 - AppShell mappar extern identitet till `CurrentUser` och äger authentication, refresh, sessionslivscykel och loginpresentation.
 - Access tolkar portalclaims, policies, application-admin och accessbeslut.
+- `ICurrentUserContext` är en tunn host-gräns för att projicera aktuell host-identitet till `CurrentUser`; den är inte en session, cache, profilkälla eller login/logout-tjänst.
 - Featurekod konsumerar `ICurrentUserContext` och explicita authorization-kontrakt i stället för `AuthenticationStateProvider`, `ClaimsPrincipal` eller råa claims.
 - Råa Entra- och Microsoft Graph-modeller hålls privata i integrationsadaptern.
 
