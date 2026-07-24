@@ -1,13 +1,13 @@
-<AuthorizeView>
+<AuthorizeView Context="authenticationState">
     <Authorized>
-        @if (CurrentUserSession.CurrentUser is not null)
+        @if (CurrentUser(authenticationState.User) is { } currentUser)
         {
-            <MudText Typo="Typo.h6">@CurrentUserSession.CurrentUser.DisplayName</MudText>
-            <MudText Typo="Typo.subtitle2" Class="mb-0">@CurrentUserSession.CurrentUser.Email</MudText>
-            @if (CurrentUserSession.Claims.Any())
+            <MudText Typo="Typo.h6">@currentUser.DisplayName</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-0">@currentUser.Email</MudText>
+            @if (authenticationState.User.Claims.Any())
             {
                 <ul>
-                    @foreach (var claim in CurrentUserSession.Claims)
+                    @foreach (var claim in authenticationState.User.Claims)
                     {
                         <li>@claim.Type: @claim.Value</li>
                     }
@@ -20,4 +20,6 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@inject IAuthService CurrentUserSession
+@code {
+    static CurrentUser? CurrentUser(System.Security.Claims.ClaimsPrincipal principal) => principal.ToCurrentUser();
+}

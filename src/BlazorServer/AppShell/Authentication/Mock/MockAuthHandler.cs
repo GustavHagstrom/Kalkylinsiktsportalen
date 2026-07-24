@@ -9,23 +9,23 @@ namespace BlazorServer.AppShell.Authentication.Mock;
 
 public class MockAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly MockCurrentUserSession _session;
+    private readonly MockAuthenticationState _state;
     private readonly MockAuthDefaults _defaults;
 
     public MockAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        MockCurrentUserSession session,
+        MockAuthenticationState state,
         MockAuthDefaults defaults) : base(options, logger, encoder)
     {
-        _session = session;
+        _state = state;
         _defaults = defaults;
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var user = _session.CurrentUser;
+        var user = _state.CurrentUser;
         if (user is null)
         {
             return Task.FromResult(AuthenticateResult.NoResult());

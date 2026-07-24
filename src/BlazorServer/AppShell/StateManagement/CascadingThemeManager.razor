@@ -4,7 +4,7 @@
     @ChildContent
 </CascadingValue>
 
-@inject IAuthService authService
+@inject ICurrentUserContext CurrentUserContext
 @inject IDarkmodeStore DarkmodeStore
 
 @code{
@@ -15,22 +15,21 @@
     public async Task SetDarkModeAsync(bool isDarkMode)
     {
         IsDarkMode = isDarkMode;
-        await authService.RefreshAsync();
         
-        if (authService.CurrentUser is not null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (currentUser is not null)
         {
-            await DarkmodeStore.SetDarkmodeAsync(authService.CurrentUser.UserId.Value, IsDarkMode);
+            await DarkmodeStore.SetDarkmodeAsync(currentUser.UserId.Value, IsDarkMode);
         }
         StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await authService.RefreshAsync();
-
-        if (authService.CurrentUser is not null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (currentUser is not null)
         {
-            IsDarkMode = await DarkmodeStore.IsDarkmodeAsync(authService.CurrentUser.UserId.Value);
+            IsDarkMode = await DarkmodeStore.IsDarkmodeAsync(currentUser.UserId.Value);
         }
     }
 }

@@ -63,14 +63,15 @@
         try
         {
 
-            if (CurrentUserSession.CurrentUser?.Email is null)
+            var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+            if (currentUser?.Email is null)
             {
                 return;
             }
 
             var result = await GetEstimationListHandler.HandleAsync(
-                new GetEstimationListQuery(CurrentUserSession.CurrentUser.OrganizationId,
-                    CurrentUserSession.CurrentUser.Email),
+                new GetEstimationListQuery(currentUser.OrganizationId,
+                    currentUser.Email),
                 CancellationToken.None);
 
             if (result is not EstimationListLoaded loaded)

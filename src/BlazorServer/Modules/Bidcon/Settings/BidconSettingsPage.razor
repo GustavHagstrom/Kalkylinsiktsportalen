@@ -48,14 +48,15 @@
 
     private async Task LoadDataAsync()
     {
-        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null)
         {
             return;
         }
 
         var result = await GetCredentialsHandler.HandleAsync(
             new Features.GetBidconCredentials.GetBidconCredentialsQuery(
-                CurrentUserContext.CurrentUser.OrganizationId),
+                currentUser.OrganizationId),
             CancellationToken.None);
 
         if (result is Features.GetBidconCredentials.InvalidGetBidconCredentialsRequest invalidRequest)
@@ -82,15 +83,16 @@
 
     private async Task SaveAsync()
     {
-        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null)
         {
             return;
         }
 
         var result = await UpsertCredentialsHandler.HandleAsync(
             new Features.UpsertBidconCredentials.UpsertBidconCredentialsCommand(
-                CurrentUserContext.CurrentUser.OrganizationId,
-                CurrentUserContext.CurrentUser.UserId,
+                currentUser.OrganizationId,
+                currentUser.UserId,
                 newKey,
                 newSecret),
             CancellationToken.None);
@@ -117,15 +119,16 @@
 
     private async Task RemoveAsync()
     {
-        if (CurrentUserContext.CurrentUser?.OrganizationId is null)
+        var currentUser = await CurrentUserContext.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null)
         {
             return;
         }
 
         var result = await RemoveCredentialsHandler.HandleAsync(
             new Features.RemoveBidconCredentials.RemoveBidconCredentialsCommand(
-                CurrentUserContext.CurrentUser.OrganizationId,
-                CurrentUserContext.CurrentUser.UserId),
+                currentUser.OrganizationId,
+                currentUser.UserId),
             CancellationToken.None);
 
         if (result is Features.RemoveBidconCredentials.InvalidRemoveBidconCredentialsRequest invalidRequest)

@@ -1,13 +1,13 @@
-﻿@using BlazorServer.AppShell.Authentication
+@using BlazorServer.AppShell.Authentication
 
-<AuthorizeView>
+<AuthorizeView Context="authenticationState">
     <Authorized>
-        <UserAvatar Name="@user?.DisplayName" AvatarBase64="@user?.Avatar" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
+        <UserAvatar Name="@CurrentUser(authenticationState.User)?.DisplayName" OnClick="() => ShowLogoutPopover = !ShowLogoutPopover" />
 
         <MudPopover Open="ShowLogoutPopover" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@user?.DisplayName</MudText>
+            <MudText Typo="Typo.subtitle2" Style="color: var(--mud-palette-text-primary);">@CurrentUser(authenticationState.User)?.DisplayName</MudText>
             <DarkmodeSwitch ThemeManagerBackup="ThemeProvider" />
-            <MudButton OnClick="LogoutAsync" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
+            <MudButton OnClick="Logout" Class="px-4 mr-n2" Style="height: 100%;" Variant="Variant.Text" Color="Color.Inherit" StartIcon="@Icons.Material.Sharp.Logout">@Localizer["Logga ut"]</MudButton>
         </MudPopover>
 
         <MudOverlay Visible="ShowLogoutPopover" LockScroll="true" OnClick="() => ShowLogoutPopover = false" />
@@ -31,7 +31,7 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@inject IAuthService AuthService
+@inject MockCurrentUserSwitcher MockCurrentUserSwitcher
 @inject MockAuthDefaults MockDefaults
 @inject IStringLocalizer<MockedLoginDisplay> Localizer
 
@@ -41,16 +41,15 @@
     bool ShowLoginPopover = false;
 
     string LoginText(CurrentUser user) => $"{Localizer["Logga in med"]} : {user.DisplayName}";
-    CurrentUser? user => AuthService.CurrentUser;
 
-    Task LogoutAsync() => AuthService.LogoutAsync();
+    void Logout() => MockCurrentUserSwitcher.Logout();
+
     void Login(CurrentUser user)
     {
-        if(AuthService is MockCurrentUserSession mockedAuthService)
-        {
-            mockedAuthService.Login(user);
-            ShowLoginPopover = false;
-            ShowLogoutPopover = false;
-        }
+        MockCurrentUserSwitcher.Login(user);
+        ShowLoginPopover = false;
+        ShowLogoutPopover = false;
     }
+
+    static CurrentUser? CurrentUser(System.Security.Claims.ClaimsPrincipal principal) => principal.ToCurrentUser();
 }

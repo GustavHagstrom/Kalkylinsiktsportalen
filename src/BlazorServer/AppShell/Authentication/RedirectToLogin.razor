@@ -1,8 +1,8 @@
-﻿@inject IAuthService AuthService
+@inject IAuthenticationActions AuthenticationActions
 
 @code {
     protected override void OnInitialized()
     {
-        AuthService.LoginAsync();
+        AuthenticationActions.Login();
     }
 }

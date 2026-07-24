@@ -29,24 +29,26 @@
     {
         Users.Clear();
 
-        if (CurrentUserSession.CurrentUser?.OrganizationId is null)
+        var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Users = await AccessDirectory.GetUsersAsync(CurrentUserSession.CurrentUser.OrganizationId);
+        Users = await AccessDirectory.GetUsersAsync(currentUser.OrganizationId);
         StateHasChanged();
     }
     async Task LoadRoleDataAsync()
     {
         Roles.Clear();
 
-        if (CurrentUserSession.CurrentUser?.OrganizationId is null)
+        var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+        if (currentUser?.OrganizationId is null)
         {
             StateHasChanged();
             return;
         }
-        Roles.AddRange(await AccessDirectory.GetRolesAsync(CurrentUserSession.CurrentUser.OrganizationId));
+        Roles.AddRange(await AccessDirectory.GetRolesAsync(currentUser.OrganizationId));
         StateHasChanged();
     }
     void EditUserAccess(AccessDirectoryUser user)
