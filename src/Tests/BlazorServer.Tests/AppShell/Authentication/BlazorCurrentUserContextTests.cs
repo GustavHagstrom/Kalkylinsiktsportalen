@@ -154,6 +154,7 @@ public class BlazorCurrentUserContextTests
 
     [TestCase(null)]
     [TestCase("")]
+    [TestCase("   ")]
     [TestCase("WindowsIntegrated")]
     public void AppShellAuthenticationRegistrationRejectsUnsupportedAuthenticationMode(string? mode)
     {
@@ -173,6 +174,44 @@ public class BlazorCurrentUserContextTests
             services.AddAppShellAuthentication(configuration, registrationContext));
 
         Assert.That(exception!.Message, Does.Contain("Unsupported authentication mode"));
+    }
+
+    [Test]
+    public void AppShellAuthenticationRegistrationTrimsAuthenticationMode()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = new AppRegistrationContext();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Auth:Mode"] = " Mock ",
+                ["Auth:Mock:OrganizationId"] = "org-1"
+            })
+            .Build();
+
+        var selection = services.AddAppShellAuthentication(configuration, registrationContext);
+
+        Assert.That(selection.IsMock, Is.True);
+    }
+
+    [Test]
+    public void AppShellAuthenticationRegistrationUsesDefaultMockOrganizationIdForWhitespaceConfiguration()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = new AppRegistrationContext();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Auth:Mode"] = "Mock",
+                ["Auth:Mock:OrganizationId"] = "   "
+            })
+            .Build();
+
+        services.AddAppShellAuthentication(configuration, registrationContext);
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.That(provider.GetRequiredService<MockAuthDefaults>().OrganizationId, Is.EqualTo("MockedOrganization"));
     }
 
     private static ClaimsPrincipal Principal(string userId, string displayName)

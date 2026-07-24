@@ -7,6 +7,8 @@ namespace BlazorServer.AppShell.Authentication;
 
 public static class AuthenticationRegistration
 {
+    private const string DefaultMockOrganizationId = "MockedOrganization";
+
     public static AppShellAuthenticationSelection AddAppShellAuthentication(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -16,12 +18,13 @@ public static class AuthenticationRegistration
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
         ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
 
-        return configuration["Auth:Mode"] switch
+        var authenticationMode = configuration["Auth:Mode"]?.Trim();
+        return authenticationMode switch
         {
             "Mock" => AddMockAuthenticationSelection(services, configuration, registrationContext),
             "EntraId" => AddEntraAuthenticationSelection(services, configuration, registrationContext),
             var mode => throw new InvalidOperationException(
-                $"Unsupported authentication mode '{mode ?? "<missing>"}'. Configure Auth:Mode as 'Mock' or 'EntraId'.")
+                $"Unsupported authentication mode '{(string.IsNullOrWhiteSpace(mode) ? "<missing>" : mode)}'. Configure Auth:Mode as 'Mock' or 'EntraId'.")
         };
     }
 
@@ -30,7 +33,10 @@ public static class AuthenticationRegistration
         IConfiguration configuration,
         AppRegistrationContext registrationContext)
     {
-        var mockOrganizationId = configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
+        var configuredOrganizationId = configuration["Auth:Mock:OrganizationId"]?.Trim();
+        var mockOrganizationId = string.IsNullOrWhiteSpace(configuredOrganizationId)
+            ? DefaultMockOrganizationId
+            : configuredOrganizationId;
         services.AddMockAuthentication(mockOrganizationId, registrationContext);
         return AppShellAuthenticationSelection.Mock(mockOrganizationId);
     }
