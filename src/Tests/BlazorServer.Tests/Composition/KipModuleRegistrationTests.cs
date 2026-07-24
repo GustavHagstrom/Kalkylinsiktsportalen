@@ -16,6 +16,7 @@ public class KipModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
+        services.AddSingleton<IApplicationAdminPrincipalEvaluator>(new AlwaysFalseApplicationAdminPrincipalEvaluator());
 
         services.AddKipModules(Configuration(), registrationContext);
 
@@ -37,6 +38,18 @@ public class KipModuleRegistrationTests
         }
     }
 
+    [Test]
+    public void KipModulesFailFastWhenAuthenticationHasNotRegisteredApplicationAdminEvaluator()
+    {
+        var services = new ServiceCollection();
+        var registrationContext = services.AddAppRegistrationContext();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            services.AddKipModules(Configuration(), registrationContext));
+
+        Assert.That(exception!.Message, Does.Contain(nameof(IApplicationAdminPrincipalEvaluator)));
+    }
+
     private static IConfiguration Configuration()
         => new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -44,4 +57,10 @@ public class KipModuleRegistrationTests
                 ["Bidcon:BaseUrl"] = "https://bidcon.example"
             })
             .Build();
+
+    private sealed class AlwaysFalseApplicationAdminPrincipalEvaluator : IApplicationAdminPrincipalEvaluator
+    {
+        public bool IsApplicationAdmin(System.Security.Claims.ClaimsPrincipal principal)
+            => false;
+    }
 }

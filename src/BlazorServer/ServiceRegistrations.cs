@@ -2,6 +2,7 @@ using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
 using BlazorServer.Infrastructure.MongoDb;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Reports;
@@ -38,6 +39,8 @@ public static class ServiceRegistrations
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
         ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
 
+        RequireApplicationAdminEvaluator(services);
+
         services.AddAccessModule(registrationContext);
         services.AddBidconModule(
             registrationContext,
@@ -47,6 +50,17 @@ public static class ServiceRegistrations
         services.AddReportsModule(registrationContext);
 
         return services;
+    }
+
+    private static void RequireApplicationAdminEvaluator(IServiceCollection services)
+    {
+        if (services.Any(service => service.ServiceType == typeof(IApplicationAdminPrincipalEvaluator)))
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            "Access authorization requires an IApplicationAdminPrincipalEvaluator. Register AppShell authentication before AddKipModules.");
     }
 
     public static AppRegistrationContext AddAppRegistrationContext(this IServiceCollection services)
