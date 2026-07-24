@@ -25,12 +25,13 @@
 @inject NavigationManager NavigationManager
 
 @code{
-    [Parameter] public UserId? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
     AccessDirectoryUser? User { get; set; }
     FunctionalAccessGrant? UserAccessGrant { get; set; }
     List<AccessDirectoryRole> AllRoles { get; set; } = [];
     List<AccessDirectoryRole> PickedRoles { get; set; } = [];
 
+    UserId? strongUserId => UserId is not null ? new UserId(UserId) : null;
     bool IsLoading { get; set; } = false;
 
     async Task LoadUserDataAsync()
