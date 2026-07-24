@@ -1,8 +1,13 @@
 using System.Security.Claims;
 using BlazorServer.AppShell.Authentication;
+using BlazorServer.AppShell.Authentication.Entra;
+using BlazorServer.AppShell.Authentication.Mock;
 using BlazorServer.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace BlazorServer.Tests.AppShell.Authentication;
 
@@ -92,6 +97,56 @@ public class BlazorCurrentUserContextTests
 
         actions.Logout();
         Assert.That(navigation.Uri, Is.EqualTo("https://example.test/auth/logout"));
+    }
+
+    [Test]
+    public void MockAuthenticationRegistrationKeepsMockServicesTogether()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<NavigationManager>(new TestNavigationManager());
+
+        services.AddMockAuthentication("org-1");
+
+        using var provider = services.BuildServiceProvider();
+        var loginDisplay = provider.GetRequiredService<LoginDisplayRecord>();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(loginDisplay.ComponentType, Is.EqualTo(typeof(MockedLoginDisplay)));
+            Assert.That(provider.GetRequiredService<MockAuthenticationState>(), Is.Not.Null);
+            Assert.That(provider.GetRequiredService<MockCurrentUserSwitcher>(), Is.Not.Null);
+            Assert.That(provider.GetRequiredService<ICurrentUserContext>(), Is.TypeOf<MockCurrentUserContext>());
+            Assert.That(provider.GetRequiredService<IAuthenticationActions>(), Is.TypeOf<AuthenticationActions>());
+        });
+    }
+
+    [Test]
+    public void EntraAuthenticationRegistrationKeepsEntraServicesTogether()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AzureAd:Instance"] = "https://login.microsoftonline.com/",
+                ["AzureAd:TenantId"] = "tenant",
+                ["AzureAd:ClientId"] = "client",
+                ["DownstreamApi:Scopes"] = "User.Read"
+            })
+            .Build();
+
+        services.AddEntraAuthentication(configuration);
+
+        var loginDisplay = services.Single(descriptor => descriptor.ServiceType == typeof(LoginDisplayRecord));
+        var graphProvider = services.Single(descriptor => descriptor.ServiceType == typeof(IAuthenticationProvider));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(((LoginDisplayRecord)loginDisplay.ImplementationInstance!).ComponentType, Is.EqualTo(typeof(LoginDisplay)));
+            Assert.That(graphProvider.ImplementationType?.FullName, Is.EqualTo("BlazorServer.AppShell.Authentication.Entra.GraphClientAuthProvider"));
+            Assert.That(services.Any(descriptor => descriptor.ServiceType == typeof(BlazorCurrentUserContext)), Is.True);
+            Assert.That(services.Any(descriptor => descriptor.ServiceType == typeof(ICurrentUserContext)), Is.True);
+            Assert.That(services.Any(descriptor => descriptor.ServiceType == typeof(IAuthenticationActions)), Is.True);
+        });
     }
 
     private static ClaimsPrincipal Principal(string userId, string displayName)

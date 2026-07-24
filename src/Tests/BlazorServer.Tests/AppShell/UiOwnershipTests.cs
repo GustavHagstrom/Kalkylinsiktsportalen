@@ -25,6 +25,25 @@ public class UiOwnershipTests
     }
 
     [Test]
+    public void AppShellAuthenticationSeparatesSharedEntraAndMockTypes()
+    {
+        AssertTypesExist(
+            "BlazorServer.AppShell.Authentication.AuthenticationRegistration",
+            "BlazorServer.AppShell.Authentication.AuthenticationActions",
+            "BlazorServer.AppShell.Authentication.BlazorCurrentUserContext",
+            "BlazorServer.AppShell.Authentication.Entra.EntraAuthenticationRegistration",
+            "BlazorServer.AppShell.Authentication.Entra.GraphClientAuthProvider",
+            "BlazorServer.AppShell.Authentication.Mock.MockAuthenticationRegistration",
+            "BlazorServer.AppShell.Authentication.Mock.MockAuthHandler",
+            "BlazorServer.AppShell.Authentication.Mock.MockAuthenticationState",
+            "BlazorServer.AppShell.Authentication.Mock.MockCurrentUserContext",
+            "BlazorServer.AppShell.Authentication.Mock.MockCurrentUserSwitcher",
+            "BlazorServer.AppShell.Authentication.Mock.MockedLoginDisplay");
+
+        AssertTypesDoNotExist("BlazorServer.AppShell.Authentication.GraphClientAuthProvider");
+    }
+
+    [Test]
     public void UiKitOwnsNeutralUiPrimitives()
     {
         AssertTypesExist(
