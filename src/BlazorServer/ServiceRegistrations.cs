@@ -18,13 +18,7 @@ public static class ServiceRegistrations
 
         builder.Services.AddAppAuthentication(builder.Configuration, registrationContext);
         builder.Services.AddSettingsShell(registrationContext);
-        builder.Services.AddAccessModule(registrationContext);
-        builder.Services.AddBidconModule(
-            registrationContext,
-            builder.Configuration["Bidcon:BaseUrl"]
-                ?? throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
-        builder.Services.AddProjectsModule(registrationContext);
-        builder.Services.AddReportsModule(registrationContext);
+        builder.Services.AddKipModules(builder.Configuration, registrationContext);
 
         builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();
@@ -33,6 +27,26 @@ public static class ServiceRegistrations
         builder.Services.AddMudServices();
         builder.Services.ApplyAppRegistrationContext(registrationContext);
         return builder;
+    }
+
+    public static IServiceCollection AddKipModules(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
+    {
+        ArgumentNullException.ThrowIfNull(services, nameof(services));
+        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
+        ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
+
+        services.AddAccessModule(registrationContext);
+        services.AddBidconModule(
+            registrationContext,
+            configuration["Bidcon:BaseUrl"]
+                ?? throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
+        services.AddProjectsModule(registrationContext);
+        services.AddReportsModule(registrationContext);
+
+        return services;
     }
 
     public static AppRegistrationContext AddAppRegistrationContext(this IServiceCollection services)

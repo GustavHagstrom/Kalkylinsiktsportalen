@@ -10,6 +10,8 @@ public sealed class AccessSubjectFactory(
 {
     public AccessSubject? Create(ClaimsPrincipal principal)
     {
+        ArgumentNullException.ThrowIfNull(principal);
+
         var userId = principal.GetUserId();
         var organizationId = principal.GetOrganizationId();
         if (userId is null || organizationId is null)

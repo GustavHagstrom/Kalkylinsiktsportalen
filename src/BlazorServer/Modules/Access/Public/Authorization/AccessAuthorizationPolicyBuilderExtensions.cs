@@ -8,6 +8,9 @@ public static class AccessAuthorizationPolicyBuilderExtensions
         this AuthorizationPolicyBuilder builder,
         string accessClaimValue)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(accessClaimValue);
+
         builder.Requirements.Add(new AccessClaimOrApplicationAdminRequirement(accessClaimValue));
         return builder;
     }

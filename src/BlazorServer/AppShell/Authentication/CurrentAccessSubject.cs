@@ -10,7 +10,9 @@ public sealed class CurrentAccessSubject(
 {
     public async Task<AccessSubject?> GetAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        cancellationToken.ThrowIfCancellationRequested();
         return accessSubjectFactory.Create(authenticationState.User);
     }
 }

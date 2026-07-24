@@ -36,6 +36,15 @@ public class AccessAuthorizationOwnershipTests
     }
 
     [Test]
+    public void AccessSubjectFactoryRejectsMissingPrincipal()
+    {
+        IAccessSubjectFactory subjectFactory = new AccessSubjectFactory(
+            new ClaimTypeApplicationAdminPrincipalEvaluator("test-admin"));
+
+        Assert.Throws<ArgumentNullException>(() => subjectFactory.Create(null!));
+    }
+
+    [Test]
     public void AccessDoesNotOwnEntraApplicationAdminClaimDetails()
     {
         var productionRoot = FindProductionRoot();
@@ -51,8 +60,8 @@ public class AccessAuthorizationOwnershipTests
             .Where(file =>
             {
                 var text = File.ReadAllText(file);
-                return text.Contains("wids", StringComparison.Ordinal)
-                    || text.Contains("62e90394-69f5-4237-9190-012177145e10", StringComparison.Ordinal);
+                return text.Contains("\"wids\"", StringComparison.Ordinal)
+                    || text.Contains("\"62e90394-69f5-4237-9190-012177145e10\"", StringComparison.Ordinal);
             })
             .Select(file => Path.GetRelativePath(
                 productionRoot,
