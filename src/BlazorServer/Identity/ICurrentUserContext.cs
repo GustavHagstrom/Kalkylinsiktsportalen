@@ -2,5 +2,5 @@ namespace BlazorServer.Identity;
 
 public interface ICurrentUserContext
 {
-    ValueTask<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default);
+    Task<CurrentUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default);
 }
