@@ -1,6 +1,7 @@
 using BlazorServer.Composition.Settings;
 using System.Security.Claims;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Components;
 using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
@@ -58,6 +59,11 @@ public class AccessModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IAccessSubjectFactory) &&
+                service.ImplementationType == typeof(AccessSubjectFactory) &&
+                service.Lifetime == ServiceLifetime.Transient));
+            Assert.That(services.Any(service => service.ServiceType == typeof(IApplicationAdminPrincipalEvaluator)), Is.False);
         }
     }
 
@@ -69,6 +75,8 @@ public class AccessModuleRegistrationTests
 
         services.AddAccessModule(registrationContext);
         services.AddLogging();
+        services.AddSingleton<IApplicationAdminPrincipalEvaluator>(
+            new ClaimTypeApplicationAdminPrincipalEvaluator("external-admin"));
         services.ApplyAppRegistrationContext(registrationContext);
 
         using var provider = services.BuildServiceProvider();
@@ -122,9 +130,15 @@ public class AccessModuleRegistrationTests
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
-                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
+                "external-admin",
+                "true")
         ], "test"));
+    }
+
+    private sealed class ClaimTypeApplicationAdminPrincipalEvaluator(string claimType) : IApplicationAdminPrincipalEvaluator
+    {
+        public bool IsApplicationAdmin(ClaimsPrincipal principal)
+            => principal.HasClaim(claimType, "true");
     }
 
     private static string[] RouteTemplatesFor<TComponent>()

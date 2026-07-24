@@ -10,6 +10,7 @@ using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using MongoDB.Driver;
 using MudBlazor;
 
@@ -25,7 +26,9 @@ public static class AccessModule
         services.AddFunctionalAccessGrantCollection();
         services.AddSingleton<IFunctionalAccessGrantStore, MongoAccessStore>();
         services.AddSingleton<IAccessClaimsCache, MemoryAccessClaimsCache>();
+        services.AddTransient<IAccessSubjectFactory, AccessSubjectFactory>();
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
+        services.AddTransient<IAuthorizationHandler, AccessClaimOrApplicationAdminHandler>();
         services.AddTransient<FunctionalAccessGrantHandler>();
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
         services.AddTransient<ViewAccessGrantHandler>();
@@ -34,8 +37,7 @@ public static class AccessModule
 
         registrationContext.Policies.AddPolicy(Constants.Authorization.PolicyName, config =>
         {
-            config.RequireAssertion(context =>
-                context.User.HasAccessClaimOrApplicationAdmin(Constants.Authorization.AccessClaimValue));
+            config.RequireAccessClaimOrApplicationAdmin(Constants.Authorization.AccessClaimValue);
         });
 
         registrationContext.AccessClaims.Register(new AccessClaimDefinition(

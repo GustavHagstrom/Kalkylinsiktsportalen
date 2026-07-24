@@ -2,6 +2,7 @@ using BlazorServer.AppShell.Settings;
 using BlazorServer.Composition;
 using BlazorServer.Infrastructure.MongoDb;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Bidcon;
 using BlazorServer.Modules.Projects;
 using BlazorServer.Modules.Reports;
@@ -18,13 +19,7 @@ public static class ServiceRegistrations
 
         builder.Services.AddAppAuthentication(builder.Configuration, registrationContext);
         builder.Services.AddSettingsShell(registrationContext);
-        builder.Services.AddAccessModule(registrationContext);
-        builder.Services.AddBidconModule(
-            registrationContext,
-            builder.Configuration["Bidcon:BaseUrl"]
-                ?? throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
-        builder.Services.AddProjectsModule(registrationContext);
-        builder.Services.AddReportsModule(registrationContext);
+        builder.Services.AddKipModules(builder.Configuration, registrationContext);
 
         builder.UseMongoDb();
         builder.Services.AddCascadingAuthenticationState();
@@ -33,6 +28,39 @@ public static class ServiceRegistrations
         builder.Services.AddMudServices();
         builder.Services.ApplyAppRegistrationContext(registrationContext);
         return builder;
+    }
+
+    public static IServiceCollection AddKipModules(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
+    {
+        ArgumentNullException.ThrowIfNull(services, nameof(services));
+        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
+        ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
+
+        RequireApplicationAdminEvaluator(services);
+
+        services.AddAccessModule(registrationContext); //this needs to be first so that the access module can register its policies before other modules are registered
+        services.AddBidconModule(
+            registrationContext,
+            configuration["Bidcon:BaseUrl"]
+                ?? throw new InvalidOperationException("Bidcon:BaseUrl configuration is missing"));
+        services.AddProjectsModule(registrationContext);
+        services.AddReportsModule(registrationContext);
+
+        return services;
+    }
+
+    private static void RequireApplicationAdminEvaluator(IServiceCollection services)
+    {
+        if (services.Any(service => service.ServiceType == typeof(IApplicationAdminPrincipalEvaluator)))
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            "Access authorization requires an IApplicationAdminPrincipalEvaluator. Register AppShell authentication before AddKipModules.");
     }
 
     public static AppRegistrationContext AddAppRegistrationContext(this IServiceCollection services)

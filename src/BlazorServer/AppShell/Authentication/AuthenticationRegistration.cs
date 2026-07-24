@@ -1,6 +1,7 @@
 using BlazorServer.AppShell.Authentication.Entra;
 using BlazorServer.AppShell.Authentication.Mock;
 using BlazorServer.Composition;
+using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Components;
 
 namespace BlazorServer.AppShell.Authentication;
@@ -17,6 +18,8 @@ public static class AuthenticationRegistration
         ArgumentNullException.ThrowIfNull(services, nameof(services));
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
         ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
+
+        services.AddScoped<ICurrentAccessSubject, CurrentAccessSubject>();
 
         var authenticationMode = configuration["Auth:Mode"]?.Trim();
         return authenticationMode switch

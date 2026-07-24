@@ -1,6 +1,7 @@
 using BlazorServer.Composition.Navigation;
 using BlazorServer.Composition.Settings;
 using System.Security.Claims;
+using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access.Public.Contracts;
@@ -154,8 +155,11 @@ public class BidconModuleRegistrationTests
     {
         var services = new ServiceCollection();
         var registrationContext = services.AddAppRegistrationContext();
+        services.AddAccessModule(registrationContext);
         services.AddBidconModule(registrationContext);
         services.AddLogging();
+        services.AddSingleton<IApplicationAdminPrincipalEvaluator>(
+            new ClaimTypeApplicationAdminPrincipalEvaluator("external-admin"));
         services.ApplyAppRegistrationContext(registrationContext);
 
         using var provider = services.BuildServiceProvider();
@@ -195,9 +199,15 @@ public class BidconModuleRegistrationTests
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
-                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
+                "external-admin",
+                "true")
         ], "test"));
+    }
+
+    private sealed class ClaimTypeApplicationAdminPrincipalEvaluator(string claimType) : IApplicationAdminPrincipalEvaluator
+    {
+        public bool IsApplicationAdmin(ClaimsPrincipal principal)
+            => principal.HasClaim(claimType, "true");
     }
 
     private sealed class PolicyAuthorizationService(params string[] allowedPolicies) : IAuthorizationService

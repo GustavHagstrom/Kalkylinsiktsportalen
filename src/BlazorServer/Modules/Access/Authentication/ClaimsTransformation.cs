@@ -9,18 +9,21 @@ public class ClaimsTransformation : IClaimsTransformation
 {
     private readonly FunctionalAccessGrantHandler functionalAccessGrants;
     private readonly IAccessClaimsCache _cache;
+    private readonly IAccessSubjectFactory _accessSubjectFactory;
 
     public ClaimsTransformation(
         FunctionalAccessGrantHandler functionalAccessGrants,
-        IAccessClaimsCache cache)
+        IAccessClaimsCache cache,
+        IAccessSubjectFactory accessSubjectFactory)
     {
         this.functionalAccessGrants = functionalAccessGrants;
         _cache = cache;
+        _accessSubjectFactory = accessSubjectFactory;
     }
 
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var subject = principal.ToAccessSubject();
+        var subject = _accessSubjectFactory.Create(principal);
         if (subject is null)
         {
             return principal;
