@@ -58,7 +58,7 @@ public static class BidconModule
         registrationContext.AccessClaims.Register(new AccessClaimDefinition("BidconApiWritePermission", "Bidcon Api Write permission", "Grants permission to edit Bidcon API credentials."));
         registrationContext.Policies.AddPolicy(
             "ApiPolicy",
-            policy => policy.RequireAssertion(context => context.User.HasAccessClaimOrApplicationAdmin("BidconApiWritePermission")));
+            policy => policy.RequireAccessClaimOrApplicationAdmin("BidconApiWritePermission"));
 
         registrationContext.Ui.AddTopNavigation(new NavigationItem(
             "Kalkyler",

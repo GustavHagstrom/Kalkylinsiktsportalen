@@ -1,5 +1,6 @@
 using BlazorServer.Composition;
 using BlazorServer.Identity;
+using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
@@ -23,6 +24,7 @@ public static class EntraAuthenticationRegistration
         services.AddScoped<BlazorCurrentUserContext>();
         services.AddScoped<IAuthenticationActions, AuthenticationActions>();
         services.AddScoped<ICurrentUserContext>(sp => sp.GetRequiredService<BlazorCurrentUserContext>());
+        services.AddSingleton<IApplicationAdminPrincipalEvaluator, EntraApplicationAdminPrincipalEvaluator>();
         services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(options =>
             {

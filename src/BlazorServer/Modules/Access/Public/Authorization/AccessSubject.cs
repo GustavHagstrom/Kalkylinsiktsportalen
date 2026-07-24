@@ -11,7 +11,9 @@ public sealed record AccessSubject(
 
 public static class ClaimsPrincipalAccessSubjectExtensions
 {
-    public static AccessSubject? ToAccessSubject(this ClaimsPrincipal principal)
+    public static AccessSubject? ToAccessSubject(
+        this ClaimsPrincipal principal,
+        IApplicationAdminPrincipalEvaluator applicationAdminEvaluator)
     {
         var userId = principal.GetUserId();
         var organizationId = principal.GetOrganizationId();
@@ -27,6 +29,6 @@ public static class ClaimsPrincipalAccessSubjectExtensions
             new UserId(userId),
             new OrganizationId(organizationId),
             roleIds,
-            principal.IsApplicationAdmin());
+            applicationAdminEvaluator.IsApplicationAdmin(principal));
     }
 }

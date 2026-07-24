@@ -1,6 +1,9 @@
 using BlazorServer;
 using BlazorServer.Composition;
+using BlazorServer.AppShell.Authentication.Entra;
+using BlazorServer.AppShell.Authentication.Mock;
 using BlazorServer.Modules.Access.Infrastructure.Identity;
+using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +29,7 @@ public class AppAuthenticationRegistrationTests
         using var provider = services.BuildServiceProvider();
 
         Assert.That(provider.GetRequiredService<IAccessDirectory>(), Is.TypeOf<MockAccessDirectory>());
+        Assert.That(provider.GetRequiredService<IApplicationAdminPrincipalEvaluator>(), Is.TypeOf<MockApplicationAdminPrincipalEvaluator>());
     }
 
     [Test]
@@ -48,6 +52,10 @@ public class AppAuthenticationRegistrationTests
             descriptor.ServiceType == typeof(IAccessDirectory) &&
             descriptor.ImplementationType == typeof(GraphAccessDirectory) &&
             descriptor.Lifetime == ServiceLifetime.Transient));
+        Assert.That(services, Has.One.Matches<ServiceDescriptor>(descriptor =>
+            descriptor.ServiceType == typeof(IApplicationAdminPrincipalEvaluator) &&
+            descriptor.ImplementationType == typeof(EntraApplicationAdminPrincipalEvaluator) &&
+            descriptor.Lifetime == ServiceLifetime.Singleton));
     }
 
     private static IConfiguration Configuration(Dictionary<string, string?> values)

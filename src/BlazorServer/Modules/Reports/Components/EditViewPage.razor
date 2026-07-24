@@ -43,6 +43,7 @@
 @inject IViewStore ViewStore
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IViewAccessDecisionService ViewAccessDecisions
+@inject IApplicationAdminPrincipalEvaluator ApplicationAdminEvaluator
 
 @code {
     [Parameter] public string? ViewId { get; set; }
@@ -76,7 +77,7 @@
         SetLoading(true);
 
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var subject = authenticationState.User.ToAccessSubject();
+        var subject = authenticationState.User.ToAccessSubject(ApplicationAdminEvaluator);
         if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, ViewId))
         {
             View = null;

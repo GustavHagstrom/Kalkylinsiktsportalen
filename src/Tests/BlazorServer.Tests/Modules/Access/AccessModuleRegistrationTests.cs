@@ -58,6 +58,7 @@ public class AccessModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(IApplicationAdminPrincipalEvaluator)), Is.False);
         }
     }
 
@@ -69,6 +70,8 @@ public class AccessModuleRegistrationTests
 
         services.AddAccessModule(registrationContext);
         services.AddLogging();
+        services.AddSingleton<IApplicationAdminPrincipalEvaluator>(
+            new ClaimTypeApplicationAdminPrincipalEvaluator("external-admin"));
         services.ApplyAppRegistrationContext(registrationContext);
 
         using var provider = services.BuildServiceProvider();
@@ -122,9 +125,15 @@ public class AccessModuleRegistrationTests
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new Claim(
-                AccessAuthorizationConstants.ExternalDirectoryRoleClaimType,
-                AccessAuthorizationConstants.ApplicationAdminRoleClaimValue)
+                "external-admin",
+                "true")
         ], "test"));
+    }
+
+    private sealed class ClaimTypeApplicationAdminPrincipalEvaluator(string claimType) : IApplicationAdminPrincipalEvaluator
+    {
+        public bool IsApplicationAdmin(ClaimsPrincipal principal)
+            => principal.HasClaim(claimType, "true");
     }
 
     private static string[] RouteTemplatesFor<TComponent>()
