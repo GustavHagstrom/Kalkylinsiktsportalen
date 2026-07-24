@@ -1,3 +1,4 @@
+using BlazorServer.Composition;
 using BlazorServer.Identity;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Graph;
@@ -11,10 +12,12 @@ public static class EntraAuthenticationRegistration
 {
     public static IServiceCollection AddEntraAuthentication(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
     {
         ArgumentNullException.ThrowIfNull(services, nameof(services));
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
+        ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
 
         services.SetLoginDisplay<LoginDisplay>();
         services.AddScoped<BlazorCurrentUserContext>();

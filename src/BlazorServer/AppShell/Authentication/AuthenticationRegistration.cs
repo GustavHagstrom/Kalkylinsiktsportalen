@@ -1,31 +1,53 @@
 using BlazorServer.AppShell.Authentication.Entra;
 using BlazorServer.AppShell.Authentication.Mock;
+using BlazorServer.Composition;
 using Microsoft.AspNetCore.Components;
 
 namespace BlazorServer.AppShell.Authentication;
 
 public static class AuthenticationRegistration
 {
+    private const string DefaultMockOrganizationId = "MockedOrganization";
+
     public static AppShellAuthenticationSelection AddAppShellAuthentication(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
     {
         ArgumentNullException.ThrowIfNull(services, nameof(services));
         ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
+        ArgumentNullException.ThrowIfNull(registrationContext, nameof(registrationContext));
 
-        if (configuration["Auth:Mode"] == "Mock")
+        var authenticationMode = configuration["Auth:Mode"]?.Trim();
+        return authenticationMode switch
         {
-            var mockOrganizationId = configuration["Auth:Mock:OrganizationId"] ?? "MockedOrganization";
-            services.AddMockAuthentication(mockOrganizationId);
-            return AppShellAuthenticationSelection.Mock(mockOrganizationId);
-        }
-        else if (configuration["Auth:Mode"] == "EntraId")
-        {
-            services.AddEntraAuthentication(configuration);
-            return AppShellAuthenticationSelection.EntraId();
-        }
+            "Mock" => AddMockAuthenticationSelection(services, configuration, registrationContext),
+            "EntraId" => AddEntraAuthenticationSelection(services, configuration, registrationContext),
+            var mode => throw new InvalidOperationException(
+                $"Unsupported authentication mode '{(string.IsNullOrWhiteSpace(mode) ? "<missing>" : mode)}'. Configure Auth:Mode as 'Mock' or 'EntraId'.")
+        };
+    }
 
-        return AppShellAuthenticationSelection.None();
+    private static AppShellAuthenticationSelection AddMockAuthenticationSelection(
+        IServiceCollection services,
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
+    {
+        var configuredOrganizationId = configuration["Auth:Mock:OrganizationId"]?.Trim();
+        var mockOrganizationId = string.IsNullOrWhiteSpace(configuredOrganizationId)
+            ? DefaultMockOrganizationId
+            : configuredOrganizationId;
+        services.AddMockAuthentication(mockOrganizationId, registrationContext);
+        return AppShellAuthenticationSelection.Mock(mockOrganizationId);
+    }
+
+    private static AppShellAuthenticationSelection AddEntraAuthenticationSelection(
+        IServiceCollection services,
+        IConfiguration configuration,
+        AppRegistrationContext registrationContext)
+    {
+        services.AddEntraAuthentication(configuration, registrationContext);
+        return AppShellAuthenticationSelection.EntraId();
     }
 
     public static IServiceCollection SetLoginDisplay<T>(this IServiceCollection services)
@@ -89,7 +111,4 @@ public sealed record AppShellAuthenticationSelection
 
     public static AppShellAuthenticationSelection EntraId()
         => new("EntraId", null);
-
-    public static AppShellAuthenticationSelection None()
-        => new("None", null);
 }
