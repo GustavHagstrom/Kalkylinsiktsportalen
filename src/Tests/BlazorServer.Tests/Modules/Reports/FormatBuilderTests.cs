@@ -27,7 +27,15 @@ public class FormatBuilderTests
 
         var result = FormatBuilder.BuildCellStyle(format);
 
-        Assert.That(result, Is.EqualTo("border-left: 2px solid #111111; border-top: none; border-right: none; border-bottom: none;  background-color: #ffffff; padding: 1px 2px 3px 4px;"));
+        Assert.That(GetCssDeclarations(result), Is.EquivalentTo(new[]
+        {
+            "border-left: 2px solid #111111",
+            "border-top: none",
+            "border-right: none",
+            "border-bottom: none",
+            "background-color: #ffffff",
+            "padding: 1px 2px 3px 4px"
+        }));
     }
 
     [Test]
@@ -48,5 +56,12 @@ public class FormatBuilderTests
         var result = FormatBuilder.BuildTextStyle(format);
 
         Assert.That(result, Is.EqualTo("color: #222222; font-size: 12px; font-family: Arial; font-weight: bold; font-style: italic; text-decoration: underline; text-align: right; vertical-align: middle;"));
+    }
+
+    private static IReadOnlyList<string> GetCssDeclarations(string style)
+    {
+        return style
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToArray();
     }
 }
