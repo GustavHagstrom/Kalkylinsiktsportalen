@@ -1,5 +1,5 @@
 using System.Globalization;
-using BlazorServer.Modules.Reports.Views.Components;
+using BlazorServer.Modules.Reports.Views.Rendering;
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 

@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 
-namespace BlazorServer.Modules.Reports.Views.Components;
+namespace BlazorServer.Modules.Reports.Views.Editing;
 
 public class DataSectionEditor
 {
