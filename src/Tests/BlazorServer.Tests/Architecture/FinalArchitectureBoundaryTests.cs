@@ -53,7 +53,7 @@ public sealed partial class FinalArchitectureBoundaryTests
         => AssertNoReferences(
             FilesUnder("AppShell"),
             reference => IsModuleReference(reference, out _, out var remainder)
-                && !remainder.StartsWith("Public", StringComparison.Ordinal),
+                && !IsPublicModuleRemainder(remainder),
             "AppShell may compose modules only through Modules.<Module>.Public contracts");
 
     [Test]
@@ -67,7 +67,7 @@ public sealed partial class FinalArchitectureBoundaryTests
             {
                 if (IsModuleReference(reference, out var target, out var remainder)
                     && !string.Equals(owner, target, StringComparison.Ordinal)
-                    && !remainder.StartsWith("Public", StringComparison.Ordinal))
+                    && !IsPublicModuleRemainder(remainder))
                 {
                     violations.Add($"{RelativePath(file)} -> {reference}");
                 }
@@ -93,7 +93,7 @@ public sealed partial class FinalArchitectureBoundaryTests
             {
                 if (IsModuleReference(reference, out var target, out var remainder)
                     && string.Equals(owner, target, StringComparison.Ordinal)
-                    && !remainder.StartsWith("Public", StringComparison.Ordinal))
+                    && !IsPublicModuleRemainder(remainder))
                 {
                     violations.Add($"{RelativePath(file)} exposes {reference}");
                 }
@@ -120,10 +120,15 @@ public sealed partial class FinalArchitectureBoundaryTests
             {
                 if (IsModuleReference(reference, out var target, out var remainder)
                     && string.Equals(owner, target, StringComparison.Ordinal)
-                    && !remainder.StartsWith("Public", StringComparison.Ordinal))
+                    && !IsPublicModuleRemainder(remainder))
                 {
                     violations.Add($"{RelativePath(file)} references {reference}");
                 }
+            }
+
+            foreach (var reference in RelativeOwnerInternalReferences(file))
+            {
+                violations.Add($"{RelativePath(file)} references {reference}");
             }
         }
 
@@ -228,6 +233,18 @@ public sealed partial class FinalArchitectureBoundaryTests
     private static bool StartsWithAny(string value, params string[] prefixes)
         => prefixes.Any(prefix => value.StartsWith(prefix, StringComparison.Ordinal));
 
+    private static bool IsPublicModuleRemainder(string remainder)
+        => remainder.Equals("Public", StringComparison.Ordinal)
+            || remainder.StartsWith("Public.", StringComparison.Ordinal);
+
+    private static IEnumerable<string> RelativeOwnerInternalReferences(string file)
+    {
+        var text = File.ReadAllText(file);
+        return RelativeOwnerInternalReferenceRegex().Matches(text)
+            .Select(match => match.Value.TrimEnd('.'))
+            .Distinct(StringComparer.Ordinal);
+    }
+
     private static IEnumerable<string> SourceFiles()
         => Directory.EnumerateFiles(ProductionRoot, "*.*", SearchOption.AllDirectories)
             .Where(file => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
@@ -270,4 +287,7 @@ public sealed partial class FinalArchitectureBoundaryTests
 
     [GeneratedRegex(@"^BlazorServer\.Modules\.(?<module>[A-Za-z_][A-Za-z0-9_]*)(?:\.(?<remainder>.+))?$")]
     private static partial Regex ModuleReferenceRegex();
+
+    [GeneratedRegex(@"(?<![A-Za-z0-9_.])(?:Features|Domain|Infrastructure|Components)(?:\.[A-Za-z_][A-Za-z0-9_]*)+")]
+    private static partial Regex RelativeOwnerInternalReferenceRegex();
 }
