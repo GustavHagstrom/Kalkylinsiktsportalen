@@ -1,5 +1,6 @@
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public;
+using BlazorServer.Modules.Reports.Views;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using BlazorServer.Identity;

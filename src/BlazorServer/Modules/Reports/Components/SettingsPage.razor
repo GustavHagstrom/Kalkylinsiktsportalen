@@ -1,4 +1,7 @@
 @page "/Settings/views"
+@using BlazorServer.Kernel.CQRS
+@using BlazorServer.Modules.Reports.Features.CreateView
+@using BlazorServer.Modules.Reports.Features.ListViews
 @using BlazorServer.Modules.Reports.Public.Contracts.Views
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Components
@@ -23,7 +26,8 @@
     </ChildContent>
 </ToolbarPage>
 
-@inject IViewStore ViewStore
+@inject ICommandHandler<CreateViewCommand, CreateViewResult> CreateView
+@inject IQueryHandler<ListViewsQuery, ListViewsResult> ListViews
 @inject IDialogService DialogService
 @inject IStringLocalizer<SettingsPage> Localizer
 @inject ICurrentUserContext CurrentUserSession
@@ -50,13 +54,14 @@
         var result = await dialog.Result;
         if (result != DialogResult.Cancel() && result?.Data is not null && result.Data is string name)
         {
-            var view = new ViewDto()
+            var createResult = await CreateView.HandleAsync(
+                new CreateViewCommand(currentUser.OrganizationId, name),
+                CancellationToken.None);
+
+            if (createResult is ViewCreated created)
             {
-                Name = name,
-                OrganizationId = currentUser.OrganizationId
-            };
-            await ViewStore.UpsertAsync(view);
-            Navigation.NavigateTo(ReportsRoutes.EditViewPage(view.Id));
+                Navigation.NavigateTo(ReportsRoutes.EditViewPage(created.ViewId));
+            }
         }
         
     }
@@ -66,8 +71,11 @@
         var currentUser = await CurrentUserSession.GetCurrentUserAsync();
         if (currentUser?.OrganizationId is null) return;
         SetLoading(true);
-        var views = await ViewStore.GetAllAsync(currentUser.OrganizationId);
-        Views = views;
+        var result = await ListViews.HandleAsync(
+            new ListViewsQuery(currentUser.OrganizationId),
+            CancellationToken.None);
+
+        Views = result is ViewsListed listed ? listed.Views.ToList() : [];
         SetLoading(false);
     }
     void SetLoading(bool loading)
