@@ -47,6 +47,36 @@ public class BidconPublicSurfaceTests
         Assert.That(offendingTypes, Is.Empty);
     }
 
+    [Test]
+    public void UpsertBidconCredentialsSliceDoesNotOwnHttpCredentialVerificationAdapter()
+    {
+        var forbiddenReferences = new[]
+        {
+            "IHttpClientFactory",
+            "BidconHttpClientNames",
+            "BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs",
+            "ApiKeyAuthenticateDto",
+            "ApiKeyAuthenticateResultDto"
+        };
+        var violations = SourceFilesUnder(
+                "Modules",
+                "Bidcon",
+                "Features",
+                "UpsertBidconCredentials")
+            .SelectMany(file =>
+            {
+                var text = File.ReadAllText(file);
+                return forbiddenReferences
+                    .Where(text.Contains)
+                    .Select(reference => $"{Path.GetFileName(file)} -> {reference}");
+            })
+            .ToArray();
+
+        Assert.That(violations, Is.Empty,
+            "The UpsertBidconCredentials slice should keep only the verifier port; HTTP and upstream Bidcon auth DTOs belong in infrastructure.\n"
+            + string.Join('\n', violations));
+    }
+
     private static void AssertTypesExist(params string[] typeNames)
     {
         var missingTypes = typeNames
@@ -88,5 +118,27 @@ public class BidconPublicSurfaceTests
                 yield return parameter.ParameterType;
             }
         }
+    }
+
+    private static IEnumerable<string> SourceFilesUnder(params string[] pathParts)
+    {
+        var directory = Path.Combine(new[] { FindProductionRoot() }.Concat(pathParts).ToArray());
+        return Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories);
+    }
+
+    private static string FindProductionRoot()
+    {
+        for (var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+             directory is not null;
+             directory = directory.Parent)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "BlazorServer");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new DirectoryNotFoundException("Could not locate src/BlazorServer from the test output directory.");
     }
 }

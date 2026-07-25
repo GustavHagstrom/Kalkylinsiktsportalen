@@ -12,6 +12,7 @@ using BlazorServer.Modules.Bidcon.CredentialAdministration;
 using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public;
@@ -43,6 +44,10 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(ImportEstimationSnapshotCommandHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(BidconEstimationClient)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IBidconCredentialsVerifier) &&
+                service.ImplementationType == typeof(BidconCredentialsVerifier) &&
+                service.Lifetime == ServiceLifetime.Transient));
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IBidconCredentialsAuditLog) &&
                 service.ImplementationType == typeof(MongoBidconCredentialsAuditLog) &&
