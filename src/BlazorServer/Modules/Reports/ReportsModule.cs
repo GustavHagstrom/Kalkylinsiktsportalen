@@ -6,6 +6,7 @@ using BlazorServer.Modules.Access.Public.Contracts;
 using BlazorServer.Modules.Reports.Features.CreateView;
 using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
+using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Views;
 using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
@@ -34,6 +35,7 @@ public static class ReportsModule
         services.AddViewCollection();
         services.AddSingleton<IViewStore, MongoViewStore>();
         services.AddScoped<ICommandHandler<CreateViewCommand, CreateViewResult>, CreateViewCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateViewCommand, UpdateViewResult>, UpdateViewCommandHandler>();
         services.AddScoped<IQueryHandler<GetViewQuery, GetViewResult>, GetViewQueryHandler>();
         services.AddScoped<IQueryHandler<ListViewsQuery, ListViewsResult>, ListViewsQueryHandler>();
     }

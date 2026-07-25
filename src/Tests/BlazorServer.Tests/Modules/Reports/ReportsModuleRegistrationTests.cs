@@ -4,6 +4,7 @@ using BlazorServer.Modules.Reports;
 using BlazorServer.Modules.Reports.Features.CreateView;
 using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
+using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Views;
 using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,10 @@ public class ReportsModuleRegistrationTests
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(ICommandHandler<CreateViewCommand, CreateViewResult>) &&
                 service.ImplementationType == typeof(CreateViewCommandHandler) &&
+                service.Lifetime == ServiceLifetime.Scoped));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(ICommandHandler<UpdateViewCommand, UpdateViewResult>) &&
+                service.ImplementationType == typeof(UpdateViewCommandHandler) &&
                 service.Lifetime == ServiceLifetime.Scoped));
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IQueryHandler<GetViewQuery, GetViewResult>) &&

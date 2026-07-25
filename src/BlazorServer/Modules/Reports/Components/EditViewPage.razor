@@ -1,6 +1,7 @@
 @page "/Settings/views/{ViewId}"
 @using BlazorServer.Kernel.CQRS
 @using BlazorServer.Modules.Reports.Features.GetView
+@using BlazorServer.Modules.Reports.Features.UpdateView
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Views.Editing
 
@@ -11,6 +12,7 @@
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["Lägg till sidbrytning"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveView">@Localizer["Spara"]</MudButton>
 
             <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
 
@@ -45,6 +47,7 @@
 
 @inject IStringLocalizer<EditViewPage> Localizer
 @inject IQueryHandler<GetViewQuery, GetViewResult> GetView
+@inject ICommandHandler<UpdateViewCommand, UpdateViewResult> UpdateView
 @inject ICurrentAccessSubject CurrentAccessSubject
 @inject IViewAccessDecisionService ViewAccessDecisions
 
@@ -55,6 +58,7 @@
     ViewEditor? Editor { get; set; }
     bool isLoading = false;
     bool TextFormatIsEnabled = true;
+    UpdateViewResult? LastSaveResult = null;
     object? SelectedItem = null;
 
     enum SectionType
@@ -120,6 +124,29 @@
             case SectionType.PageBreak:
                 Editor.AddPageBreakSection();
                 break;
+        }
+    }
+
+    async Task SaveView()
+    {
+        if (View is null) return;
+        var subject = await CurrentAccessSubject.GetAsync();
+        if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, View.Id.Value))
+        {
+            LastSaveResult = null;
+            return;
+        }
+
+        SetLoading(true);
+        try
+        {
+            LastSaveResult = await UpdateView.HandleAsync(
+                UpdateViewCommand.FromEditedView(subject.OrganizationId, View),
+                CancellationToken.None);
+        }
+        finally
+        {
+            SetLoading(false);
         }
     }
 }
