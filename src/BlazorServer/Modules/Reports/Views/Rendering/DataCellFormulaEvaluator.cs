@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 
-namespace BlazorServer.Modules.Reports.Views.Components;
+namespace BlazorServer.Modules.Reports.Views.Rendering;
 
 public static partial class DataCellFormulaEvaluator
 {

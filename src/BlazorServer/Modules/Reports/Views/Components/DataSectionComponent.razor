@@ -1,3 +1,5 @@
+@using BlazorServer.Modules.Reports.Views.Editing
+
 <table class="@Class">
     <colgroup>
         @foreach (var column in DataSectionDto.ColumnDefinitions.OrderBy(x => x.ColumnIndex))

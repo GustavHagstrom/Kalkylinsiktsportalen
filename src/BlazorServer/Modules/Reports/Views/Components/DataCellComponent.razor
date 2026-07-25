@@ -1,3 +1,5 @@
+@using BlazorServer.Modules.Reports.Views.Rendering
+
 <td class="@Class" style="@FormatBuilder.BuildCellStyle(DataCellDto.CellFormat)" @onclick="() => OnClick.InvokeAsync(DataCellDto)"> 
     <div style="@FormatBuilder.BuildTextStyle(DataCellDto.TextFormat)">
         @if (EditMode)

@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 
-namespace BlazorServer.Modules.Reports.Views.Components;
+namespace BlazorServer.Modules.Reports.Views.Rendering;
 
 public static class FormatBuilder
 {

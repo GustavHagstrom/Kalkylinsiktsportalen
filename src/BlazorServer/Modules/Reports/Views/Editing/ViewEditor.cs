@@ -2,7 +2,7 @@ using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.SheetSection;
 
-namespace BlazorServer.Modules.Reports.Views.Components;
+namespace BlazorServer.Modules.Reports.Views.Editing;
 
 public class ViewEditor
 {
@@ -20,7 +20,10 @@ public class ViewEditor
 
     public DataSectionDto AddDataSection()
     {
-        var editor = new DataSectionEditor(new DataSectionDto());
+        var editor = new DataSectionEditor(new DataSectionDto
+        {
+            SectionIndex = SectionCount
+        });
         editor.AddColumn();
         editor.AddColumn();
         editor.AddColumn();
