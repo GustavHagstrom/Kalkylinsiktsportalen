@@ -1,10 +1,10 @@
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
+using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 
-namespace BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 
-public sealed class BidconCredentialsVerifier(IHttpClientFactory httpClientFactory) : IBidconCredentialsVerifier
+internal sealed class BidconCredentialsVerifier(IHttpClientFactory httpClientFactory) : IBidconCredentialsVerifier
 {
     public async Task<bool> VerifyAsync(BidconApiCredentials credentials, CancellationToken cancellationToken)
     {
