@@ -133,14 +133,20 @@
         var subject = await CurrentAccessSubject.GetAsync();
         if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, View.Id.Value))
         {
-            LastSaveResult = new ViewUpdateOrganizationMismatch(View.Id, subject?.OrganizationId ?? View.OrganizationId);
+            LastSaveResult = null;
             return;
         }
 
         SetLoading(true);
-        LastSaveResult = await UpdateView.HandleAsync(
-            UpdateViewCommand.FromEditedView(subject.OrganizationId, View),
-            CancellationToken.None);
-        SetLoading(false);
+        try
+        {
+            LastSaveResult = await UpdateView.HandleAsync(
+                UpdateViewCommand.FromEditedView(subject.OrganizationId, View),
+                CancellationToken.None);
+        }
+        finally
+        {
+            SetLoading(false);
+        }
     }
 }
