@@ -3,6 +3,7 @@ using BlazorServer;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Views.Rendering;
 using BlazorServer.Modules.Reports.Views.Editing;
+using BlazorServer.Modules.Reports.Views;
 using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
 using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
@@ -31,9 +32,43 @@ public class ReportsViewOwnershipTests
             Assert.That(typeof(FormatBuilder).Namespace, Does.StartWith("BlazorServer.Modules.Reports."));
             Assert.That(typeof(FormatBuilder).Namespace, Does.Not.Contain(".Components"));
             Assert.That(typeof(PrintableDocument).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Rendering"));
-            Assert.That(typeof(IViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));
+            Assert.That(typeof(IViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views"));
             Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));
+            Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));
+            Assert.That(typeof(ViewMappings).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));
         });
+    }
+
+    [Test]
+    public void ReportsComponentsDoNotDependOnViewPersistencePortDirectly()
+    {
+        var componentFiles = Directory
+            .EnumerateFiles(
+                Path.Combine(FindProductionRoot(), "Modules", "Reports", "Components"),
+                "*.razor",
+                SearchOption.AllDirectories)
+            .Select(Path.GetFullPath);
+
+        var violations = componentFiles
+            .Where(file => File.ReadAllText(file).Contains("IViewStore", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .ToArray();
+
+        Assert.That(violations, Is.Empty);
+    }
+
+    private static string FindProductionRoot()
+    {
+        for (var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory); directory is not null; directory = directory.Parent)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "BlazorServer");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new DirectoryNotFoundException("Could not locate src/BlazorServer from the test output directory.");
     }
 
     [Test]

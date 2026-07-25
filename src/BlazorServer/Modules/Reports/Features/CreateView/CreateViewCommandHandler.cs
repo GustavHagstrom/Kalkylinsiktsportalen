@@ -1,0 +1,34 @@
+using BlazorServer.Kernel.CQRS;
+using BlazorServer.Modules.Reports.Public.Contracts.Views;
+using BlazorServer.Modules.Reports.Views;
+
+namespace BlazorServer.Modules.Reports.Features.CreateView;
+
+internal sealed class CreateViewCommandHandler(
+    IViewStore viewStore,
+    CreateViewCommandValidator? validator = null)
+    : ICommandHandler<CreateViewCommand, CreateViewResult>
+{
+    private readonly CreateViewCommandValidator _validator = validator ?? new CreateViewCommandValidator();
+
+    public async Task<CreateViewResult> HandleAsync(
+        CreateViewCommand command,
+        CancellationToken cancellationToken)
+    {
+        var errors = _validator.Validate(command);
+        if (errors.Count > 0)
+        {
+            return new InvalidCreateViewRequest(errors);
+        }
+
+        var view = new ViewDto
+        {
+            Name = command.Name,
+            OrganizationId = command.OrganizationId
+        };
+
+        await viewStore.UpsertAsync(view);
+
+        return new ViewCreated(view.Id, view.OrganizationId, view.Name, view);
+    }
+}

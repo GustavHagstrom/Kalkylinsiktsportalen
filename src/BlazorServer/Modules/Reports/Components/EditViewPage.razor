@@ -1,4 +1,7 @@
 @page "/Settings/views/{ViewId}"
+@using BlazorServer.Kernel.CQRS
+@using BlazorServer.Modules.Reports.Features.GetView
+@using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Views.Editing
 
 @if(View is not null)
@@ -41,7 +44,7 @@
 }
 
 @inject IStringLocalizer<EditViewPage> Localizer
-@inject IViewStore ViewStore
+@inject IQueryHandler<GetViewQuery, GetViewResult> GetView
 @inject ICurrentAccessSubject CurrentAccessSubject
 @inject IViewAccessDecisionService ViewAccessDecisions
 
@@ -85,7 +88,11 @@
             return;
         }
 
-        View = await ViewStore.GetAsync(ViewId);
+        var result = await GetView.HandleAsync(
+            new GetViewQuery(new ViewId(ViewId)),
+            CancellationToken.None);
+
+        View = result is ViewLoaded loaded ? loaded.View : null;
         if(View is not null)
         {
             Editor = new ViewEditor(View);
