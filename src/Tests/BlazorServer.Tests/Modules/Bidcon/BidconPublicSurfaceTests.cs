@@ -67,7 +67,7 @@ public class BidconPublicSurfaceTests
             {
                 var text = File.ReadAllText(file);
                 return forbiddenReferences
-                    .Where(text.Contains)
+                    .Where(reference => text.Contains(reference, StringComparison.Ordinal))
                     .Select(reference => $"{Path.GetFileName(file)} -> {reference}");
             })
             .ToArray();
