@@ -1,4 +1,80 @@
 @page "/BidconBrowser"
+@using BlazorServer.Modules.Bidcon.Features.GetEstimationList
 @using BlazorServer.Modules.Bidcon.Public.Components
 
-<EstimationExplorer />
+<EstimationExplorer
+    Estimations="Estimations"
+    SelectedBidconIds="SelectedBidconIds"
+    SelectedBidconIdsChanged="UpdateSelectedEstimations"
+    OnRefresh="LoadData"
+    IsLoading="IsLoading" />
+
+@inject GetEstimationListQueryHandler GetEstimationListHandler
+@inject ICurrentUserContext CurrentUserSession
+
+@code {
+    private List<EstimationExplorerItem> Estimations { get; set; } = [];
+    private HashSet<string> SelectedBidconIds { get; set; } = new(StringComparer.Ordinal);
+    private bool HasLoaded { get; set; }
+    private bool IsLoading { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        if (HasLoaded)
+        {
+            return Task.CompletedTask;
+        }
+
+        return LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+
+        try
+        {
+            var currentUser = await CurrentUserSession.GetCurrentUserAsync();
+            if (currentUser?.Email is null)
+            {
+                return;
+            }
+
+            var result = await GetEstimationListHandler.HandleAsync(
+                new GetEstimationListQuery(
+                    currentUser.OrganizationId,
+                    currentUser.Email),
+                CancellationToken.None);
+
+            if (result is not EstimationListLoaded loaded)
+            {
+                return;
+            }
+
+            Estimations = loaded.Estimations
+                .Select(DtoToModel)
+                .OrderBy(estimation => estimation.Name)
+                .ToList();
+            SelectedBidconIds.IntersectWith(Estimations.Select(estimation => estimation.BidconId));
+            HasLoaded = true;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void UpdateSelectedEstimations(IReadOnlySet<string> selectedBidconIds)
+    {
+        SelectedBidconIds = selectedBidconIds.ToHashSet(StringComparer.Ordinal);
+    }
+
+    private static EstimationExplorerItem DtoToModel(GetEstimationListItem dto)
+    {
+        var name = string.IsNullOrWhiteSpace(dto.Description)
+            ? dto.Name
+            : $"{dto.Name} - {dto.Description}";
+
+        return new EstimationExplorerItem(name, dto.Id);
+    }
+}

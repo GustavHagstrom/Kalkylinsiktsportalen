@@ -41,7 +41,7 @@ public sealed partial class RootCompositionBoundaryTests
                 Remainder = match.Groups["remainder"].Value
             })
             .Where(match => !(allowModuleRoot && string.IsNullOrEmpty(match.Remainder)))
-            .Where(match => !match.Remainder.StartsWith("Public", StringComparison.Ordinal))
+            .Where(match => !IsPublicModuleRemainder(match.Remainder))
             .Select(match => match.Reference)
             .Distinct(StringComparer.Ordinal)
             .ToArray();
@@ -71,4 +71,8 @@ public sealed partial class RootCompositionBoundaryTests
 
     [GeneratedRegex(@"\bBlazorServer\.Modules\.(?<module>[A-Za-z_][A-Za-z0-9_]*)(?:\.(?<remainder>[A-Za-z_][A-Za-z0-9_.]*))?")]
     private static partial Regex ModuleReferenceRegex();
+
+    private static bool IsPublicModuleRemainder(string remainder)
+        => remainder.Equals("Public", StringComparison.Ordinal)
+            || remainder.StartsWith("Public.", StringComparison.Ordinal);
 }

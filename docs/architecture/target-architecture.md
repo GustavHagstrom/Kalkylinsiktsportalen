@@ -48,6 +48,8 @@ Blazor-komponenter får inte placeras i feature slices. UI-komponenter hör hemm
 
 Den här gränsen gör att slicen kan återanvändas av andra klienter, till exempel React, HTTP endpoints eller tester, utan att dra med sig Blazor.
 
+`Modules/{Module}/Public/Components` är ett avsiktligt mönster för små modulägda UI-entrypoints som andra ägare får komponera in. En public component ska ha en stabil Blazor-yta via parametrar, callbacks och andra typer under samma publika yta. Den får bero på neutral UI-teknik, `UiKit`, `Kernel`, `Identity` och modulens egna `Public`-kontrakt, men den får inte referera eller exponera modulens interna `Features`, `Domain`, `Infrastructure`, `Components`, stores, handlers, adapters, externa DTO:er eller presentationsstate. Interna routade sidor eller andra modulägda components får orkestrera use cases och sedan mata public component med stabil data.
+
 Delad domänlogik som behövs av flera slices inom samma modul hör hemma i modulens `Domain`. Slice-specifik logik ska stanna i slicen tills den faktiskt behöver delas.
 
 Vertical slices betyder inte att varje teknisk typ måste dupliceras per feature. Det betyder att användningsfallet är den primära samlingspunkten och att breda horisontella `Application`-lager inte är målformen för ny produktkod.

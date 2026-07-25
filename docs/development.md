@@ -77,6 +77,9 @@ Följ målarkitekturen när du lägger ny produktlogik:
 - moduler får använda `BlazorServer.Composition` för bootstrap-bidrag
 - andra moduler får bara referera avsiktligt exponerad kod under `Modules/{Module}/Public`
 - använd `Public/Contracts` för modulkontrakt och `Public/Components` för avsiktliga entry components
+- `Public/Components` är ett tillåtet publikt UI-compositionmönster, inte en generell export av modulens interna UI
+- public components får bero på neutral UI-teknik, `UiKit`, `Kernel`, `Identity` och den egna modulens `Public`-typer
+- public components får inte referera eller exponera den egna modulens interna `Features`, `Domain`, `Infrastructure`, `Components`, stores, handlers, adapters, externa DTO:er eller komponent-state
 - moduler får inte anropa varandras interna use cases, stores, integrationsklienter eller helper components
 - råa externa DTO:er och provider-modeller ska vara privata för integrationsägande modul
 

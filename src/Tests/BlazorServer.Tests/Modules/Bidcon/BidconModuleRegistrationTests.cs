@@ -69,9 +69,6 @@ public class BidconModuleRegistrationTests
                 service.ServiceType == typeof(IEstimationSnapshotStore) &&
                 service.ImplementationType == typeof(MongoEstimationSnapshotStore) &&
                 service.Lifetime == ServiceLifetime.Singleton));
-            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
-                service.ServiceType == typeof(EstimationListState) &&
-                service.Lifetime == ServiceLifetime.Scoped));
             Assert.That(registrationContext.AccessClaims.Claims, Has.Member(new AccessClaimDefinition(
                 "BrowserAccess",
                 "Bidconutforskaren",
