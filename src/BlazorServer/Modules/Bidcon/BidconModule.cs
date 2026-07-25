@@ -36,7 +36,6 @@ public static class BidconModule
         services.AddSingleton<IBidconCredentialsAuditLog, MongoBidconCredentialsAuditLog>();
         services.AddTransient<ImportEstimationSnapshotCommandHandler>();
         services.AddTransient<BidconEstimationClient>();
-        services.AddScoped<EstimationListState>();
         if (baseUrl is not null)
         {
             services.AddHttpClient(BidconHttpClientNames.ApiClient, client =>

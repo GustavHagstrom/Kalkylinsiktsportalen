@@ -104,6 +104,34 @@ public sealed partial class FinalArchitectureBoundaryTests
             "Module Public contracts must not expose internal DTOs, stores, persistence entities or implementations. Violations:\n"
             + string.Join('\n', violations));
     }
+
+    [Test]
+    public void ModulePublicComponentsMustNotReferenceOwnerInternals()
+    {
+        var violations = new List<string>();
+        var publicComponentFiles = FilesUnder("Modules")
+            .Where(file => RelativePath(file).Split('/').ElementAtOrDefault(2) == "Public")
+            .Where(file => RelativePath(file).Split('/').ElementAtOrDefault(3) == "Components");
+
+        foreach (var file in publicComponentFiles)
+        {
+            var owner = RelativePath(file).Split('/')[1];
+            foreach (var reference in NamespaceReferences(file))
+            {
+                if (IsModuleReference(reference, out var target, out var remainder)
+                    && string.Equals(owner, target, StringComparison.Ordinal)
+                    && !remainder.StartsWith("Public", StringComparison.Ordinal))
+                {
+                    violations.Add($"{RelativePath(file)} references {reference}");
+                }
+            }
+        }
+
+        Assert.That(violations, Is.Empty,
+            "Module Public components are stable UI entrypoints and must not reference owner internals. Violations:\n"
+            + string.Join('\n', violations));
+    }
+
     [Test]
     public void ModulesMayNotReferenceAppShell() 
     {
