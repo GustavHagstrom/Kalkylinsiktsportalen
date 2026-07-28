@@ -1,6 +1,9 @@
 using BlazorServer.Identity;
 using BlazorServer.Modules.Access;
+using BlazorServer.Modules.Access.Features.GrantRoleViewAccess;
+using BlazorServer.Modules.Access.Features.GrantUserViewAccess;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Infrastructure.InMemory;
 using BlazorServer.Modules.Access.Public.Authorization;
 
 namespace BlazorServer.Tests.Modules.Access;
@@ -12,12 +15,17 @@ public class ViewAccessDecisionHandlersTests
     public async Task ViewFlowAllowsUseEditAndAdministerOnlyWhenMatchingViewGrantExists()
     {
         var store = new InMemoryViewAccessGrantStore();
-        var grantHandler = new ViewAccessGrantHandler(store);
+        var grantUserHandler = new GrantUserViewAccessCommandHandler(store);
+        var grantRoleHandler = new GrantRoleViewAccessCommandHandler(store);
         var decisionService = new ViewAccessDecisionHandler(store);
         var subject = Subject(userId: "user-1", organizationId: "org-1", roleIds: ["role-1"]);
 
-        await grantHandler.HandleAsync(new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView));
-        await grantHandler.HandleAsync(new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView));
+        await grantUserHandler.HandleAsync(
+            new GrantUserViewAccessCommand("view-1", "user-1", "org-1", ViewAccessRight.UseView),
+            CancellationToken.None);
+        await grantRoleHandler.HandleAsync(
+            new GrantRoleViewAccessCommand("view-1", "role-1", "org-1", ViewAccessRight.EditView),
+            CancellationToken.None);
 
         var canUse = await decisionService.CanUseViewAsync(subject, "view-1");
         var canEdit = await decisionService.CanEditViewAsync(subject, "view-1");

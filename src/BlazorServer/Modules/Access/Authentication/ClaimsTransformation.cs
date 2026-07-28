@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
+using BlazorServer.Modules.Access.Features.GetEffectiveFunctionalAccessClaims;
 using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
@@ -7,16 +7,16 @@ namespace BlazorServer.Modules.Access.Authentication;
 
 public class ClaimsTransformation : IClaimsTransformation
 {
-    private readonly FunctionalAccessGrantHandler functionalAccessGrants;
+    private readonly GetEffectiveFunctionalAccessClaimsQueryHandler effectiveFunctionalAccessClaims;
     private readonly IAccessClaimsCache _cache;
     private readonly IAccessSubjectFactory _accessSubjectFactory;
 
     public ClaimsTransformation(
-        FunctionalAccessGrantHandler functionalAccessGrants,
+        GetEffectiveFunctionalAccessClaimsQueryHandler effectiveFunctionalAccessClaims,
         IAccessClaimsCache cache,
         IAccessSubjectFactory accessSubjectFactory)
     {
-        this.functionalAccessGrants = functionalAccessGrants;
+        this.effectiveFunctionalAccessClaims = effectiveFunctionalAccessClaims;
         _cache = cache;
         _accessSubjectFactory = accessSubjectFactory;
     }
@@ -35,12 +35,15 @@ public class ClaimsTransformation : IClaimsTransformation
             out List<string>? accessClaimValues))
         {
             _cache.ClearAccessClaims(subject.UserId, subject.OrganizationId);
-            var accessClaims = await functionalAccessGrants.HandleAsync(
+            var result = await effectiveFunctionalAccessClaims.HandleAsync(
                 new GetEffectiveFunctionalAccessClaimsQuery(
                     subject.UserId,
                     subject.RoleIds.ToList(),
-                    subject.OrganizationId));
-            accessClaimValues = [.. accessClaims.Select(x => x.Value)];
+                    subject.OrganizationId),
+                CancellationToken.None);
+            accessClaimValues = result is EffectiveFunctionalAccessClaimsLoaded loaded
+                ? [.. loaded.AccessClaims.Select(x => x.Value)]
+                : [];
             _cache.SetAccessClaims(
                 subject.UserId,
                 subject.OrganizationId,
