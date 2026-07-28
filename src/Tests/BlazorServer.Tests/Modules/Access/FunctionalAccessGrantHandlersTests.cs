@@ -12,23 +12,56 @@ public class FunctionalAccessGrantHandlersTests
     public async Task UserAccessGrantsCanBeReadGrantedRevokedAndGrantedIdempotently()
     {
         var store = new RecordingAccessStore();
-        var handler = new FunctionalAccessGrantHandler(store);
+        var grantHandler = new GrantUserFunctionalAccessCommandHandler(store);
+        var revokeHandler = new RevokeUserFunctionalAccessCommandHandler(store);
+        var readHandler = new GetUserFunctionalAccessQueryHandler(store);
 
-        await handler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
-        await handler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
+        await grantHandler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"), CancellationToken.None);
+        await grantHandler.HandleAsync(new GrantUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"), CancellationToken.None);
 
-        var granted = await handler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")));
+        var granted = await readHandler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")), CancellationToken.None);
 
-        await handler.HandleAsync(new RevokeUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"));
-        var revoked = await handler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")));
+        await revokeHandler.HandleAsync(new RevokeUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId("org-1"), "CanManageAccess"), CancellationToken.None);
+        var revoked = await readHandler.HandleAsync(new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId("org-1")), CancellationToken.None);
 
         Assert.Multiple(() =>
         {
-            Assert.That(granted.AccessClaimValues, Is.EqualTo(new[] { "CanManageAccess" }));
-            Assert.That(granted.Target, Is.EqualTo(FunctionalAccessGrantTarget.User(new UserId("user-1"))));
-            Assert.That(revoked.AccessClaimValues, Is.Empty);
+            Assert.That(granted, Is.TypeOf<UserFunctionalAccessLoaded>());
+            Assert.That(((UserFunctionalAccessLoaded)granted).AccessClaimValues, Is.EqualTo(new[] { "CanManageAccess" }));
+            Assert.That(((UserFunctionalAccessLoaded)granted).UserId, Is.EqualTo(new UserId("user-1")));
+            Assert.That(revoked, Is.TypeOf<UserFunctionalAccessLoaded>());
+            Assert.That(((UserFunctionalAccessLoaded)revoked).AccessClaimValues, Is.Empty);
             Assert.That(store.GrantCalls, Is.EqualTo(2));
             Assert.That(store.RevokeCalls, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public async Task UserGrantCommandsValidateInputBeforeDomainInvariants()
+    {
+        var store = new RecordingAccessStore();
+        var grantHandler = new GrantUserFunctionalAccessCommandHandler(store);
+        var revokeHandler = new RevokeUserFunctionalAccessCommandHandler(store);
+        var readHandler = new GetUserFunctionalAccessQueryHandler(store);
+
+        var grantResult = await grantHandler.HandleAsync(
+            new GrantUserFunctionalAccessCommand(new UserId(), new OrganizationId("org-1"), "CanManageAccess"),
+            CancellationToken.None);
+        var revokeResult = await revokeHandler.HandleAsync(
+            new RevokeUserFunctionalAccessCommand(new UserId("user-1"), new OrganizationId(), "CanManageAccess"),
+            CancellationToken.None);
+        var readResult = await readHandler.HandleAsync(
+            new GetUserFunctionalAccessQuery(new UserId("user-1"), new OrganizationId()),
+            CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(grantResult, Is.TypeOf<InvalidGrantUserFunctionalAccessRequest>());
+            Assert.That(revokeResult, Is.TypeOf<InvalidRevokeUserFunctionalAccessRequest>());
+            Assert.That(readResult, Is.TypeOf<InvalidGetUserFunctionalAccessRequest>());
+            Assert.That(store.GrantCalls, Is.Zero);
+            Assert.That(store.RevokeCalls, Is.Zero);
+            Assert.That(store.ReadCalls, Is.Zero);
         });
     }
 
@@ -83,9 +116,11 @@ public class FunctionalAccessGrantHandlersTests
 
         public int GrantCalls { get; private set; }
         public int RevokeCalls { get; private set; }
+        public int ReadCalls { get; private set; }
 
         public Task<FunctionalAccessGrant> GetAccessGrantAsync(FunctionalAccessGrantTarget target, OrganizationId orgId)
         {
+            ReadCalls++;
             return Task.FromResult(new FunctionalAccessGrant(
                 target,
                 orgId,

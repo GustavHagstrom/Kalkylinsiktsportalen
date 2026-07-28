@@ -30,6 +30,9 @@ public static class AccessModule
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddTransient<IAuthorizationHandler, AccessClaimOrApplicationAdminHandler>();
         services.AddTransient<FunctionalAccessGrantHandler>();
+        services.AddTransient<GetUserFunctionalAccessQueryHandler>();
+        services.AddTransient<GrantUserFunctionalAccessCommandHandler>();
+        services.AddTransient<RevokeUserFunctionalAccessCommandHandler>();
         services.AddSingleton<IViewAccessGrantStore, InMemoryViewAccessGrantStore>();
         services.AddTransient<ViewAccessGrantHandler>();
         services.AddTransient<ViewAccessDecisionHandler>();

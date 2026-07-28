@@ -49,6 +49,9 @@ public class AccessModuleRegistrationTests
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
                     Constants.Authorization.PolicyName)));
             Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetUserFunctionalAccessQueryHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserFunctionalAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeUserFunctionalAccessCommandHandler)), Is.True);
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IMongoCollection<MongoFunctionalAccessGrant>) &&
                 service.Lifetime == ServiceLifetime.Singleton));
