@@ -1,10 +1,10 @@
 using BlazorServer.Modules.Bidcon.Domain;
+using BlazorServer.Modules.Bidcon.Features;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Mapping;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
-using BlazorServer.Kernel.Validation;
 using BlazorServer.Identity;
 
 namespace BlazorServer.Tests.Modules.Bidcon;
@@ -19,7 +19,7 @@ public class ImportEstimationSnapshotTests
         var bidconEstimationId = new BidconEstimationId("EST-100");
         var store = new RecordingEstimationSnapshotStore();
         var handler = new ImportEstimationSnapshotCommandHandler(
-            new StubBidconEstimationClient(CreateEstimationDetails()),
+            new StubBidconEstimationSnapshotSource(CreateSnapshotDetails()),
             store);
 
         var beforeImport = DateTimeOffset.UtcNow;
@@ -58,7 +58,7 @@ public class ImportEstimationSnapshotTests
     {
         var store = new RecordingEstimationSnapshotStore();
         var handler = new ImportEstimationSnapshotCommandHandler(
-            new StubBidconEstimationClient(null),
+            new StubBidconEstimationSnapshotSource(null),
             store);
 
         var result = await handler.HandleAsync(
@@ -80,9 +80,9 @@ public class ImportEstimationSnapshotTests
     [Test]
     public async Task ImportEstimationSnapshot_ReturnsValidationErrors_WhenCommandIsMissingRequiredIds()
     {
-        var client = new RecordingBidconEstimationClient();
+        var source = new RecordingBidconEstimationSnapshotSource();
         var store = new RecordingEstimationSnapshotStore();
-        var handler = new ImportEstimationSnapshotCommandHandler(client, store);
+        var handler = new ImportEstimationSnapshotCommandHandler(source, store);
 
         var result = await handler.HandleAsync(
             new ImportEstimationSnapshotCommand(
@@ -99,7 +99,7 @@ public class ImportEstimationSnapshotTests
                 "bidcon.import.organization.required",
                 "bidcon.import.estimation.required"
             ]));
-            Assert.That(client.WasCalled, Is.False);
+            Assert.That(source.WasCalled, Is.False);
             Assert.That(store.SavedSnapshot, Is.Null);
         });
     }
@@ -109,8 +109,8 @@ public class ImportEstimationSnapshotTests
     {
         var store = new RecordingEstimationSnapshotStore();
         var handler = new ImportEstimationSnapshotCommandHandler(
-            new FailingBidconEstimationClient(
-                new BidconEstimationClientException(
+            new FailingBidconEstimationSnapshotSource(
+                new BidconFeatureSourceException(
                     "bidcon.credentials.missing",
                     nameof(ImportEstimationSnapshotCommand.OrganizationId),
                     "Bidcon credentials are missing.")),
@@ -130,6 +130,14 @@ public class ImportEstimationSnapshotTests
             Assert.That(unavailable.ErrorField, Is.EqualTo(nameof(ImportEstimationSnapshotCommand.OrganizationId)));
             Assert.That(store.SavedSnapshot, Is.Null);
         });
+    }
+
+    private static BidconEstimationSnapshotSourceDetails CreateSnapshotDetails()
+    {
+        var estimationDetails = CreateEstimationDetails();
+        return new BidconEstimationSnapshotSourceDetails(
+            estimationDetails.EditDate,
+            estimationDetails.ToSnapshotPayload());
     }
 
     [Test]
@@ -284,16 +292,14 @@ public class ImportEstimationSnapshotTests
         Assert.That(snapshotValues, Is.EqualTo(externalValues));
     }
 
-    private sealed class StubBidconEstimationClient(EstimationDetailsDto? estimationDetails) : BidconEstimationClient
+    private sealed class StubBidconEstimationSnapshotSource(BidconEstimationSnapshotSourceDetails? estimationDetails) : IBidconEstimationSnapshotSource
     {
-        private readonly EstimationDetailsDto? _estimationDetails = estimationDetails;
-
-        public override Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+        public Task<BidconEstimationSnapshotSourceDetails?> GetSnapshotDetailsAsync(
             BidconEstimationId bidconEstimationId,
             OrganizationId organizationId,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(_estimationDetails);
+            return Task.FromResult(estimationDetails);
         }
     }
 
@@ -313,25 +319,25 @@ public class ImportEstimationSnapshotTests
         }
     }
 
-    private sealed class RecordingBidconEstimationClient : BidconEstimationClient
+    private sealed class RecordingBidconEstimationSnapshotSource : IBidconEstimationSnapshotSource
     {
         public bool WasCalled { get; private set; }
 
-        public override Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+        public Task<BidconEstimationSnapshotSourceDetails?> GetSnapshotDetailsAsync(
             BidconEstimationId bidconEstimationId,
             OrganizationId organizationId,
             CancellationToken cancellationToken)
         {
             WasCalled = true;
-            return Task.FromResult<EstimationDetailsDto?>(null);
+            return Task.FromResult<BidconEstimationSnapshotSourceDetails?>(null);
         }
     }
 
-    private sealed class FailingBidconEstimationClient(Exception exception) : BidconEstimationClient
+    private sealed class FailingBidconEstimationSnapshotSource(Exception exception) : IBidconEstimationSnapshotSource
     {
         private readonly Exception _exception = exception;
 
-        public override Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+        public Task<BidconEstimationSnapshotSourceDetails?> GetSnapshotDetailsAsync(
             BidconEstimationId bidconEstimationId,
             OrganizationId organizationId,
             CancellationToken cancellationToken)

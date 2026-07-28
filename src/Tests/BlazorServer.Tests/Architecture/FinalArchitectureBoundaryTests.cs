@@ -276,7 +276,10 @@ public sealed partial class FinalArchitectureBoundaryTests
             || reference.StartsWith("Microsoft.Graph", StringComparison.Ordinal)
             || reference.Equals("System.Net.Http.IHttpClientFactory", StringComparison.Ordinal)
             || reference.Equals("IHttpClientFactory", StringComparison.Ordinal)
-            || reference.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal);
+            || reference.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal)
+            || reference.Contains(".Infrastructure.BidconApi.Clients", StringComparison.Ordinal)
+            || reference.Contains(".Infrastructure.BidconApi.DTOs", StringComparison.Ordinal)
+            || reference.Contains(".Infrastructure.BidconApi.Mapping", StringComparison.Ordinal);
 
     private static IEnumerable<string> RelativeOwnerInternalReferences(string file)
     {
