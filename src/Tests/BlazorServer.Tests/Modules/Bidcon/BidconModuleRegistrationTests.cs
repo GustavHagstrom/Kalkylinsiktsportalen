@@ -43,6 +43,14 @@ public class BidconModuleRegistrationTests
             Assert.That(services.Any(service => service.ServiceType == typeof(GetEstimationListQueryHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(ImportEstimationSnapshotCommandHandler)), Is.True);
             Assert.That(services.Any(service => service.ServiceType == typeof(BidconEstimationClient)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IBidconEstimationListSource) &&
+                service.ImplementationFactory is not null &&
+                service.Lifetime == ServiceLifetime.Transient));
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IBidconEstimationSnapshotSource) &&
+                service.ImplementationFactory is not null &&
+                service.Lifetime == ServiceLifetime.Transient));
             Assert.That(services.Any(service => service.ServiceType == typeof(IBidconAccessTokenCache)), Is.True);
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IBidconCredentialsVerifier) &&

@@ -2,14 +2,18 @@ using System.Net;
 using System.Net.Http.Headers;
 using BlazorServer.Identity;
 using BlazorServer.Modules.Bidcon.AccessTokens;
+using BlazorServer.Modules.Bidcon.Features;
+using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
+using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Mapping;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 
 namespace BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 
-internal class BidconEstimationClient
+internal class BidconEstimationClient : IBidconEstimationListSource, IBidconEstimationSnapshotSource
 {
     private readonly IHttpClientFactory? httpClientFactory;
     private readonly IBidconAccessTokenCache? accessTokenCache;
@@ -29,7 +33,64 @@ internal class BidconEstimationClient
         this.credentialsStore = credentialsStore;
     }
 
-    public async virtual Task<IReadOnlyList<EstimationDto>> GetEstimationListAsync(
+    public async virtual Task<IReadOnlyList<BidconEstimationListSourceItem>> GetEstimationListAsync(
+        string userEmail,
+        OrganizationId organizationId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var estimations = await GetEstimationDtosAsync(
+                userEmail,
+                organizationId,
+                cancellationToken);
+
+            return estimations
+                .Select(estimation => new BidconEstimationListSourceItem(
+                    estimation.Id,
+                    estimation.Name,
+                    estimation.Description))
+                .ToList();
+        }
+        catch (BidconEstimationClientException exception)
+        {
+            throw new BidconFeatureSourceException(
+                exception.Code,
+                exception.Field,
+                exception.Message,
+                exception);
+        }
+    }
+
+    public async virtual Task<BidconEstimationSnapshotSourceDetails?> GetSnapshotDetailsAsync(
+        BidconEstimationId bidconEstimationId,
+        OrganizationId organizationId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var details = await GetEstimationDetailsDtoAsync(
+                bidconEstimationId,
+                organizationId,
+                cancellationToken);
+
+            return details is null
+                ? null
+                : new BidconEstimationSnapshotSourceDetails(
+                    details.EditDate,
+                    details.ToSnapshotPayload());
+        }
+        catch (BidconEstimationClientException exception)
+        {
+            throw new BidconFeatureSourceException(
+                exception.Code,
+                exception.Field,
+                exception.Message,
+                exception);
+        }
+    }
+
+    private async Task<IReadOnlyList<EstimationDto>> GetEstimationDtosAsync(
         string userEmail,
         OrganizationId organizationId,
         CancellationToken cancellationToken)
@@ -55,12 +116,12 @@ internal class BidconEstimationClient
         {
             throw new BidconEstimationClientException(
                 "bidcon.estimationClient.failed",
-                nameof(userEmail),
+                nameof(GetEstimationListQuery.UserEmail),
                 exception.Message);
         }
     }
 
-    public async virtual Task<EstimationDetailsDto?> GetEstimationDetailsAsync(
+    private async Task<EstimationDetailsDto?> GetEstimationDetailsDtoAsync(
         BidconEstimationId bidconEstimationId,
         OrganizationId organizationId,
         CancellationToken cancellationToken)
