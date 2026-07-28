@@ -1,21 +1,18 @@
 using BlazorServer.Modules.Bidcon.Domain;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.DTOs;
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Mapping;
+using BlazorServer.Modules.Bidcon.Features;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
 using BlazorServer.Modules.Bidcon.Public.Contracts;
 using BlazorServer.Kernel.CQRS;
-using BlazorServer.Kernel.Validation;
 
 namespace BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 
 internal sealed class ImportEstimationSnapshotCommandHandler(
-    BidconEstimationClient estimationDetailsClient,
+    IBidconEstimationSnapshotSource estimationSnapshotSource,
     IEstimationSnapshotStore estimationSnapshotStore,
     ImportEstimationSnapshotCommandValidator? validator = null)
         : ICommandHandler<ImportEstimationSnapshotCommand, ImportEstimationSnapshotResult>
 {
-    private readonly BidconEstimationClient _estimationDetailsClient = estimationDetailsClient;
+    private readonly IBidconEstimationSnapshotSource _estimationSnapshotSource = estimationSnapshotSource;
     private readonly IEstimationSnapshotStore _estimationSnapshotStore = estimationSnapshotStore;
     private readonly ImportEstimationSnapshotCommandValidator _validator = validator ?? new ImportEstimationSnapshotCommandValidator();
 
@@ -29,16 +26,16 @@ internal sealed class ImportEstimationSnapshotCommandHandler(
             return new InvalidImportEstimationSnapshotRequest(errors);
         }
 
-        EstimationDetailsDto? estimationDetails;
+        BidconEstimationSnapshotSourceDetails? estimationDetails;
 
         try
         {
-            estimationDetails = await _estimationDetailsClient.GetEstimationDetailsAsync(
+            estimationDetails = await _estimationSnapshotSource.GetSnapshotDetailsAsync(
                 command.BidconEstimationId,
                 command.OrganizationId,
                 cancellationToken);
         }
-        catch (BidconEstimationClientException exception)
+        catch (BidconFeatureSourceException exception)
         {
             return new ImportEstimationSnapshotBidconUnavailable(
                 exception.Code,
@@ -59,9 +56,9 @@ internal sealed class ImportEstimationSnapshotCommandHandler(
             new EstimationSnapshotId(Guid.NewGuid()),
             command.OrganizationId,
             command.BidconEstimationId,
-            estimationDetails.EditDate,
+            estimationDetails.SourceEditDate,
             importedAt,
-            estimationDetails.ToSnapshotPayload());
+            estimationDetails.Payload);
 
         await _estimationSnapshotStore.AddAsync(snapshot, cancellationToken);
 

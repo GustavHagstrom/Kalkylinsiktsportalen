@@ -1,14 +1,14 @@
-using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
+using BlazorServer.Modules.Bidcon.Features;
 using BlazorServer.Kernel.CQRS;
 
 namespace BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 
 internal sealed class GetEstimationListQueryHandler(
-    BidconEstimationClient estimationClient,
+    IBidconEstimationListSource estimationListSource,
     GetEstimationListQueryValidator? validator = null)
         : IQueryHandler<GetEstimationListQuery, GetEstimationListResult>
 {
-    private readonly BidconEstimationClient _estimationClient = estimationClient;
+    private readonly IBidconEstimationListSource _estimationListSource = estimationListSource;
     private readonly GetEstimationListQueryValidator _validator = validator ?? new GetEstimationListQueryValidator();
 
     public async Task<GetEstimationListResult> HandleAsync(
@@ -23,7 +23,7 @@ internal sealed class GetEstimationListQueryHandler(
 
         try
         {
-            var estimations = await _estimationClient.GetEstimationListAsync(
+            var estimations = await _estimationListSource.GetEstimationListAsync(
                 query.UserEmail,
                 query.OrganizationId,
                 cancellationToken);
@@ -36,7 +36,7 @@ internal sealed class GetEstimationListQueryHandler(
                         estimation.Description))
                     .ToList());
         }
-        catch (BidconEstimationClientException exception)
+        catch (BidconFeatureSourceException exception)
         {
             return new EstimationListBidconUnavailable(exception.Code, exception.Field, exception.Message);
         }
