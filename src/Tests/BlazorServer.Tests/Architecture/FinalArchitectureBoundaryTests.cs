@@ -133,7 +133,7 @@ public sealed partial class FinalArchitectureBoundaryTests
         }
 
         Assert.That(violations, Is.Empty,
-            "Module Public components are stable UI entrypoints and must not reference owner internals. Violations:\n"
+            "Modules/{Module}/Public/Components are stable Blazor entrypoints. They may expose only stable parameters, callbacks and public contracts; orchestration and owner internals belong in the module's internal Components or feature handlers. Violations:\n"
             + string.Join('\n', violations));
     }
 
@@ -202,6 +202,35 @@ public sealed partial class FinalArchitectureBoundaryTests
             reference => reference.StartsWith("BlazorServer.Modules", StringComparison.Ordinal),
             "Central Infrastructure/MongoDb must not depend on module-owned stores, entities or collection definitions");
 
+    [Test]
+    public void FeatureSlicesMustNotContainRazorComponents()
+    {
+        var violations = FeatureSliceFiles()
+            .Where(file => file.EndsWith(".razor", StringComparison.OrdinalIgnoreCase))
+            .Select(RelativePath)
+            .ToArray();
+
+        Assert.That(violations, Is.Empty,
+            "Feature slices are UI-independent use cases. Move .razor components to the module's Components area, or to Modules/{Module}/Public/Components when the component is a stable public entrypoint. Violations:\n"
+            + string.Join('\n', violations));
+    }
+
+    [Test]
+    public void FeatureSlicesMustNotReferenceBlazorComponentNamespaces()
+        => AssertNoReferences(
+            FeatureSliceFiles(),
+            reference => reference.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal)
+                || IsModuleReference(reference, out _, out var remainder)
+                    && IsComponentNamespaceRemainder(remainder),
+            "Feature slices are UI-independent. Blazor component namespaces and UI services belong in module Components or Public/Components, while slices expose commands, queries, handlers and result contracts");
+
+    [Test]
+    public void FeatureSlicesMustNotReferenceAdapterTechnologiesDirectly()
+        => AssertNoReferences(
+            FeatureSliceFiles(),
+            IsForbiddenFeatureAdapterTechnology,
+            "Feature slices must depend on slice-owned ports or module contracts, not adapter technologies. MongoDB, Microsoft Graph, IHttpClientFactory and other external adapter APIs belong in module Infrastructure");
+
     private static void AssertNoReferences(IEnumerable<string> files, Func<string, bool> forbidden, string rule)
     {
         var violations = files
@@ -237,6 +266,18 @@ public sealed partial class FinalArchitectureBoundaryTests
         => remainder.Equals("Public", StringComparison.Ordinal)
             || remainder.StartsWith("Public.", StringComparison.Ordinal);
 
+    private static bool IsComponentNamespaceRemainder(string remainder)
+        => remainder.Equals("Components", StringComparison.Ordinal)
+            || remainder.StartsWith("Components.", StringComparison.Ordinal)
+            || remainder.Contains(".Components.", StringComparison.Ordinal);
+
+    private static bool IsForbiddenFeatureAdapterTechnology(string reference)
+        => reference.StartsWith("MongoDB.", StringComparison.Ordinal)
+            || reference.StartsWith("Microsoft.Graph", StringComparison.Ordinal)
+            || reference.Equals("System.Net.Http.IHttpClientFactory", StringComparison.Ordinal)
+            || reference.Equals("IHttpClientFactory", StringComparison.Ordinal)
+            || reference.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal);
+
     private static IEnumerable<string> RelativeOwnerInternalReferences(string file)
     {
         var text = File.ReadAllText(file);
@@ -262,6 +303,10 @@ public sealed partial class FinalArchitectureBoundaryTests
             : [];
     }
 
+    private static IEnumerable<string> FeatureSliceFiles()
+        => FilesUnder("Modules")
+            .Where(file => RelativePath(file).Split('/').Contains("Features", StringComparer.Ordinal));
+
     private static string RelativePath(string file)
         => Path.GetRelativePath(ProductionRoot, file).Replace('\\', '/');
 
@@ -282,7 +327,7 @@ public sealed partial class FinalArchitectureBoundaryTests
     [GeneratedRegex(@"\bnamespace\s+BlazorServer\.Shared(?:\.|\b)|\bBlazorServer\.Shared(?:\.|\b)")]
     private static partial Regex SharedNamespaceRegex();
 
-    [GeneratedRegex(@"\bBlazorServer(?:\.[A-Za-z_][A-Za-z0-9_]*)+")]
+    [GeneratedRegex(@"\b(?:BlazorServer|Microsoft|MongoDB|System)(?:\.[A-Za-z_][A-Za-z0-9_]*)+|\bIHttpClientFactory\b")]
     private static partial Regex NamespaceReferenceRegex();
 
     [GeneratedRegex(@"^BlazorServer\.Modules\.(?<module>[A-Za-z_][A-Za-z0-9_]*)(?:\.(?<remainder>.+))?$")]
