@@ -275,6 +275,7 @@ public sealed partial class FinalArchitectureBoundaryTests
         => reference.StartsWith("MongoDB.", StringComparison.Ordinal)
             || reference.StartsWith("Microsoft.Graph", StringComparison.Ordinal)
             || reference.Equals("System.Net.Http.IHttpClientFactory", StringComparison.Ordinal)
+            || reference.Equals("IHttpClientFactory", StringComparison.Ordinal)
             || reference.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal);
 
     private static IEnumerable<string> RelativeOwnerInternalReferences(string file)
