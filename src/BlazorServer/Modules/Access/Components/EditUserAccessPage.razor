@@ -11,7 +11,7 @@
         <MudOverlay DarkBackground="true" Visible="IsLoading" Absolute="true">
             <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
         </MudOverlay>
-        <AccessClaimValuePicker PickedAccessClaimValues="UserAccessGrant?.AccessClaimValues ?? []" PickChanged="UserAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="PickedAccessClaimValues" PickChanged="UserAccessCheckBoxClick" />
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Roller"]">
@@ -19,7 +19,9 @@
     </SettingsSection>
 </SettingsPageBase>
 
-@inject FunctionalAccessGrantHandler FunctionalAccessGrants
+@inject GetUserFunctionalAccessQueryHandler GetUserFunctionalAccess
+@inject GrantUserFunctionalAccessCommandHandler GrantUserFunctionalAccess
+@inject RevokeUserFunctionalAccessCommandHandler RevokeUserFunctionalAccess
 @inject IAccessDirectory AccessDirectory
 @inject ICurrentUserContext CurrentUserContext
 @inject NavigationManager NavigationManager
@@ -27,7 +29,8 @@
 @code{
     [Parameter] public string? UserId { get; set; }
     AccessDirectoryUser? User { get; set; }
-    FunctionalAccessGrant? UserAccessGrant { get; set; }
+    IReadOnlyList<string> PickedAccessClaimValues { get; set; } = [];
+    OrganizationId OrganizationId { get; set; }
     List<AccessDirectoryRole> AllRoles { get; set; } = [];
     List<AccessDirectoryRole> PickedRoles { get; set; } = [];
 
@@ -41,7 +44,15 @@
         var currentUser = await CurrentUserContext.GetCurrentUserAsync();
         if (strongUserId is not null && currentUser is not null)
         {
-            UserAccessGrant = await FunctionalAccessGrants.HandleAsync(new GetUserFunctionalAccessQuery(strongUserId.Value, currentUser.OrganizationId));
+            OrganizationId = currentUser.OrganizationId;
+            var accessResult = await GetUserFunctionalAccess.HandleAsync(
+                new GetUserFunctionalAccessQuery(strongUserId.Value, currentUser.OrganizationId),
+                CancellationToken.None);
+            if (accessResult is UserFunctionalAccessLoaded loadedAccess)
+            {
+                PickedAccessClaimValues = loadedAccess.AccessClaimValues;
+            }
+
             User = await AccessDirectory.GetUserAsync(strongUserId.Value);
             AllRoles = await AccessDirectory.GetRolesAsync(currentUser.OrganizationId);
             var pickedRoles = await AccessDirectory.GetRolesForUserAsync(strongUserId.Value, currentUser.OrganizationId);
@@ -56,28 +67,39 @@
     }
     Task UserAccessCheckBoxClick(PickChangedRecord<AccessClaimDefinition> pickedRecord)
     {
-        if (UserAccessGrant is null) return Task.CompletedTask;
-        if (pickedRecord.IsPicked && !UserAccessGrant.AccessClaimValues.Contains(pickedRecord.Data.Value))
+        if (strongUserId is null || OrganizationId.IsEmpty) return Task.CompletedTask;
+        if (pickedRecord.IsPicked && !PickedAccessClaimValues.Contains(pickedRecord.Data.Value))
         {
-            UserAccessGrant = new FunctionalAccessGrant(
-                UserAccessGrant.Target,
-                UserAccessGrant.OrganizationId,
-                UserAccessGrant.AccessClaimValues.Append(pickedRecord.Data.Value));
-            return FunctionalAccessGrants.HandleAsync(new GrantUserFunctionalAccessCommand(
-                new UserId(UserAccessGrant.Target.Id),
-                UserAccessGrant.OrganizationId,
-                pickedRecord.Data.Value));
+            return GrantAccessClaimAsync(pickedRecord.Data.Value);
         }
-        else
+
+        if (!pickedRecord.IsPicked && PickedAccessClaimValues.Contains(pickedRecord.Data.Value))
         {
-            UserAccessGrant = new FunctionalAccessGrant(
-                UserAccessGrant.Target,
-                UserAccessGrant.OrganizationId,
-                UserAccessGrant.AccessClaimValues.Where(value => value != pickedRecord.Data.Value));
-            return FunctionalAccessGrants.HandleAsync(new RevokeUserFunctionalAccessCommand(
-                new UserId(UserAccessGrant.Target.Id),
-                UserAccessGrant.OrganizationId,
-                pickedRecord.Data.Value));
+            return RevokeAccessClaimAsync(pickedRecord.Data.Value);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    async Task GrantAccessClaimAsync(string accessClaimValue)
+    {
+        var result = await GrantUserFunctionalAccess.HandleAsync(
+            new GrantUserFunctionalAccessCommand(strongUserId!.Value, OrganizationId, accessClaimValue),
+            CancellationToken.None);
+        if (result is UserFunctionalAccessGranted granted)
+        {
+            PickedAccessClaimValues = granted.AccessClaimValues;
+        }
+    }
+
+    async Task RevokeAccessClaimAsync(string accessClaimValue)
+    {
+        var result = await RevokeUserFunctionalAccess.HandleAsync(
+            new RevokeUserFunctionalAccessCommand(strongUserId!.Value, OrganizationId, accessClaimValue),
+            CancellationToken.None);
+        if (result is UserFunctionalAccessRevoked revoked)
+        {
+            PickedAccessClaimValues = revoked.AccessClaimValues;
         }
     }
 }

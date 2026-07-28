@@ -1,4 +1,5 @@
 using BlazorServer.Identity;
+using BlazorServer.Modules.Access.Persistence;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Reports.Public;
 

@@ -1,6 +1,7 @@
 using BlazorServer.Modules.Reports.Public;
+using BlazorServer.Modules.Access.Features.ViewAccessGrants;
 
-namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
+namespace BlazorServer.Modules.Access.Persistence;
 
 public interface IViewAccessGrantStore
 {

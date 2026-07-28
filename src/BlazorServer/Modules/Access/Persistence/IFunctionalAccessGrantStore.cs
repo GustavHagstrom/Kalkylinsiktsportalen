@@ -2,7 +2,7 @@ using BlazorServer.Identity;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Domain;
 
-namespace BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
+namespace BlazorServer.Modules.Access.Persistence;
 
 public interface IFunctionalAccessGrantStore
 {

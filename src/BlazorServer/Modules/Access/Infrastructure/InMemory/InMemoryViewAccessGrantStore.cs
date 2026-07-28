@@ -1,6 +1,8 @@
 using BlazorServer.Modules.Reports.Public;
+using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Persistence;
 
-namespace BlazorServer.Modules.Access.Features.ViewAccessGrants;
+namespace BlazorServer.Modules.Access.Infrastructure.InMemory;
 
 public sealed class InMemoryViewAccessGrantStore : IViewAccessGrantStore
 {

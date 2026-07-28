@@ -3,10 +3,22 @@ using System.Security.Claims;
 using BlazorServer.Modules.Access;
 using BlazorServer.Modules.Access.Authentication;
 using BlazorServer.Modules.Access.Components;
-using BlazorServer.Modules.Access.Features.FunctionalAccessGrants;
+using BlazorServer.Modules.Access.Features.GetEffectiveFunctionalAccessClaims;
+using BlazorServer.Modules.Access.Features.GetRoleFunctionalAccess;
+using BlazorServer.Modules.Access.Features.GetUserFunctionalAccess;
+using BlazorServer.Modules.Access.Features.GrantRoleFunctionalAccess;
+using BlazorServer.Modules.Access.Features.GrantRoleViewAccess;
+using BlazorServer.Modules.Access.Features.GrantUserFunctionalAccess;
+using BlazorServer.Modules.Access.Features.GrantUserViewAccess;
+using BlazorServer.Modules.Access.Features.RevokeRoleFunctionalAccess;
+using BlazorServer.Modules.Access.Features.RevokeRoleViewAccess;
+using BlazorServer.Modules.Access.Features.RevokeUserFunctionalAccess;
+using BlazorServer.Modules.Access.Features.RevokeUserViewAccess;
 using BlazorServer.Modules.Access.Features.ViewAccessGrants;
+using BlazorServer.Modules.Access.Infrastructure.InMemory;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Entities;
 using BlazorServer.Modules.Access.Infrastructure.MongoDb.Stores;
+using BlazorServer.Modules.Access.Persistence;
 using BlazorServer.AppShell.Settings;
 using BlazorServer.Modules.Access.Public.Authorization;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +60,17 @@ public class AccessModuleRegistrationTests
                     10,
                     MudBlazor.Icons.Material.Sharp.AdminPanelSettings,
                     Constants.Authorization.PolicyName)));
-            Assert.That(services.Any(service => service.ServiceType == typeof(FunctionalAccessGrantHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetUserFunctionalAccessQueryHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserFunctionalAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeUserFunctionalAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetRoleFunctionalAccessQueryHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantRoleFunctionalAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeRoleFunctionalAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GetEffectiveFunctionalAccessClaimsQueryHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantUserViewAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(GrantRoleViewAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeUserViewAccessCommandHandler)), Is.True);
+            Assert.That(services.Any(service => service.ServiceType == typeof(RevokeRoleViewAccessCommandHandler)), Is.True);
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IMongoCollection<MongoFunctionalAccessGrant>) &&
                 service.Lifetime == ServiceLifetime.Singleton));
@@ -56,8 +78,10 @@ public class AccessModuleRegistrationTests
                 service.ServiceType == typeof(IFunctionalAccessGrantStore) &&
                 service.ImplementationType == typeof(MongoAccessStore) &&
                 service.Lifetime == ServiceLifetime.Singleton));
-            Assert.That(services.Any(service => service.ServiceType == typeof(IViewAccessGrantStore)), Is.True);
-            Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessGrantHandler)), Is.True);
+            Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
+                service.ServiceType == typeof(IViewAccessGrantStore) &&
+                service.ImplementationType == typeof(InMemoryViewAccessGrantStore) &&
+                service.Lifetime == ServiceLifetime.Singleton));
             Assert.That(services.Any(service => service.ServiceType == typeof(ViewAccessDecisionHandler)), Is.True);
             Assert.That(services, Has.One.Matches<ServiceDescriptor>(service =>
                 service.ServiceType == typeof(IAccessSubjectFactory) &&

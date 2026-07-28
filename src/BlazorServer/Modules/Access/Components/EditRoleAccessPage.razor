@@ -7,7 +7,7 @@
     </SettingsSection>
 
     <SettingsSection Title="@Localizer["Rättigheter"]" LoadDataAsync="LoadDataAsync">
-        <AccessClaimValuePicker PickedAccessClaimValues="RoleAccessGrant?.AccessClaimValues ?? []" PickChanged="RoleAccessCheckBoxClick" />
+        <AccessClaimValuePicker PickedAccessClaimValues="PickedAccessClaimValues" PickChanged="RoleAccessCheckBoxClick" />
     </SettingsSection>
     
     <SettingsSection Title="@Localizer["Användare"]">
@@ -17,7 +17,9 @@
 </SettingsPageBase>
 
 
-@inject FunctionalAccessGrantHandler FunctionalAccessGrants
+@inject GetRoleFunctionalAccessQueryHandler GetRoleFunctionalAccess
+@inject GrantRoleFunctionalAccessCommandHandler GrantRoleFunctionalAccess
+@inject RevokeRoleFunctionalAccessCommandHandler RevokeRoleFunctionalAccess
 @inject IAccessDirectory AccessDirectory
 @inject IDialogService DialogService
 @inject ICurrentUserContext CurrentUserSession
@@ -29,7 +31,8 @@
     bool IsLoading { get; set; } = false;
 
     AccessDirectoryRole? Role { get; set; }
-    FunctionalAccessGrant? RoleAccessGrant { get; set; }
+    IReadOnlyList<string> PickedAccessClaimValues { get; set; } = [];
+    OrganizationId OrganizationId { get; set; }
 
     List<AccessDirectoryUser> PickedUsers { get; set; } = new();
 
@@ -47,8 +50,15 @@
         var currentUser = await CurrentUserSession.GetCurrentUserAsync();
         if (RoleId is not null && currentUser?.OrganizationId.IsEmpty == false)
         {
-            RoleAccessGrant = await FunctionalAccessGrants.HandleAsync(
-                new GetRoleFunctionalAccessQuery(RoleId, currentUser.OrganizationId));
+            OrganizationId = currentUser.OrganizationId;
+            var accessResult = await GetRoleFunctionalAccess.HandleAsync(
+                new GetRoleFunctionalAccessQuery(RoleId, currentUser.OrganizationId),
+                CancellationToken.None);
+            if (accessResult is RoleFunctionalAccessLoaded loadedAccess)
+            {
+                PickedAccessClaimValues = loadedAccess.AccessClaimValues;
+            }
+
             Role = await AccessDirectory.GetRoleAsync(RoleId);
             PickedUsers = await AccessDirectory.GetUsersInRoleAsync(RoleId, currentUser.OrganizationId);
         }
@@ -61,29 +71,39 @@
     }
     Task RoleAccessCheckBoxClick(PickChangedRecord<AccessClaimDefinition> checkedRecord)
     {
-        if (RoleAccessGrant is null) return Task.CompletedTask;
-        if (checkedRecord.IsPicked && !RoleAccessGrant.AccessClaimValues.Contains(checkedRecord.Data.Value))
+        if (RoleId is null || OrganizationId.IsEmpty) return Task.CompletedTask;
+        if (checkedRecord.IsPicked && !PickedAccessClaimValues.Contains(checkedRecord.Data.Value))
         {
-            RoleAccessGrant = new FunctionalAccessGrant(
-                RoleAccessGrant.Target,
-                RoleAccessGrant.OrganizationId,
-                RoleAccessGrant.AccessClaimValues.Append(checkedRecord.Data.Value));
-            return FunctionalAccessGrants.HandleAsync(new GrantRoleFunctionalAccessCommand(
-                RoleAccessGrant.Target.Id,
-                RoleAccessGrant.OrganizationId,
-                checkedRecord.Data.Value));
+            return GrantAccessClaimAsync(checkedRecord.Data.Value);
         }
-        else
+
+        if (!checkedRecord.IsPicked && PickedAccessClaimValues.Contains(checkedRecord.Data.Value))
         {
-            RoleAccessGrant = new FunctionalAccessGrant(
-                RoleAccessGrant.Target,
-                RoleAccessGrant.OrganizationId,
-                RoleAccessGrant.AccessClaimValues.Where(value => value != checkedRecord.Data.Value));
-            return FunctionalAccessGrants.HandleAsync(new RevokeRoleFunctionalAccessCommand(
-                RoleAccessGrant.Target.Id,
-                RoleAccessGrant.OrganizationId,
-                checkedRecord.Data.Value));
+            return RevokeAccessClaimAsync(checkedRecord.Data.Value);
         }
-        
+
+        return Task.CompletedTask;
+    }
+
+    async Task GrantAccessClaimAsync(string accessClaimValue)
+    {
+        var result = await GrantRoleFunctionalAccess.HandleAsync(
+            new GrantRoleFunctionalAccessCommand(RoleId!, OrganizationId, accessClaimValue),
+            CancellationToken.None);
+        if (result is RoleFunctionalAccessGranted granted)
+        {
+            PickedAccessClaimValues = granted.AccessClaimValues;
+        }
+    }
+
+    async Task RevokeAccessClaimAsync(string accessClaimValue)
+    {
+        var result = await RevokeRoleFunctionalAccess.HandleAsync(
+            new RevokeRoleFunctionalAccessCommand(RoleId!, OrganizationId, accessClaimValue),
+            CancellationToken.None);
+        if (result is RoleFunctionalAccessRevoked revoked)
+        {
+            PickedAccessClaimValues = revoked.AccessClaimValues;
+        }
     }
 }
