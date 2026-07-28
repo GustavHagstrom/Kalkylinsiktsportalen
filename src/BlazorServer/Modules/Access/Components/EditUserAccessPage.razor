@@ -73,7 +73,12 @@
             return GrantAccessClaimAsync(pickedRecord.Data.Value);
         }
 
-        return RevokeAccessClaimAsync(pickedRecord.Data.Value);
+        if (!pickedRecord.IsPicked && PickedAccessClaimValues.Contains(pickedRecord.Data.Value))
+        {
+            return RevokeAccessClaimAsync(pickedRecord.Data.Value);
+        }
+
+        return Task.CompletedTask;
     }
 
     async Task GrantAccessClaimAsync(string accessClaimValue)
