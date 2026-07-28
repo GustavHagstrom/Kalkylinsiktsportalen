@@ -11,6 +11,7 @@ using BlazorServer.Modules.Bidcon.Features.GetEstimationList;
 using BlazorServer.Modules.Bidcon.Features.ImportEstimationSnapshot;
 using BlazorServer.Modules.Bidcon.Features.RemoveBidconCredentials;
 using BlazorServer.Modules.Bidcon.Features.UpsertBidconCredentials;
+using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Authentication;
 using BlazorServer.Modules.Bidcon.Infrastructure.BidconApi.Clients;
 using BlazorServer.Modules.Bidcon.Infrastructure.Persistence;
@@ -29,12 +30,14 @@ public static class BidconModule
     {
         services.AddTransient<GetBidconCredentialsQueryHandler>();
         services.AddTransient<GetEstimationListQueryHandler>();
+        services.AddTransient<IBidconEstimationListSource, BidconEstimationListSource>();
         services.AddTransient<UpsertBidconCredentialsCommandHandler>();
         services.AddTransient<RemoveBidconCredentialsCommandHandler>();
         services.AddTransient<IBidconCredentialsVerifier, BidconCredentialsVerifier>();
         services.AddSingleton<IBidconAccessTokenCache, MemoryBidconAccessTokenCache>();
         services.AddSingleton<IBidconCredentialsAuditLog, MongoBidconCredentialsAuditLog>();
         services.AddTransient<ImportEstimationSnapshotCommandHandler>();
+        services.AddTransient<IBidconEstimationSnapshotSource, BidconEstimationSnapshotSource>();
         services.AddTransient<BidconEstimationClient>();
         if (baseUrl is not null)
         {
