@@ -30,6 +30,7 @@ Om äldre kod och målarkitekturen säger olika saker gäller målarkitekturen s
 - [domain/reports.md](domain/reports.md) - Reports-modulens aggregate, livscykel och policyer
 - [architecture/target-architecture.md](architecture/target-architecture.md) - målarkitektur för modulär monolit, snapshots och utbytbar frontend
 - [development.md](development.md) - lokal setup, arbetsflöde, kodriktlinjer och Definition of Done
+- [ui-ux.md](ui-ux.md) - långlivade UI/UX-principer för produktens gränssnitt
 - [ideas.md](ideas.md) - lågfriktions-inbox för idéer som inte är backlog, beslut eller planeringsfrågor ännu
 - [planning.md](planning.md) - planeringsprinciper och öppna frågor som ännu inte blivit issues eller ADR:er
 - [agent-guide.md](agent-guide.md) - agentinstruktioner och uppgiftsmall
@@ -44,6 +45,7 @@ För att undvika motsägelser ska varje typ av information ha en primär ägare:
 - [domain/README.md](domain/README.md) och `domain/*.md` äger modulernas levande domänmodell: aggregates, relationer, invariants och modulnära policyer.
 - [architecture/target-architecture.md](architecture/target-architecture.md) äger arkitekturprinciper, modulgränser och beroenderiktning.
 - [development.md](development.md) äger lokal setup, arbetsflöde och praktiska kodriktlinjer.
+- [ui-ux.md](ui-ux.md) äger långlivade UI/UX-principer som gäller över flera funktioner.
 - [ideas.md](ideas.md) äger lösa idéer och utredningssignaler som inte är konkreta backlog-items, beslut eller etablerade öppna frågor.
 - [planning.md](planning.md) äger öppna frågor som ännu inte blivit issues eller ADR:er.
 - [agent-guide.md](agent-guide.md) äger agentinstruktioner och uppgiftsmallar, inte allmän produkt- eller arkitekturbeskrivning.
@@ -92,5 +94,6 @@ När du lägger till eller ändrar en feature bör du i normalfallet överväga 
 - levande modulägd domänmodell
 - målarkitektur
 - utvecklingsriktlinjer
+- UI/UX-principer när användarflöden, interaktionsmönster eller visuell riktning påverkas
 - planering eller öppna frågor
 - ADR om beslutet är långlivat eller svårt att backa ur

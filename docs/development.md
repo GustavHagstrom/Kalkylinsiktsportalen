@@ -4,6 +4,8 @@ Det här dokumentet samlar lokal utveckling, kodriktlinjer och praktiska arbetsr
 
 Arkitekturriktning, modulgränser och beroendeprinciper ägs av [architecture/target-architecture.md](architecture/target-architecture.md). Det här dokumentet översätter den riktningen till praktiskt arbete i repoet.
 
+UI/UX-principer som gäller över flera funktioner ägs av [ui-ux.md](ui-ux.md).
+
 ## Lokal Setup
 
 Förutsättningar:

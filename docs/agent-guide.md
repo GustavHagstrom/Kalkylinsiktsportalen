@@ -9,6 +9,7 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - levande modulägd domänmodell: [domain/README.md](domain/README.md)
 - arkitekturriktning: [architecture/target-architecture.md](architecture/target-architecture.md)
 - praktiska kodregler och övergång från äldre feature-struktur: [development.md](development.md)
+- UI/UX-principer: [ui-ux.md](ui-ux.md)
 - dokumentägarskap: [README.md](README.md)
 - lösa idéer och utredningssignaler: [ideas.md](ideas.md)
 
@@ -34,6 +35,7 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - läs [ideas.md](ideas.md) vid planering, arkitekturarbete, produktfrågor eller när användaren explicit nämner idéer
 - behandla inte idéer i [ideas.md](ideas.md) som beslutad riktning eller backlog
 - uppdatera docs när ansvar, regler eller arkitektur påverkas
+- uppdatera [ui-ux.md](ui-ux.md) när en UI/UX-princip etableras eller ändras
 - verifiera med relevanta tester eller annan rimlig kontroll
 
 ## Skills-Arbetsflöde Från Idé Till Handoff
@@ -60,6 +62,7 @@ Använd det här flödet när en ny idé behöver förfinas, brytas ned, byggas 
 4. Finns redan ett etablerat mönster i repoet?
 5. Kräver ändringen ny policy, claim eller registrering?
 6. Behöver tester eller docs uppdateras?
+7. Påverkar ändringen en etablerad UI/UX-princip?
 
 ## Kort Uppgiftsmall
 
