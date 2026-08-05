@@ -17,6 +17,7 @@ public sealed class Project
         CreatedBy = createdBy;
         CreatedAt = createdAt;
         Name = name;
+        Description = description;
     }
 
     public ProjectId Id { get; }
