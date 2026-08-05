@@ -6,5 +6,6 @@ public enum PaginationIssueCode
     DuplicateMeasurement,
     InvalidBodyArea,
     BlockOverflow,
+    MeasurementFailed,
     UnsupportedPrintableItem
 }
