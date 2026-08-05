@@ -102,6 +102,54 @@ _Avoid_: Rapportvy
 Kombinationen av `View`, `EstimationVersion`, `EstimationSnapshot` och eventuellt `ViewScopedChangeSet` som används för att räkna fram vad en rapport visar vid rendering.
 _Avoid_: Renderingskontext
 
+**Paginated Document Renderer**:
+Portalägd renderingsyta som placerar rapportsektioner, header och footer på ett fast sidformat så att den visade rapporten motsvarar utskrifts- eller PDF-resultatet.
+_Avoid_: PrintableDocument när du menar förmågan, Blazor component när sidlayoutansvaret spelar roll
+
+**Report Document Renderer**:
+Adapter mellan en `View` med aktuell `RenderingContext` och `Paginated Document Renderer`. Den bygger renderbart rapportinnehåll från domänmodellen men äger inte själva sidpagineringen.
+_Avoid_: Paginated Document Renderer när `View`-tolkning ingår
+
+**Printable Block**:
+Odelbar, stabil presentationsenhet som `Paginated Document Renderer` mäter och placerar på en sida. Ett `Printable Block` renderar en Blazor-komponent med parametrar och kan inte delas över sidor.
+_Avoid_: komponent när sidbrytningsansvaret spelar roll
+
+**Printable Container**:
+Logisk samling av `Printable Block` och andra `Printable Container` som hör ihop i rapporten, till exempel flera rader från samma tabell. Containern kan bära layoutval som gäller efter hela innehållet utan att själv mätas eller placeras som ett odelbart block.
+_Avoid_: printable block när innehållet ska kunna brytas internt
+
+**Printable Block Identity**:
+Stabil identitet för ett `Printable Block` inom ett paginerat dokument. Identiteten beskriver renderingsblocket, medan blockets källa beskriver vilken rapportsektion eller rad blocket kommer från.
+_Avoid_: list index när blocket behöver spåras i fel, test eller omrendering
+
+**Printable Block Source**:
+Spårbar hänvisning från ett `Printable Block` till dess ursprung i rapporten, till exempel `SheetSection` och radidentitet.
+_Avoid_: block identity när du menar rapportursprung
+
+**Page Break Behavior**:
+Layoutval på ett `Printable Block` som anger om renderingen ska fortsätta på samma sida eller bryta efter blocket. Stödda värden är `None` och `After`.
+_Avoid_: page break before, DOM-attribut i blockkomponentens egen markup
+
+**Document Header Region**:
+Fast sidregion som upprepas överst på varje sida i ett paginerat dokument och reserverar höjd innan `Printable Block` placeras i sidans body-yta.
+_Avoid_: header block
+
+**Document Footer Region**:
+Fast sidregion som upprepas nederst på varje sida i ett paginerat dokument och reserverar höjd innan `Printable Block` placeras i sidans body-yta.
+_Avoid_: footer block
+
+**Page Format**:
+Fast sidstorlek med namn och mått i millimeter som `Paginated Document Renderer` använder för både visning och utskrift, till exempel A3, A4 eller A5.
+_Avoid_: page size enum när måtten spelar roll
+
+**Pagination Error**:
+Blockerande renderingsproblem som innebär att `Paginated Document Renderer` inte kan placera innehållet korrekt på det valda sidformatet, till exempel när en `Printable Block` är högre än sidans body-yta.
+_Avoid_: warning när utskrifts- eller PDF-resultatet inte kan garanteras
+
+**Pagination Warning**:
+Icke-blockerande observation från pagineringen där dokumentet fortfarande kan visas och skrivas ut korrekt.
+_Avoid_: error när dokumentet fortfarande är korrekt renderbart
+
 **DataSection**:
 Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas, och sektionen kan ange sidbrytning efter sig.
 
