@@ -15,6 +15,18 @@ internal sealed class PrintableDocumentRendererState
     public IReadOnlyList<PaginationIssue> Errors { get; private set; } = [];
     public IReadOnlyList<PrintablePage> Pages { get; private set; } = [];
 
+    public PrintableDocumentPrintResult GetPrintReadiness()
+    {
+        if (Status == PrintableRendererStatus.Ready && !NeedsMeasurement && Errors.Count == 0)
+        {
+            return PrintableDocumentPrintResult.Ready();
+        }
+
+        return Errors.Count > 0
+            ? PrintableDocumentPrintResult.BlockedByPaginationErrors(Errors.Select(ToPrintIssue).ToArray())
+            : PrintableDocumentPrintResult.NotReady();
+    }
+
     public void SetDocument(PrintableDocumentContract document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -85,6 +97,9 @@ internal sealed class PrintableDocumentRendererState
                 document.PageFormat.WidthMm,
                 document.PageFormat.HeightMm);
     }
+
+    private static PrintableDocumentPrintIssue ToPrintIssue(PaginationIssue issue)
+        => new(issue.Code.ToString(), issue.Message, issue.BlockId);
 }
 
 internal enum PrintableRendererStatus

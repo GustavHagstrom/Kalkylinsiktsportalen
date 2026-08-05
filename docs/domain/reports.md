@@ -140,6 +140,8 @@ Reports pagineringsmotor är ren C#-logik. Den tar ett `PrintableDocument`, uppm
 
 Motorn paginerar bara body-block. Header och footer repeteras som fasta regioner på varje sida och minskar den tillgängliga body-ytan. Om nästa block inte ryms på aktuell sida fortsätter motorn på nästa sida. Om ett enskilt block inte ryms i body-ytan returneras ett blockerande `Pagination Error`.
 
+`PaginatedDocumentRenderer` äger den säkra print-ingången. Browser print öppnas bara när den paginerade preview-DOM:en är aktuell och saknar blockerande `Pagination Error`. Browserns print-to-PDF är den initiala PDF-vägen för renderern, så PDF-export i MVP använder samma paginerade DOM som användaren förhandsgranskar.
+
 ## MVP-Begränsningar Och Tillfälliga Val
 
 - första PDF-exporten utgår från aktivt öppnat view-läge snarare än bredare historikhantering

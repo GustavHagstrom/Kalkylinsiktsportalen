@@ -35,6 +35,25 @@ public sealed class PrintableDocumentMeasurementAdapterTests
         });
     }
 
+    [Test]
+    public async Task PrintAsync_UsesCollocatedModuleToPrintTheRendererRoot()
+    {
+        var jsRuntime = new RecordingJsRuntime(new PrintableDocumentMeasurementResult(
+            HeaderHeightPx: 0,
+            FooterHeightPx: 0,
+            BodyBlocks: []));
+        var adapter = new PrintableDocumentMeasurementAdapter(jsRuntime);
+
+        var printed = await adapter.PrintAsync(default, default);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(jsRuntime.ImportedModulePath, Is.EqualTo("./Modules/Reports/Views/Rendering/PrintableDocument.razor.js"));
+            Assert.That(jsRuntime.Module.InvokedIdentifier, Is.EqualTo("print"));
+            Assert.That(printed, Is.True);
+        });
+    }
+
     private sealed class RecordingJsRuntime(PrintableDocumentMeasurementResult measurementResult) : IJSRuntime
     {
         public RecordingJsModule Module { get; } = new(measurementResult);
@@ -69,6 +88,14 @@ public sealed class PrintableDocumentMeasurementAdapterTests
             InvokedIdentifier = identifier;
             Assert.That(args, Is.Not.Null);
             Assert.That(args![0], Is.TypeOf<ElementReference>());
+            if (identifier == "print")
+            {
+                Assert.That(args, Has.Length.EqualTo(2));
+                Assert.That(args![1], Is.TypeOf<ElementReference>());
+                return ValueTask.FromResult((TValue)(object)true);
+            }
+
+            Assert.That(args, Has.Length.EqualTo(1));
             return ValueTask.FromResult((TValue)(object)measurementResult);
         }
 

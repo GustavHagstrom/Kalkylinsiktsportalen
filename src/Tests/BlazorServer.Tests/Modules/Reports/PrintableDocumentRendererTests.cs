@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
+using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PaginatedDocumentRenderer;
 using ReportPrintableDocument = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocument;
 
 namespace BlazorServer.Tests.Modules.Reports;
@@ -47,6 +48,7 @@ public sealed class PrintableDocumentRendererTests
             Assert.That(html, Does.Contain("data-printable-block-id=\"body\""));
             Assert.That(html, Does.Contain("data-page-break-behavior=\"After\""));
             Assert.That(html, Does.Not.Contain("Pageination/engine.js"));
+            Assert.That(html, Does.Not.Contain("Pageination/styles.css"));
         });
     }
 
@@ -69,6 +71,37 @@ public sealed class PrintableDocumentRendererTests
             async () => await RenderDocumentAsync(document));
 
         Assert.That(exception!.Message, Does.Contain("duplicate"));
+    }
+
+    [Test]
+    public void PrintableDocument_PrintCssHidesApplicationChromeAndKeepsReadyPagesPrintable()
+    {
+        var component = File.ReadAllText(FindProjectFile(
+            "BlazorServer",
+            "Modules",
+            "Reports",
+            "Views",
+            "Rendering",
+            "PrintableDocument.razor"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(component, Does.Contain("@@media print"));
+            Assert.That(component, Does.Contain("body *"));
+            Assert.That(component, Does.Contain("visibility: hidden"));
+            Assert.That(component, Does.Contain("printable-document-wrapper[data-printable-print-target=\"true\"]"));
+            Assert.That(component, Does.Contain("visibility: visible !important"));
+            Assert.That(component, Does.Contain("printable-document-root[data-printable-renderer-state=\"Ready\"] .page"));
+            Assert.That(component, Does.Contain("box-shadow: none !important"));
+        });
+    }
+
+    [Test]
+    public void PaginatedDocumentRenderer_ExposesSafePrintCommandForCallers()
+    {
+        Assert.That(
+            typeof(ReportPaginatedDocumentRenderer).GetMethod(nameof(ReportPaginatedDocumentRenderer.PrintAsync)),
+            Is.Not.Null);
     }
 
     private static PrintableBlock Block(
@@ -121,5 +154,19 @@ public sealed class PrintableDocumentRendererTests
 
         public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
             => throw new NotSupportedException("The printable document renderer test does not invoke JavaScript.");
+    }
+
+    private static string FindProjectFile(params string[] segments)
+    {
+        for (var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory); directory is not null; directory = directory.Parent)
+        {
+            var candidate = Path.Combine(new[] { directory.FullName }.Concat(segments).ToArray());
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new FileNotFoundException($"Could not find project file '{Path.Combine(segments)}'.");
     }
 }
