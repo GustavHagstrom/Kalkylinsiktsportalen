@@ -10,4 +10,3 @@ AppShell continues to own authentication adapters, session refresh and login pre
 
 - Modules may depend on `Identity` instead of AppShell for current-user information.
 - `CurrentUser` always includes an active `OrganizationId`.
-- Existing identity types and contracts move to the new boundary when the code migration is implemented.

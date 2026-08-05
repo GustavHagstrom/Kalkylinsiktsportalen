@@ -60,7 +60,7 @@ Nya feature slices använder normalt separata commands och queries när det finn
 
 CQRS används här för tydligare intention, smalare kontrakt och bättre testbarhet. Det kräver inte separat read database, event sourcing, mediator-ramverk eller generell pipeline. Sådant införs först när upprepad orchestration eller verkliga prestanda-/skalningsbehov motiverar det.
 
-För trivial read-only kod, enkel intern logik eller små ändringar nära äldre kod får enklare former användas. Avvikelsen ska vara lokal och begriplig; ny produktlogik som etablerar ett användningsfall bör däremot formas som en command- eller query-slice.
+För trivial read-only kod eller enkel intern logik får enklare former användas. Avvikelsen ska vara lokal och begriplig; ny produktlogik som etablerar ett användningsfall bör däremot formas som en command- eller query-slice.
 
 ### Clean Architecture Som Beroendeprincip
 
@@ -149,24 +149,6 @@ UiKit/
 - `Access` äger portalclaims, authorization policies, application-admin-semantik, grants och accessbeslut.
 
 Den detaljerade modellen inom varje modul beskrivs i `docs/domain/*`.
-
-## Övergång Från Äldre Feature-Struktur
-
-Äldre produktkod kan fortfarande ligga i `Features/*`. För små ändringar kan det vara rätt att arbeta nära befintlig kod, men ny eller flyttad production-kod ska placeras hos en explicit ägare.
-
-Målarkitekturen är normativ för ny eller flyttad production-kod från och med nu. Det innebär att nya användningsfall ska följa modulägarskap, vertical slices, pragmatisk CQRS, clean architecture som beroendeprincip och DDD-light där domänen motiverar det.
-
-Små ändringar i äldre `Features/*` behöver inte starta en modulmigrering. De ska däremot inte introducera nya beroenden, delade modeller, stores eller UI-bunden affärslogik som går emot målarkitekturen.
-
-Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `BlazorServer.Shared`.
-
-| Äldre feature | Målmodul/riktning |
-|---|---|
-| `Settings` | `AppShell` / neutral `UiKit` |
-| `Access` | `Access` |
-| `BidconAccess` | `Bidcon` |
-| `BidconBrowser` | `Bidcon`, senare delvis `Projects` |
-| `ViewSettings` | `Reports` |
 
 ## Gemensamma Byggblock
 

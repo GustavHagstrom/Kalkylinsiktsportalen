@@ -18,8 +18,6 @@ För de flesta ändringar räcker den här ordningen:
 4. [architecture/target-architecture.md](architecture/target-architecture.md) - långsiktig målbild
 5. [development.md](development.md) - lokal utveckling och kodriktlinjer
 
-Om äldre kod och målarkitekturen säger olika saker gäller målarkitekturen som riktning för ny produktlogik. Små ändringar kan fortfarande göras nära befintlig feature enligt [development.md](development.md).
-
 ## Struktur
 
 - [../CONTEXT.md](../CONTEXT.md) - kanonisk ordlista för domänspråk

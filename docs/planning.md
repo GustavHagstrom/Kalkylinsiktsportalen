@@ -16,7 +16,6 @@ Lösa idéer och utredningssignaler som inte är redo som öppna planeringsfråg
 
 ## Öppna Arkitekturfrågor
 
-- Hur mycket av `IFeature`-mönstret ska behållas när modulerna blir tydligare?
 - Ska WYSIWYG/PDF vara en intern del av `Reports` eller en separat renderingmodul?
 - Hur ska `SnapshotChangeSet` modelleras?
 

@@ -65,14 +65,12 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 ### Global
 
 - [0001 - Use feature slices with target modules](global/0001-use-feature-slices-with-target-modules.md)
-- [0002 - Limit Shared to stable cross-cutting building blocks](global/0002-limit-shared-to-stable-cross-cutting-building-blocks.md) - superseded by ADR-0042; historical context only
 - [0018 - Split active state building from report rendering](global/0018-split-active-state-building-from-report-rendering.md)
 - [0019 - Pass view change settings to Projects](global/0019-pass-view-change-settings-to-projects.md)
 - [0027 - Keep domain models persistence-independent](global/0027-keep-domain-models-persistence-independent.md)
-- [0034 - Defer domain events during initial migration](global/0034-defer-domain-events-during-initial-migration.md)
+- [0034 - Add domain events only for concrete follow-up behavior](global/0034-add-domain-events-only-for-concrete-follow-up-behavior.md)
 - [0035 - Let Web orchestrate Projects and Reports initially](global/0035-let-web-orchestrate-projects-and-reports-initially.md)
 - [0037 - Use pragmatic CQRS feature slices](global/0037-use-pragmatic-cqrs-feature-slices.md)
-- [0038 - Use IModule and UI composition registration](global/0038-use-imodule-and-ui-composition-registration.md) - superseded by ADR-0040; historical context only
 - [0039 - Keep persistence APIs behind store contracts](global/0039-keep-persistence-apis-behind-store-contracts.md)
 - [0040 - Use static module registration functions](global/0040-use-static-module-registration-functions.md)
 - [0041 - Use access claim registry](global/0041-use-access-claim-registry.md)

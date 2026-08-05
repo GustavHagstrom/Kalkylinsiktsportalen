@@ -17,4 +17,3 @@ Handlers in pragmatic CQRS feature slices should depend on small module- or slic
 - Store contracts should be small and use-case-oriented rather than generic CRUD repositories.
 - Name new persistence contracts as stores unless there is a specific reason to use another term.
 - Reusable queries, tenant-scoped reads, persistence mapping, transaction handling and concurrency behavior belong behind stores instead of being repeated in handlers.
-- Existing older stores and Blazor components do not need a broad migration just because of this decision; move them toward module-owned use cases and stores when related work already touches them or when the current shape blocks a clearer module boundary.

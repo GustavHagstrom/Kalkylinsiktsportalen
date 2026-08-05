@@ -8,7 +8,7 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - produktbild och huvudflöden: [product-and-domain.md](product-and-domain.md)
 - levande modulägd domänmodell: [domain/README.md](domain/README.md)
 - arkitekturriktning: [architecture/target-architecture.md](architecture/target-architecture.md)
-- praktiska kodregler och övergång från äldre feature-struktur: [development.md](development.md)
+- praktiska kodregler: [development.md](development.md)
 - UI/UX-principer: [ui-ux.md](ui-ux.md)
 - dokumentägarskap: [README.md](README.md)
 - lösa idéer och utredningssignaler: [ideas.md](ideas.md)
@@ -23,9 +23,8 @@ Allmän produkt-, domän- och arkitekturbeskrivning ägs av andra dokument och s
 - läs relevanta filer innan ändring
 - läs målarkitektur och utvecklingsriktlinjer om ändringen påverkar struktur eller ansvar
 - gör små, fokuserade ändringar
-- håll små ändringar nära befintlig feature
-- lägg ny produktkod i `Modules/*` när det passar målarkitekturen och utvecklingsriktlinjerna
-- lägg inte saker i `Shared` i onödan
+- lägg produktkod hos den explicita ägaren
+- lägg aldrig production-kod i `Shared`
 - undvik nya paket om de inte behövs
 - uppdatera [../CONTEXT.md](../CONTEXT.md) när ett kanoniskt domänbegrepp ändras eller etableras
 - uppdatera `docs/domain/*.md` när aggregates, relationer, invariants eller modulnära policyer förfinas
@@ -89,7 +88,7 @@ Ange vilka tester eller kontroller som ska köras.
 Läs först relevanta filer och sammanfatta kort hur berörd feature fungerar idag.
 Läs målarkitektur och utvecklingsriktlinjer om ändringen påverkar struktur eller ansvar.
 Implementera minsta rimliga ändring.
-Följ befintlig feature-struktur för små ändringar och målmodulerna för ny produktkod.
+Följ målarkitekturen och lägg produktkod hos den explicita ägaren.
 Lägg inte till nya paket.
 Uppdatera dokumentation om ansvar, regler eller arkitektur påverkas.
 Verifiera med relevanta tester eller annan lämplig validering.
