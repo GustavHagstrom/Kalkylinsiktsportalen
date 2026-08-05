@@ -37,6 +37,26 @@ public sealed class PrintableDocumentPaginationTests
             Assert.Throws<ArgumentException>(() => CreateDocument([], changeToken: ""));
             Assert.Throws<ArgumentException>(() => new PageFormat("Invalid", WidthMm: 0, HeightMm: 100));
             Assert.Throws<ArgumentException>(() => new PageFormat("Invalid", WidthMm: 100, HeightMm: 0));
+            Assert.Throws<ArgumentException>(() => new PrintableBlockMeasurement("", HeightMm: 10));
+            Assert.Throws<ArgumentException>(() => new PrintableBlockMeasurement("block", HeightMm: 0));
+            Assert.Throws<ArgumentNullException>(() => new PrintableDocumentMeasurements(
+                HeaderHeightMm: 10,
+                FooterHeightMm: 10,
+                BodyBlocks: null!));
+        });
+    }
+
+    [Test]
+    public void Paginate_RequiresDocumentAndMeasurements()
+    {
+        var paginator = new PrintableDocumentPaginator();
+        var document = CreateDocument([]);
+        var measurements = Measurements();
+
+        Assert.Multiple(() =>
+        {
+            Assert.Throws<ArgumentNullException>(() => paginator.Paginate(null!, measurements));
+            Assert.Throws<ArgumentNullException>(() => paginator.Paginate(document, null!));
         });
     }
 
@@ -227,6 +247,54 @@ public sealed class PrintableDocumentPaginationTests
         });
     }
 
+    [Test]
+    public void Paginate_ReturnsBlockingErrorWhenPrintableItemTypeIsUnsupported()
+    {
+        var document = CreateDocument([new UnsupportedPrintableItem("unsupported")]);
+        var measurements = Measurements();
+        var paginator = new PrintableDocumentPaginator();
+
+        var result = paginator.Paginate(document, measurements);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Pages, Is.Empty);
+            Assert.That(result.Errors, Has.One.Matches<PaginationIssue>(issue =>
+                issue.Code == PaginationIssueCode.UnsupportedPrintableItem &&
+                issue.BlockId == "unsupported"));
+        });
+    }
+
+    [Test]
+    public void Paginate_ReturnsNoPagesWhenMeasurementsAreMissingOrDuplicated()
+    {
+        var document = CreateDocument(
+            [
+                Block("before"),
+                Block("missing"),
+                Block("after")
+            ]);
+        var measurements = new PrintableDocumentMeasurements(
+            HeaderHeightMm: 10,
+            FooterHeightMm: 10,
+            BodyBlocks:
+            [
+                new PrintableBlockMeasurement("before", 10),
+                new PrintableBlockMeasurement("before", 10),
+                new PrintableBlockMeasurement("after", 10)
+            ]);
+        var paginator = new PrintableDocumentPaginator();
+
+        var result = paginator.Paginate(document, measurements);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Pages, Is.Empty);
+            Assert.That(result.Errors.Select(issue => issue.Code), Does.Contain(PaginationIssueCode.DuplicateMeasurement));
+            Assert.That(result.Errors.Select(issue => issue.Code), Does.Contain(PaginationIssueCode.MissingMeasurement));
+        });
+    }
+
     private static PrintableDocument CreateDocument(
         IReadOnlyList<PrintableItem> bodyItems,
         string id = "document-1",
@@ -251,4 +319,7 @@ public sealed class PrintableDocumentPaginationTests
         => new(id, typeof(TestPrintableComponent), new Dictionary<string, object?>(), pageBreakBehavior);
 
     private sealed class TestPrintableComponent;
+
+    private sealed record UnsupportedPrintableItem(string ItemId)
+        : PrintableItem(ItemId, PageBreakBehavior.None);
 }

@@ -6,6 +6,9 @@ public sealed class PrintableDocumentPaginator
 {
     public PrintablePaginationResult Paginate(PrintableDocument document, PrintableDocumentMeasurements measurements)
     {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(measurements);
+
         var availableBodyHeightMm = document.PageFormat.HeightMm - measurements.HeaderHeightMm - measurements.FooterHeightMm;
         var errors = new List<PaginationIssue>();
         var warnings = new List<PaginationIssue>();
@@ -19,10 +22,18 @@ public sealed class PrintableDocumentPaginator
         }
 
         var measurementByBlockId = BuildMeasurementLookup(measurements.BodyBlocks, errors);
-        var flattenedBlocks = Flatten(document.BodyItems);
+        var flattenedBlocks = Flatten(document.BodyItems, errors);
+        AppendMissingMeasurementErrors(flattenedBlocks, measurementByBlockId, errors);
+        if (errors.Count > 0)
+        {
+            return new PrintablePaginationResult([], warnings, errors);
+        }
+
         var pages = PlaceBlocks(flattenedBlocks, measurementByBlockId, availableBodyHeightMm, errors);
 
-        return new PrintablePaginationResult(pages, warnings, errors);
+        return errors.Count > 0
+            ? new PrintablePaginationResult([], warnings, errors)
+            : new PrintablePaginationResult(pages, warnings, errors);
     }
 
     private static Dictionary<string, PrintableBlockMeasurement> BuildMeasurementLookup(
@@ -44,18 +55,35 @@ public sealed class PrintableDocumentPaginator
         return measurementByBlockId;
     }
 
-    private static IReadOnlyList<FlattenedPrintableBlock> Flatten(IReadOnlyList<PrintableItem> items)
+    private static void AppendMissingMeasurementErrors(
+        IReadOnlyList<FlattenedPrintableBlock> blocks,
+        Dictionary<string, PrintableBlockMeasurement> measurementByBlockId,
+        List<PaginationIssue> errors)
+    {
+        foreach (var block in blocks)
+        {
+            if (!measurementByBlockId.ContainsKey(block.BlockId))
+            {
+                errors.Add(new PaginationIssue(
+                    PaginationIssueCode.MissingMeasurement,
+                    $"Block '{block.BlockId}' is missing a measurement.",
+                    block.BlockId));
+            }
+        }
+    }
+
+    private static IReadOnlyList<FlattenedPrintableBlock> Flatten(IReadOnlyList<PrintableItem> items, List<PaginationIssue> errors)
     {
         var blocks = new List<FlattenedPrintableBlock>();
         foreach (var item in items)
         {
-            Flatten(item, blocks);
+            Flatten(item, blocks, errors);
         }
 
         return blocks;
     }
 
-    private static void Flatten(PrintableItem item, List<FlattenedPrintableBlock> blocks)
+    private static void Flatten(PrintableItem item, List<FlattenedPrintableBlock> blocks, List<PaginationIssue> errors)
     {
         switch (item)
         {
@@ -67,7 +95,7 @@ public sealed class PrintableDocumentPaginator
                 var firstDescendantIndex = blocks.Count;
                 foreach (var child in container.Items)
                 {
-                    Flatten(child, blocks);
+                    Flatten(child, blocks, errors);
                 }
 
                 if (container.PageBreakBehavior == PageBreakBehavior.After && blocks.Count > firstDescendantIndex)
@@ -76,6 +104,13 @@ public sealed class PrintableDocumentPaginator
                     blocks[lastIndex] = blocks[lastIndex] with { PageBreakBehavior = PageBreakBehavior.After };
                 }
 
+                break;
+
+            default:
+                errors.Add(new PaginationIssue(
+                    PaginationIssueCode.UnsupportedPrintableItem,
+                    $"Printable item '{item.Id}' has unsupported type '{item.GetType().Name}'.",
+                    item.Id));
                 break;
         }
     }
@@ -94,11 +129,7 @@ public sealed class PrintableDocumentPaginator
         {
             if (!measurementByBlockId.TryGetValue(block.BlockId, out var measurement))
             {
-                errors.Add(new PaginationIssue(
-                    PaginationIssueCode.MissingMeasurement,
-                    $"Block '{block.BlockId}' is missing a measurement.",
-                    block.BlockId));
-                continue;
+                return [];
             }
 
             if (measurement.HeightMm > availableBodyHeightMm)
