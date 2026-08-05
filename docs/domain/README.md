@@ -32,7 +32,7 @@ Lägg inte sådant i ADR:er som standard. ADR:er används bara när ett modell- 
 - [projects.md](projects.md) - Projects-modulens aggregates, relationer, invariants och policyer
 - [reports.md](reports.md) - Reports-modulens aggregate, livscykel, relationer och policyer
 
-Senare kan fler moduldokument läggas till, till exempel för `Organizations`.
+Senare kan fler moduldokument läggas till när en ny modul äger en konkret domänmodell.
 
 ## Gemensamma Modelleringsprinciper
 

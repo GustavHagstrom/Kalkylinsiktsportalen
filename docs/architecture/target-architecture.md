@@ -104,6 +104,8 @@ Tvärgående kod ska ägas av en av de avsiktliga top-level-gränserna: `Composi
 
 Organisationen är den grundläggande tenant-gränsen. Data, rättigheter, integrationer och konfiguration ska utformas så att organisationsgränsen förblir tydlig.
 
+Organisation är en systemgräns och runtime-kontext, inte en egen produktmodul i målarkitekturen. `OrganizationId` och aktuell organisationskontext ägs av `Identity` och host-gränsen. Organisationsscopade inställningar och data ägs av den modul som konsumerar dem, till exempel Bidcon credentials i `Bidcon` och access grants i `Access`.
+
 ## Målstruktur
 
 ```text
@@ -145,7 +147,6 @@ UiKit/
 - `Reports` äger views, rapportstruktur, rendering och export.
 - `Bidcon` äger extern Bidcon-integration, credentials, import och integrations-DTO:er.
 - `Access` äger portalclaims, authorization policies, application-admin-semantik, grants och accessbeslut.
-- `Organizations` äger tenant-kontext och organisationsinställningar.
 
 Den detaljerade modellen inom varje modul beskrivs i `docs/domain/*`.
 
@@ -163,7 +164,7 @@ Ingen production-kod får ligga i en `Shared`-katalog eller använda namespace `
 |---|---|
 | `Settings` | `AppShell` / neutral `UiKit` |
 | `Access` | `Access` |
-| `BidconAccess` | `Bidcon` + `Organizations` |
+| `BidconAccess` | `Bidcon` |
 | `BidconBrowser` | `Bidcon`, senare delvis `Projects` |
 | `ViewSettings` | `Reports` |
 

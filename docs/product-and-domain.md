@@ -102,11 +102,12 @@ Den detaljerade levande domänmodellen finns i [domain/README.md](domain/README.
 
 På global nivå består domänbilden av följande huvuddelar:
 
-- `Organization` som tenantgräns för data, views, access och credentials
 - `Bidcon` som extern källa för estimationsdata
 - `Projects` som portalens arbetsmodell för projekt, versioner, snapshots och delade ändringar
 - `Reports` som portalens modell för views, rapportstruktur, rendering och export
 - `Access` som portalens behörighetsmodell
+
+Organisation är tenant-gräns och runtime-kontext för dessa delar, men inte ett eget produktområde eller en egen modul.
 
 Domänens huvudkedja:
 
@@ -137,7 +138,7 @@ Projekt, versioner, snapshots och historik är portalens egna arbetsobjekt ovanp
 Identity/Graph beskriver vem användaren är. Portalens accessmodell beskriver vad användaren får göra.
 
 **Organisation vs global nivå**  
-Organisationen är tenant-gränsen för projekt, views, access, credentials och rapportkonfiguration.
+Organisationen är tenant-gränsen för projekt, views, access, credentials och rapportkonfiguration. Organisationsscopad konfiguration ägs av den modul som använder den, inte av en separat Organizations-modul.
 
 ## Språk Och Modellering
 

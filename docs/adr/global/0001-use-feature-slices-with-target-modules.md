@@ -1,3 +1,3 @@
 ﻿# Use feature slices with target modules
 
-New product code should move toward the target modules `Projects`, `Reports`, `Bidcon`, `Access` and `Organizations`, while small changes can stay close to the existing feature that owns the behavior today. This lets the application migrate from the current feature-based Blazor Server structure toward a modular monolith without forcing a large rewrite before the module boundaries have been proven.
+Product code should live in the module that owns the behavior: `Projects`, `Reports`, `Bidcon` or `Access`. New use cases should be organized as feature slices inside the owning module, with explicit public contracts when another module or the host needs to compose the behavior.
