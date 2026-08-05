@@ -35,23 +35,7 @@ public sealed class PrintableDocumentRendererTests
             [
                 Block("footer", "footer-text")
             ]);
-        var services = new ServiceCollection()
-            .AddSingleton<IJSRuntime, TestJsRuntime>()
-            .BuildServiceProvider();
-        using var serviceProvider = services;
-        await using var renderer = new HtmlRenderer(serviceProvider, NullLoggerFactory.Instance);
-
-        var html = await renderer.Dispatcher.InvokeAsync(async () =>
-        {
-            var output = await renderer.RenderComponentAsync<ReportPrintableDocument>(
-                ParameterView.FromDictionary(new Dictionary<string, object?>
-                {
-                    ["Document"] = document,
-                    ["ShowPaginationOverlay"] = false
-                }));
-
-            return output.ToHtmlString();
-        });
+        var html = await RenderDocumentAsync(document);
 
         Assert.Multiple(() =>
         {
@@ -62,11 +46,53 @@ public sealed class PrintableDocumentRendererTests
         });
     }
 
+    [Test]
+    public void PrintableDocument_FailsFastWhenBodyBlockIdsAreDuplicated()
+    {
+        var document = new PrintableDocument(
+            Id: "demo-document",
+            ChangeToken: "change-1",
+            PageFormat: new PageFormat("A4", WidthMm: 210, HeightMm: 297),
+            HeaderItems: [],
+            BodyItems:
+            [
+                Block("duplicate", "first"),
+                Block("duplicate", "second")
+            ],
+            FooterItems: []);
+
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await RenderDocumentAsync(document));
+
+        Assert.That(exception!.Message, Does.Contain("duplicate"));
+    }
+
     private static PrintableBlock Block(string id, string text)
         => new(
             id,
             typeof(TestPrintableContent),
             new Dictionary<string, object?> { [nameof(TestPrintableContent.Text)] = text });
+
+    private static async Task<string> RenderDocumentAsync(PrintableDocument document)
+    {
+        var services = new ServiceCollection()
+            .AddSingleton<IJSRuntime, TestJsRuntime>()
+            .BuildServiceProvider();
+        using var serviceProvider = services;
+        await using var renderer = new HtmlRenderer(serviceProvider, NullLoggerFactory.Instance);
+
+        return await renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<ReportPrintableDocument>(
+                ParameterView.FromDictionary(new Dictionary<string, object?>
+                {
+                    ["Document"] = document,
+                    ["ShowPaginationOverlay"] = false
+                }));
+
+            return output.ToHtmlString();
+        });
+    }
 
     private sealed class TestPrintableContent : ComponentBase
     {
