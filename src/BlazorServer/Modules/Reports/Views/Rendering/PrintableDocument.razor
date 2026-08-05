@@ -9,14 +9,18 @@
     
 <div id="print-wrapper">
     
-    <div @ref="RendererRoot" id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
-        @if (ShowPaginationOverlay)
+    <div @ref="RendererRoot" id="print-root" class="d-flex flex-column gap-4 relative" data-printable-renderer-state="@RendererState.Status" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
+        @if (RendererState.Status is PrintableRendererStatus.Measuring or PrintableRendererStatus.Paginating)
         {
-            <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
+            <div class="printable-renderer-status print-hide" aria-live="polite">@RendererStatusText</div>
+        }
+        @if (ShowPaginationOverlay && (RendererState.Status is PrintableRendererStatus.Measuring or PrintableRendererStatus.Paginating))
+        {
+            <MudOverlay Absolute="true" DarkBackground="true" Visible="true">
                 <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
             </MudOverlay>
         }
-        @if (!IsPaginated)
+        @if (RendererState.Status is PrintableRendererStatus.Measuring or PrintableRendererStatus.Paginating)
         {
             BodyBlockMap.Clear();
             foreach (var block in HeaderBlocks)
@@ -41,16 +45,16 @@
         }
         else
         {
-            if (PaginationErrors.Count > 0)
+            if (RendererState.Errors.Count > 0)
             {
-                foreach (var error in PaginationErrors)
+                foreach (var error in RendererState.Errors)
                 {
                     <MudAlert Severity="Severity.Error">@error.Message</MudAlert>
                 }
             }
             else
             {
-                foreach (var pageIndex in PageMap.Keys.Order())
+                foreach (var page in RendererState.Pages.OrderBy(page => page.PageNumber))
                 {
                     <div class="@PageClass" style="@PageStyle">
 
@@ -61,11 +65,13 @@
                             }
                         </div>
 
-                        <div class="body">
-                            @foreach (var id in PageMap[pageIndex])
+                        <div class="body" style="@BodyRegionStyle(page)">
+                            @foreach (var placement in page.BodyBlocks)
                             {
-                                var block = GetMappedBodyBlock(id);
-                                <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                                var block = GetMappedBodyBlock(placement.BlockId);
+                                <div class="body-placement-block" data-printable-block-id="@placement.BlockId" style="@BodyPlacementStyle(placement)">
+                                    <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                                </div>
                             }
                         </div>
 
@@ -129,6 +135,14 @@
 
     string PageClass => $"page {FormatClass}";
     string PageStyle => $"width: {RenderPageFormat.WidthMm}mm; height: {RenderPageFormat.HeightMm}mm;";
+    string RendererStatusText => RendererState.Status switch
+    {
+        PrintableRendererStatus.Measuring => "Measuring printable document",
+        PrintableRendererStatus.Paginating => "Paginating printable document",
+        PrintableRendererStatus.Error => "Printable document pagination failed",
+        PrintableRendererStatus.Ready => "Printable document preview ready",
+        _ => "Printable document renderer"
+    };
     string FormatClass => RenderPageFormat.Name switch
     {
         "A4" => "A4",
@@ -136,7 +150,7 @@
         "A5" => "A5",
         _ => string.Empty
     };
-    bool IsPaginated { get; set; } = false;
+    PrintableDocumentRendererState RendererState { get; } = new();
     public PageSizeFormat LegacyPageFormat { get; set; } = PageSizeFormat.A4;
     public enum PageSizeFormat
     {
@@ -171,14 +185,8 @@
     /// </summary>
     Dictionary<string, PrintableBlock> BodyBlockMap { get; set; } = new(StringComparer.Ordinal);
 
-    /// <summary>
-    /// key: page number, value: array of PrintableBlock ids on that page
-    /// </summary>
-    Dictionary<int, string[]> PageMap { get; set; } = new();
     ElementReference RendererRoot { get; set; }
     PrintableDocumentMeasurementAdapter? MeasurementAdapter { get; set; }
-    IReadOnlyList<PaginationIssue> PaginationWarnings { get; set; } = [];
-    IReadOnlyList<PaginationIssue> PaginationErrors { get; set; } = [];
 
     private static IReadOnlyList<PrintableBlock> ToLegacyBlocks(
         string idPrefix,
@@ -249,33 +257,57 @@
         throw new InvalidOperationException($"Paginated body references unknown printable block id '{id}'.");
     }
 
+    private static string BodyRegionStyle(PrintablePage page)
+        => $"height: {page.BodyHeightMm}mm; position: relative;";
+
+    private static string BodyPlacementStyle(PrintableBlockPlacement placement)
+        => $"position: absolute; top: {placement.TopMm}mm; height: {placement.HeightMm}mm; left: 0; right: 0; overflow: hidden;";
+
+    protected override void OnParametersSet()
+    {
+        RendererState.SetDocument(RenderDocument);
+    }
+
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!IsPaginated)
+        if (RendererState.NeedsMeasurement)
         {
             return Paginate();
         }
-        // else
-        // {
-        //     IsPaginated = false;
-        // }
+
         return Task.CompletedTask;
     }
 
     public async Task Paginate()
     {
-        MeasurementAdapter ??= new PrintableDocumentMeasurementAdapter(JS);
-        var measurements = await MeasurementAdapter.MeasureAsync(RendererRoot);
-        var pagination = new PrintableDocumentPaginator().Paginate(RenderDocument, measurements);
+        if (!RendererState.NeedsMeasurement)
+        {
+            return;
+        }
 
-        PaginationWarnings = pagination.Warnings;
-        PaginationErrors = pagination.Errors;
-        PageMap = pagination.Pages.ToDictionary(
-            page => page.PageNumber,
-            page => page.BodyBlocks.Select(block => block.BlockId).ToArray());
-        IsPaginated = true;
+        RendererState.MarkPaginating();
+        MeasurementAdapter ??= new PrintableDocumentMeasurementAdapter(JS);
+        try
+        {
+            var measurements = await MeasurementAdapter.MeasureAsync(RendererRoot);
+            var pagination = new PrintableDocumentPaginator().Paginate(RenderDocument, measurements);
+            RendererState.MarkReady(pagination);
+        }
+        catch (Exception exception)
+        {
+            RendererState.MarkError(new PaginationIssue(
+                PaginationIssueCode.MeasurementFailed,
+                $"The printable document could not be measured: {exception.Message}"));
+        }
+
         StateHasChanged();
 
+    }
+
+    public Task RefreshPagination()
+    {
+        RendererState.RequestRefresh();
+        return InvokeAsync(StateHasChanged);
     }
 
     public async ValueTask DisposeAsync()
