@@ -22,6 +22,29 @@ export function measure(root, options = {}) {
     };
 }
 
+export function print(root, wrapper, options = {}) {
+    if (!root) {
+        throw new Error("Paginated document renderer root is required for printing.");
+    }
+    if (!wrapper) {
+        throw new Error("Paginated document renderer wrapper is required for printing.");
+    }
+
+    const readyState = options.readyState ?? "Ready";
+    const stateAttribute = options.stateAttribute ?? "data-printable-renderer-state";
+    const printTargetAttribute = options.printTargetAttribute ?? "data-printable-print-target";
+    if (root.getAttribute(stateAttribute) !== readyState) {
+        return false;
+    }
+
+    wrapper.setAttribute(printTargetAttribute, "true");
+    const clearPrintTarget = () => wrapper.removeAttribute(printTargetAttribute);
+    window.addEventListener("afterprint", clearPrintTarget, { once: true });
+    window.print();
+    window.setTimeout(clearPrintTarget, 0);
+    return true;
+}
+
 function getRegionWrappers(root, regionAttribute, region) {
     return Array
         .from(root.querySelectorAll(`[${regionAttribute}="${region}"]`))

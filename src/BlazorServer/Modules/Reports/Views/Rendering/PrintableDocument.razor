@@ -3,13 +3,85 @@
 @implements IAsyncDisposable
 
 <HeadContent>
-    <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                margin: 0;
+                padding: 0;
+                margin-right: -1mm;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            .printable-document-wrapper[data-printable-print-target="true"],
+            .printable-document-wrapper[data-printable-print-target="true"] * {
+                visibility: visible !important;
+            }
+
+            .printable-document-wrapper[data-printable-print-target="true"] {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+            }
+
+            .printable-document-root {
+                gap: 0 !important;
+            }
+
+            .print-hide,
+            .printable-renderer-status,
+            .mud-overlay {
+                display: none !important;
+            }
+
+            .printable-document-root:not([data-printable-renderer-state="Ready"]) .page,
+            .printable-document-root:not([data-printable-renderer-state="Ready"]) .header-block,
+            .printable-document-root:not([data-printable-renderer-state="Ready"]) .body-block,
+            .printable-document-root:not([data-printable-renderer-state="Ready"]) .footer-block {
+                display: none !important;
+            }
+
+            .printable-document-root[data-printable-renderer-state="Ready"] .page {
+                box-shadow: none !important;
+                visibility: visible !important;
+            }
+        }
+
+        .page {
+            padding: 0mm;
+            box-sizing: border-box;
+            background-color: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            box-shadow: var(--mud-elevation-4);
+        }
+
+        .A4 {
+            width: 210mm;
+            height: 297mm;
+        }
+
+        .page .body {
+            flex-grow: 1;
+        }
+
+        .footer-block,
+        .header-block,
+        .body-block {
+            visibility: hidden;
+        }
+    </style>
 </HeadContent>
 
     
-<div id="print-wrapper">
+<div @ref="RendererWrapper" class="printable-document-wrapper">
     
-    <div @ref="RendererRoot" id="print-root" class="d-flex flex-column gap-4 relative" data-printable-renderer-state="@RendererState.Status" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
+    <div @ref="RendererRoot" class="printable-document-root d-flex flex-column gap-4 relative" data-printable-renderer-state="@RendererState.Status" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
         @if (RendererState.Status is PrintableRendererStatus.Measuring or PrintableRendererStatus.Paginating)
         {
             <div class="printable-renderer-status print-hide" aria-live="polite">@RendererStatusText</div>
@@ -186,6 +258,7 @@
     Dictionary<string, PrintableBlock> BodyBlockMap { get; set; } = new(StringComparer.Ordinal);
 
     ElementReference RendererRoot { get; set; }
+    ElementReference RendererWrapper { get; set; }
     PrintableDocumentMeasurementAdapter? MeasurementAdapter { get; set; }
 
     private static IReadOnlyList<PrintableBlock> ToLegacyBlocks(
@@ -308,6 +381,26 @@
     {
         RendererState.RequestRefresh();
         return InvokeAsync(StateHasChanged);
+    }
+
+    public async Task<PrintableDocumentPrintResult> PrintAsync(CancellationToken cancellationToken = default)
+    {
+        if (RendererState.NeedsMeasurement)
+        {
+            await RefreshPagination();
+            return PrintableDocumentPrintResult.NotReady();
+        }
+
+        var readiness = RendererState.GetPrintReadiness();
+        if (readiness.Status != PrintableDocumentPrintStatus.Ready)
+        {
+            return readiness;
+        }
+
+        MeasurementAdapter ??= new PrintableDocumentMeasurementAdapter(JS);
+        return await MeasurementAdapter.PrintAsync(RendererRoot, RendererWrapper, cancellationToken)
+            ? readiness
+            : PrintableDocumentPrintResult.NotReady();
     }
 
     public async ValueTask DisposeAsync()

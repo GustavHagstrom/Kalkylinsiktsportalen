@@ -126,6 +126,36 @@ public sealed class PrintableDocumentRendererStateTests
     }
 
     [Test]
+    public void GetPrintReadiness_AllowsPrintOnlyWhenCurrentPreviewIsReadyAndValid()
+    {
+        var state = new PrintableDocumentRendererState();
+        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.NotReady));
+
+        state.MarkPaginating();
+        Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.NotReady));
+
+        state.MarkReady(EmptyPagination());
+        Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.Ready));
+
+        state.SetDocument(Document("document-1", "change-2", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.NotReady));
+
+        state.MarkPaginating();
+        state.MarkReady(new PrintablePaginationResult(
+            Pages: [],
+            Warnings: [],
+            Errors: [new PaginationIssue(PaginationIssueCode.BlockOverflow, "Block is too tall.", "block-1")]));
+
+        Assert.Multiple(() =>
+        {
+            var readiness = state.GetPrintReadiness();
+            Assert.That(readiness.Status, Is.EqualTo(PrintableDocumentPrintStatus.BlockedByPaginationErrors));
+            Assert.That(readiness.Errors.Single().Code, Is.EqualTo(nameof(PaginationIssueCode.BlockOverflow)));
+        });
+    }
+
+    [Test]
     public void MarkError_PreventsReadyPagesAfterMeasurementFailure()
     {
         var state = new PrintableDocumentRendererState();

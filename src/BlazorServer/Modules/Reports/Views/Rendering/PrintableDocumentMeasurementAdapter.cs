@@ -33,6 +33,19 @@ internal sealed class PrintableDocumentMeasurementAdapter(IJSRuntime jsRuntime) 
                 .ToArray());
     }
 
+    public async ValueTask<bool> PrintAsync(
+        ElementReference rendererRoot,
+        ElementReference rendererWrapper,
+        CancellationToken cancellationToken = default)
+    {
+        var measurementModule = await GetModuleAsync(cancellationToken);
+        return await measurementModule.InvokeAsync<bool>(
+            "print",
+            cancellationToken,
+            rendererRoot,
+            rendererWrapper);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (module is not null)
