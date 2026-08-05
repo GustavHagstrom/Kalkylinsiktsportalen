@@ -1,11 +1,10 @@
-﻿function pageinate() {
+function pageinate(pageHeightMm = 297) {
     const root = document.getElementById("print-root");
     const headerBlocks = root.getElementsByClassName("header-block");
     const footerBlocks = root.getElementsByClassName("footer-block");
     const bodyBlocks = root.getElementsByClassName("body-block");
-    const PX_PER_MM = 96 / 25.4; // ≈ 3.7795
-    const A4_HEIGHT_PX = 297 * PX_PER_MM;
-
+    const PX_PER_MM = 96 / 25.4;
+    const pageHeightPx = pageHeightMm * PX_PER_MM;
 
     let headerHeight = 0;
     Array.from(headerBlocks).forEach(block => {
@@ -15,10 +14,8 @@
     Array.from(footerBlocks).forEach(block => {
         footerHeight += block.getBoundingClientRect().height;
     });
-    const availableHeight = A4_HEIGHT_PX - headerHeight - footerHeight;
+    const availableHeight = pageHeightPx - headerHeight - footerHeight;
     console.log("availableHeight: " + availableHeight);
-
-    
 
     //dictionary, key is page number, value is array of body blocks
     const map = new Map();
@@ -44,20 +41,19 @@
 
         let pageBreaks = block.querySelectorAll("[data-pagebreak]");
         console.log(pageBreaks);
-       
+
         if (pageBreaks.length > 0) {
             currentPage += 1;
             currentBodyHeight = 0;
         }
     });
-    
+
     const json = Object.fromEntries(map);
     console.log(map);
     console.log(json);
 
-    return json;    
+    return json;
 }
-
 
 function addToMap(map, key, value) {
     if (!map.has(key)) {
