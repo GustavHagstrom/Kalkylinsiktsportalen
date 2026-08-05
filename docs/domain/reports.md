@@ -9,6 +9,8 @@ Modulen äger:
 - `View`
 - view-definition med identifierbara `DataSection` och `SheetSection`
 - `PageBreakAfter` som layoutval på innehållssektioner
+- `PrintableDocument` som modellkontrakt för rapportinnehåll som ska kunna mätas, pagineras och renderas
+- pagineringspolicy för `Printable Block` och `Printable Container`
 - regler för när en view är ändringsbar eller arkiverad
 - rendering från `RenderingContext` till rapportstruktur
 - PDF-export och relaterade exportbeslut
@@ -54,6 +56,37 @@ Ansvar:
 - visa standardiserad radindikator när en rad är ändrad
 - kunna ange `PageBreakAfter`
 
+### `PrintableDocument`
+
+Modellkontrakt för ett renderbart rapportdokument. Dokumentet bär stabil identitet, obligatorisk change token, sidformat samt separata header-, body- och footer-items.
+
+Ansvar:
+
+- beskriva dokumentets renderbara struktur utan beroende på browsermätning, JS eller Blazor-renderingslivscykel
+- låta header och footer behandlas som fasta upprepade regioner per sida
+- låta body-items pagineras genom mätta `Printable Block`
+- bära `PageBreakBehavior` som layoutintention på block och containers
+
+### `PrintableContainer`
+
+Logisk gruppering av `PrintableItem` i ett `PrintableDocument`. Containers är inte odelbara vid paginering.
+
+Ansvar:
+
+- samla relaterade items i dokumentmodellen
+- flattenas till sina placement-descendants innan paginering
+- föra vidare `PageBreakBehavior.After` till sin sista placement-descendant
+
+### `Printable Block`
+
+Odelbar placement-enhet i pagineringen. Ett block har stabil identitet, komponenttyp och parametrar, men pagineringsmotorn använder bara den flattenade blockidentiteten och dess mätta höjd.
+
+Ansvar:
+
+- vara minsta enhet som placeras i sidans body-yta
+- kunna starta ny sida efter sig genom `PageBreakBehavior.After`
+- ge spårbarhet från pagineringsresultat och fel till källblocket
+
 ## Relationer
 
 - Reports renderar aktuell `RenderingContext`. `RenderableSnapshotState` är tills vidare ett preliminärt arbetsnamn för kontraktet mellan Projects och Reports, inte ett kanoniskt Reports-begrepp.
@@ -68,6 +101,10 @@ Ansvar:
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
+- Ett `PrintableDocument` måste bära en change token så mätning och paginering kan knytas till samma dokumentversion.
+- `PrintableContainer` ska flattenas före paginering och får inte placeras som ett odelbart block.
+- Header och footer reserverar höjd på varje sida innan body-block placeras.
+- Ett body-block som är högre än tillgänglig body-yta är ett blockerande pagineringsfel.
 
 ## Nuvarande Policyer
 
@@ -96,6 +133,12 @@ Arkivering betyder att vyn:
 - döljs från normal ny användning
 - bevaras för att förklara historiska rapporter och beslut
 - kan användas i läsläge för historik och exportförståelse
+
+### Paginering
+
+Reports pagineringsmotor är ren C#-logik. Den tar ett `PrintableDocument`, uppmätta header/footer-höjder och uppmätta body-block, flattenar containers och returnerar sidor, warnings och blockerande fel.
+
+Motorn paginerar bara body-block. Header och footer repeteras som fasta regioner på varje sida och minskar den tillgängliga body-ytan. Om nästa block inte ryms på aktuell sida fortsätter motorn på nästa sida. Om ett enskilt block inte ryms i body-ytan returneras ett blockerande `Pagination Error`.
 
 ## MVP-Begränsningar Och Tillfälliga Val
 
