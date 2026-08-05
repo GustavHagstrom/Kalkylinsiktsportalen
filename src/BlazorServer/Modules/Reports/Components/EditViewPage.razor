@@ -38,7 +38,7 @@
                     }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
-                    <PrintableDocument />
+                    <PrintableDocument Document="@ReportDocument" />
                 </div>
             </div>
         </ChildContent>
@@ -60,6 +60,11 @@
     bool TextFormatIsEnabled = true;
     UpdateViewResult? LastSaveResult = null;
     object? SelectedItem = null;
+    ReportDocumentRenderer ReportRenderer { get; } = new();
+    BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument? ReportDocument
+        => View is null
+            ? null
+            : ReportRenderer.BuildDocument(View, ReportRenderingContext.ForViewPreview(View));
 
     enum SectionType
     {

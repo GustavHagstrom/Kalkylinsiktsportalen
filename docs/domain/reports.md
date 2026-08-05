@@ -10,6 +10,7 @@ Modulen äger:
 - view-definition med identifierbara `DataSection` och `SheetSection`
 - `PageBreakAfter` som layoutval på innehållssektioner
 - `PrintableDocument` som modellkontrakt för rapportinnehåll som ska kunna mätas, pagineras och renderas
+- `ReportDocumentRenderer` som adapter från `View` och aktuell `RenderingContext` till `PrintableDocument`
 - pagineringspolicy för `Printable Block` och `Printable Container`
 - regler för när en view är ändringsbar eller arkiverad
 - rendering från `RenderingContext` till rapportstruktur
@@ -87,9 +88,21 @@ Ansvar:
 - kunna starta ny sida efter sig genom `PageBreakBehavior.After`
 - ge spårbarhet från pagineringsresultat och fel till källblocket
 
+### `ReportDocumentRenderer`
+
+Adapter mellan rapportdefinitionen och det modellstyrda pagineringsflödet.
+
+Ansvar:
+
+- tolka `View` och aktuell `RenderingContext`, inklusive estimation version, snapshot och eventuellt view-scoped change set
+- skapa ett `PrintableDocument` med stabil identitet, sidformat och change token
+- översätta rapportsektioner till `PrintableBlock` och `PrintableContainer`
+- låta lång eller internt brytbar sektiondata bli flera mätbara block utan att pagineringsmotorn behöver känna till rapportdomänen
+
 ## Relationer
 
 - Reports renderar aktuell `RenderingContext`. `RenderableSnapshotState` är tills vidare ett preliminärt arbetsnamn för kontraktet mellan Projects och Reports, inte ett kanoniskt Reports-begrepp.
+- `ReportDocumentRenderer` håller `View`- och `RenderingContext`-kunskap utanför `PaginatedDocumentRenderer`, som bara arbetar med `PrintableDocument`.
 - En `View` kan användas mot olika snapshot- och versionslägen, men varje `ViewScopedChangeSet` ägs fortfarande av Projects.
 - `EnableChanges` på `View` styr om användare får skapa nya view-lokala ändringar, medan Projects fortfarande äger validering, lagring och concurrency.
 - När en view dupliceras kopieras view-definitionen, men inte det change set-state som Projects äger för tidigare arbetslägen.

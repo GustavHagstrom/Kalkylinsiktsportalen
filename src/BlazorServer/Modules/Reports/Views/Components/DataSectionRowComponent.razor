@@ -1,0 +1,45 @@
+<table class="data-table">
+    <colgroup>
+        @foreach (var column in OrderedColumns)
+        {
+            <col style="@ColumnPercentWidth(column)" />
+        }
+    </colgroup>
+    <tbody>
+        <tr style="@RowHeight">
+            @foreach (var column in OrderedColumns)
+            {
+                <DataCellComponent DataCellDto="@GetDataCellDto(column)" />
+            }
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    [Parameter, EditorRequired] public DataSectionDto DataSectionDto { get; set; } = new();
+    [Parameter, EditorRequired] public RowDefinition RowDefinition { get; set; } = new();
+
+    private IReadOnlyList<DataColumnDefinition> OrderedColumns
+        => DataSectionDto.ColumnDefinitions.OrderBy(column => column.ColumnIndex).ToArray();
+
+    private int TableWidth => DataSectionDto.ColumnDefinitions.Sum(column => column.Width);
+    private string RowHeight => $"""height: {RowDefinition.Height}mm""";
+
+    private string ColumnPercentWidth(DataColumnDefinition column)
+    {
+        if (TableWidth <= 0)
+        {
+            return string.Empty;
+        }
+
+        return $"""width: {((double)column.Width / TableWidth * 100).ToString("F2")}%""";
+    }
+
+    private DataCellDto GetDataCellDto(DataColumnDefinition column)
+    {
+        var key = $"R{RowDefinition.RowIndex}C{column.ColumnIndex}";
+        return DataSectionDto.DataCells.TryGetValue(key, out var cell)
+            ? cell
+            : new DataCellDto { RowIndex = RowDefinition.RowIndex, ColumnIndex = column.ColumnIndex };
+    }
+}
