@@ -1,6 +1,7 @@
 @using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments
+@using BlazorServer.Modules.Reports.Domain.PrintableDocuments
+@implements IAsyncDisposable
 
-<script src="@Assets["Pageination/engine.js"]"></script>
 <HeadContent>
     <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
 </HeadContent>
@@ -8,7 +9,7 @@
     
 <div id="print-wrapper">
     
-    <div id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
+    <div @ref="RendererRoot" id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
         @if (ShowPaginationOverlay)
         {
             <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
@@ -20,53 +21,63 @@
             BodyBlockMap.Clear();
             foreach (var block in HeaderBlocks)
             {
-                <div class="header-block">
+                <div class="header-block" data-printable-region="header">
                     <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
             foreach (var block in BodyBlocks)
             {
                 RegisterBodyBlock(block);
-                <div class="body-block" data-id="@block.Id">
+                <div class="body-block" data-printable-region="body" data-printable-block-id="@block.Id" data-page-break-behavior="@block.PageBreakBehavior">
                     <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
             foreach (var block in FooterBlocks)
             {
-                <div class="footer-block">
+                <div class="footer-block" data-printable-region="footer">
                     <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
         }
         else
         {
-            foreach (var pageIndex in PageMap.Keys.Order())
+            if (PaginationErrors.Count > 0)
             {
-                <div class="@PageClass" style="@PageStyle">
+                foreach (var error in PaginationErrors)
+                {
+                    <MudAlert Severity="Severity.Error">@error.Message</MudAlert>
+                }
+            }
+            else
+            {
+                foreach (var pageIndex in PageMap.Keys.Order())
+                {
+                    <div class="@PageClass" style="@PageStyle">
 
-                    <div class="header">
-                        @foreach (var block in HeaderBlocks)
-                        {
-                            <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
-                        }
+                        <div class="header">
+                            @foreach (var block in HeaderBlocks)
+                            {
+                                <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                            }
+                        </div>
+
+                        <div class="body">
+                            @foreach (var id in PageMap[pageIndex])
+                            {
+                                var block = GetMappedBodyBlock(id);
+                                <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                            }
+                        </div>
+
+                        <div class="footer">
+                            @foreach (var block in FooterBlocks)
+                            {
+                                <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                            }
+                        </div>
                     </div>
 
-                    <div class="body">
-                        @foreach (var id in PageMap[pageIndex])
-                        {
-                            var block = GetMappedBodyBlock(id);
-                            <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
-                        }
-                    </div>
-
-                    <div class="footer">
-                        @foreach (var block in FooterBlocks)
-                        {
-                            <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
-                        }
-                    </div>
-                </div>
-
+                }
             }
         }
     </div>
@@ -122,7 +133,8 @@
     {
         "A4" => "A4",
         "A3" => "A3",
-        _ => "A4"
+        "A5" => "A5",
+        _ => string.Empty
     };
     bool IsPaginated { get; set; } = false;
     public PageSizeFormat LegacyPageFormat { get; set; } = PageSizeFormat.A4;
@@ -137,6 +149,13 @@
         { PageSizeFormat.A3, new PageFormat("A3", WidthMm: 297, HeightMm: 420) },
     };
     PageFormat RenderPageFormat => Document?.PageFormat ?? LegacyPageFormats[LegacyPageFormat];
+    BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument RenderDocument => Document ?? new(
+        Id: "legacy-printable-document",
+        ChangeToken: "legacy-render",
+        PageFormat: RenderPageFormat,
+        HeaderItems: HeaderBlocks,
+        BodyItems: BodyBlocks,
+        FooterItems: FooterBlocks);
     IReadOnlyList<PrintableBlock> HeaderBlocks => Document is null
         ? ToLegacyBlocks("header", HeaderComponents)
         : FlattenPrintableBlocks(Document.HeaderItems);
@@ -156,6 +175,10 @@
     /// key: page number, value: array of PrintableBlock ids on that page
     /// </summary>
     Dictionary<int, string[]> PageMap { get; set; } = new();
+    ElementReference RendererRoot { get; set; }
+    PrintableDocumentMeasurementAdapter? MeasurementAdapter { get; set; }
+    IReadOnlyList<PaginationIssue> PaginationWarnings { get; set; } = [];
+    IReadOnlyList<PaginationIssue> PaginationErrors { get; set; } = [];
 
     private static IReadOnlyList<PrintableBlock> ToLegacyBlocks(
         string idPrefix,
@@ -241,10 +264,26 @@
 
     public async Task Paginate()
     {
+        MeasurementAdapter ??= new PrintableDocumentMeasurementAdapter(JS);
+        var measurements = await MeasurementAdapter.MeasureAsync(RendererRoot);
+        var pagination = new PrintableDocumentPaginator().Paginate(RenderDocument, measurements);
+
+        PaginationWarnings = pagination.Warnings;
+        PaginationErrors = pagination.Errors;
+        PageMap = pagination.Pages.ToDictionary(
+            page => page.PageNumber,
+            page => page.BodyBlocks.Select(block => block.BlockId).ToArray());
         IsPaginated = true;
-        PageMap = await JS.InvokeAsync<Dictionary<int, string[]>>("pageinate", RenderPageFormat.HeightMm);
         StateHasChanged();
 
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (MeasurementAdapter is not null)
+        {
+            await MeasurementAdapter.DisposeAsync();
+        }
     }
     
 }
