@@ -1,3 +1,5 @@
+@using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments
+
 <script src="@Assets["Pageination/engine.js"]"></script>
 <HeadContent>
     <link href="@Assets["Pageination/styles.css"]" rel="stylesheet" />
@@ -6,32 +8,33 @@
     
 <div id="print-wrapper">
     
-    <div id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {PageSizes[PageFormat].widthMm}mm;")">
-        <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
-            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-        </MudOverlay>
+    <div id="print-root" class="d-flex flex-column gap-4 relative" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
+        @if (ShowPaginationOverlay)
+        {
+            <MudOverlay Absolute="true" DarkBackground="true" Visible="!IsPaginated">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </MudOverlay>
+        }
         @if (!IsPaginated)
         {
-            int BodyComponentId = 0;
-            IdComponentMap.Clear();
-            foreach (var component in HeaderComponents)
+            BodyBlockMap.Clear();
+            foreach (var block in HeaderBlocks)
             {
                 <div class="header-block">
-                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
+                    <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
-            foreach (var component in BodyComponents)
+            foreach (var block in BodyBlocks)
             {
-                BodyComponentId += 1;
-                IdComponentMap.Add(BodyComponentId, component);
-                <div class="body-block" data-id="@BodyComponentId">
-                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
+                BodyBlockMap[block.Id] = block;
+                <div class="body-block" data-id="@block.Id">
+                    <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
-            foreach (var component in FooterComponents)
+            foreach (var block in FooterBlocks)
             {
                 <div class="footer-block">
-                    @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
+                    <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                 </div>
             }
         }
@@ -42,23 +45,26 @@
                 <div class="@PageClass">
 
                     <div class="header">
-                        @foreach (var component in HeaderComponents)
+                        @foreach (var block in HeaderBlocks)
                         {
-                            @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
+                            <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                         }
                     </div>
 
                     <div class="body">
                         @foreach (var id in PageMap[pageIndex])
                         {
-                            @IComponentHtmlRenderer.Render(IdComponentMap[int.Parse(id)].ComponentType, IdComponentMap[int.Parse(id)].Parameters)
+                            if (BodyBlockMap.TryGetValue(id, out var block))
+                            {
+                                <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
+                            }
                         }
                     </div>
 
                     <div class="footer">
-                        @foreach (var component in FooterComponents)
+                        @foreach (var block in FooterBlocks)
                         {
-                            @IComponentHtmlRenderer.Render(component.ComponentType, component.Parameters)
+                            <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                         }
                     </div>
                 </div>
@@ -72,9 +78,10 @@
 
 
 @inject IJSRuntime JS
-@inject IComponentHtmlRenderer IComponentHtmlRenderer
 
 @code {
+    [Parameter] public BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument? Document { get; set; }
+    [Parameter] public bool ShowPaginationOverlay { get; set; } = true;
 
     /// <summary>
     /// ComponentType needs to be a Blazor Component
@@ -112,33 +119,95 @@
 
 
     string PageClass => $"page {FormatClass}";
-    string FormatClass => PageFormat switch
+    string FormatClass => RenderPageFormat.Name switch
     {
-        PageSizeFormat.A4 => "A4",
-        PageSizeFormat.A3 => "A3",
+        "A4" => "A4",
+        "A3" => "A3",
         _ => "A4"
     };
     bool IsPaginated { get; set; } = false;
-    public PageSizeFormat PageFormat { get; set; } = PageSizeFormat.A4;
+    public PageSizeFormat LegacyPageFormat { get; set; } = PageSizeFormat.A4;
     public enum PageSizeFormat
     {
         A4,
         A3,
     }
-    Dictionary<PageSizeFormat, (double widthMm, double heightMm)> PageSizes { get; set; } = new()
+    Dictionary<PageSizeFormat, PageFormat> LegacyPageFormats { get; set; } = new()
     {
-        { PageSizeFormat.A4, (210, 297) },
-        { PageSizeFormat.A3, (297, 420) },
+        { PageSizeFormat.A4, new PageFormat("A4", WidthMm: 210, HeightMm: 297) },
+        { PageSizeFormat.A3, new PageFormat("A3", WidthMm: 297, HeightMm: 420) },
     };
-    /// <summary>
-    /// key: Id value, value: list of components on that page
-    /// </summary>
-    Dictionary<int, (Type ComponentType, Dictionary<string, object> Parameters)> IdComponentMap { get; set; } = new();
+    PageFormat RenderPageFormat => Document?.PageFormat ?? LegacyPageFormats[LegacyPageFormat];
+    IReadOnlyList<PrintableBlock> HeaderBlocks => Document is null
+        ? ToLegacyBlocks("header", HeaderComponents)
+        : FlattenPrintableBlocks(Document.HeaderItems);
+    IReadOnlyList<PrintableBlock> BodyBlocks => Document is null
+        ? ToLegacyBlocks("body", BodyComponents)
+        : FlattenPrintableBlocks(Document.BodyItems);
+    IReadOnlyList<PrintableBlock> FooterBlocks => Document is null
+        ? ToLegacyBlocks("footer", FooterComponents)
+        : FlattenPrintableBlocks(Document.FooterItems);
 
     /// <summary>
-    /// key: page number, value: array of component ids on that page
+    /// key: PrintableBlock Id value, value: block rendered on that page
+    /// </summary>
+    Dictionary<string, PrintableBlock> BodyBlockMap { get; set; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// key: page number, value: array of PrintableBlock ids on that page
     /// </summary>
     Dictionary<int, string[]> PageMap { get; set; } = new();
+
+    private static IReadOnlyList<PrintableBlock> ToLegacyBlocks(
+        string idPrefix,
+        IReadOnlyList<(Type ComponentType, Dictionary<string, object> Parameters)> components)
+        => components
+            .Select((component, index) => new PrintableBlock(
+                $"{idPrefix}-{index + 1}",
+                component.ComponentType,
+                component.Parameters.ToDictionary(
+                    parameter => parameter.Key,
+                    parameter => (object?)parameter.Value,
+                    StringComparer.Ordinal)))
+            .ToArray();
+
+    private static IReadOnlyList<PrintableBlock> FlattenPrintableBlocks(IReadOnlyList<PrintableItem> items)
+    {
+        var blocks = new List<PrintableBlock>();
+        foreach (var item in items)
+        {
+            FlattenPrintableBlock(item, blocks);
+        }
+
+        return blocks;
+    }
+
+    private static void FlattenPrintableBlock(PrintableItem item, List<PrintableBlock> blocks)
+    {
+        switch (item)
+        {
+            case PrintableBlock block:
+                blocks.Add(block);
+                break;
+
+            case PrintableContainer container:
+                foreach (var child in container.Items)
+                {
+                    FlattenPrintableBlock(child, blocks);
+                }
+
+                break;
+
+            default:
+                throw new NotSupportedException($"Printable item '{item.Id}' has unsupported type '{item.GetType().Name}'.");
+        }
+    }
+
+    private static Dictionary<string, object?> ToDynamicParameters(PrintableBlock block)
+        => block.Parameters.ToDictionary(
+            parameter => parameter.Key,
+            parameter => parameter.Value,
+            StringComparer.Ordinal);
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
