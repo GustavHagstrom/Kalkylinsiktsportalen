@@ -28,7 +28,7 @@ public sealed class PrintableDocumentRendererTests
                 new PrintableContainer(
                     "body-container",
                     [
-                        Block("body", "body-text")
+                        Block("body", "body-text", PageBreakBehavior.After)
                     ])
             ],
             FooterItems:
@@ -43,6 +43,10 @@ public sealed class PrintableDocumentRendererTests
             Assert.That(html, Does.Contain("body-text"));
             Assert.That(html, Does.Contain("footer-text"));
             Assert.That(html, Does.Not.Contain("body-container"));
+            Assert.That(html, Does.Contain("data-printable-region=\"body\""));
+            Assert.That(html, Does.Contain("data-printable-block-id=\"body\""));
+            Assert.That(html, Does.Contain("data-page-break-behavior=\"After\""));
+            Assert.That(html, Does.Not.Contain("Pageination/engine.js"));
         });
     }
 
@@ -67,11 +71,15 @@ public sealed class PrintableDocumentRendererTests
         Assert.That(exception!.Message, Does.Contain("duplicate"));
     }
 
-    private static PrintableBlock Block(string id, string text)
+    private static PrintableBlock Block(
+        string id,
+        string text,
+        PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
         => new(
             id,
             typeof(TestPrintableContent),
-            new Dictionary<string, object?> { [nameof(TestPrintableContent.Text)] = text });
+            new Dictionary<string, object?> { [nameof(TestPrintableContent.Text)] = text },
+            pageBreakBehavior);
 
     private static async Task<string> RenderDocumentAsync(PrintableDocument document)
     {
