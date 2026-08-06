@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Reports.Domain.Views;
+
 namespace BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
 public class DataSection
@@ -5,6 +7,7 @@ public class DataSection
     private const double DefaultRowHeight = 8;
     private const int DefaultColumnWidth = 10;
 
+    public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
     public int RowsCount { get; set; } = 0;
     public int ColumnsCount { get; set; } = 0;
@@ -176,6 +179,9 @@ public class DataSection
 
     public void Normalize()
     {
+        if (string.IsNullOrWhiteSpace(SectionId))
+            SectionId = SectionIds.New();
+
         RowDefinitions ??= new List<RowDefinition>();
         ColumnDefinitions ??= new List<DataColumnDefinition>();
         DataCells ??= new Dictionary<string, DataCell>();

@@ -21,6 +21,7 @@ public class ViewTests
 
         Assert.Multiple(() =>
         {
+            Assert.That(section.SectionId, Is.Not.Empty);
             Assert.That(section.SectionIndex, Is.EqualTo(1));
             Assert.That(section.RowsCount, Is.EqualTo(3));
             Assert.That(section.ColumnsCount, Is.EqualTo(3));
@@ -34,10 +35,10 @@ public class ViewTests
     }
 
     [Test]
-    public void RemoveDataSection_CollapsesFollowingSectionIndexes()
+    public void RemoveDataSection_CollapsesFollowingSectionIndexesWithoutChangingSectionIdentity()
     {
-        var removedSection = new DataSection { SectionIndex = 0 };
-        var remainingSection = new SheetSection { SectionIndex = 1 };
+        var removedSection = new DataSection { SectionId = "removed-section", SectionIndex = 0 };
+        var remainingSection = new SheetSection { SectionId = "remaining-section", SectionIndex = 1 };
         var view = new View
         {
             DataSections = new List<DataSection> { removedSection },
@@ -48,7 +49,27 @@ public class ViewTests
         Assert.Multiple(() =>
         {
             Assert.That(view.DataSections, Is.Empty);
+            Assert.That(remainingSection.SectionId, Is.EqualTo("remaining-section"));
             Assert.That(remainingSection.SectionIndex, Is.EqualTo(0));
+        });
+    }
+
+    [Test]
+    public void Normalize_AssignsMissingSectionIdsForHydratedLegacySections()
+    {
+        var view = new View
+        {
+            DataSections = new List<DataSection> { new() { SectionId = "", SectionIndex = 0 } },
+            SheetSections = new List<SheetSection> { new() { SectionId = "", SectionIndex = 1 } }
+        };
+
+        view.Normalize();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(view.DataSections[0].SectionId, Is.Not.Empty);
+            Assert.That(view.SheetSections[0].SectionId, Is.Not.Empty);
+            Assert.That(view.DataSections[0].SectionId, Is.Not.EqualTo(view.SheetSections[0].SectionId));
         });
     }
 }

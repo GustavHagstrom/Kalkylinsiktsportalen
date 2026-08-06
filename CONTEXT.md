@@ -90,6 +90,10 @@ _Avoid_: utkastversion
 Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`.
 _Avoid_: mall, dokument
 
+**SectionId**:
+Stabil identitet för en sektion inom en `View`. En `SectionId` följer sektionen när den flyttas och används när andra modeller eller renderingsspårning behöver peka på samma sektion över tid.
+_Avoid_: SectionIndex när identiteten måste vara stabil
+
 **Change-enabled View**:
 `View` där `EnableChanges` är aktiverat och där användare med rätt att använda vyn får göra delade view-lokala `ReplacementSelection`.
 _Avoid_: Ändringsbar view

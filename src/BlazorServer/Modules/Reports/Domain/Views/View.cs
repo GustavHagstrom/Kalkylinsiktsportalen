@@ -74,12 +74,32 @@ public class View
         DataSections ??= new List<DataSectionModel>();
         SheetSections ??= new List<SheetSectionModel>();
 
+        EnsureSectionIdentities();
+
         var orderedSections = GetSectionHandles()
             .OrderBy(x => x.SectionIndex)
             .ToList();
 
         for (var index = 0; index < orderedSections.Count; index++)
             orderedSections[index].SetSectionIndex(index);
+    }
+
+    public void EnsureSectionIdentities()
+    {
+        DataSections ??= new List<DataSectionModel>();
+        SheetSections ??= new List<SheetSectionModel>();
+
+        foreach (var section in DataSections)
+        {
+            if (string.IsNullOrWhiteSpace(section.SectionId))
+                section.SectionId = SectionIds.New();
+        }
+
+        foreach (var section in SheetSections)
+        {
+            if (string.IsNullOrWhiteSpace(section.SectionId))
+                section.SectionId = SectionIds.New();
+        }
     }
 
     private void CollapseSectionIndexesAfter(int removedSectionIndex)

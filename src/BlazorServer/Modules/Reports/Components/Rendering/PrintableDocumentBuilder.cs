@@ -15,6 +15,7 @@ public sealed class PrintableDocumentBuilder
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(renderingContext);
+        view.EnsureSectionIdentities();
 
         return new PrintableDocument(
             Id: $"report-view-{view.Id.Value}",
@@ -47,11 +48,11 @@ public sealed class PrintableDocumentBuilder
 
     private static PrintableContainer BuildDataSectionItem(DataSection section)
         => new(
-            $"data-section-{section.SectionIndex}",
+            $"data-section-{section.SectionId}",
             section.RowDefinitions
                 .OrderBy(row => row.RowIndex)
                 .Select(row => new PrintableBlock(
-                    $"data-section-{section.SectionIndex}-row-{row.RowIndex}",
+                    $"data-section-{section.SectionId}-row-{row.RowIndex}",
                     typeof(DataSectionRowComponent),
                     new Dictionary<string, object?>
                     {
@@ -62,10 +63,10 @@ public sealed class PrintableDocumentBuilder
 
     private static PrintableContainer BuildSheetSectionItem(SheetSection section)
         => new(
-            $"sheet-section-{section.SectionIndex}",
+            $"sheet-section-{section.SectionId}",
             Enum.GetValues<RowType>()
                 .Select(rowType => new PrintableBlock(
-                    $"sheet-section-{section.SectionIndex}-row-{rowType}",
+                    $"sheet-section-{section.SectionId}-row-{rowType}",
                     typeof(SheetSectionRowComponent),
                     new Dictionary<string, object?>
                     {

@@ -23,6 +23,7 @@ public class ReportsViewPersistenceTests
             [
                 new DataSection
                 {
+                    SectionId = "data-section-1",
                     SectionIndex = 1,
                     RowsCount = 2,
                     ColumnsCount = 2,
@@ -51,6 +52,7 @@ public class ReportsViewPersistenceTests
             [
                 new SheetSection
                 {
+                    SectionId = "sheet-section-1",
                     SectionIndex = 2,
                     Content = "TenderSheet",
                     SheetCells =
@@ -77,11 +79,13 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
             Assert.That(roundTripped.DataSections, Has.Count.EqualTo(1));
+            Assert.That(roundTripped.DataSections[0].SectionId, Is.EqualTo("data-section-1"));
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].RawValue, Is.EqualTo("=1+2"));
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].TextFormat.Type, Is.EqualTo(TextType.Number));
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].TextFormat.IsBold, Is.True);
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].CellFormat.BackgroundColor, Is.EqualTo("#ffeecc"));
             Assert.That(roundTripped.SheetSections, Has.Count.EqualTo(1));
+            Assert.That(roundTripped.SheetSections[0].SectionId, Is.EqualTo("sheet-section-1"));
             Assert.That(roundTripped.SheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
         });
     }

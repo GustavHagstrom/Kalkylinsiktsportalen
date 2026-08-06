@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Reports.Domain.Views;
+
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 
 public class SheetSection
@@ -17,10 +19,19 @@ public class SheetSection
             }
         }
     }
+    public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
     public string Content { get; set; } = string.Empty;
     /// <summary>
     /// Key: $"{rowType}-{columnType}"
     /// </summary>
     public Dictionary<string, SheetCell> SheetCells { get; set; } = new();
+
+    public void Normalize()
+    {
+        if (string.IsNullOrWhiteSpace(SectionId))
+            SectionId = SectionIds.New();
+
+        SheetCells ??= new Dictionary<string, SheetCell>();
+    }
 }

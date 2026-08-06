@@ -38,6 +38,7 @@ public sealed record ReportRenderingContext
     public static ReportRenderingContext ForViewPreview(View view)
     {
         ArgumentNullException.ThrowIfNull(view);
+        view.EnsureSectionIdentities();
 
         var viewReference = view.Id.Value;
         return new ReportRenderingContext(
