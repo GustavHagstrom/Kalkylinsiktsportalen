@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PaginatedDocumentRenderer;
-using ReportPrintableDocument = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocument;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -19,7 +18,7 @@ public sealed class PrintableDocumentRendererTests
         var document = new PrintableDocument(
             Id: "demo-document",
             ChangeToken: "change-1",
-            PageFormat: new PageFormat("A4", WidthMm: 210, HeightMm: 297),
+            PageFormat: PageFormat.A4,
             HeaderItems:
             [
                 Block("header", "header-text")
@@ -29,8 +28,9 @@ public sealed class PrintableDocumentRendererTests
                 new PrintableContainer(
                     "body-container",
                     [
-                        Block("body", "body-text", PageBreakBehavior.After)
-                    ])
+                        Block("body", "body-text")
+                    ],
+                    PageBreakBehavior.After)
             ],
             FooterItems:
             [
@@ -58,7 +58,7 @@ public sealed class PrintableDocumentRendererTests
         var document = new PrintableDocument(
             Id: "demo-document",
             ChangeToken: "change-1",
-            PageFormat: new PageFormat("A4", WidthMm: 210, HeightMm: 297),
+            PageFormat: PageFormat.A4,
             HeaderItems: [],
             BodyItems:
             [
@@ -82,7 +82,7 @@ public sealed class PrintableDocumentRendererTests
             "Reports",
             "Views",
             "Rendering",
-            "PrintableDocument.razor"));
+            "PaginatedDocumentRenderer.razor"));
 
         Assert.Multiple(() =>
         {
@@ -124,7 +124,7 @@ public sealed class PrintableDocumentRendererTests
 
         return await renderer.Dispatcher.InvokeAsync(async () =>
         {
-            var output = await renderer.RenderComponentAsync<ReportPrintableDocument>(
+            var output = await renderer.RenderComponentAsync<ReportPaginatedDocumentRenderer>(
                 ParameterView.FromDictionary(new Dictionary<string, object?>
                 {
                     ["Document"] = document,

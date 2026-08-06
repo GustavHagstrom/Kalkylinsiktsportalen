@@ -61,11 +61,6 @@
             box-shadow: var(--mud-elevation-4);
         }
 
-        .A4 {
-            width: 210mm;
-            height: 297mm;
-        }
-
         .page .body {
             flex-grow: 1;
         }
@@ -128,7 +123,7 @@
             {
                 foreach (var page in RendererState.Pages.OrderBy(page => page.PageNumber))
                 {
-                    <div class="@PageClass" style="@PageStyle">
+                    <div class="page" style="@PageStyle">
 
                         <div class="header">
                             @foreach (var block in HeaderBlocks)
@@ -170,42 +165,6 @@
     [Parameter] public BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument? Document { get; set; }
     [Parameter] public bool ShowPaginationOverlay { get; set; } = true;
 
-    /// <summary>
-    /// ComponentType needs to be a Blazor Component
-    /// </summary>
-    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> BodyComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 1" } }),
-        new (typeof(Demo3), new()),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 3" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 4" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 5" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 6" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 7" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 8" } }),
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Komponent 9" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Komponent 10" } }),
-    ];
-    /// <summary>
-    /// ComponentType needs to be a Blazor Component
-    /// </summary>
-    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> HeaderComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Header Komponent 1" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Header Komponent 2" } }),
-
-    ];
-    /// <summary>
-    /// ComponentType needs to be a Blazor Component
-    /// </summary>
-    [Parameter] public List<(Type ComponentType, Dictionary<string, object> Parameters)> FooterComponents { get; set; } =
-    [
-        new (typeof(Demo), new Dictionary<string, object>() { { nameof(Demo.Test), "Footer Komponent 1" } }),
-        new (typeof(Demo2), new Dictionary<string, object>() { { nameof(Demo2.Test), "Footer Komponent 2" } }),
-    ];
-
-
-    string PageClass => $"page {FormatClass}";
     string PageStyle => $"width: {RenderPageFormat.WidthMm}mm; height: {RenderPageFormat.HeightMm}mm;";
     string RendererStatusText => RendererState.Status switch
     {
@@ -215,42 +174,19 @@
         PrintableRendererStatus.Ready => "Printable document preview ready",
         _ => "Printable document renderer"
     };
-    string FormatClass => RenderPageFormat.Name switch
-    {
-        "A4" => "A4",
-        "A3" => "A3",
-        "A5" => "A5",
-        _ => string.Empty
-    };
     PrintableDocumentRendererState RendererState { get; } = new();
-    public PageSizeFormat LegacyPageFormat { get; set; } = PageSizeFormat.A4;
-    public enum PageSizeFormat
-    {
-        A4,
-        A3,
-    }
-    Dictionary<PageSizeFormat, PageFormat> LegacyPageFormats { get; set; } = new()
-    {
-        { PageSizeFormat.A4, new PageFormat("A4", WidthMm: 210, HeightMm: 297) },
-        { PageSizeFormat.A3, new PageFormat("A3", WidthMm: 297, HeightMm: 420) },
-    };
-    PageFormat RenderPageFormat => Document?.PageFormat ?? LegacyPageFormats[LegacyPageFormat];
+    static PageFormat DefaultPageFormat { get; } = PageFormat.A4;
+    PageFormat RenderPageFormat => Document?.PageFormat ?? DefaultPageFormat;
     BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument RenderDocument => Document ?? new(
-        Id: "legacy-printable-document",
-        ChangeToken: "legacy-render",
+        Id: "empty-paginated-document",
+        ChangeToken: "empty",
         PageFormat: RenderPageFormat,
-        HeaderItems: HeaderBlocks,
-        BodyItems: BodyBlocks,
-        FooterItems: FooterBlocks);
-    IReadOnlyList<PrintableBlock> HeaderBlocks => Document is null
-        ? ToLegacyBlocks("header", HeaderComponents)
-        : FlattenPrintableBlocks(Document.HeaderItems);
-    IReadOnlyList<PrintableBlock> BodyBlocks => Document is null
-        ? ToLegacyBlocks("body", BodyComponents)
-        : FlattenPrintableBlocks(Document.BodyItems);
-    IReadOnlyList<PrintableBlock> FooterBlocks => Document is null
-        ? ToLegacyBlocks("footer", FooterComponents)
-        : FlattenPrintableBlocks(Document.FooterItems);
+        HeaderItems: [],
+        BodyItems: [],
+        FooterItems: []);
+    IReadOnlyList<PrintableBlock> HeaderBlocks => FlattenPrintableBlocks(RenderDocument.HeaderItems);
+    IReadOnlyList<PrintableBlock> BodyBlocks => FlattenPrintableBlocks(RenderDocument.BodyItems);
+    IReadOnlyList<PrintableBlock> FooterBlocks => FlattenPrintableBlocks(RenderDocument.FooterItems);
 
     /// <summary>
     /// key: PrintableBlock Id value, value: block rendered on that page
@@ -260,19 +196,6 @@
     ElementReference RendererRoot { get; set; }
     ElementReference RendererWrapper { get; set; }
     PrintableDocumentMeasurementAdapter? MeasurementAdapter { get; set; }
-
-    private static IReadOnlyList<PrintableBlock> ToLegacyBlocks(
-        string idPrefix,
-        IReadOnlyList<(Type ComponentType, Dictionary<string, object> Parameters)> components)
-        => components
-            .Select((component, index) => new PrintableBlock(
-                $"{idPrefix}-{index + 1}",
-                component.ComponentType,
-                component.Parameters.ToDictionary(
-                    parameter => parameter.Key,
-                    parameter => (object?)parameter.Value,
-                    StringComparer.Ordinal)))
-            .ToArray();
 
     private static IReadOnlyList<PrintableBlock> FlattenPrintableBlocks(IReadOnlyList<PrintableItem> items)
     {
@@ -294,9 +217,21 @@
                 break;
 
             case PrintableContainer container:
+                var firstDescendantIndex = blocks.Count;
                 foreach (var child in container.Items)
                 {
                     FlattenPrintableBlock(child, blocks);
+                }
+
+                if (container.PageBreakBehavior == PageBreakBehavior.After && blocks.Count > firstDescendantIndex)
+                {
+                    var lastIndex = blocks.Count - 1;
+                    var lastBlock = blocks[lastIndex];
+                    blocks[lastIndex] = new PrintableBlock(
+                        lastBlock.Id,
+                        lastBlock.ComponentType,
+                        lastBlock.Parameters,
+                        PageBreakBehavior.After);
                 }
 
                 break;

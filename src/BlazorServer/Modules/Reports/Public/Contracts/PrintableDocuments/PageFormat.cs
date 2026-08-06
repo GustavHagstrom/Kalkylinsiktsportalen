@@ -2,7 +2,11 @@ namespace BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments;
 
 public sealed record PageFormat
 {
-    public PageFormat(string Name, decimal WidthMm, decimal HeightMm)
+    public static PageFormat A3 { get; } = new("A3", WidthMm: 297, HeightMm: 420);
+    public static PageFormat A4 { get; } = new("A4", WidthMm: 210, HeightMm: 297);
+    public static PageFormat A5 { get; } = new("A5", WidthMm: 148, HeightMm: 210);
+
+    private PageFormat(string Name, decimal WidthMm, decimal HeightMm)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(Name);
         if (WidthMm <= 0)

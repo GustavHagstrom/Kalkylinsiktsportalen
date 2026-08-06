@@ -29,14 +29,24 @@ public sealed class PrintableDocumentPaginationTests
     }
 
     [Test]
-    public void PrintableDocumentModel_RequiresIdentityChangeTokenAndValidPageFormat()
+    public void PrintableDocumentModel_RequiresIdentityChangeTokenAndUsesPresetPageFormats()
     {
         Assert.Multiple(() =>
         {
             Assert.Throws<ArgumentException>(() => CreateDocument([], id: ""));
             Assert.Throws<ArgumentException>(() => CreateDocument([], changeToken: ""));
-            Assert.Throws<ArgumentException>(() => new PageFormat("Invalid", WidthMm: 0, HeightMm: 100));
-            Assert.Throws<ArgumentException>(() => new PageFormat("Invalid", WidthMm: 100, HeightMm: 0));
+            Assert.That(PageFormat.A3.Name, Is.EqualTo("A3"));
+            Assert.That(PageFormat.A3.WidthMm, Is.EqualTo(297m));
+            Assert.That(PageFormat.A3.HeightMm, Is.EqualTo(420m));
+            Assert.That(PageFormat.A4.Name, Is.EqualTo("A4"));
+            Assert.That(PageFormat.A4.WidthMm, Is.EqualTo(210m));
+            Assert.That(PageFormat.A4.HeightMm, Is.EqualTo(297m));
+            Assert.That(PageFormat.A5.Name, Is.EqualTo("A5"));
+            Assert.That(PageFormat.A5.WidthMm, Is.EqualTo(148m));
+            Assert.That(PageFormat.A5.HeightMm, Is.EqualTo(210m));
+            Assert.That(
+                typeof(PageFormat).GetConstructors(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance),
+                Is.Empty);
             Assert.Throws<ArgumentException>(() => new PrintableBlockMeasurement("", HeightMm: 10));
             Assert.Throws<ArgumentException>(() => new PrintableBlockMeasurement("block", HeightMm: 0));
             Assert.Throws<ArgumentNullException>(() => new PrintableDocumentMeasurements(
@@ -102,9 +112,9 @@ public sealed class PrintableDocumentPaginationTests
             FooterHeightMm: 10,
             BodyBlocks:
             [
-                new PrintableBlockMeasurement("first", 50),
-                new PrintableBlockMeasurement("second", 30),
-                new PrintableBlockMeasurement("third", 10)
+                new PrintableBlockMeasurement("first", 100),
+                new PrintableBlockMeasurement("second", 80),
+                new PrintableBlockMeasurement("third", 20)
             ]);
         var paginator = new PrintableDocumentPaginator();
 
@@ -203,8 +213,8 @@ public sealed class PrintableDocumentPaginationTests
                 Block("second")
             ]);
         var measurements = new PrintableDocumentMeasurements(
-            HeaderHeightMm: 20,
-            FooterHeightMm: 30,
+            HeaderHeightMm: 80,
+            FooterHeightMm: 80,
             BodyBlocks:
             [
                 new PrintableBlockMeasurement("first", 50),
@@ -233,7 +243,7 @@ public sealed class PrintableDocumentPaginationTests
                 Block("too-tall"),
                 Block("after")
             ]);
-        var measurements = Measurements(("before", 10), ("too-tall", 81), ("after", 10));
+        var measurements = Measurements(("before", 10), ("too-tall", 191), ("after", 10));
         var paginator = new PrintableDocumentPaginator();
 
         var result = paginator.Paginate(document, measurements);
@@ -302,7 +312,7 @@ public sealed class PrintableDocumentPaginationTests
         => new(
             Id: id,
             ChangeToken: changeToken,
-            PageFormat: new PageFormat("Test", WidthMm: 100, HeightMm: 100),
+            PageFormat: PageFormat.A5,
             HeaderItems: [],
             BodyItems: bodyItems,
             FooterItems: []);

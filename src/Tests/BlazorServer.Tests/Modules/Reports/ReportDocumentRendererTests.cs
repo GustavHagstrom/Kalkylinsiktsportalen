@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using PrintableDocumentContract = BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument;
-using ReportPrintableDocument = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocument;
+using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PaginatedDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -189,7 +189,7 @@ public sealed class ReportDocumentRendererTests
 
         return await renderer.Dispatcher.InvokeAsync(async () =>
         {
-            var output = await renderer.RenderComponentAsync<ReportPrintableDocument>(
+            var output = await renderer.RenderComponentAsync<ReportPaginatedDocumentRenderer>(
                 ParameterView.FromDictionary(new Dictionary<string, object?>
                 {
                     ["Document"] = document,

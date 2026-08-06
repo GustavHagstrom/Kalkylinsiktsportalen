@@ -22,7 +22,7 @@ public sealed record ReportRenderingContext
         this.EstimationSnapshotReference = EstimationSnapshotReference;
         this.ViewScopedChangeSetReference = ViewScopedChangeSetReference;
         this.PrintableContentChangeToken = PrintableContentChangeToken;
-        this.PageFormat = PageFormat ?? new PageFormat("A4", WidthMm: 210, HeightMm: 297);
+        this.PageFormat = PageFormat ?? PageFormat.A4;
         this.Values = new Dictionary<string, string>(
             Values ?? new Dictionary<string, string>(),
             StringComparer.Ordinal);

@@ -12,26 +12,26 @@ public sealed class PrintableDocumentRendererStateTests
     public void SetDocument_MarksPaginationStaleOnlyWhenPaginationKeyChanges()
     {
         var state = new PrintableDocumentRendererState();
-        var document = Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297));
+        var document = Document("document-1", "change-1", PageFormat.A4);
 
         state.SetDocument(document);
         state.MarkPaginating();
         state.MarkReady(EmptyPagination());
 
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         Assert.That(state.NeedsMeasurement, Is.False);
 
-        state.SetDocument(Document("document-2", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-2", "change-1", PageFormat.A4));
         Assert.That(state.NeedsMeasurement, Is.True);
 
         state.MarkPaginating();
         state.MarkReady(EmptyPagination());
-        state.SetDocument(Document("document-2", "change-2", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-2", "change-2", PageFormat.A4));
         Assert.That(state.NeedsMeasurement, Is.True);
 
         state.MarkPaginating();
         state.MarkReady(EmptyPagination());
-        state.SetDocument(Document("document-2", "change-2", new PageFormat("A3", WidthMm: 297, HeightMm: 420)));
+        state.SetDocument(Document("document-2", "change-2", PageFormat.A3));
         Assert.That(state.NeedsMeasurement, Is.True);
     }
 
@@ -39,7 +39,7 @@ public sealed class PrintableDocumentRendererStateTests
     public void MarkReady_ExposesReadyPagesOrBlockingErrors()
     {
         var state = new PrintableDocumentRendererState();
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         state.MarkPaginating();
 
         state.MarkReady(new PrintablePaginationResult(
@@ -60,7 +60,7 @@ public sealed class PrintableDocumentRendererStateTests
             Assert.That(state.Errors, Is.Empty);
         });
 
-        state.SetDocument(Document("document-1", "change-2", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-2", PageFormat.A4));
         state.MarkPaginating();
         state.MarkReady(new PrintablePaginationResult(
             Pages: [],
@@ -82,7 +82,7 @@ public sealed class PrintableDocumentRendererStateTests
     public void MarkReady_KeepsPlacementGeometryForReadyPreview()
     {
         var state = new PrintableDocumentRendererState();
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         state.MarkPaginating();
 
         state.MarkReady(new PrintablePaginationResult(
@@ -112,7 +112,7 @@ public sealed class PrintableDocumentRendererStateTests
     public void RequestRefresh_MarksCurrentDocumentStaleWithoutChangingTheDocumentKey()
     {
         var state = new PrintableDocumentRendererState();
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         state.MarkPaginating();
         state.MarkReady(EmptyPagination());
 
@@ -129,7 +129,7 @@ public sealed class PrintableDocumentRendererStateTests
     public void GetPrintReadiness_AllowsPrintOnlyWhenCurrentPreviewIsReadyAndValid()
     {
         var state = new PrintableDocumentRendererState();
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.NotReady));
 
         state.MarkPaginating();
@@ -138,7 +138,7 @@ public sealed class PrintableDocumentRendererStateTests
         state.MarkReady(EmptyPagination());
         Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.Ready));
 
-        state.SetDocument(Document("document-1", "change-2", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-2", PageFormat.A4));
         Assert.That(state.GetPrintReadiness().Status, Is.EqualTo(PrintableDocumentPrintStatus.NotReady));
 
         state.MarkPaginating();
@@ -159,7 +159,7 @@ public sealed class PrintableDocumentRendererStateTests
     public void MarkError_PreventsReadyPagesAfterMeasurementFailure()
     {
         var state = new PrintableDocumentRendererState();
-        state.SetDocument(Document("document-1", "change-1", new PageFormat("A4", WidthMm: 210, HeightMm: 297)));
+        state.SetDocument(Document("document-1", "change-1", PageFormat.A4));
         state.MarkPaginating();
 
         state.MarkError(new PaginationIssue(PaginationIssueCode.MeasurementFailed, "Could not measure document."));

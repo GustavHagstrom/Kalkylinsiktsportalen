@@ -25,7 +25,7 @@ public sealed class PrintableDocumentMeasurementAdapterTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(jsRuntime.ImportedModulePath, Is.EqualTo("./Modules/Reports/Views/Rendering/PrintableDocument.razor.js"));
+            Assert.That(jsRuntime.ImportedModulePath, Is.EqualTo("./Modules/Reports/Views/Rendering/PaginatedDocumentRenderer.razor.js"));
             Assert.That(jsRuntime.Module.InvokedIdentifier, Is.EqualTo("measure"));
             Assert.That(measurements.HeaderHeightMm, Is.EqualTo(25.4m));
             Assert.That(measurements.FooterHeightMm, Is.EqualTo(12.7m));
@@ -48,7 +48,7 @@ public sealed class PrintableDocumentMeasurementAdapterTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(jsRuntime.ImportedModulePath, Is.EqualTo("./Modules/Reports/Views/Rendering/PrintableDocument.razor.js"));
+            Assert.That(jsRuntime.ImportedModulePath, Is.EqualTo("./Modules/Reports/Views/Rendering/PaginatedDocumentRenderer.razor.js"));
             Assert.That(jsRuntime.Module.InvokedIdentifier, Is.EqualTo("print"));
             Assert.That(printed, Is.True);
         });

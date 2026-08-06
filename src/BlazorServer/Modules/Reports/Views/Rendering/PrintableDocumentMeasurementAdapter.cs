@@ -7,7 +7,7 @@ namespace BlazorServer.Modules.Reports.Views.Rendering;
 
 internal sealed class PrintableDocumentMeasurementAdapter(IJSRuntime jsRuntime) : IAsyncDisposable
 {
-    private const string ModulePath = "./Modules/Reports/Views/Rendering/PrintableDocument.razor.js";
+    private const string ModulePath = "./Modules/Reports/Views/Rendering/PaginatedDocumentRenderer.razor.js";
     private const decimal PixelsPerMillimeter = 96m / 25.4m;
 
     private IJSObjectReference? module;

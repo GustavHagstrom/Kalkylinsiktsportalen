@@ -29,12 +29,6 @@
     <Folder Include="Modules\Bidcon\Features\GetEstimationList\" />
   </ItemGroup>
 
-
-  <!--<ItemGroup>
-    <None Include="wwwroot\Pageination\styles.css" />
-    <None Include="wwwroot\Pageination\engine.js" />
-  </ItemGroup>-->
-
   <!--<ItemGroup>
     <Folder Include="Shared\Components\Settings\Common\" />
     <Folder Include="Shared\Services\Bidcon\" />
