@@ -13,7 +13,7 @@ public class ReportsViewPersistenceTests
     [Test]
     public void ViewMappingsPreserveViewIdentitySectionsAndFormatting()
     {
-        var view = new ViewDto
+        var view = new View
         {
             Id = new ViewId("view-1"),
             OrganizationId = new OrganizationId("org-1"),
@@ -21,25 +21,25 @@ public class ReportsViewPersistenceTests
             Description = "For review",
             DataSections =
             [
-                new DataSectionDto
+                new DataSection
                 {
                     SectionIndex = 1,
                     RowsCount = 2,
                     ColumnsCount = 2,
                     DataCells =
                     {
-                        ["R0C0"] = new DataCellDto
+                        ["R0C0"] = new DataCell
                         {
                             RowIndex = 0,
                             ColumnIndex = 0,
                             RawValue = "=1+2",
-                            TextFormat = new TextFormatDto
+                            TextFormat = new TextFormat
                             {
                                 Type = TextType.Number,
                                 DecimalCount = 0,
                                 IsBold = true
                             },
-                            CellFormat = new CellFormatDto
+                            CellFormat = new CellFormat
                             {
                                 BackgroundColor = "#ffeecc"
                             }
@@ -49,13 +49,13 @@ public class ReportsViewPersistenceTests
             ],
             SheetSections =
             [
-                new SheetSectionDto
+                new SheetSection
                 {
                     SectionIndex = 2,
                     Content = "TenderSheet",
                     SheetCells =
                     {
-                        ["Group-Description"] = new SheetCellDto
+                        ["Group-Description"] = new SheetCell
                         {
                             RowType = RowType.Group,
                             ColumnType = ColumnType.Description,
@@ -67,7 +67,7 @@ public class ReportsViewPersistenceTests
         };
 
         var mongoView = ViewMappings.ToMongo(view);
-        var roundTripped = ViewMappings.ToDto(mongoView);
+        var roundTripped = ViewMappings.ToDomain(mongoView);
 
         Assert.Multiple(() =>
         {

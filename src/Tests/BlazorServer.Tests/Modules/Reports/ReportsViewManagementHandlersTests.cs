@@ -38,7 +38,7 @@ public sealed class ReportsViewManagementHandlersTests
     public async Task ListViews_ReturnsViewsFromPortForOrganization()
     {
         var organizationId = new OrganizationId("org-1");
-        var expected = new ViewDto { OrganizationId = organizationId, Name = "Tender report" };
+        var expected = new View { OrganizationId = organizationId, Name = "Tender report" };
         var store = new RecordingViewStore { AllViews = [expected] };
         var handler = new ListViewsQueryHandler(store);
 
@@ -57,7 +57,7 @@ public sealed class ReportsViewManagementHandlersTests
     public async Task GetView_ReturnsViewFromPort()
     {
         var viewId = new ViewId("view-1");
-        var expected = new ViewDto { Id = viewId, Name = "Tender report" };
+        var expected = new View { Id = viewId, Name = "Tender report" };
         var store = new RecordingViewStore { View = expected };
         var handler = new GetViewQueryHandler(store);
 
@@ -72,7 +72,7 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = new ViewDto
+        var existing = new View
         {
             Id = viewId,
             OrganizationId = organizationId,
@@ -127,7 +127,7 @@ public sealed class ReportsViewManagementHandlersTests
         var requestedOrganizationId = new OrganizationId("org-2");
         var store = new RecordingViewStore
         {
-            View = new ViewDto
+            View = new View
             {
                 Id = viewId,
                 OrganizationId = new OrganizationId("org-1"),
@@ -146,27 +146,27 @@ public sealed class ReportsViewManagementHandlersTests
 
     private sealed class RecordingViewStore : IViewStore
     {
-        public List<ViewDto> AllViews { get; init; } = [];
-        public ViewDto? View { get; init; }
-        public ViewDto? Upserted { get; private set; }
+        public List<View> AllViews { get; init; } = [];
+        public View? View { get; init; }
+        public View? Upserted { get; private set; }
         public OrganizationId? ListedOrganizationId { get; private set; }
         public ViewId? LoadedViewId { get; private set; }
 
         public Task DeleteAsync(ViewId viewId) => Task.CompletedTask;
 
-        public Task<List<ViewDto>> GetAllAsync(OrganizationId orgId)
+        public Task<List<View>> GetAllAsync(OrganizationId orgId)
         {
             ListedOrganizationId = orgId;
             return Task.FromResult(AllViews);
         }
 
-        public Task<ViewDto?> GetAsync(ViewId viewId)
+        public Task<View?> GetAsync(ViewId viewId)
         {
             LoadedViewId = viewId;
             return Task.FromResult(View);
         }
 
-        public Task UpsertAsync(ViewDto view)
+        public Task UpsertAsync(View view)
         {
             Upserted = view;
             return Task.CompletedTask;

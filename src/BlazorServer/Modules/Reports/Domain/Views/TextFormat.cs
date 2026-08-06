@@ -1,6 +1,6 @@
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
-public class TextFormatDto
+public class TextFormat
 {
     public string FontFamily { get; set; } = "Calibri";
     public string Color { get; set; } = "#000000";

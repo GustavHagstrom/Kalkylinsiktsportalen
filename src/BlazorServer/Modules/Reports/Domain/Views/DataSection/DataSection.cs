@@ -1,23 +1,39 @@
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+namespace BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
-namespace BlazorServer.Modules.Reports.Domain.Views.Editing;
-
-public class DataSectionEditor
+public class DataSection
 {
     private const double DefaultRowHeight = 8;
     private const int DefaultColumnWidth = 10;
 
-    public DataSectionEditor(DataSectionDto dataSection)
-    {
-        DataSection = dataSection ?? throw new ArgumentNullException(nameof(dataSection));
-        Normalize();
-    }
+    public int SectionIndex { get; set; } = 0;
+    public int RowsCount { get; set; } = 0;
+    public int ColumnsCount { get; set; } = 0;
+    /// <summary>
+    /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
+    /// </summary>
+    public Dictionary<string, DataCell> DataCells { get; set; } = new();
+    public List<RowDefinition> RowDefinitions { get; set; } = new();
+    public List<DataColumnDefinition> ColumnDefinitions { get; set; } = new();
 
-    public DataSectionDto DataSection { get; }
-    public IReadOnlyList<RowDefinition> Rows => DataSection.RowDefinitions;
-    public IReadOnlyList<DataColumnDefinition> Columns => DataSection.ColumnDefinitions;
-    public int RowsCount => DataSection.RowsCount;
-    public int ColumnsCount => DataSection.ColumnsCount;
+    public IReadOnlyList<RowDefinition> Rows => RowDefinitions;
+    public IReadOnlyList<DataColumnDefinition> Columns => ColumnDefinitions;
+
+    public static DataSection CreateDefault(int sectionIndex)
+    {
+        var section = new DataSection
+        {
+            SectionIndex = sectionIndex
+        };
+
+        section.AddColumn();
+        section.AddColumn();
+        section.AddColumn();
+        section.AddRow();
+        section.AddRow();
+        section.AddRow();
+
+        return section;
+    }
 
     public void Initialize(int rowsCount, int columnsCount)
     {
@@ -27,11 +43,11 @@ public class DataSectionEditor
         if (columnsCount < 0)
             throw new ArgumentOutOfRangeException(nameof(columnsCount));
 
-        DataSection.RowDefinitions.Clear();
-        DataSection.ColumnDefinitions.Clear();
-        DataSection.DataCells.Clear();
-        DataSection.RowsCount = 0;
-        DataSection.ColumnsCount = 0;
+        RowDefinitions.Clear();
+        ColumnDefinitions.Clear();
+        DataCells.Clear();
+        RowsCount = 0;
+        ColumnsCount = 0;
 
         for (var i = 0; i < rowsCount; i++)
             AddRow();
@@ -42,6 +58,8 @@ public class DataSectionEditor
 
     public RowDefinition AddRow(double height = DefaultRowHeight)
     {
+        Normalize();
+
         if (height <= 0)
             throw new ArgumentOutOfRangeException(nameof(height));
 
@@ -51,8 +69,8 @@ public class DataSectionEditor
             Height = height
         };
 
-        DataSection.RowDefinitions.Add(row);
-        DataSection.RowsCount = DataSection.RowDefinitions.Count;
+        RowDefinitions.Add(row);
+        RowsCount = RowDefinitions.Count;
 
         for (var columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
             EnsureCellExists(row.RowIndex, columnIndex);
@@ -62,6 +80,8 @@ public class DataSectionEditor
 
     public DataColumnDefinition AddColumn(int width = DefaultColumnWidth)
     {
+        Normalize();
+
         if (width <= 0)
             throw new ArgumentOutOfRangeException(nameof(width));
 
@@ -71,8 +91,8 @@ public class DataSectionEditor
             Width = width
         };
 
-        DataSection.ColumnDefinitions.Add(column);
-        DataSection.ColumnsCount = DataSection.ColumnDefinitions.Count;
+        ColumnDefinitions.Add(column);
+        ColumnsCount = ColumnDefinitions.Count;
 
         for (var rowIndex = 0; rowIndex < RowsCount; rowIndex++)
             EnsureCellExists(rowIndex, column.ColumnIndex);
@@ -82,16 +102,17 @@ public class DataSectionEditor
 
     public void RemoveRow(int rowIndex)
     {
+        Normalize();
         ValidateRowIndex(rowIndex);
 
-        var rowDefinition = DataSection.RowDefinitions.Single(x => x.RowIndex == rowIndex);
-        DataSection.RowDefinitions.Remove(rowDefinition);
+        var rowDefinition = RowDefinitions.Single(x => x.RowIndex == rowIndex);
+        RowDefinitions.Remove(rowDefinition);
 
-        foreach (var row in DataSection.RowDefinitions.Where(x => x.RowIndex > rowIndex))
+        foreach (var row in RowDefinitions.Where(x => x.RowIndex > rowIndex))
             row.RowIndex--;
 
-        var updatedCells = new Dictionary<string, DataCellDto>();
-        foreach (var cell in DataSection.DataCells.Values)
+        var updatedCells = new Dictionary<string, DataCell>();
+        foreach (var cell in DataCells.Values)
         {
             if (cell.RowIndex == rowIndex)
                 continue;
@@ -102,22 +123,23 @@ public class DataSectionEditor
             updatedCells[BuildCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
         }
 
-        DataSection.DataCells = updatedCells;
-        DataSection.RowsCount = DataSection.RowDefinitions.Count;
+        DataCells = updatedCells;
+        RowsCount = RowDefinitions.Count;
     }
 
     public void RemoveColumn(int columnIndex)
     {
+        Normalize();
         ValidateColumnIndex(columnIndex);
 
-        var columnDefinition = DataSection.ColumnDefinitions.Single(x => x.ColumnIndex == columnIndex);
-        DataSection.ColumnDefinitions.Remove(columnDefinition);
+        var columnDefinition = ColumnDefinitions.Single(x => x.ColumnIndex == columnIndex);
+        ColumnDefinitions.Remove(columnDefinition);
 
-        foreach (var column in DataSection.ColumnDefinitions.Where(x => x.ColumnIndex > columnIndex))
+        foreach (var column in ColumnDefinitions.Where(x => x.ColumnIndex > columnIndex))
             column.ColumnIndex--;
 
-        var updatedCells = new Dictionary<string, DataCellDto>();
-        foreach (var cell in DataSection.DataCells.Values)
+        var updatedCells = new Dictionary<string, DataCell>();
+        foreach (var cell in DataCells.Values)
         {
             if (cell.ColumnIndex == columnIndex)
                 continue;
@@ -128,33 +150,38 @@ public class DataSectionEditor
             updatedCells[BuildCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
         }
 
-        DataSection.DataCells = updatedCells;
-        DataSection.ColumnsCount = DataSection.ColumnDefinitions.Count;
+        DataCells = updatedCells;
+        ColumnsCount = ColumnDefinitions.Count;
     }
 
-    public DataCellDto GetCell(int rowIndex, int columnIndex)
+    public DataCell GetCell(int rowIndex, int columnIndex)
     {
+        Normalize();
         ValidateRowIndex(rowIndex);
         ValidateColumnIndex(columnIndex);
 
         return EnsureCellExists(rowIndex, columnIndex);
     }
 
-    public bool TryGetCell(int rowIndex, int columnIndex, out DataCellDto? cell)
+    public bool TryGetCell(int rowIndex, int columnIndex, out DataCell? cell)
     {
+        Normalize();
         cell = null;
 
         if (rowIndex < 0 || rowIndex >= RowsCount || columnIndex < 0 || columnIndex >= ColumnsCount)
             return false;
 
-        return DataSection.DataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out cell);
+        return DataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out cell);
     }
 
-
-    private void Normalize()
+    public void Normalize()
     {
-        DataSection.RowsCount = Math.Max(DataSection.RowsCount, DataSection.RowDefinitions.Count);
-        DataSection.ColumnsCount = Math.Max(DataSection.ColumnsCount, DataSection.ColumnDefinitions.Count);
+        RowDefinitions ??= new List<RowDefinition>();
+        ColumnDefinitions ??= new List<DataColumnDefinition>();
+        DataCells ??= new Dictionary<string, DataCell>();
+
+        RowsCount = Math.Max(RowsCount, RowDefinitions.Count);
+        ColumnsCount = Math.Max(ColumnsCount, ColumnDefinitions.Count);
 
         NormalizeRows();
         NormalizeColumns();
@@ -163,12 +190,12 @@ public class DataSectionEditor
 
     private void NormalizeRows()
     {
-        var existingRows = DataSection.RowDefinitions
+        var existingRows = RowDefinitions
             .Where(x => x.RowIndex >= 0)
             .GroupBy(x => x.RowIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        DataSection.RowDefinitions = Enumerable.Range(0, DataSection.RowsCount)
+        RowDefinitions = Enumerable.Range(0, RowsCount)
             .Select(index =>
             {
                 if (existingRows.TryGetValue(index, out var row))
@@ -191,12 +218,12 @@ public class DataSectionEditor
 
     private void NormalizeColumns()
     {
-        var existingColumns = DataSection.ColumnDefinitions
+        var existingColumns = ColumnDefinitions
             .Where(x => x.ColumnIndex >= 0)
             .GroupBy(x => x.ColumnIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        DataSection.ColumnDefinitions = Enumerable.Range(0, DataSection.ColumnsCount)
+        ColumnDefinitions = Enumerable.Range(0, ColumnsCount)
             .Select(index =>
             {
                 if (existingColumns.TryGetValue(index, out var column))
@@ -219,9 +246,9 @@ public class DataSectionEditor
 
     private void NormalizeCells()
     {
-        var normalizedCells = new Dictionary<string, DataCellDto>();
+        var normalizedCells = new Dictionary<string, DataCell>();
 
-        foreach (var cell in DataSection.DataCells.Values)
+        foreach (var cell in DataCells.Values)
         {
             if (cell.RowIndex < 0 || cell.RowIndex >= RowsCount || cell.ColumnIndex < 0 || cell.ColumnIndex >= ColumnsCount)
                 continue;
@@ -237,7 +264,7 @@ public class DataSectionEditor
                 if (normalizedCells.ContainsKey(key))
                     continue;
 
-                normalizedCells[key] = new DataCellDto
+                normalizedCells[key] = new DataCell
                 {
                     RowIndex = rowIndex,
                     ColumnIndex = columnIndex
@@ -245,22 +272,22 @@ public class DataSectionEditor
             }
         }
 
-        DataSection.DataCells = normalizedCells;
+        DataCells = normalizedCells;
     }
 
-    private DataCellDto EnsureCellExists(int rowIndex, int columnIndex)
+    private DataCell EnsureCellExists(int rowIndex, int columnIndex)
     {
         var key = BuildCellKey(rowIndex, columnIndex);
-        if (DataSection.DataCells.TryGetValue(key, out var cell))
+        if (DataCells.TryGetValue(key, out var cell))
             return cell;
 
-        cell = new DataCellDto
+        cell = new DataCell
         {
             RowIndex = rowIndex,
             ColumnIndex = columnIndex
         };
 
-        DataSection.DataCells[key] = cell;
+        DataCells[key] = cell;
         return cell;
     }
 

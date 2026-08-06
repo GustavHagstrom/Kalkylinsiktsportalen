@@ -21,7 +21,7 @@ internal sealed class CreateViewCommandHandler(
             return new InvalidCreateViewRequest(errors);
         }
 
-        var view = new ViewDto
+        var view = new View
         {
             Name = command.Name,
             OrganizationId = command.OrganizationId

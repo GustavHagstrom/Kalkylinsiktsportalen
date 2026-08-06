@@ -1,6 +1,6 @@
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
-public class BorderStyleDto
+public class BorderFormat
 {
     public bool IsBorder { get; set; }
     public string BorderStyle { get; set; } = "Solid";

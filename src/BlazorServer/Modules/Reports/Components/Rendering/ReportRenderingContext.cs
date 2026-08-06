@@ -35,7 +35,7 @@ public sealed record ReportRenderingContext
     public PageFormat PageFormat { get; }
     public IReadOnlyDictionary<string, string> Values { get; }
 
-    public static ReportRenderingContext ForViewPreview(ViewDto view)
+    public static ReportRenderingContext ForViewPreview(View view)
     {
         ArgumentNullException.ThrowIfNull(view);
 

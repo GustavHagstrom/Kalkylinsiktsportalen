@@ -9,20 +9,20 @@
         <tr style="@RowHeight">
             @foreach (var column in OrderedColumns)
             {
-                <DataCellComponent DataCellDto="@GetDataCellDto(column)" />
+                <DataCellComponent DataCell="@GetDataCell(column)" />
             }
         </tr>
     </tbody>
 </table>
 
 @code {
-    [Parameter, EditorRequired] public DataSectionDto DataSectionDto { get; set; } = new();
+    [Parameter, EditorRequired] public DataSection DataSection { get; set; } = new();
     [Parameter, EditorRequired] public RowDefinition RowDefinition { get; set; } = new();
 
     private IReadOnlyList<DataColumnDefinition> OrderedColumns
-        => DataSectionDto.ColumnDefinitions.OrderBy(column => column.ColumnIndex).ToArray();
+        => DataSection.ColumnDefinitions.OrderBy(column => column.ColumnIndex).ToArray();
 
-    private int TableWidth => DataSectionDto.ColumnDefinitions.Sum(column => column.Width);
+    private int TableWidth => DataSection.ColumnDefinitions.Sum(column => column.Width);
     private string RowHeight => $"""height: {RowDefinition.Height}mm""";
 
     private string ColumnPercentWidth(DataColumnDefinition column)
@@ -35,11 +35,11 @@
         return $"""width: {((double)column.Width / TableWidth * 100).ToString("F2")}%""";
     }
 
-    private DataCellDto GetDataCellDto(DataColumnDefinition column)
+    private DataCell GetDataCell(DataColumnDefinition column)
     {
         var key = $"R{RowDefinition.RowIndex}C{column.ColumnIndex}";
-        return DataSectionDto.DataCells.TryGetValue(key, out var cell)
+        return DataSection.DataCells.TryGetValue(key, out var cell)
             ? cell
-            : new DataCellDto { RowIndex = RowDefinition.RowIndex, ColumnIndex = column.ColumnIndex };
+            : new DataCell { RowIndex = RowDefinition.RowIndex, ColumnIndex = column.ColumnIndex };
     }
 }

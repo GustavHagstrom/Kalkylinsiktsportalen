@@ -107,17 +107,17 @@ public class DataCellFormulaEvaluatorTests
         }
     }
 
-    private static DataCellDto CreateCell(
+    private static DataCell CreateCell(
         string rawValue,
         TextType textType = TextType.PlainText,
         int decimalCount = 2,
         bool hasThousandsSeparator = true,
         string dateTimeFormat = "yyyy-MM-dd")
     {
-        return new DataCellDto
+        return new DataCell
         {
             RawValue = rawValue,
-            TextFormat = new TextFormatDto
+            TextFormat = new TextFormat
             {
                 Type = textType,
                 DecimalCount = decimalCount,

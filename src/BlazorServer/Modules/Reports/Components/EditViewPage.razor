@@ -4,7 +4,6 @@
 @using BlazorServer.Modules.Reports.Features.UpdateView
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Domain.Views
-@using BlazorServer.Modules.Reports.Domain.Views.Editing
 @using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments
 
 @if(View is not null)
@@ -24,9 +23,9 @@
                                     OnClick="@ToggleTextFormat"
                                     Class="mx-2" />
 
-                <CellFormatEditor FormatDto="selection.DataCellDto.CellFormat" Enabled="@TextFormatIsEnabled" />
+                <CellFormatEditor Format="selection.DataCell.CellFormat" Enabled="@TextFormatIsEnabled" />
                 <MudDivider Vertical="true" FlexItem="true" Class="mx-2"/>
-                <TextFormatEditor FormatDto="selection.DataCellDto.TextFormat" Enabled="@TextFormatIsEnabled" />
+                <TextFormatEditor Format="selection.DataCell.TextFormat" Enabled="@TextFormatIsEnabled" />
             }
         </LeftToolbarContent>
         <ChildContent>
@@ -34,8 +33,8 @@
                 <MudPaper Class="full-height flex-grow-1 pa-1 gap-1 d-flex flex-column" Style="overflow: auto; min-width: 300px;">
                     @foreach(var section in View.DataSections.OrderBy(x => x.SectionIndex))
                     {
-                        var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSectionDto == section ? selection.DataCellDto : null;
-                        <DataSectionComponent DataSectionDto="section" EditMode="true" SelectedDataCellDto="selectedCell" OnCellClick="x => SelectedItem = x"/>
+                        var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSection == section ? selection.DataCell : null;
+                        <DataSectionComponent DataSection="section" EditMode="true" SelectedDataCell="selectedCell" OnCellClick="x => SelectedItem = x"/>
                     }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
@@ -55,8 +54,7 @@
 @code {
     [Parameter] public string? ViewId { get; set; }
 
-    ViewDto? View { get; set; }
-    ViewEditor? Editor { get; set; }
+    View? View { get; set; }
     bool isLoading = false;
     bool TextFormatIsEnabled = true;
     UpdateViewResult? LastSaveResult = null;
@@ -89,7 +87,6 @@
         if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, ViewId))
         {
             View = null;
-            Editor = null;
             SetLoading(false);
             return;
         }
@@ -99,10 +96,6 @@
             CancellationToken.None);
 
         View = result is ViewLoaded loaded ? loaded.View : null;
-        if(View is not null)
-        {
-            Editor = new ViewEditor(View);
-        }
         SetLoading(false);
     }
 
@@ -114,14 +107,14 @@
 
     void AddSection(SectionType type)
     {
-        if(Editor is null) return;
+        if(View is null) return;
         switch(type)
         {
             case SectionType.Data:
-                Editor.AddDataSection();
+                View.AddDataSection();
                 break;
             case SectionType.Sheet:
-                Editor.AddSheetSection();
+                View.AddSheetSection();
                 break;
         }
     }

@@ -50,7 +50,7 @@ public sealed class ReportDocumentRendererTests
         {
             Assert.That(firstRow.Id, Is.EqualTo("data-section-0-row-0"));
             Assert.That(firstRow.ComponentType, Is.EqualTo(typeof(DataSectionRowComponent)));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSectionDto)], Is.SameAs(view.DataSections[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.DataSections[0]));
             Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.DataSections[0].RowDefinitions[0]));
         });
     }
@@ -95,12 +95,12 @@ public sealed class ReportDocumentRendererTests
     [Test]
     public void BuildDocument_EmitsSheetSectionsAsBreakableRowBlocks()
     {
-        var view = new ViewDto
+        var view = new View
         {
             Id = new ViewId("sheet-view"),
             SheetSections =
             [
-                new SheetSectionDto { SectionIndex = 0, Content = "Tender sheet" }
+                new SheetSection { SectionIndex = 0, Content = "Tender sheet" }
             ]
         };
 
@@ -132,16 +132,16 @@ public sealed class ReportDocumentRendererTests
         Assert.That(html, Does.Contain("first"));
     }
 
-    private static ViewDto ViewWithDataSection()
+    private static View ViewWithDataSection()
     {
-        var view = new ViewDto
+        var view = new View
         {
             Id = new ViewId("view-1"),
             Name = "Report",
             Description = "Demo report",
             DataSections =
             [
-                new DataSectionDto
+                new DataSection
                 {
                     SectionIndex = 0,
                     RowsCount = 2,
@@ -157,8 +157,8 @@ public sealed class ReportDocumentRendererTests
                     ],
                     DataCells =
                     {
-                        ["R0C0"] = new DataCellDto { RawValue = "first" },
-                        ["R1C0"] = new DataCellDto { RawValue = "second" }
+                        ["R0C0"] = new DataCell { RawValue = "first" },
+                        ["R1C0"] = new DataCell { RawValue = "second" }
                     }
                 }
             ]

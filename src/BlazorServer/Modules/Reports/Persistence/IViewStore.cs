@@ -7,7 +7,7 @@ namespace BlazorServer.Modules.Reports.Persistence;
 public interface IViewStore
 {
     Task DeleteAsync(ViewId viewId);
-    Task<List<ViewDto>> GetAllAsync(OrganizationId orgId);
-    Task<ViewDto?> GetAsync(ViewId viewId);
-    Task UpsertAsync(ViewDto view);
+    Task<List<View>> GetAllAsync(OrganizationId orgId);
+    Task<View?> GetAsync(ViewId viewId);
+    Task UpsertAsync(View view);
 }

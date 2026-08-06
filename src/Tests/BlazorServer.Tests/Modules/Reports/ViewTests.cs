@@ -1,26 +1,23 @@
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
-using BlazorServer.Modules.Reports.Domain.Views.Editing;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
 [TestFixture]
-public class ViewEditorTests
+public class ViewTests
 {
     [Test]
     public void AddDataSection_AddsDefaultEditableGridAtNextSectionIndex()
     {
-        var view = new ViewDto
+        var view = new View
         {
-            SheetSections = new List<SheetSectionDto>
+            SheetSections = new List<SheetSection>
             {
                 new() { SectionIndex = 0 }
             }
         };
-        var editor = new ViewEditor(view);
-
-        var section = editor.AddDataSection();
+        var section = view.AddDataSection();
 
         Assert.Multiple(() =>
         {
@@ -39,16 +36,14 @@ public class ViewEditorTests
     [Test]
     public void RemoveDataSection_CollapsesFollowingSectionIndexes()
     {
-        var removedSection = new DataSectionDto { SectionIndex = 0 };
-        var remainingSection = new SheetSectionDto { SectionIndex = 1 };
-        var view = new ViewDto
+        var removedSection = new DataSection { SectionIndex = 0 };
+        var remainingSection = new SheetSection { SectionIndex = 1 };
+        var view = new View
         {
-            DataSections = new List<DataSectionDto> { removedSection },
-            SheetSections = new List<SheetSectionDto> { remainingSection }
+            DataSections = new List<DataSection> { removedSection },
+            SheetSections = new List<SheetSection> { remainingSection }
         };
-        var editor = new ViewEditor(view);
-
-        editor.RemoveDataSection(removedSection);
+        view.RemoveDataSection(removedSection);
 
         Assert.Multiple(() =>
         {

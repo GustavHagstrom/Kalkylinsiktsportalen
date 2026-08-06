@@ -11,7 +11,7 @@ public sealed record ViewUpdated(
     ViewId ViewId,
     OrganizationId OrganizationId,
     string Name,
-    ViewDto View) : UpdateViewResult;
+    View View) : UpdateViewResult;
 
 public sealed record ViewToUpdateNotFound(ViewId ViewId) : UpdateViewResult;
 

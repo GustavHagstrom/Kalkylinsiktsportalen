@@ -1,15 +1,15 @@
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 
-public class SheetSectionDto
+public class SheetSection
 {
-    public SheetSectionDto()
+    public SheetSection()
     {
         foreach (var rowType in Enum.GetValues<RowType>())
         {
             foreach (var columnType in Enum.GetValues<ColumnType>())
             {
                 var key = $"{rowType}-{columnType}";
-                SheetCells[key] = new SheetCellDto
+                SheetCells[key] = new SheetCell
                 {
                     RowType = rowType,
                     ColumnType = columnType
@@ -22,5 +22,5 @@ public class SheetSectionDto
     /// <summary>
     /// Key: $"{rowType}-{columnType}"
     /// </summary>
-    public Dictionary<string, SheetCellDto> SheetCells { get; set; } = new();
+    public Dictionary<string, SheetCell> SheetCells { get; set; } = new();
 }

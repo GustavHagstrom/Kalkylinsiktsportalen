@@ -4,4 +4,4 @@ namespace BlazorServer.Modules.Reports.Features.ListViews;
 
 public abstract record ListViewsResult;
 
-public sealed record ViewsListed(IReadOnlyList<ViewDto> Views) : ListViewsResult;
+public sealed record ViewsListed(IReadOnlyList<View> Views) : ListViewsResult;
