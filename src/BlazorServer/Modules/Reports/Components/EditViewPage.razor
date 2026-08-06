@@ -4,6 +4,7 @@
 @using BlazorServer.Modules.Reports.Features.UpdateView
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Views.Editing
+@using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments
 
 @if(View is not null)
 {
@@ -38,7 +39,7 @@
                     }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
-                    <PaginatedDocumentRenderer Document="@ReportDocument" />
+                    <PrintableDocumentRenderer Document="@Document" />
                 </div>
             </div>
         </ChildContent>
@@ -60,11 +61,8 @@
     bool TextFormatIsEnabled = true;
     UpdateViewResult? LastSaveResult = null;
     object? SelectedItem = null;
-    ReportDocumentRenderer ReportRenderer { get; } = new();
-    BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument? ReportDocument
-        => View is null
-            ? null
-            : ReportRenderer.BuildDocument(View, ReportRenderingContext.ForViewPreview(View));
+    PrintableDocumentBuilder DocumentBuilder { get; } = new();
+    PrintableDocument? Document => View is null ? null : DocumentBuilder.Build(View, ReportRenderingContext.ForViewPreview(View));
 
     enum SectionType
     {

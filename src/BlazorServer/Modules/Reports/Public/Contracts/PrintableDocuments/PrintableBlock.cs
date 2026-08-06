@@ -7,13 +7,12 @@ public sealed record PrintableBlock : PrintableItem
     public PrintableBlock(
         string Id,
         Type ComponentType,
-        IReadOnlyDictionary<string, object?> Parameters,
+        IReadOnlyDictionary<string, object?>? Parameters = null,
         PageBreakBehavior PageBreakBehavior = PageBreakBehavior.None)
         : base(Id, PageBreakBehavior)
     {
         this.ComponentType = ComponentType ?? throw new ArgumentNullException(nameof(ComponentType));
-        this.Parameters = new ReadOnlyDictionary<string, object?>(
-            new Dictionary<string, object?>(Parameters ?? throw new ArgumentNullException(nameof(Parameters)), StringComparer.Ordinal));
+        this.Parameters = new ReadOnlyDictionary<string, object?>(new Dictionary<string, object?>(Parameters ?? new Dictionary<string, object?>(), StringComparer.Ordinal));
     }
 
     public Type ComponentType { get; }

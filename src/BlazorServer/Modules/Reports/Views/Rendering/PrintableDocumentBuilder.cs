@@ -6,18 +6,17 @@ using BlazorServer.Modules.Reports.Public.Contracts.Views;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
 using BlazorServer.Modules.Reports.Public.Contracts.Views.SheetSection;
 using BlazorServer.Modules.Reports.Views.Components;
-using PrintableDocumentContract = BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument;
 
 namespace BlazorServer.Modules.Reports.Views.Rendering;
 
-public sealed class ReportDocumentRenderer
+public sealed class PrintableDocumentBuilder
 {
-    public PrintableDocumentContract BuildDocument(ViewDto view, ReportRenderingContext renderingContext)
+    public PrintableDocument Build(ViewDto view, ReportRenderingContext renderingContext)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(renderingContext);
 
-        return new PrintableDocumentContract(
+        return new PrintableDocument(
             Id: $"report-view-{view.Id.Value}",
             ChangeToken: CreateChangeToken(view, renderingContext),
             PageFormat: renderingContext.PageFormat,

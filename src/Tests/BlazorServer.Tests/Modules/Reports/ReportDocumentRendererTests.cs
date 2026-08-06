@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using PrintableDocumentContract = BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument;
-using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PaginatedDocumentRenderer;
+using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -25,7 +25,7 @@ public sealed class ReportDocumentRendererTests
         var view = ViewWithDataSection();
         view.PageBreakSections.Add(new PageBreakSectionDto { SectionIndex = 1 });
 
-        var document = new ReportDocumentRenderer().BuildDocument(
+        var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
 
@@ -59,14 +59,14 @@ public sealed class ReportDocumentRendererTests
     [Test]
     public void BuildDocument_ChangesTokenWhenPrintableViewContentOrContextChanges()
     {
-        var renderer = new ReportDocumentRenderer();
+        var renderer = new PrintableDocumentBuilder();
         var view = ViewWithDataSection();
 
-        var original = renderer.BuildDocument(view, RenderingContext("version-1", "snapshot-1"));
+        var original = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
 
         view.DataSections[0].DataCells["R0C0"].RawValue = "changed height";
-        var changedView = renderer.BuildDocument(view, RenderingContext("version-1", "snapshot-1"));
-        var changedContext = renderer.BuildDocument(view, RenderingContext("version-1", "snapshot-2"));
+        var changedView = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
+        var changedContext = renderer.Build(view, RenderingContext("version-1", "snapshot-2"));
 
         Assert.Multiple(() =>
         {
@@ -78,7 +78,7 @@ public sealed class ReportDocumentRendererTests
     [Test]
     public async Task BuildDocument_CanRenderThroughPrintableDocumentDynamicComponents()
     {
-        var document = new ReportDocumentRenderer().BuildDocument(
+        var document = new PrintableDocumentBuilder().Build(
             ViewWithDataSection(),
             RenderingContext("version-1", "snapshot-1"));
 
@@ -105,7 +105,7 @@ public sealed class ReportDocumentRendererTests
             ]
         };
 
-        var document = new ReportDocumentRenderer().BuildDocument(
+        var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
 
@@ -124,7 +124,7 @@ public sealed class ReportDocumentRendererTests
     {
         var view = ViewWithDataSection();
         view.DataSections[0].DataCells.Remove("R1C0");
-        var document = new ReportDocumentRenderer().BuildDocument(
+        var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
 

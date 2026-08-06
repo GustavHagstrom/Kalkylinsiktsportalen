@@ -31,7 +31,7 @@ public class ReportsViewOwnershipTests
             Assert.That(typeof(DataCellFormulaEvaluator).Namespace, Does.Not.Contain(".Components"));
             Assert.That(typeof(FormatBuilder).Namespace, Does.StartWith("BlazorServer.Modules.Reports."));
             Assert.That(typeof(FormatBuilder).Namespace, Does.Not.Contain(".Components"));
-            Assert.That(typeof(PaginatedDocumentRenderer).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Rendering"));
+            Assert.That(typeof(PrintableDocumentRenderer).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Rendering"));
             Assert.That(typeof(IViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views"));
             Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));
             Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb"));

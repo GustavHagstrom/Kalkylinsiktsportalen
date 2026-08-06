@@ -136,7 +136,8 @@
                             @foreach (var placement in page.BodyBlocks)
                             {
                                 var block = GetMappedBodyBlock(placement.BlockId);
-                                <div class="body-placement-block" data-printable-block-id="@placement.BlockId" style="@BodyPlacementStyle(placement)">
+                                @* <div class="body-placement-block" data-printable-block-id="@placement.BlockId" style="@BodyPlacementStyle(placement)"> *@
+                                <div class="body-placement-block" data-printable-block-id="@placement.BlockId">
                                     <DynamicComponent Type="@block.ComponentType" Parameters="@ToDynamicParameters(block)" />
                                 </div>
                             }
@@ -162,7 +163,7 @@
 @inject IJSRuntime JS
 
 @code {
-    [Parameter] public BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument? Document { get; set; }
+    [Parameter] public PrintableDocument? Document { get; set; }
     [Parameter] public bool ShowPaginationOverlay { get; set; } = true;
 
     string PageStyle => $"width: {RenderPageFormat.WidthMm}mm; height: {RenderPageFormat.HeightMm}mm;";
@@ -177,13 +178,14 @@
     PrintableDocumentRendererState RendererState { get; } = new();
     static PageFormat DefaultPageFormat { get; } = PageFormat.A4;
     PageFormat RenderPageFormat => Document?.PageFormat ?? DefaultPageFormat;
-    BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument RenderDocument => Document ?? new(
+    // PrintableDocument RenderDocument => Document ?? new(
+    PrintableDocument RenderDocument => new(
         Id: "empty-paginated-document",
         ChangeToken: "empty",
         PageFormat: RenderPageFormat,
-        HeaderItems: [],
-        BodyItems: [],
-        FooterItems: []);
+        HeaderItems: [new PrintableBlock("1", typeof(Demo))],
+        BodyItems: [new PrintableBlock("2", typeof(Demo2)), new PrintableBlock("4", typeof(Demo2)), new PrintableBlock("5", typeof(Demo2)), new PrintableBlock("6", typeof(Demo2)), new PrintableBlock("7", typeof(Demo2)), new PrintableBlock("8", typeof(Demo2)), new PrintableBlock("9", typeof(Demo2))],
+        FooterItems: [new PrintableBlock("3", typeof(Demo3))]);
     IReadOnlyList<PrintableBlock> HeaderBlocks => FlattenPrintableBlocks(RenderDocument.HeaderItems);
     IReadOnlyList<PrintableBlock> BodyBlocks => FlattenPrintableBlocks(RenderDocument.BodyItems);
     IReadOnlyList<PrintableBlock> FooterBlocks => FlattenPrintableBlocks(RenderDocument.FooterItems);
