@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;

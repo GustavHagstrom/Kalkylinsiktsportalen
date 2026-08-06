@@ -104,14 +104,14 @@ _Avoid_: Renderingskontext
 
 **Paginated Document Renderer**:
 Portalägd renderingsyta som placerar rapportsektioner, header och footer på ett fast sidformat så att den visade rapporten motsvarar utskrifts- eller PDF-resultatet.
-_Avoid_: PrintableDocument när du menar förmågan, Blazor component när sidlayoutansvaret spelar roll
+_Avoid_: PrintableDocument när du menar förmågan, component när sidlayoutansvaret spelar roll
 
 **Report Document Renderer**:
 Adapter mellan en `View` med aktuell `RenderingContext` och `Paginated Document Renderer`. Den bygger renderbart rapportinnehåll från domänmodellen men äger inte själva sidpagineringen.
 _Avoid_: Paginated Document Renderer när `View`-tolkning ingår
 
 **Printable Block**:
-Odelbar, stabil presentationsenhet som `Paginated Document Renderer` mäter och placerar på en sida. Ett `Printable Block` renderar en Blazor-komponent med parametrar och kan inte delas över sidor.
+Odelbar, stabil presentationsenhet som `Paginated Document Renderer` mäter och placerar på en sida. Ett `Printable Block` beskriver renderbart innehåll med parametrar och kan inte delas över sidor.
 _Avoid_: komponent när sidbrytningsansvaret spelar roll
 
 **Printable Container**:
@@ -155,9 +155,6 @@ Identifierbar sektion i en `View` som består av en fri excel-liknande layout av
 
 **SheetSection**:
 Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas, och sektionen kan ange sidbrytning efter sig.
-
-**PageBreakAfter**:
-Booleskt layoutval på en `DataSection` eller `SheetSection` som anger att rendering eller utskrift ska fortsätta på en ny sida efter sektionen.
 
 **DataCell**:
 Cell i en `DataSection` med råvärde, formel eller namngiven värdereferens samt format. Visningsvärdet sparas inte, utan beräknas vid rendering från cellens innehåll och aktuell `RenderingContext`.

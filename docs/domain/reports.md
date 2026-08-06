@@ -8,10 +8,8 @@ Modulen äger:
 
 - `View`
 - view-definition med identifierbara `DataSection` och `SheetSection`
-- `PageBreakAfter` som layoutval på innehållssektioner
-- `PrintableDocument` som modellkontrakt för rapportinnehåll som ska kunna mätas, pagineras och renderas
-- `ReportDocumentRenderer` som adapter från `View` och aktuell `RenderingContext` till `PrintableDocument`
-- pagineringspolicy för `Printable Block` och `Printable Container`
+- komponentnära rendering från `View` och aktuell `RenderingContext` till mätbart rapportinnehåll
+- pagineringspolicy för renderingsmodellens `Printable Block` och `Printable Container`
 - regler för när en view är ändringsbar eller arkiverad
 - rendering från `RenderingContext` till rapportstruktur
 - PDF-export och relaterade exportbeslut
@@ -22,7 +20,7 @@ Reports äger inte:
 - mutation av `EstimationSnapshot`
 - snapshot- och versionsmodell i Projects
 
-Reports avsiktliga publika kontrakt är smala. `ViewId` är publik eftersom Access och andra moduler behöver referera en Reports-ägd view utan att känna till view-definitionen. `View`, view-definitionens sektioner, `PrintableDocument`, routes, renderers, stores och komponentstate är Reports-interna modeller eller adapters.
+Reports avsiktliga publika kontrakt är smala. `ViewId` är publik eftersom Access och andra moduler behöver referera en Reports-ägd view utan att känna till view-definitionen. `View`, view-definitionens sektioner, routes, renderers, stores, `PrintableDocument` och komponentstate är Reports-interna modeller eller adapters.
 
 ## Huvudaggregate
 
@@ -46,7 +44,6 @@ Ansvar:
 
 - bära fria celler med text, formler, formatering och namngivna värdereferenser
 - läsa metadata och namngivna värden via aktuell `RenderingContext`
-- kunna ange `PageBreakAfter`
 
 ### `SheetSection`
 
@@ -57,11 +54,12 @@ Ansvar:
 - bära vilket datablad som ska visas
 - bära synlighet och formatering för bladets fält
 - visa standardiserad radindikator när en rad är ändrad
-- kunna ange `PageBreakAfter`
+
+## Renderingsmodeller Och Adapters
 
 ### `PrintableDocument`
 
-Modellkontrakt för ett renderbart rapportdokument. Dokumentet bär stabil identitet, obligatorisk change token, sidformat samt separata header-, body- och footer-items.
+Komponentnära modellkontrakt för ett renderbart rapportdokument. Dokumentet bär stabil identitet, obligatorisk change token, sidformat samt separata header-, body- och footer-items.
 
 Ansvar:
 

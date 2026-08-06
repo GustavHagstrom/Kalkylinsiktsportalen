@@ -1,5 +1,5 @@
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
-using PrintableDocumentContract = BlazorServer.Modules.Reports.Domain.PrintableDocuments.PrintableDocument;
+using PrintableDocumentContract = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments.PrintableDocument;
 using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;

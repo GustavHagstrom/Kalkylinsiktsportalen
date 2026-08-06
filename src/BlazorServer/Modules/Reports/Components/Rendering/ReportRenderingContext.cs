@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using System.Text.Json;
 

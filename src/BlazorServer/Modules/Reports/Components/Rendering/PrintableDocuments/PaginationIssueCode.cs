@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
 public enum PaginationIssueCode
 {
