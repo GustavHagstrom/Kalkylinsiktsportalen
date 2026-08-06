@@ -22,6 +22,8 @@ Reports äger inte:
 - mutation av `EstimationSnapshot`
 - snapshot- och versionsmodell i Projects
 
+Reports avsiktliga publika kontrakt är smala. `ViewId` är publik eftersom Access och andra moduler behöver referera en Reports-ägd view utan att känna till view-definitionen. `View`, view-definitionens sektioner, `PrintableDocument`, routes, renderers, stores och komponentstate är Reports-interna modeller eller adapters.
+
 ## Huvudaggregate
 
 ### `View`

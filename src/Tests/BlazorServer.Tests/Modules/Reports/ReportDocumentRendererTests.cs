@@ -1,18 +1,18 @@
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments;
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
-using BlazorServer.Modules.Reports.Public.Contracts.Views.SheetSection;
-using BlazorServer.Modules.Reports.Views.Components;
-using BlazorServer.Modules.Reports.Views.Rendering;
+using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Components.Views;
+using BlazorServer.Modules.Reports.Components.Rendering;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
-using PrintableDocumentContract = BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments.PrintableDocument;
-using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocumentRenderer;
+using PrintableDocumentContract = BlazorServer.Modules.Reports.Domain.PrintableDocuments.PrintableDocument;
+using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;
 

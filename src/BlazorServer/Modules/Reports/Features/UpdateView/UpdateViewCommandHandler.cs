@@ -1,5 +1,5 @@
 using BlazorServer.Kernel.CQRS;
-using BlazorServer.Modules.Reports.Views;
+using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Modules.Reports.Features.UpdateView;
 

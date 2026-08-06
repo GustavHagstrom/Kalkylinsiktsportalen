@@ -1,6 +1,6 @@
 using BlazorServer.Kernel.CQRS;
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Views;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Modules.Reports.Features.CreateView;
 

@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
+using BlazorServer.Modules.Reports.Domain.Views;
 
 namespace BlazorServer.Modules.Reports.Features.GetView;
 

@@ -3,13 +3,14 @@ using BlazorServer.Composition.Settings;
 using BlazorServer.Kernel.CQRS;
 using BlazorServer.Modules.Access.Public.Authorization;
 using BlazorServer.Modules.Access.Public.Contracts;
+using BlazorServer.Modules.Reports.Components;
 using BlazorServer.Modules.Reports.Features.CreateView;
 using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Views;
-using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Persistence;
+using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MudBlazor;
 

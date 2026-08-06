@@ -4,8 +4,8 @@ using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Views;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Tests.Modules.Reports;
 

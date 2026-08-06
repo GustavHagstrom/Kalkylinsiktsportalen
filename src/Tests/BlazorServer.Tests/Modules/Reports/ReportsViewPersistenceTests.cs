@@ -1,9 +1,9 @@
 using BlazorServer.Identity;
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
-using BlazorServer.Modules.Reports.Public.Contracts.Views.SheetSection;
-using BlazorServer.Modules.Reports.Views.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
 
 namespace BlazorServer.Tests.Modules.Reports;
 

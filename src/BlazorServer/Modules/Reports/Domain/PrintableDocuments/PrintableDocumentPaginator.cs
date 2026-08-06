@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments;
+using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
 
 namespace BlazorServer.Modules.Reports.Domain.PrintableDocuments;
 

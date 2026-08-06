@@ -1,11 +1,11 @@
-using BlazorServer.Modules.Reports.Public.Contracts.PrintableDocuments;
+using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
-using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Views.Rendering.PrintableDocumentRenderer;
+using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -80,9 +80,9 @@ public sealed class PrintableDocumentRendererTests
             "BlazorServer",
             "Modules",
             "Reports",
-            "Views",
+            "Components",
             "Rendering",
-            "PaginatedDocumentRenderer.razor"));
+            "PrintableDocumentRenderer.razor"));
 
         Assert.Multiple(() =>
         {

@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Views.Rendering;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Components.Rendering;
 
 namespace BlazorServer.Tests.Modules.Reports;
 

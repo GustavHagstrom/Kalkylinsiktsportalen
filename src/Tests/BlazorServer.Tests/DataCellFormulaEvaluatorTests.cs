@@ -1,7 +1,7 @@
 using System.Globalization;
-using BlazorServer.Modules.Reports.Views.Rendering;
-using BlazorServer.Modules.Reports.Public.Contracts.Views;
-using BlazorServer.Modules.Reports.Public.Contracts.Views.DataSection;
+using BlazorServer.Modules.Reports.Components.Rendering;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
 namespace BlazorServer.Tests;
 
