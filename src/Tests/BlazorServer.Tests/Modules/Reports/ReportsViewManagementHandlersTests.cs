@@ -88,7 +88,6 @@ public sealed class ReportsViewManagementHandlersTests
                 "Updated tender report",
                 "Updated description",
                 [],
-                [],
                 []),
             CancellationToken.None);
 
@@ -114,7 +113,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", [], [], []),
+            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", [], []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewToUpdateNotFound(viewId)));
@@ -138,7 +137,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", [], [], []),
+            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", [], []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewUpdateOrganizationMismatch(viewId, requestedOrganizationId)));

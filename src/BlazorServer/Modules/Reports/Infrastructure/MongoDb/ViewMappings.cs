@@ -15,7 +15,6 @@ public static class ViewMappings
             OrganizationId = new OrganizationId(mongoView.OrganizationId),
             SheetSections = mongoView.SheetSections,
             DataSections = mongoView.DataSections,
-            PageBreakSections = mongoView.PageBreakSections,
             Description = mongoView.Description,
         };
     }
@@ -28,7 +27,6 @@ public static class ViewMappings
             OrganizationId = viewDto.OrganizationId.Value,
             SheetSections = viewDto.SheetSections,
             DataSections = viewDto.DataSections,
-            PageBreakSections = viewDto.PageBreakSections,
             Description = viewDto.Description,
         };
     }

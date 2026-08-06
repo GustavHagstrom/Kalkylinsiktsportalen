@@ -44,11 +44,7 @@ public class ViewEditorTests
         var view = new ViewDto
         {
             DataSections = new List<DataSectionDto> { removedSection },
-            SheetSections = new List<SheetSectionDto> { remainingSection },
-            PageBreakSections = new List<PageBreakSectionDto>
-            {
-                new() { SectionIndex = 2 }
-            }
+            SheetSections = new List<SheetSectionDto> { remainingSection }
         };
         var editor = new ViewEditor(view);
 
@@ -58,7 +54,6 @@ public class ViewEditorTests
         {
             Assert.That(view.DataSections, Is.Empty);
             Assert.That(remainingSection.SectionIndex, Is.EqualTo(0));
-            Assert.That(view.PageBreakSections.Single().SectionIndex, Is.EqualTo(1));
         });
     }
 }

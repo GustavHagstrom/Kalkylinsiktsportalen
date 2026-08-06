@@ -39,10 +39,6 @@ public sealed class PrintableDocumentBuilder
                 case SheetSectionDto sheetSection:
                     items.Add(BuildSheetSectionItem(sheetSection));
                     break;
-
-                case PageBreakSectionDto:
-                    ApplyPageBreakAfterToPreviousItem(items);
-                    break;
             }
         }
 
@@ -78,37 +74,9 @@ public sealed class PrintableDocumentBuilder
                     }))
                 .ToArray());
 
-    private static void ApplyPageBreakAfterToPreviousItem(List<PrintableItem> items)
-    {
-        if (items.Count == 0)
-        {
-            return;
-        }
-
-        items[^1] = WithPageBreakAfter(items[^1]);
-    }
-
-    private static PrintableItem WithPageBreakAfter(PrintableItem item)
-        => item switch
-        {
-            PrintableBlock block => new PrintableBlock(
-                block.Id,
-                block.ComponentType,
-                block.Parameters,
-                PageBreakBehavior.After),
-
-            PrintableContainer container => new PrintableContainer(
-                container.Id,
-                container.Items,
-                PageBreakBehavior.After),
-
-            _ => throw new NotSupportedException($"Printable item '{item.Id}' has unsupported type '{item.GetType().Name}'.")
-        };
-
     private static IEnumerable<object> OrderedSections(ViewDto view)
         => view.DataSections.Cast<object>()
             .Concat(view.SheetSections)
-            .Concat(view.PageBreakSections)
             .OrderBy(SectionIndex);
 
     private static int SectionIndex(object section)
@@ -116,7 +84,6 @@ public sealed class PrintableDocumentBuilder
         {
             DataSectionDto dataSection => dataSection.SectionIndex,
             SheetSectionDto sheetSection => sheetSection.SectionIndex,
-            PageBreakSectionDto pageBreakSection => pageBreakSection.SectionIndex,
             _ => throw new NotSupportedException($"Unsupported report section type '{section.GetType().Name}'.")
         };
 
@@ -144,8 +111,7 @@ public sealed class PrintableDocumentBuilder
                 view.Name,
                 view.Description,
                 DataSections = view.DataSections.OrderBy(section => section.SectionIndex),
-                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex),
-                PageBreakSections = view.PageBreakSections.OrderBy(section => section.SectionIndex)
+                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex)
             }
         });
 

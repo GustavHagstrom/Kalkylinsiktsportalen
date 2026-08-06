@@ -13,7 +13,6 @@
         <LeftToolbarContent>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.PageBreak))">@Localizer["Lägg till sidbrytning"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveView">@Localizer["Spara"]</MudButton>
 
             <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
@@ -68,8 +67,7 @@
     enum SectionType
     {
         Data,
-        Sheet,
-        PageBreak
+        Sheet
     }
 
     void ToggleTextFormat()
@@ -124,9 +122,6 @@
                 break;
             case SectionType.Sheet:
                 Editor.AddSheetSection();
-                break;
-            case SectionType.PageBreak:
-                Editor.AddPageBreakSection();
                 break;
         }
     }

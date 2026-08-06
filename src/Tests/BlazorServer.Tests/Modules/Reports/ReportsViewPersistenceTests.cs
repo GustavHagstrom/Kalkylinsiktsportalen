@@ -63,10 +63,6 @@ public class ReportsViewPersistenceTests
                         }
                     }
                 }
-            ],
-            PageBreakSections =
-            [
-                new PageBreakSectionDto { SectionIndex = 3 }
             ]
         };
 
@@ -87,7 +83,6 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].CellFormat.BackgroundColor, Is.EqualTo("#ffeecc"));
             Assert.That(roundTripped.SheetSections, Has.Count.EqualTo(1));
             Assert.That(roundTripped.SheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
-            Assert.That(roundTripped.PageBreakSections, Has.Count.EqualTo(1));
         });
     }
 }

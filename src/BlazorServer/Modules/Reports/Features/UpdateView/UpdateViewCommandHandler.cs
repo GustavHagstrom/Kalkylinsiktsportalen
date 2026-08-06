@@ -35,7 +35,6 @@ internal sealed class UpdateViewCommandHandler(
         view.Description = command.Description;
         view.DataSections = command.DataSections.ToList();
         view.SheetSections = command.SheetSections.ToList();
-        view.PageBreakSections = command.PageBreakSections.ToList();
 
         await viewStore.UpsertAsync(view);
 

@@ -15,8 +15,7 @@ public class ViewEditor
     public ViewDto View { get; }
     public IReadOnlyList<DataSectionDto> DataSections => View.DataSections;
     public IReadOnlyList<SheetSectionDto> SheetSections => View.SheetSections;
-    public IReadOnlyList<PageBreakSectionDto> PageBreakSections => View.PageBreakSections;
-    public int SectionCount => View.DataSections.Count + View.SheetSections.Count + View.PageBreakSections.Count;
+    public int SectionCount => View.DataSections.Count + View.SheetSections.Count;
 
     public DataSectionDto AddDataSection()
     {
@@ -46,17 +45,6 @@ public class ViewEditor
         return section;
     }
 
-    public PageBreakSectionDto AddPageBreakSection()
-    {
-        var section = new PageBreakSectionDto
-        {
-            SectionIndex = SectionCount
-        };
-
-        View.PageBreakSections.Add(section);
-        return section;
-    }
-
     public void RemoveDataSection(DataSectionDto section)
     {
         ArgumentNullException.ThrowIfNull(section);
@@ -77,21 +65,10 @@ public class ViewEditor
         CollapseSectionIndexesAfter(section.SectionIndex);
     }
 
-    public void RemovePageBreakSection(PageBreakSectionDto section)
-    {
-        ArgumentNullException.ThrowIfNull(section);
-
-        if (!View.PageBreakSections.Remove(section))
-            throw new InvalidOperationException("The page break section does not belong to this view.");
-
-        CollapseSectionIndexesAfter(section.SectionIndex);
-    }
-
     public IEnumerable<object> GetSectionsInOrder()
     {
         return View.DataSections.Cast<object>()
             .Concat(View.SheetSections)
-            .Concat(View.PageBreakSections)
             .OrderBy(GetSectionIndex);
     }
 
@@ -99,7 +76,6 @@ public class ViewEditor
     {
         View.DataSections ??= new List<DataSectionDto>();
         View.SheetSections ??= new List<SheetSectionDto>();
-        View.PageBreakSections ??= new List<PageBreakSectionDto>();
 
         var orderedSections = GetSectionHandles()
             .OrderBy(x => x.SectionIndex)
@@ -122,9 +98,6 @@ public class ViewEditor
 
         foreach (var section in View.SheetSections)
             yield return new SectionHandle(section.SectionIndex, value => section.SectionIndex = value);
-
-        foreach (var section in View.PageBreakSections)
-            yield return new SectionHandle(section.SectionIndex, value => section.SectionIndex = value);
     }
 
     private static int GetSectionIndex(object section)
@@ -133,7 +106,6 @@ public class ViewEditor
         {
             DataSectionDto dataSection => dataSection.SectionIndex,
             SheetSectionDto sheetSection => sheetSection.SectionIndex,
-            PageBreakSectionDto pageBreakSection => pageBreakSection.SectionIndex,
             _ => throw new ArgumentException("Unknown section type.", nameof(section))
         };
     }

@@ -49,8 +49,7 @@ public sealed record ReportRenderingContext
                 view.Name,
                 view.Description,
                 DataSections = view.DataSections.OrderBy(section => section.SectionIndex),
-                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex),
-                PageBreakSections = view.PageBreakSections.OrderBy(section => section.SectionIndex)
+                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex)
             }));
     }
 

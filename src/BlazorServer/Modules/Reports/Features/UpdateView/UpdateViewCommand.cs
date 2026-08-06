@@ -13,8 +13,7 @@ public sealed record UpdateViewCommand(
     string Name,
     string Description,
     IReadOnlyList<DataSectionDto> DataSections,
-    IReadOnlyList<SheetSectionDto> SheetSections,
-    IReadOnlyList<PageBreakSectionDto> PageBreakSections) : ICommand<UpdateViewResult>
+    IReadOnlyList<SheetSectionDto> SheetSections) : ICommand<UpdateViewResult>
 {
     public static UpdateViewCommand FromEditedView(OrganizationId organizationId, ViewDto view)
         => new(
@@ -23,6 +22,5 @@ public sealed record UpdateViewCommand(
             view.Name,
             view.Description,
             view.DataSections,
-            view.SheetSections,
-            view.PageBreakSections);
+            view.SheetSections);
 }

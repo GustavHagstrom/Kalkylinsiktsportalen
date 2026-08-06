@@ -23,7 +23,6 @@ public sealed class ReportDocumentRendererTests
     public void BuildDocument_TranslatesViewSectionsIntoPrintableDocument()
     {
         var view = ViewWithDataSection();
-        view.PageBreakSections.Add(new PageBreakSectionDto { SectionIndex = 1 });
 
         var document = new PrintableDocumentBuilder().Build(
             view,
@@ -42,7 +41,7 @@ public sealed class ReportDocumentRendererTests
         Assert.Multiple(() =>
         {
             Assert.That(section.Id, Is.EqualTo("data-section-0"));
-            Assert.That(section.PageBreakBehavior, Is.EqualTo(PageBreakBehavior.After));
+            Assert.That(section.PageBreakBehavior, Is.EqualTo(PageBreakBehavior.None));
             Assert.That(section.Items, Has.Count.EqualTo(2));
         });
 
