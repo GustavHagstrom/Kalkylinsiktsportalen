@@ -32,9 +32,12 @@ Ansvar:
 
 - bära rapportdefinitionen
 - bära sektionernas stabila identiteter inom vyn och deras ordning i rapporten
+- äga strukturella ändringar av rapporten, till exempel att lägga till, ta bort och flytta sektioner
 - bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
 - vara workspace-gränsen som Projects change sets scope:as mot
+
+`View` muterar inte sektioners interna innehåll direkt. `DataSection` och `SheetSection` äger sina egna interna invariants, medan `View` äger vilka sektioner som ingår och i vilken ordning de ligger.
 
 ### `DataSection`
 
@@ -43,6 +46,7 @@ Identifierbar sektion i en `View` som består av en fri excel-liknande layout av
 Ansvar:
 
 - bära fria celler med text, formler, formatering och namngivna värdereferenser
+- skydda sin egen rad-, kolumn-, cell- och layoutkonsistens
 - läsa metadata och namngivna värden via aktuell `RenderingContext`
 
 ### `SheetSection`
@@ -53,6 +57,7 @@ Ansvar:
 
 - bära vilket datablad som ska visas
 - bära synlighet och formatering för bladets fält
+- skydda sina egna fält-, synlighets- och formateringsregler
 - visa standardiserad radindikator när en rad är ändrad
 
 ## Renderingsmodeller Och Adapters
@@ -111,6 +116,7 @@ Ansvar:
 
 - `View` äger rapportdefinitionen men inte snapshotets sanning eller `ReplacementSelection`-persistens.
 - `SectionIndex` är ordning i rapporten, inte identitet för `DataSection` eller `SheetSection`.
+- Strukturell redigering identifierar befintliga sektioner med `SectionId`; dubbletter eller saknade sektionsidentiteter är ogiltig edit-input. Under kompatibilitetsperioden får ett editor-payload introducera en ny sektion med ny `SectionId`, men bara om identiteten är unik, icke-tom, sektionstypen är känd och resultatets ordning är giltig.
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.

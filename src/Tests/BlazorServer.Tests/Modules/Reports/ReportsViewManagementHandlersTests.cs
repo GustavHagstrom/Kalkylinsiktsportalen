@@ -5,6 +5,8 @@ using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Tests.Modules.Reports;
@@ -102,6 +104,85 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(store.LoadedViewId, Is.EqualTo(viewId));
             Assert.That(store.Upserted, Is.SameAs(existing));
             Assert.That(store.Upserted!.Description, Is.EqualTo("Updated description"));
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_AppliesEditedSectionsThroughViewStructureRules()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = new View
+        {
+            Id = viewId,
+            OrganizationId = organizationId,
+            Name = "Tender report",
+            DataSections =
+            [
+                new DataSection { SectionId = "data-1", SectionIndex = 0 }
+            ],
+            SheetSections =
+            [
+                new SheetSection { SectionId = "sheet-1", SectionIndex = 1 }
+            ]
+        };
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var editedDataSection = new DataSection { SectionId = "data-1", SectionIndex = 1 };
+        var addedSheetSection = new SheetSection { SectionId = "sheet-2", SectionIndex = 0 };
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                [editedDataSection],
+                [addedSheetSection]),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<ViewUpdated>());
+        Assert.Multiple(() =>
+        {
+            Assert.That(existing.DataSections, Is.EqualTo(new[] { editedDataSection }));
+            Assert.That(existing.SheetSections, Is.EqualTo(new[] { addedSheetSection }));
+            Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
+            Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
+            Assert.That(store.Upserted, Is.SameAs(existing));
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_ReturnsValidationErrorForInvalidEditedSectionStructure()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = new View
+        {
+            Id = viewId,
+            OrganizationId = organizationId,
+            Name = "Tender report"
+        };
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                [new DataSection { SectionId = "", SectionIndex = 0 }],
+                []),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_id.required"));
+            Assert.That(existing.Name, Is.EqualTo("Tender report"));
+            Assert.That(store.Upserted, Is.Null);
         });
     }
 

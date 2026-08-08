@@ -1,4 +1,5 @@
 using BlazorServer.Identity;
+using BlazorServer.Modules.Reports.Domain;
 using BlazorServer.Modules.Reports.Public;
 using DataSectionModel = BlazorServer.Modules.Reports.Domain.Views.DataSection.DataSection;
 using SheetSectionModel = BlazorServer.Modules.Reports.Domain.Views.SheetSection.SheetSection;
@@ -60,6 +61,23 @@ public class View
         CollapseSectionIndexesAfter(section.SectionIndex);
     }
 
+    public void ApplyEditedSections(
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
+    {
+        ArgumentNullException.ThrowIfNull(dataSections);
+        ArgumentNullException.ThrowIfNull(sheetSections);
+
+        Normalize();
+        ValidateEditedSectionIdentities(dataSections, sheetSections);
+        ValidateExistingSectionTypes(dataSections, sheetSections);
+        ValidateEditedSectionOrder(dataSections, sheetSections);
+
+        DataSections = dataSections.ToList();
+        SheetSections = sheetSections.ToList();
+        Normalize();
+    }
+
     public IEnumerable<object> GetSectionsInOrder()
     {
         Normalize();
@@ -106,6 +124,72 @@ public class View
     {
         foreach (var section in GetSectionHandles().Where(x => x.SectionIndex > removedSectionIndex))
             section.SetSectionIndex(section.SectionIndex - 1);
+    }
+
+    private void ValidateEditedSectionIdentities(
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
+    {
+        var sectionIds = dataSections
+            .Select(section => section.SectionId)
+            .Concat(sheetSections.Select(section => section.SectionId))
+            .ToList();
+
+        if (sectionIds.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new ReportsDomainException(
+                "view.section_id.required",
+                "Edited view sections must have stable section identities.");
+        }
+
+        if (sectionIds.Distinct(StringComparer.Ordinal).Count() != sectionIds.Count)
+        {
+            throw new ReportsDomainException(
+                "view.section_id.duplicate",
+                "Edited view sections must not contain duplicate section identities.");
+        }
+    }
+
+    private void ValidateExistingSectionTypes(
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
+    {
+        var existingDataSectionIds = DataSections
+            .Select(section => section.SectionId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var existingSheetSectionIds = SheetSections
+            .Select(section => section.SectionId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (dataSections.Any(section => existingSheetSectionIds.Contains(section.SectionId))
+            || sheetSections.Any(section => existingDataSectionIds.Contains(section.SectionId)))
+        {
+            throw new ReportsDomainException(
+                "view.section_type.changed",
+                "Edited view sections must keep the same section type for existing section identities.");
+        }
+    }
+
+    private void ValidateEditedSectionOrder(
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
+    {
+        var sectionIndexes = dataSections
+            .Select(section => section.SectionIndex)
+            .Concat(sheetSections.Select(section => section.SectionIndex))
+            .Order()
+            .ToList();
+
+        for (var index = 0; index < sectionIndexes.Count; index++)
+        {
+            if (sectionIndexes[index] == index)
+                continue;
+
+            throw new ReportsDomainException(
+                "view.section_order.invalid",
+                "Edited view sections must use contiguous section indexes.");
+        }
     }
 
     private IEnumerable<SectionHandle> GetSectionHandles()

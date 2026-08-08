@@ -4,6 +4,8 @@ Här ligger bara de Reports-beslut som fortfarande är riktiga ADR:er: långliva
 
 Den levande Reports-modellen finns i [../../../domain/reports.md](../../../domain/reports.md).
 
+- [0024 - Edit views through intent commands](0024-edit-views-through-intent-commands.md)
+
 Lägg normalt inte följande här:
 
 - `View` som aggregate

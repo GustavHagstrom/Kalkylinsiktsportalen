@@ -87,7 +87,7 @@ Arbetsversion som ännu inte är en publicerad eller definitiv version.
 _Avoid_: utkastversion
 
 **View**:
-Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`.
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
 _Avoid_: mall, dokument
 
 **SectionId**:
@@ -155,10 +155,10 @@ Icke-blockerande observation från pagineringen där dokumentet fortfarande kan 
 _Avoid_: error när dokumentet fortfarande är korrekt renderbart
 
 **DataSection**:
-Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas.
+Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `DataSection` äger sina egna interna layout- och cellinvariants.
 
 **SheetSection**:
-Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas.
+Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
 
 **DataCell**:
 Cell i en `DataSection` med råvärde, formel eller namngiven värdereferens samt format. Visningsvärdet sparas inte, utan beräknas vid rendering från cellens innehåll och aktuell `RenderingContext`.
