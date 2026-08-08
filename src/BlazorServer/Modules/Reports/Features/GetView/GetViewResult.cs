@@ -4,4 +4,4 @@ namespace BlazorServer.Modules.Reports.Features.GetView;
 
 public abstract record GetViewResult;
 
-public sealed record ViewLoaded(ViewDto? View) : GetViewResult;
+public sealed record ViewLoaded(View? View) : GetViewResult;

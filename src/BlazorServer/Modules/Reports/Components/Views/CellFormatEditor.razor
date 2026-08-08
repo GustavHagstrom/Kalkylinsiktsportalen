@@ -2,7 +2,7 @@
 
 
 
-@if(FormatDto is null)
+@if(Format is null)
 {
     
 }
@@ -45,7 +45,7 @@ else
                                         Icon="@Icons.Material.Sharp.FormatColorFill"
                                         OnClick="() => ToggleColorPicker(ColorPickerTarget.Background)"
                                         Class="border border-solid"
-                                        Style="@($"color: {FormatDto.BackgroundColor}; border-color: var(--mud-palette-text-primary);")"
+                                        Style="@($"color: {Format.BackgroundColor}; border-color: var(--mud-palette-text-primary);")"
                                         Enabled="@Enabled" />
                 </div>
 
@@ -77,12 +77,12 @@ else
 
         <div class="column">
             <div class="row">
-                <input class="kip-input row-height" style="width: 70px;" @bind="FormatDto!.PaddingLeft" placeholder="@Localizer["Vänster"]" />
-                <input class="kip-input row-height" style="width: 70px;" @bind="FormatDto!.PaddingRight" placeholder="@Localizer["Höger"]" />
+                <input class="kip-input row-height" style="width: 70px;" @bind="Format!.PaddingLeft" placeholder="@Localizer["Vï¿½nster"]" />
+                <input class="kip-input row-height" style="width: 70px;" @bind="Format!.PaddingRight" placeholder="@Localizer["Hï¿½ger"]" />
             </div>
             <div class="row">
-                <input class="kip-input row-height" style="width: 70px;" @bind="FormatDto!.PaddingTop" placeholder="@Localizer["Topp"]" />
-                <input class="kip-input row-height" style="width: 70px;" @bind="FormatDto!.PaddingBottom" placeholder="@Localizer["Botten"]" />
+                <input class="kip-input row-height" style="width: 70px;" @bind="Format!.PaddingTop" placeholder="@Localizer["Topp"]" />
+                <input class="kip-input row-height" style="width: 70px;" @bind="Format!.PaddingBottom" placeholder="@Localizer["Botten"]" />
             </div>
         </div>
         
@@ -90,7 +90,7 @@ else
 
         <div class="column">
             <div class="row">
-                <KipSelect Style="width: 120px; height: 36px;" TItem="string" Items="@BorderStyles" @bind-SelectedItem="SelectedBorder.BorderStyle" />
+                <KipSelect Style="width: 120px; height: 36px;" TItem="string" Items="@BorderFormats" @bind-SelectedItem="SelectedBorder.BorderStyle" />
             </div>
             <div class="row">
                 <input class="kip-input row-height" style="width: 48px;" @bind="SelectedBorder.BorderWidth" />
@@ -103,27 +103,27 @@ else
 
 
 @code {
-    [Parameter] public CellFormatDto? FormatDto { get; set; }
+    [Parameter] public CellFormat? Format { get; set; }
     [Parameter] public bool Enabled { get; set; } = true;
 
     string baseRowClass => Enabled ? "row" : "row disabled";
     bool ShowColorPicker = false;
     ColorPickerTarget ActiveColorPicker = ColorPickerTarget.None;
     BorderSide SelectedBorderSide = BorderSide.Top;
-    List<string> BorderStyles = ["Solid", "Dashed", "Dotted", "Double", "None"];
+    List<string> BorderFormats = ["Solid", "Dashed", "Dotted", "Double", "None"];
 
-    BorderStyleDto SelectedBorder => SelectedBorderSide switch
+    BorderFormat SelectedBorder => SelectedBorderSide switch
     {
-        BorderSide.Left => FormatDto?.LeftBorder ?? new BorderStyleDto(),
-        BorderSide.Right => FormatDto?.RightBorder ?? new BorderStyleDto(),
-        BorderSide.Bottom => FormatDto?.BottomBorder ?? new BorderStyleDto(),
-        _ => FormatDto?.TopBorder ?? new BorderStyleDto()
+        BorderSide.Left => Format?.LeftBorder ?? new BorderFormat(),
+        BorderSide.Right => Format?.RightBorder ?? new BorderFormat(),
+        BorderSide.Bottom => Format?.BottomBorder ?? new BorderFormat(),
+        _ => Format?.TopBorder ?? new BorderFormat()
     };
 
     MudBlazor.Utilities.MudColor CurrentColor => ActiveColorPicker switch
     {
         ColorPickerTarget.Border => new MudBlazor.Utilities.MudColor(SelectedBorder.BorderColor),
-        _ => new MudBlazor.Utilities.MudColor(FormatDto?.BackgroundColor ?? "#FFFFFF")
+        _ => new MudBlazor.Utilities.MudColor(Format?.BackgroundColor ?? "#FFFFFF")
     };
 
 
@@ -153,7 +153,7 @@ else
 
     Task OnColorChanged(MudBlazor.Utilities.MudColor color)
     {
-        if (FormatDto is not null)
+        if (Format is not null)
         {
             var hexColor = color.ToString(MudBlazor.Utilities.MudColorOutputFormats.Hex);
 
@@ -163,7 +163,7 @@ else
             }
             else
             {
-                FormatDto.BackgroundColor = hexColor;
+                Format.BackgroundColor = hexColor;
             }
         }
 

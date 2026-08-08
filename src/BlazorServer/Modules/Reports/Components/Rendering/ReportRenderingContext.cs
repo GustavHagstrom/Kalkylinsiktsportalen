@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using System.Text.Json;
 
@@ -35,9 +35,10 @@ public sealed record ReportRenderingContext
     public PageFormat PageFormat { get; }
     public IReadOnlyDictionary<string, string> Values { get; }
 
-    public static ReportRenderingContext ForViewPreview(ViewDto view)
+    public static ReportRenderingContext ForViewPreview(View view)
     {
         ArgumentNullException.ThrowIfNull(view);
+        view.EnsureSectionIdentities();
 
         var viewReference = view.Id.Value;
         return new ReportRenderingContext(

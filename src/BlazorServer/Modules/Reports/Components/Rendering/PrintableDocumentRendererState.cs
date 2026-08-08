@@ -1,5 +1,5 @@
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
-using PrintableDocumentContract = BlazorServer.Modules.Reports.Domain.PrintableDocuments.PrintableDocument;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
+using PrintableDocumentContract = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments.PrintableDocument;
 
 namespace BlazorServer.Modules.Reports.Components.Rendering;
 

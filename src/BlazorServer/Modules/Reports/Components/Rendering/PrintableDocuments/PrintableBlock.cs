@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
 public sealed record PrintableBlock : PrintableItem
 {

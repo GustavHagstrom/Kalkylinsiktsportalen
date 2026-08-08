@@ -1,5 +1,5 @@
 using BlazorServer.Modules.Reports.Components.Rendering;
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 

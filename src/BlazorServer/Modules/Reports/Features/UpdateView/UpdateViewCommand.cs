@@ -12,10 +12,10 @@ public sealed record UpdateViewCommand(
     ViewId ViewId,
     string Name,
     string Description,
-    IReadOnlyList<DataSectionDto> DataSections,
-    IReadOnlyList<SheetSectionDto> SheetSections) : ICommand<UpdateViewResult>
+    IReadOnlyList<DataSection> DataSections,
+    IReadOnlyList<SheetSection> SheetSections) : ICommand<UpdateViewResult>
 {
-    public static UpdateViewCommand FromEditedView(OrganizationId organizationId, ViewDto view)
+    public static UpdateViewCommand FromEditedView(OrganizationId organizationId, View view)
         => new(
             organizationId,
             view.Id,

@@ -18,25 +18,25 @@
 </table>
 
 @code {
-    [Parameter, EditorRequired] public SheetSectionDto SheetSectionDto { get; set; } = new();
+    [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = new();
     [Parameter, EditorRequired] public RowType RowType { get; set; }
 
     private static IReadOnlyList<ColumnType> OrderedColumnTypes { get; } = Enum.GetValues<ColumnType>();
 
-    private SheetCellDto GetSheetCell(ColumnType columnType)
+    private SheetCell GetSheetCell(ColumnType columnType)
     {
         var key = $"{RowType}-{columnType}";
-        return SheetSectionDto.SheetCells.TryGetValue(key, out var cell)
+        return SheetSection.SheetCells.TryGetValue(key, out var cell)
             ? cell
-            : new SheetCellDto { RowType = RowType, ColumnType = columnType };
+            : new SheetCell { RowType = RowType, ColumnType = columnType };
     }
 
     private string DisplayValue(ColumnType columnType)
         => columnType switch
         {
-            ColumnType.Description => string.IsNullOrWhiteSpace(SheetSectionDto.Content)
+            ColumnType.Description => string.IsNullOrWhiteSpace(SheetSection.Content)
                 ? RowType.ToString()
-                : SheetSectionDto.Content,
+                : SheetSection.Content,
             _ => string.Empty
         };
 }

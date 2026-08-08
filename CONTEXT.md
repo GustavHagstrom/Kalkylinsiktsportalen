@@ -87,8 +87,12 @@ Arbetsversion som ännu inte är en publicerad eller definitiv version.
 _Avoid_: utkastversion
 
 **View**:
-Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`.
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
 _Avoid_: mall, dokument
+
+**SectionId**:
+Stabil identitet för en sektion inom en `View`. En `SectionId` följer sektionen när den flyttas och används när andra modeller eller renderingsspårning behöver peka på samma sektion över tid.
+_Avoid_: SectionIndex när identiteten måste vara stabil
 
 **Change-enabled View**:
 `View` där `EnableChanges` är aktiverat och där användare med rätt att använda vyn får göra delade view-lokala `ReplacementSelection`.
@@ -104,14 +108,14 @@ _Avoid_: Renderingskontext
 
 **Paginated Document Renderer**:
 Portalägd renderingsyta som placerar rapportsektioner, header och footer på ett fast sidformat så att den visade rapporten motsvarar utskrifts- eller PDF-resultatet.
-_Avoid_: PrintableDocument när du menar förmågan, Blazor component när sidlayoutansvaret spelar roll
+_Avoid_: PrintableDocument när du menar förmågan, component när sidlayoutansvaret spelar roll
 
 **Report Document Renderer**:
 Adapter mellan en `View` med aktuell `RenderingContext` och `Paginated Document Renderer`. Den bygger renderbart rapportinnehåll från domänmodellen men äger inte själva sidpagineringen.
 _Avoid_: Paginated Document Renderer när `View`-tolkning ingår
 
 **Printable Block**:
-Odelbar, stabil presentationsenhet som `Paginated Document Renderer` mäter och placerar på en sida. Ett `Printable Block` renderar en Blazor-komponent med parametrar och kan inte delas över sidor.
+Odelbar, stabil presentationsenhet som `Paginated Document Renderer` mäter och placerar på en sida. Ett `Printable Block` beskriver renderbart innehåll med parametrar och kan inte delas över sidor.
 _Avoid_: komponent när sidbrytningsansvaret spelar roll
 
 **Printable Container**:
@@ -151,13 +155,10 @@ Icke-blockerande observation från pagineringen där dokumentet fortfarande kan 
 _Avoid_: error när dokumentet fortfarande är korrekt renderbart
 
 **DataSection**:
-Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas, och sektionen kan ange sidbrytning efter sig.
+Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `DataSection` äger sina egna interna layout- och cellinvariants.
 
 **SheetSection**:
-Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas, och sektionen kan ange sidbrytning efter sig.
-
-**PageBreakAfter**:
-Booleskt layoutval på en `DataSection` eller `SheetSection` som anger att rendering eller utskrift ska fortsätta på en ny sida efter sektionen.
+Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
 
 **DataCell**:
 Cell i en `DataSection` med råvärde, formel eller namngiven värdereferens samt format. Visningsvärdet sparas inte, utan beräknas vid rendering från cellens innehåll och aktuell `RenderingContext`.

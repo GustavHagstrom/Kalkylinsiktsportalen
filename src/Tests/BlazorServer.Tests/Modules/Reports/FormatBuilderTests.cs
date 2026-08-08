@@ -9,14 +9,14 @@ public class FormatBuilderTests
     [Test]
     public void BuildCellStyle_MapsCellFormatToCss()
     {
-        var format = new CellFormatDto
+        var format = new CellFormat
         {
             BackgroundColor = "#ffffff",
             PaddingTop = 1,
             PaddingRight = 2,
             PaddingBottom = 3,
             PaddingLeft = 4,
-            LeftBorder = new BorderStyleDto
+            LeftBorder = new BorderFormat
             {
                 IsBorder = true,
                 BorderWidth = 2,
@@ -41,7 +41,7 @@ public class FormatBuilderTests
     [Test]
     public void BuildTextStyle_MapsTextFormatToCss()
     {
-        var format = new TextFormatDto
+        var format = new TextFormat
         {
             Color = "#222222",
             FontSize = 12,

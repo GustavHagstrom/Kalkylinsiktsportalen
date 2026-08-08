@@ -11,7 +11,7 @@ public sealed record ViewCreated(
     ViewId ViewId,
     OrganizationId OrganizationId,
     string Name,
-    ViewDto View) : CreateViewResult;
+    View View) : CreateViewResult;
 
 public sealed record InvalidCreateViewRequest(
     IReadOnlyList<ValidationError> ValidationErrors) : CreateViewResult;

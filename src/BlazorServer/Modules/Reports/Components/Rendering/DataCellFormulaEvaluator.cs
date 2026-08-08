@@ -9,13 +9,13 @@ namespace BlazorServer.Modules.Reports.Components.Rendering;
 public static partial class DataCellFormulaEvaluator
 {
     public static string GetDisplayValue(
-        DataCellDto dataCellDto,
+        DataCell dataCell,
         IReadOnlyDictionary<string, object?>? estimationProperties = null)
     {
-        ArgumentNullException.ThrowIfNull(dataCellDto);
+        ArgumentNullException.ThrowIfNull(dataCell);
 
-        var evaluatedValue = EvaluateRawValue(dataCellDto.RawValue, estimationProperties);
-        return FormatValue(evaluatedValue, dataCellDto.TextFormat);
+        var evaluatedValue = EvaluateRawValue(dataCell.RawValue, estimationProperties);
+        return FormatValue(evaluatedValue, dataCell.TextFormat);
     }
 
     private static object? EvaluateRawValue(
@@ -246,7 +246,7 @@ public static partial class DataCellFormulaEvaluator
         };
     }
 
-    private static string FormatValue(object? value, TextFormatDto textFormat)
+    private static string FormatValue(object? value, TextFormat textFormat)
     {
         return textFormat.Type switch
         {
@@ -256,7 +256,7 @@ public static partial class DataCellFormulaEvaluator
         };
     }
 
-    private static string FormatNumber(object? value, TextFormatDto textFormat)
+    private static string FormatNumber(object? value, TextFormat textFormat)
     {
         if (!TryConvertToDecimal(value, out var decimalValue))
             return Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;
@@ -268,7 +268,7 @@ public static partial class DataCellFormulaEvaluator
         return decimalValue.ToString(format, CultureInfo.CurrentCulture);
     }
 
-    private static string FormatDateTime(object? value, TextFormatDto textFormat)
+    private static string FormatDateTime(object? value, TextFormat textFormat)
     {
         if (!TryConvertToDateTime(value, out var dateTimeValue))
             return Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;

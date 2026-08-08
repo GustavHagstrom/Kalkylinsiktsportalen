@@ -1,6 +1,6 @@
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
-namespace BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
 public sealed class PrintableDocumentPaginator
 {

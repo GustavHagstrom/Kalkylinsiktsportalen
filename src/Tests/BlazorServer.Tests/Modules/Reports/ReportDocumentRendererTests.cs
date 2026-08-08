@@ -1,5 +1,5 @@
 using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
-using PrintableDocumentContract = BlazorServer.Modules.Reports.Domain.PrintableDocuments.PrintableDocument;
+using PrintableDocumentContract = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments.PrintableDocument;
 using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
 namespace BlazorServer.Tests.Modules.Reports;
@@ -40,7 +40,7 @@ public sealed class ReportDocumentRendererTests
         var section = (PrintableContainer)document.BodyItems.Single();
         Assert.Multiple(() =>
         {
-            Assert.That(section.Id, Is.EqualTo("data-section-0"));
+            Assert.That(section.Id, Is.EqualTo("data-section-section-1"));
             Assert.That(section.PageBreakBehavior, Is.EqualTo(PageBreakBehavior.None));
             Assert.That(section.Items, Has.Count.EqualTo(2));
         });
@@ -48,9 +48,9 @@ public sealed class ReportDocumentRendererTests
         var firstRow = (PrintableBlock)section.Items[0];
         Assert.Multiple(() =>
         {
-            Assert.That(firstRow.Id, Is.EqualTo("data-section-0-row-0"));
+            Assert.That(firstRow.Id, Is.EqualTo("data-section-section-1-row-0"));
             Assert.That(firstRow.ComponentType, Is.EqualTo(typeof(DataSectionRowComponent)));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSectionDto)], Is.SameAs(view.DataSections[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.DataSections[0]));
             Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.DataSections[0].RowDefinitions[0]));
         });
     }
@@ -87,20 +87,20 @@ public sealed class ReportDocumentRendererTests
         {
             Assert.That(html, Does.Contain("first"));
             Assert.That(html, Does.Contain("second"));
-            Assert.That(html, Does.Contain("data-printable-block-id=\"data-section-0-row-0\""));
-            Assert.That(html, Does.Contain("data-printable-block-id=\"data-section-0-row-1\""));
+            Assert.That(html, Does.Contain("data-printable-block-id=\"data-section-section-1-row-0\""));
+            Assert.That(html, Does.Contain("data-printable-block-id=\"data-section-section-1-row-1\""));
         });
     }
 
     [Test]
     public void BuildDocument_EmitsSheetSectionsAsBreakableRowBlocks()
     {
-        var view = new ViewDto
+        var view = new View
         {
             Id = new ViewId("sheet-view"),
             SheetSections =
             [
-                new SheetSectionDto { SectionIndex = 0, Content = "Tender sheet" }
+                new SheetSection { SectionId = "sheet-1", SectionIndex = 0, Content = "Tender sheet" }
             ]
         };
 
@@ -112,7 +112,7 @@ public sealed class ReportDocumentRendererTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(section.Id, Is.EqualTo("sheet-section-0"));
+            Assert.That(section.Id, Is.EqualTo("sheet-section-sheet-1"));
             Assert.That(section.Items, Has.Count.EqualTo(Enum.GetValues<RowType>().Length));
             Assert.That(section.Items.Cast<PrintableBlock>().Select(block => block.ComponentType).Distinct(), Is.EqualTo([typeof(SheetSectionRowComponent)]));
         });
@@ -132,17 +132,18 @@ public sealed class ReportDocumentRendererTests
         Assert.That(html, Does.Contain("first"));
     }
 
-    private static ViewDto ViewWithDataSection()
+    private static View ViewWithDataSection()
     {
-        var view = new ViewDto
+        var view = new View
         {
             Id = new ViewId("view-1"),
             Name = "Report",
             Description = "Demo report",
             DataSections =
             [
-                new DataSectionDto
+                new DataSection
                 {
+                    SectionId = "section-1",
                     SectionIndex = 0,
                     RowsCount = 2,
                     ColumnsCount = 1,
@@ -157,8 +158,8 @@ public sealed class ReportDocumentRendererTests
                     ],
                     DataCells =
                     {
-                        ["R0C0"] = new DataCellDto { RawValue = "first" },
-                        ["R1C0"] = new DataCellDto { RawValue = "second" }
+                        ["R0C0"] = new DataCell { RawValue = "first" },
+                        ["R1C0"] = new DataCell { RawValue = "second" }
                     }
                 }
             ]

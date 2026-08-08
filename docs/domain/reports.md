@@ -8,10 +8,8 @@ Modulen äger:
 
 - `View`
 - view-definition med identifierbara `DataSection` och `SheetSection`
-- `PageBreakAfter` som layoutval på innehållssektioner
-- `PrintableDocument` som modellkontrakt för rapportinnehåll som ska kunna mätas, pagineras och renderas
-- `ReportDocumentRenderer` som adapter från `View` och aktuell `RenderingContext` till `PrintableDocument`
-- pagineringspolicy för `Printable Block` och `Printable Container`
+- komponentnära rendering från `View` och aktuell `RenderingContext` till mätbart rapportinnehåll
+- pagineringspolicy för renderingsmodellens `Printable Block` och `Printable Container`
 - regler för när en view är ändringsbar eller arkiverad
 - rendering från `RenderingContext` till rapportstruktur
 - PDF-export och relaterade exportbeslut
@@ -22,7 +20,7 @@ Reports äger inte:
 - mutation av `EstimationSnapshot`
 - snapshot- och versionsmodell i Projects
 
-Reports avsiktliga publika kontrakt är smala. `ViewId` är publik eftersom Access och andra moduler behöver referera en Reports-ägd view utan att känna till view-definitionen. `View`, view-definitionens sektioner, `PrintableDocument`, routes, renderers, stores och komponentstate är Reports-interna modeller eller adapters.
+Reports avsiktliga publika kontrakt är smala. `ViewId` är publik eftersom Access och andra moduler behöver referera en Reports-ägd view utan att känna till view-definitionen. `View`, view-definitionens sektioner, routes, renderers, stores, `PrintableDocument` och komponentstate är Reports-interna modeller eller adapters.
 
 ## Huvudaggregate
 
@@ -34,9 +32,12 @@ Ansvar:
 
 - bära rapportdefinitionen
 - bära sektionernas stabila identiteter inom vyn och deras ordning i rapporten
+- äga strukturella ändringar av rapporten, till exempel att lägga till, ta bort och flytta sektioner
 - bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
 - vara workspace-gränsen som Projects change sets scope:as mot
+
+`View` muterar inte sektioners interna innehåll direkt. `DataSection` och `SheetSection` äger sina egna interna invariants, medan `View` äger vilka sektioner som ingår och i vilken ordning de ligger.
 
 ### `DataSection`
 
@@ -45,8 +46,8 @@ Identifierbar sektion i en `View` som består av en fri excel-liknande layout av
 Ansvar:
 
 - bära fria celler med text, formler, formatering och namngivna värdereferenser
+- skydda sin egen rad-, kolumn-, cell- och layoutkonsistens
 - läsa metadata och namngivna värden via aktuell `RenderingContext`
-- kunna ange `PageBreakAfter`
 
 ### `SheetSection`
 
@@ -56,12 +57,14 @@ Ansvar:
 
 - bära vilket datablad som ska visas
 - bära synlighet och formatering för bladets fält
+- skydda sina egna fält-, synlighets- och formateringsregler
 - visa standardiserad radindikator när en rad är ändrad
-- kunna ange `PageBreakAfter`
+
+## Renderingsmodeller Och Adapters
 
 ### `PrintableDocument`
 
-Modellkontrakt för ett renderbart rapportdokument. Dokumentet bär stabil identitet, obligatorisk change token, sidformat samt separata header-, body- och footer-items.
+Komponentnära modellkontrakt för ett renderbart rapportdokument. Dokumentet bär stabil identitet, obligatorisk change token, sidformat samt separata header-, body- och footer-items.
 
 Ansvar:
 
@@ -113,6 +116,7 @@ Ansvar:
 
 - `View` äger rapportdefinitionen men inte snapshotets sanning eller `ReplacementSelection`-persistens.
 - `SectionIndex` är ordning i rapporten, inte identitet för `DataSection` eller `SheetSection`.
+- Strukturell redigering identifierar befintliga sektioner med `SectionId`; dubbletter eller saknade sektionsidentiteter är ogiltig edit-input. Under kompatibilitetsperioden får ett editor-payload introducera en ny sektion med ny `SectionId`, men bara om identiteten är unik, icke-tom, sektionstypen är känd och resultatets ordning är giltig.
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.

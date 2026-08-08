@@ -1,4 +1,6 @@
 using BlazorServer.Kernel.CQRS;
+using BlazorServer.Kernel.Validation;
+using BlazorServer.Modules.Reports.Domain;
 using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Modules.Reports.Features.UpdateView;
@@ -8,6 +10,7 @@ internal sealed class UpdateViewCommandHandler(
     UpdateViewCommandValidator? validator = null)
     : ICommandHandler<UpdateViewCommand, UpdateViewResult>
 {
+    private const string SectionsField = "Sections";
     private readonly UpdateViewCommandValidator _validator = validator ?? new UpdateViewCommandValidator();
 
     public async Task<UpdateViewResult> HandleAsync(
@@ -31,10 +34,22 @@ internal sealed class UpdateViewCommandHandler(
             return new ViewUpdateOrganizationMismatch(command.ViewId, command.OrganizationId);
         }
 
-        view.Name = command.Name;
-        view.Description = command.Description;
-        view.DataSections = command.DataSections.ToList();
-        view.SheetSections = command.SheetSections.ToList();
+        try
+        {
+            view.ApplyEditedSections(command.DataSections, command.SheetSections);
+            view.Name = command.Name;
+            view.Description = command.Description;
+        }
+        catch (ReportsDomainException exception)
+        {
+            return new InvalidUpdateViewRequest(
+            [
+                new ValidationError(
+                    exception.Code,
+                    SectionsField,
+                    exception.Message)
+            ]);
+        }
 
         await viewStore.UpsertAsync(view);
 

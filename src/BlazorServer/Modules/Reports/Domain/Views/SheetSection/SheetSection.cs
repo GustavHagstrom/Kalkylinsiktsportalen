@@ -1,15 +1,17 @@
+using BlazorServer.Modules.Reports.Domain.Views;
+
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 
-public class SheetSectionDto
+public class SheetSection
 {
-    public SheetSectionDto()
+    public SheetSection()
     {
         foreach (var rowType in Enum.GetValues<RowType>())
         {
             foreach (var columnType in Enum.GetValues<ColumnType>())
             {
                 var key = $"{rowType}-{columnType}";
-                SheetCells[key] = new SheetCellDto
+                SheetCells[key] = new SheetCell
                 {
                     RowType = rowType,
                     ColumnType = columnType
@@ -17,10 +19,19 @@ public class SheetSectionDto
             }
         }
     }
+    public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
     public string Content { get; set; } = string.Empty;
     /// <summary>
     /// Key: $"{rowType}-{columnType}"
     /// </summary>
-    public Dictionary<string, SheetCellDto> SheetCells { get; set; } = new();
+    public Dictionary<string, SheetCell> SheetCells { get; set; } = new();
+
+    public void Normalize()
+    {
+        if (string.IsNullOrWhiteSpace(SectionId))
+            SectionId = SectionIds.New();
+
+        SheetCells ??= new Dictionary<string, SheetCell>();
+    }
 }

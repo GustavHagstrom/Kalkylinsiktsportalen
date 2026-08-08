@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using BlazorServer.Modules.Reports.Domain.PrintableDocuments;
+using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
@@ -11,10 +11,11 @@ namespace BlazorServer.Modules.Reports.Components.Rendering;
 
 public sealed class PrintableDocumentBuilder
 {
-    public PrintableDocument Build(ViewDto view, ReportRenderingContext renderingContext)
+    public PrintableDocument Build(View view, ReportRenderingContext renderingContext)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(renderingContext);
+        view.EnsureSectionIdentities();
 
         return new PrintableDocument(
             Id: $"report-view-{view.Id.Value}",
@@ -25,18 +26,18 @@ public sealed class PrintableDocumentBuilder
             FooterItems: []);
     }
 
-    private static IReadOnlyList<PrintableItem> BuildBodyItems(ViewDto view)
+    private static IReadOnlyList<PrintableItem> BuildBodyItems(View view)
     {
         var items = new List<PrintableItem>();
         foreach (var section in OrderedSections(view))
         {
             switch (section)
             {
-                case DataSectionDto dataSection:
+                case DataSection dataSection:
                     items.Add(BuildDataSectionItem(dataSection));
                     break;
 
-                case SheetSectionDto sheetSection:
+                case SheetSection sheetSection:
                     items.Add(BuildSheetSectionItem(sheetSection));
                     break;
             }
@@ -45,36 +46,36 @@ public sealed class PrintableDocumentBuilder
         return items;
     }
 
-    private static PrintableContainer BuildDataSectionItem(DataSectionDto section)
+    private static PrintableContainer BuildDataSectionItem(DataSection section)
         => new(
-            $"data-section-{section.SectionIndex}",
+            $"data-section-{section.SectionId}",
             section.RowDefinitions
                 .OrderBy(row => row.RowIndex)
                 .Select(row => new PrintableBlock(
-                    $"data-section-{section.SectionIndex}-row-{row.RowIndex}",
+                    $"data-section-{section.SectionId}-row-{row.RowIndex}",
                     typeof(DataSectionRowComponent),
                     new Dictionary<string, object?>
                     {
-                        [nameof(DataSectionRowComponent.DataSectionDto)] = section,
+                        [nameof(DataSectionRowComponent.DataSection)] = section,
                         [nameof(DataSectionRowComponent.RowDefinition)] = row
                     }))
                 .ToArray());
 
-    private static PrintableContainer BuildSheetSectionItem(SheetSectionDto section)
+    private static PrintableContainer BuildSheetSectionItem(SheetSection section)
         => new(
-            $"sheet-section-{section.SectionIndex}",
+            $"sheet-section-{section.SectionId}",
             Enum.GetValues<RowType>()
                 .Select(rowType => new PrintableBlock(
-                    $"sheet-section-{section.SectionIndex}-row-{rowType}",
+                    $"sheet-section-{section.SectionId}-row-{rowType}",
                     typeof(SheetSectionRowComponent),
                     new Dictionary<string, object?>
                     {
-                        [nameof(SheetSectionRowComponent.SheetSectionDto)] = section,
+                        [nameof(SheetSectionRowComponent.SheetSection)] = section,
                         [nameof(SheetSectionRowComponent.RowType)] = rowType
                     }))
                 .ToArray());
 
-    private static IEnumerable<object> OrderedSections(ViewDto view)
+    private static IEnumerable<object> OrderedSections(View view)
         => view.DataSections.Cast<object>()
             .Concat(view.SheetSections)
             .OrderBy(SectionIndex);
@@ -82,12 +83,12 @@ public sealed class PrintableDocumentBuilder
     private static int SectionIndex(object section)
         => section switch
         {
-            DataSectionDto dataSection => dataSection.SectionIndex,
-            SheetSectionDto sheetSection => sheetSection.SectionIndex,
+            DataSection dataSection => dataSection.SectionIndex,
+            SheetSection sheetSection => sheetSection.SectionIndex,
             _ => throw new NotSupportedException($"Unsupported report section type '{section.GetType().Name}'.")
         };
 
-    private static string CreateChangeToken(ViewDto view, ReportRenderingContext renderingContext)
+    private static string CreateChangeToken(View view, ReportRenderingContext renderingContext)
     {
         var tokenInput = JsonSerializer.Serialize(new
         {
