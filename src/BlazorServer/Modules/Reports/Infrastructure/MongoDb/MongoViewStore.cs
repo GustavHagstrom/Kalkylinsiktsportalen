@@ -25,7 +25,7 @@ public class MongoViewStore : IViewStore
     {
         var filter = Builders<MongoView>.Filter.Eq(v => v.OrganizationId, orgId.Value);
         var mongoViews = await _collection.Find(filter).ToListAsync();
-        var views = mongoViews.Select(ViewMappings.ToDomain).ToList();
+        var views = mongoViews.Select(ViewMappings.ToDomain).OfType<View>().ToList();
         return views;
     }
     public Task DeleteAsync(ViewId viewId)

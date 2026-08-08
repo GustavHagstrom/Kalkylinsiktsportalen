@@ -181,6 +181,7 @@ public sealed class ReportsViewManagementHandlersTests
         Assert.Multiple(() =>
         {
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_id.required"));
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Field), Does.Contain("Sections"));
             Assert.That(existing.Name, Is.EqualTo("Tender report"));
             Assert.That(store.Upserted, Is.Null);
         });

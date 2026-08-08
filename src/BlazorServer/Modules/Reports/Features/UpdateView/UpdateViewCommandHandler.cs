@@ -10,6 +10,7 @@ internal sealed class UpdateViewCommandHandler(
     UpdateViewCommandValidator? validator = null)
     : ICommandHandler<UpdateViewCommand, UpdateViewResult>
 {
+    private const string SectionsField = "Sections";
     private readonly UpdateViewCommandValidator _validator = validator ?? new UpdateViewCommandValidator();
 
     public async Task<UpdateViewResult> HandleAsync(
@@ -45,7 +46,7 @@ internal sealed class UpdateViewCommandHandler(
             [
                 new ValidationError(
                     exception.Code,
-                    nameof(UpdateViewCommand.DataSections),
+                    SectionsField,
                     exception.Message)
             ]);
         }

@@ -6,8 +6,11 @@ namespace BlazorServer.Modules.Reports.Infrastructure.MongoDb;
 
 public static class ViewMappings
 {
-    public static View ToDomain(this MongoView mongoView)
+    public static View? ToDomain(this MongoView? mongoView)
     {
+        if (mongoView is null)
+            return null;
+
         var view = new View
         {
             Id = new ViewId(mongoView.Id),

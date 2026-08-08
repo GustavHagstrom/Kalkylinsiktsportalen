@@ -71,10 +71,11 @@ public class ReportsViewPersistenceTests
         var mongoView = ViewMappings.ToMongo(view);
         var roundTripped = ViewMappings.ToDomain(mongoView);
 
+        Assert.That(roundTripped, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(mongoView.Id, Is.EqualTo("view-1"));
-            Assert.That(roundTripped.Id, Is.EqualTo(new ViewId("view-1")));
+            Assert.That(roundTripped!.Id, Is.EqualTo(new ViewId("view-1")));
             Assert.That(roundTripped.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
@@ -88,5 +89,15 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.SheetSections[0].SectionId, Is.EqualTo("sheet-section-1"));
             Assert.That(roundTripped.SheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
         });
+    }
+
+    [Test]
+    public void ViewMappingsReturnNullForMissingMongoView()
+    {
+        MongoView? mongoView = null;
+
+        var view = ViewMappings.ToDomain(mongoView);
+
+        Assert.That(view, Is.Null);
     }
 }
