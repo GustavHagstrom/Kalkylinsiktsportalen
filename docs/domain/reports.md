@@ -31,13 +31,13 @@ Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom ident
 Ansvar:
 
 - bära rapportdefinitionen
-- bära sektionernas stabila identiteter inom vyn och deras ordning i rapporten
+- bära en ordnad sektionssamling med sektionernas stabila identiteter inom vyn
 - äga strukturella ändringar av rapporten, till exempel att lägga till, ta bort och flytta sektioner
 - bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
 - vara workspace-gränsen som Projects change sets scope:as mot
 
-`View` muterar inte sektioners interna innehåll direkt. `DataSection` och `SheetSection` äger sina egna interna invariants, medan `View` äger vilka sektioner som ingår och i vilken ordning de ligger.
+`View` muterar inte sektioners interna innehåll direkt. `DataSection` och `SheetSection` äger sina egna interna invariants och defaults, medan `View` äger den ordnade sektionssamlingen och vilka sektionstyper som får ingå.
 
 ### `DataSection`
 
@@ -115,8 +115,20 @@ Ansvar:
 ## Invariants
 
 - `View` äger rapportdefinitionen men inte snapshotets sanning eller `ReplacementSelection`-persistens.
-- `SectionIndex` är ordning i rapporten, inte identitet för `DataSection` eller `SheetSection`.
+- En `View` skapas inom exakt en `Organization` och kan inte flyttas till en annan `Organization`.
+- En `View` måste ha ett namn, men namnet behöver inte vara unikt inom en `Organization`.
+- En `View` kan ha en valfri beskrivning som metadata för att skilja rapportmallar åt; beskrivningen har ingen renderingsbetydelse om den inte uttryckligen används i en sektion.
+- En arkiverad `View` får inte redigeras i normala edit-flöden; den måste återaktiveras eller dupliceras till en aktiv view innan ändringar görs.
+- En `View` får ha noll sektioner medan rapportmallen byggs.
+- En `View` får innehålla flera sektioner av samma typ och flera `SheetSection` som visar samma datablad; varje sektion skiljs genom sin stabila identitet och egen konfiguration.
+- När en sektion tas bort försvinner den ur den aktiva view-definitionen; `View` har ingen separat per-section-arkivering.
+- Sektioners ordning kommer från deras position i `View`ens ordnade sektionssamling. `SectionIndex` är ett övergångs-/payloadfält, inte en separat domänsanning.
+- En ny sektion får sin `SectionId` när sektionen skapas. `View` skyddar att alla sektioner i samma view har icke-tomma och unika `SectionId`.
+- `SectionId` är unik inom sin `View`; externa referenser till en sektion behöver `ViewId` och `SectionId` tillsammans.
+- En befintlig sektions typ får inte ändras. Typbyte modelleras som borttag av den gamla sektionen och tillägg av en ny sektion med ny `SectionId`.
 - Strukturell redigering identifierar befintliga sektioner med `SectionId`; dubbletter eller saknade sektionsidentiteter är ogiltig edit-input. Under kompatibilitetsperioden får ett editor-payload introducera en ny sektion med ny `SectionId`, men bara om identiteten är unik, icke-tom, sektionstypen är känd och resultatets ordning är giltig.
+- Strukturella ändringar uttrycks som intentioner, till exempel `AddSection`, `RemoveSection` och `MoveSection`; whole-view saves är bara en kompatibilitetsbrygga.
+- Normalisering är en legacy-/hydration-mekanism. Nya feature-slices ska använda domänbeteenden som håller `View` giltig utan att callers behöver reparera modellen efteråt.
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
@@ -127,15 +139,21 @@ Ansvar:
 
 ## Nuvarande Policyer
 
+### Borttag Av Sektion
+
+Borttag av en sektion ska föregås av en tydlig UI-varning, särskilt eftersom Projects kan ha historiska `ViewScopedChangeSet` som refererar sektionens `SectionId`.
+
 ### `EnableChanges`
 
 Om en användare får använda en view och `EnableChanges` är aktiverat får användaren göra de delade `ReplacementSelection` som Projects tillåter. Detta är en view-egenskap, inte en generell projektinställning.
+
+Nya views har `EnableChanges` avstängt som standard. Att tillåta nya delade `ReplacementSelection` är ett avsiktligt rapportmallval.
 
 ### Duplicering
 
 Duplicering av en view kopierar:
 
-- view-definition
+- view-definitionens ordnade sektionssamling
 - relevanta inställningar, inklusive `EnableChanges`
 
 Duplicering kopierar inte:
@@ -143,15 +161,21 @@ Duplicering kopierar inte:
 - befintliga `ViewScopedChangeSet`
 - gammalt arbetsstate från andra vyer
 
+Duplicerade sektioner får nya `SectionId`; kopian har motsvarande sektioner, inte samma sektioner.
+
 ### Arkivering
 
 Views med historik, exportrelevans eller `ViewScopedChangeSet`-bakgrund ska kunna arkiveras i stället för att tas bort ur all historik.
+
+View-livscykeln skiljer initialt bara mellan aktiv och arkiverad. `Draft`/`Published` införs inte förrän view-definitioner behöver publicerings- eller versionsregler.
 
 Arkivering betyder att vyn:
 
 - döljs från normal ny användning
 - bevaras för att förklara historiska rapporter och beslut
 - kan användas i läsläge för historik och exportförståelse
+
+En arkiverad view kan återaktiveras genom en explicit åtgärd.
 
 ### Paginering
 

@@ -87,12 +87,12 @@ Arbetsversion som ännu inte är en publicerad eller definitiv version.
 _Avoid_: utkastversion
 
 **View**:
-Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom en ordnad samling identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
 _Avoid_: mall, dokument
 
 **SectionId**:
-Stabil identitet för en sektion inom en `View`. En `SectionId` följer sektionen när den flyttas och används när andra modeller eller renderingsspårning behöver peka på samma sektion över tid.
-_Avoid_: SectionIndex när identiteten måste vara stabil
+Stabil identitet för en sektion inom en `View`. En `SectionId` följer sektionen när den flyttas och används tillsammans med `ViewId` när andra modeller eller renderingsspårning behöver peka på samma sektion över tid.
+_Avoid_: listposition när identiteten måste vara stabil
 
 **Change-enabled View**:
 `View` där `EnableChanges` är aktiverat och där användare med rätt att använda vyn får göra delade view-lokala `ReplacementSelection`.
