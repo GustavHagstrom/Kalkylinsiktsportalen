@@ -41,13 +41,16 @@ Ansvar:
 
 ### `DataSection`
 
-Identifierbar sektion i en `View` som består av en fri excel-liknande layout av `DataCell`.
+Identifierbar sektion i en `View` som består av en fri spreadsheet-like layout av `DataCell`.
 
 Ansvar:
 
-- bära fria celler med text, formler, formatering och namngivna värdereferenser
+- bära en fri grid-layout med celler som kan innehålla text, formler, formatering och namngivna värdereferenser
+- bära rad- och kolumnstorlekar som del av rapportlayouten
+- bära cell- och textformat som del av rapportmallens layout
 - skydda sin egen rad-, kolumn-, cell- och layoutkonsistens
 - läsa metadata och namngivna värden via aktuell `RenderingContext`
+- inte själv tolka celluttryck till displayvärden
 
 ### `SheetSection`
 
@@ -103,6 +106,7 @@ Ansvar:
 - skapa ett `PrintableDocument` med stabil identitet, sidformat och change token
 - översätta rapportsektioner till `PrintableBlock` och `PrintableContainer`
 - låta lång eller internt brytbar sektiondata bli flera mätbara block utan att pagineringsmotorn behöver känna till rapportdomänen
+- använda Reports cell evaluation för att härleda `DataCell`-displayvärden från `CellExpression` och aktuell `RenderingContext`
 
 ## Relationer
 
@@ -129,6 +133,33 @@ Ansvar:
 - Strukturell redigering identifierar befintliga sektioner med `SectionId`; dubbletter eller saknade sektionsidentiteter är ogiltig edit-input. Under kompatibilitetsperioden får ett editor-payload introducera en ny sektion med ny `SectionId`, men bara om identiteten är unik, icke-tom, sektionstypen är känd och resultatets ordning är giltig.
 - Strukturella ändringar uttrycks som intentioner, till exempel `AddSection`, `RemoveSection` och `MoveSection`; whole-view saves är bara en kompatibilitetsbrygga.
 - Normalisering är en legacy-/hydration-mekanism. Nya feature-slices ska använda domänbeteenden som håller `View` giltig utan att callers behöver reparera modellen efteråt.
+- I en `DataSection` är `RowDefinition`- och `DataColumnDefinition`-samlingarna sanningen för gridens storlek. Separata row/column count-fält är derived eller legacy/payload, inte egna domänsanningar.
+- En existerande `DataSection` har minst en rad och minst en kolumn.
+- En `DataSection` får inte ta bort sin sista rad eller sista kolumn; då ska sektionen tas bort från `View` i stället.
+- En ny `DataSection` kan skapas med explicit storlek. En 3x3-grid är en editor-default, inte en affärsregel.
+- `DataSection` trimmar inte automatiskt tomma rader eller kolumner. Gridens storlek är ett explicit layoutval.
+- Radhöjd är del av rapportlayouten, inte bara editor-state, och uttrycks i millimeter i domänmodellen.
+- Radhöjd kan vara decimal men måste vara större än noll.
+- Kolumnbredd är del av rapportlayouten, inte bara editor-state, och uttrycks som relativ vikt inom `DataSection`ens tillgängliga bredd.
+- Kolumnbreddens relativa vikt kan vara decimal men måste vara större än noll.
+- `DataSection` bär inte sin totala renderade bredd. Tillgänglig bredd kommer från rendering/container och används för att omräkna kolumnvikter vid rendering.
+- `DataSection` stödjer inte sammanslagna celler i nuläget.
+- I en `DataSection` identifieras en `DataCell` av sin position `(rowIndex, columnIndex)` inom sektionen. Stringnycklar som `R0C0` är lookup-/persistence-detaljer, inte domänspråk.
+- En `DataSection` får inte innehålla celler utanför aktuell gridstorlek. Nya cell edits utanför gridens bounds ska avvisas i stället för att tyst repareras.
+- En `DataCell` lagrar användarens `CellExpression`. Displayvärdet härleds vid rendering; uttryck som börjar med `=` tolkas som formler, annars visas uttrycket som text. Format ligger bredvid celluttrycket.
+- `DataCell` har systemdefault för textformat och cellformat. En cell behöver bara lagras när dess uttryck eller format avviker från systemdefault.
+- Cell- och textformat i en `DataSection` är del av rapportmallens layout, inte bara editor-state.
+- Lagrade `DataCell`-format får inte vara null. Legacy-hydration kan reparera null-format till systemdefault, men nya domänoperationer ska inte skapa null-format.
+- Cell evaluation är ett Reports-renderingsansvar utanför `DataCell`/`DataSection` entityn. Det ska vara testbart utan Blazor-komponentlivscykel.
+- En formel som inte kan tolkas ska ge ett explicit renderingsfel eller felvärde, inte tyst falla tillbaka till att visa `CellExpression` som vanlig text.
+- En `DataSection` behöver bara lagra celler som avviker från default. En saknad cell betyder en tom default-cell på den positionen.
+- När en rad eller kolumn tas bort ur en `DataSection` flyttas efterföljande rader/kolumner och deras cellinnehåll upp respektive vänster. Grid-positioner är layoutkoordinater, inte stabila rad- eller kolumnidentiteter.
+- Rader och kolumner i en `DataSection` identifieras av sin aktuella position inom sektionen, inte av stabila identities.
+- En `DataSection` skapas med explicit initial storlek. Efter skapande ändras den genom intentionella operationer som add/remove row/column, resize och cell edits. Full reset/initialize är inte ett normalt edit-beteende och ska vara explicit om det behövs.
+- `DataSection` har ingen separat titel i nuläget. Rapportens rubriker bärs av cellinnehåll i gridden.
+- Page-break-regler hör hemma på gemensam section-/rapportblocknivå, inte som interna cell- eller radregler i `DataSection`.
+- En `DataSection` kan renderas som flera mätbara radblock för paginering. Den behöver inte placeras som ett enda odelbart `Printable Block`.
+- `DataSection` validerar inte radhöjd mot en specifik sidbody. En renderad rad som inte ryms i aktuell sidbody blir ett blockerande pagineringsfel.
 - `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
@@ -185,6 +216,8 @@ Motorn paginerar bara body-block. Header och footer repeteras som fasta regioner
 
 `PaginatedDocumentRenderer` äger den säkra print-ingången. Browser print öppnas bara när den paginerade preview-DOM:en är aktuell och saknar blockerande `Pagination Error`. Browserns print-to-PDF är den initiala PDF-vägen för renderern, så PDF-export i MVP använder samma paginerade DOM som användaren förhandsgranskar.
 
+Cell evaluation errors visas i editor/preview som felvärden. Som nuvarande policy ska export/print kunna blockeras av cell evaluation errors, men detta kan omprövas när rapportarbetsflödet mognar.
+
 ## MVP-Begränsningar Och Tillfälliga Val
 
 - första PDF-exporten utgår från aktivt öppnat view-läge snarare än bredare historikhantering
@@ -195,6 +228,10 @@ Motorn paginerar bara body-block. Header och footer repeteras som fasta regioner
 - tydligare skillnad mellan arbetsvyer, publicerade rapportvyer och arkiverade historikvyer
 - rikare exporthistorik
 - fler view- eller rapportnivåer för olika målgrupper eller distributionssätt
+- cellformler i en `DataSection` som refererar andra celler inom samma sektion, om behovet uppstår
+- konfigurerbara defaultformat på `DataSection`, rad eller kolumn, om användare behöver formatmallar utöver systemdefault för celler
+- flytt av rader eller kolumner i en `DataSection`, om rapporteditorn behöver omordna gridinnehåll utan manuell kopiering
+- gemensamma section-level page-break-regler för `DataSection` och `SheetSection`
 
 ## Relaterade ADR:er
 
