@@ -28,6 +28,7 @@ Exempel är arkitekturens riktning, data- eller auth-modell, integrationsmönste
 ADR:er ligger nära beslutets ägarskap:
 
 - [global/](global/) - repoövergripande arkitektur, modulgränser och gemensamma riktlinjer
+- [modules/access/](modules/access/) - Access grants, authorization-beslut och Access-nära modellbeslut
 - [modules/bidcon/](modules/bidcon/) - Bidcon-import, snapshot-källa och Bidcon-nära modellbeslut
 - [modules/projects/](modules/projects/) - långlivade Projects-beslut som fortfarande är verkliga trade-offs
 - [modules/reports/](modules/reports/) - långlivade Reports-beslut kring export, historik och ansvar
@@ -62,9 +63,9 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 
 ## Befintliga ADR:er
 
-### Övriga
+### Access
 
-- [0001 - Target-Based Functional Access Grants](0001-target-based-functional-access-grants.md)
+- [0001 - Target-Based Functional Access Grants](modules/access/0001-target-based-functional-access-grants.md)
 
 ### Global
 
