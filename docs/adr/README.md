@@ -62,6 +62,10 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 
 ## Befintliga ADR:er
 
+### Övriga
+
+- [0001 - Target-Based Functional Access Grants](0001-target-based-functional-access-grants.md)
+
 ### Global
 
 - [0001 - Use feature slices with target modules](global/0001-use-feature-slices-with-target-modules.md)
@@ -77,6 +81,7 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 - [0042 - Remove Shared and establish explicit ownership](global/0042-remove-shared-and-establish-explicit-ownership.md)
 - [0043 - Introduce dedicated Composition boundary](global/0043-introduce-dedicated-composition-boundary.md)
 - [0044 - Introduce Identity boundary](global/0044-introduce-identity-boundary.md)
+- [0045 - Keep current-user context as host boundary](global/0045-keep-current-user-context-as-host-boundary.md)
 
 ### Bidcon
 
@@ -89,6 +94,12 @@ Lägg bara till extra sektioner när de faktiskt hjälper en framtida läsare:
 
 ### Reports
 
+- [0001 - Paginated Document Renderer Boundary](modules/reports/0001-paginated-document-renderer-boundary.md)
+- [0002 - Report Rendering Is Two-Stage](modules/reports/0002-report-rendering-is-two-stage.md)
+- [0003 - JavaScript Only Measures Document Layout](modules/reports/0003-javascript-only-measures-document-layout.md)
+- [0004 - Printable Document Model](modules/reports/0004-printable-document-model.md)
+- [0005 - Repagination Is Driven by Document Change Token](modules/reports/0005-repagination-is-driven-by-document-change-token.md)
 - [0015 - Export active view state to PDF](modules/reports/0015-export-active-view-state-to-pdf.md)
 - [0022 - Archive views with history](modules/reports/0022-archive-views-with-history.md)
 - [0023 - Generate PDF exports on demand for MVP](modules/reports/0023-generate-pdf-exports-on-demand-for-mvp.md)
+- [0024 - Edit views through intent commands](modules/reports/0024-edit-views-through-intent-commands.md)
