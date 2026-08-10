@@ -87,7 +87,7 @@ Arbetsversion som ännu inte är en publicerad eller definitiv version.
 _Avoid_: utkastversion
 
 **View**:
-Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom en ordnad samling identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
+Organisationsägd rapportmall som beskriver hur kalkyldata ska visas genom valt `PageFormat` och en ordnad samling identifierbara sektioner, initialt `DataSection` och `SheetSection`. En `View` äger rapportstrukturens invariants, inklusive vilka sektioner som ingår, sektionernas stabila identiteter och deras ordning. `View` muterar inte sektioners interna innehåll direkt, utan delegerar sådana förändringar till respektive sektion.
 _Avoid_: mall, dokument
 
 **SectionId**:
@@ -143,7 +143,7 @@ Fast sidregion som upprepas nederst på varje sida i ett paginerat dokument och 
 _Avoid_: footer block
 
 **Page Format**:
-Fast sidstorlek med namn och mått i millimeter som `Paginated Document Renderer` använder för både visning och utskrift, till exempel A3, A4 eller A5.
+Reports-domänvärde för fast sidstorlek med namn och mått i millimeter, till exempel A3, A4 eller A5. En `View` bär valt `Page Format`, och renderingen för vidare sidformatet till `Paginated Document Renderer`.
 _Avoid_: page size enum när måtten spelar roll
 
 **Pagination Error**:

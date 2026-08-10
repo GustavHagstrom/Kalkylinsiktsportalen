@@ -32,6 +32,7 @@ Ansvar:
 
 - bära rapportdefinitionen
 - bära en ordnad sektionssamling med sektionernas stabila identiteter inom vyn
+- bära valt `PageFormat` för rapportmallen
 - äga strukturella ändringar av rapporten, till exempel att lägga till, ta bort och flytta sektioner
 - bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
@@ -122,6 +123,7 @@ Ansvar:
 - En `View` skapas inom exakt en `Organization` och kan inte flyttas till en annan `Organization`.
 - En `View` måste ha ett namn, men namnet behöver inte vara unikt inom en `Organization`.
 - En `View` kan ha en valfri beskrivning som metadata för att skilja rapportmallar åt; beskrivningen har ingen renderingsbetydelse om den inte uttryckligen används i en sektion.
+- En `View` bär valt `PageFormat` eftersom sidformatet är del av rapportmallens layout. Nya views använder A4 som default tills användaren väljer annat.
 - En arkiverad `View` får inte redigeras i normala edit-flöden; den måste återaktiveras eller dupliceras till en aktiv view innan ändringar görs.
 - En `View` får ha noll sektioner medan rapportmallen byggs.
 - En `View` får innehålla flera sektioner av samma typ och flera `SheetSection` som visar samma datablad; varje sektion skiljs genom sin stabila identitet och egen konfiguration.
@@ -211,6 +213,8 @@ En arkiverad view kan återaktiveras genom en explicit åtgärd.
 ### Paginering
 
 Reports pagineringsmotor är ren C#-logik. Den tar ett `PrintableDocument`, uppmätta header/footer-höjder och uppmätta body-block, flattenar containers och returnerar sidor, warnings och blockerande fel.
+
+`PageFormat` är ett Reports-domänvärde för namngiven sidstorlek med mått i millimeter, till exempel A3, A4 eller A5. `View` äger valt `PageFormat`; `PrintableDocument` bär sidformatet som renderad input till pagineringsmotorn.
 
 Motorn paginerar bara body-block. Header och footer repeteras som fasta regioner på varje sida och minskar den tillgängliga body-ytan. Om nästa block inte ryms på aktuell sida fortsätter motorn på nästa sida. Om ett enskilt block inte ryms i body-ytan returneras ett blockerande `Pagination Error`.
 
