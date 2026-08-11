@@ -151,6 +151,37 @@ Ansvar:
 - En `DataCell` lagrar användarens `CellExpression`. Displayvärdet härleds vid rendering; uttryck som börjar med `=` tolkas som formler, annars visas uttrycket som text. Format ligger bredvid celluttrycket.
 - `DataCell` har systemdefault för textformat och cellformat. En cell behöver bara lagras när dess uttryck eller format avviker från systemdefault.
 - Cell- och textformat i en `DataSection` är del av rapportmallens layout, inte bara editor-state.
+- `CellFormat`, `TextFormat` och `BorderFormat` är Reports-domänvärden för rapportlayout. De uttrycker layoutintention; rendering översätter dem till CSS eller annan presentationsrepresentation.
+- Formatmodeller är value objects. Målmodellen bör ersätta formatvärden via domänoperationer i stället för att behandla format som muterbara entities.
+- Målmodellen skiljer `CellLayout`, `TextStyle` och `ValueFormat`. `CellLayout` äger bakgrund, padding och borders; `TextStyle` äger font, färg, styling och alignment; `ValueFormat` äger plain text/number/date-regler.
+- En `DataCell` lagrar bara formatdelar som overrides från systemdefault. Saknade `CellLayout`, `TextStyle` eller `ValueFormat` betyder systemdefault för den formatdelen.
+- Efter cell edits eller formatpatchar tas en cell bort ur `DataSection`ens lagrade cellsamling när den åter är helt default: tomt `CellExpression` och inga format-overrides.
+- Systemdefault för cellformat är initialt en global Reports-default, inte ett `View`-specifikt tema.
+- Dagens `TextFormat` blandar textstil och värdeformat och bör delas enligt målmodellen.
+- Default `ValueFormat` är text. Tal- och datumformat måste vara explicit valda; programmet ska inte auto-tolka celler som tal eller datum.
+- Number `ValueFormat` tillåter `DecimalCount` mellan 0 och 6.
+- Number `ValueFormat` har en enkel `UseThousandsSeparator`-inställning. Själva separatorns tecken och kultur kommer från rendering/export-context, inte från cellen.
+- Date/time `ValueFormat` använder en begränsad uppsättning stödda formatpresets, inte fria .NET-formatsträngar.
+- Initiala date/time-presets är `Date` och `DateTimeMinute`.
+- Bold, italic och underline är boolska text style-val med default `false`.
+- Underline behålls som text style-val; andra text decorations, till exempel strike-through, ingår inte initialt.
+- Färger i rapportformat uttrycks som validerade hex-färger utan alpha, till exempel `#FFFFFF`. UI kan använda color picker, men domänen ska inte acceptera fria CSS-färgsträngar.
+- Hex-färger normaliseras till uppercase kanonisk form, till exempel `#FFFFFF`.
+- Default cellbakgrund är ingen fill, inte explicit vit. Explicit vit bakgrund är ett användarvalt format.
+- Default textfärg är systemdefault/auto, inte explicit svart. Explicit svart text är ett användarvalt format.
+- Font väljs från en begränsad uppsättning stödda rapportfonter. Domänen ska inte acceptera godtyckliga CSS `font-family`-strängar.
+- Default font är systemdefault/auto. Nuvarande systemdefault kan vara Calibri, men explicit font lagras bara när användaren väljer en font.
+- Fontstorlek uttrycks i points i domänmodellen, inte CSS-pixels.
+- Fontstorlek kan vara decimal men måste vara större än noll.
+- Cellpadding uttrycks i millimeter i domänmodellen, inte CSS-pixels.
+- Cellpadding får vara noll men inte negativ.
+- Border width uttrycks i points i domänmodellen, inte CSS-pixels.
+- Ingen border är ett separat border-tillstånd. När en border finns måste dess width vara större än noll.
+- Border style är en begränsad enum, initialt `Solid`, `Dashed`, `Dotted` och `Double`. `None` är inte en border style utan det separata no-border-tillståndet.
+- En cell kan ha olika border per sida: left, right, top och bottom.
+- Horisontell och vertikal textplacering är separata formatbegrepp. Horisontell alignment använder `Left`, `Center`, `Right`; vertikal alignment använder `Top`, `Middle`, `Bottom`.
+- Default horisontell textplacering härleds från displaytyp när ingen explicit alignment är satt: text vänsterställs, tal högerställs och datum/tid högerställs. Explicit alignment override vinner alltid.
+- Default vertikal textplacering i en `DataCell` är bottom.
 - Lagrade `DataCell`-format får inte vara null. Legacy-hydration kan reparera null-format till systemdefault, men nya domänoperationer ska inte skapa null-format.
 - Cell evaluation är ett Reports-renderingsansvar utanför `DataCell`/`DataSection` entityn. Det ska vara testbart utan Blazor-komponentlivscykel.
 - En formel som inte kan tolkas ska ge ett explicit renderingsfel eller felvärde, inte tyst falla tillbaka till att visa `CellExpression` som vanlig text.
@@ -158,6 +189,9 @@ Ansvar:
 - När en rad eller kolumn tas bort ur en `DataSection` flyttas efterföljande rader/kolumner och deras cellinnehåll upp respektive vänster. Grid-positioner är layoutkoordinater, inte stabila rad- eller kolumnidentiteter.
 - Rader och kolumner i en `DataSection` identifieras av sin aktuella position inom sektionen, inte av stabila identities.
 - En `DataSection` skapas med explicit initial storlek. Efter skapande ändras den genom intentionella operationer som add/remove row/column, resize och cell edits. Full reset/initialize är inte ett normalt edit-beteende och ska vara explicit om det behövs.
+- `DataSection` kan applicera format på ett cellintervall som en domänoperation. Sektionen validerar att intervallet ligger inom gridens bounds.
+- Formatändringar uttrycks som intentionella, partiella patches när användaren ändrar en del av formatet, till exempel bold, bakgrundsfärg eller top border. En patch ska inte oavsiktligt ersätta orelaterade formatval.
+- Formatpatchar kan både sätta ett explicit formatvärde och återställa ett formatfält till systemdefault/auto.
 - `DataSection` har ingen separat titel i nuläget. Rapportens rubriker bärs av cellinnehåll i gridden.
 - Page-break-regler hör hemma på gemensam section-/rapportblocknivå, inte som interna cell- eller radregler i `DataSection`.
 - En `DataSection` kan renderas som flera mätbara radblock för paginering. Den behöver inte placeras som ett enda odelbart `Printable Block`.
@@ -234,6 +268,7 @@ Cell evaluation errors visas i editor/preview som felvärden. Som nuvarande poli
 - fler view- eller rapportnivåer för olika målgrupper eller distributionssätt
 - cellformler i en `DataSection` som refererar andra celler inom samma sektion, om behovet uppstår
 - konfigurerbara defaultformat på `DataSection`, rad eller kolumn, om användare behöver formatmallar utöver systemdefault för celler
+- `View`-specifika rapportteman/defaultformat, om användare behöver konsekventa mallteman
 - flytt av rader eller kolumner i en `DataSection`, om rapporteditorn behöver omordna gridinnehåll utan manuell kopiering
 - gemensamma section-level page-break-regler för `DataSection` och `SheetSection`
 

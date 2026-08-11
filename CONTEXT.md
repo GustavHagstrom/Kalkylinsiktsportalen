@@ -168,6 +168,18 @@ _Avoid_: Data cell
 Användarens inmatade uttryck i en `DataCell`. Uttryck som börjar med `=` tolkas som formler vid rendering; annars visas uttrycket som text.
 _Avoid_: RawValue i domänspråk
 
+**CellLayout**:
+Rapportlayoutvärde för en `DataCell` som beskriver bakgrund, padding och borders. En `CellLayout` uttrycker layoutintention och översätts av rendering till presentationsrepresentation.
+_Avoid_: CellFormat när skillnaden mot text- och värdeformat spelar roll
+
+**TextStyle**:
+Rapportlayoutvärde för en `DataCell` som beskriver font, textfärg, bold, italic, underline och textplacering.
+_Avoid_: TextFormat när värdeformat också ingår
+
+**ValueFormat**:
+Rapportlayoutvärde för en `DataCell` som beskriver hur cellens beräknade displayvärde formateras som text, tal eller datum/tid. Default är text, och tal/datum måste väljas explicit.
+_Avoid_: TextFormat när du menar tal- eller datumformat
+
 **Estimation Explorer**:
 Yta där användaren söker, filtrerar och väljer estimations från Bidcon.
 _Avoid_: Kalkylutforskare
