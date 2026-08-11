@@ -34,7 +34,6 @@ Ansvar:
 - bära en ordnad sektionssamling med sektionernas stabila identiteter inom vyn
 - bära valt `PageFormat` för rapportmallen
 - äga strukturella ändringar av rapporten, till exempel att lägga till, ta bort och flytta sektioner
-- bära `EnableChanges` som styr om nya delade `ReplacementSelection` får göras i vyn
 - bära livscykelstatus, inklusive aktiv och arkiverad
 - vara workspace-gränsen som Projects change sets scope:as mot
 
@@ -55,14 +54,20 @@ Ansvar:
 
 ### `SheetSection`
 
-Identifierbar sektion i en `View` som visar exakt ett datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext`.
+Identifierbar sektion i en `View` som visar exakt ett helt Bidcon-datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext`.
 
 Ansvar:
 
-- bära vilket datablad som ska visas
-- bära synlighet och formatering för bladets fält
+- bära `SheetKind`, vilket explicit väljer vilket datablad som ska visas
+- bära om nya `ReplacementSelection` får göras i just den sheet section
+- bära synlighet för bladets kolumner
+- bära synlighet och formatering för kombinationen radtyp och kolumntyp
 - skydda sina egna fält-, synlighets- och formateringsregler
 - visa standardiserad radindikator när en rad är ändrad
+
+`Content` är legacy-/payloadspråk och ska inte användas som domänbegrepp för `SheetSection`. En eventuell rubrik eller beskrivande label för en sheet section är ett separat layoutval, inte samma sak som vilket datablad sektionen renderar.
+
+Målmodellen låter ändringsrätten ligga på `SheetSection`, inte på hela `View`. `ViewScopedChangeSet` är fortfarande scoped till `View`, estimation version och snapshot eftersom Projects lagrar delade val för rapportmallen som helhet, men varje nytt `ReplacementSelection` måste tillåtas av den `SheetSection` där ändringen görs. Dagens `View.EnableChanges` är legacy-/kompatibilitetsspråk eller en temporär default under migration, inte långsiktig domänsanning.
 
 ## Renderingsmodeller Och Adapters
 
@@ -114,7 +119,7 @@ Ansvar:
 - Reports renderar aktuell `RenderingContext`. `RenderableSnapshotState` är tills vidare ett preliminärt arbetsnamn för kontraktet mellan Projects och Reports, inte ett kanoniskt Reports-begrepp.
 - `ReportDocumentRenderer` håller `View`- och `RenderingContext`-kunskap utanför `PaginatedDocumentRenderer`, som bara arbetar med `PrintableDocument`.
 - En `View` kan användas mot olika snapshot- och versionslägen, men varje `ViewScopedChangeSet` ägs fortfarande av Projects.
-- `EnableChanges` på `View` styr om användare får skapa nya view-lokala ändringar, medan Projects fortfarande äger validering, lagring och concurrency.
+- Ändringsrätten på en `SheetSection` styr om användare får skapa nya view-lokala ändringar i just den sektionen, medan Projects fortfarande äger validering, lagring och concurrency för `ViewScopedChangeSet`.
 - När en view dupliceras kopieras view-definitionen, men inte det change set-state som Projects äger för tidigare arbetslägen.
 
 ## Invariants
@@ -196,7 +201,7 @@ Ansvar:
 - Page-break-regler hör hemma på gemensam section-/rapportblocknivå, inte som interna cell- eller radregler i `DataSection`.
 - En `DataSection` kan renderas som flera mätbara radblock för paginering. Den behöver inte placeras som ett enda odelbart `Printable Block`.
 - `DataSection` validerar inte radhöjd mot en specifik sidbody. En renderad rad som inte ryms i aktuell sidbody blir ett blockerande pagineringsfel.
-- `EnableChanges` styr rätten att göra nya ändringar, inte om redan sparade ändringar ska appliceras.
+- Ändringsrätten på en `SheetSection` styr rätten att göra nya ändringar i den sektionen, inte om redan sparade ändringar ska appliceras.
 - En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
 - Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
 - Ett `PrintableDocument` måste bära en change token så mätning och paginering kan knytas till samma dokumentversion.
@@ -210,11 +215,11 @@ Ansvar:
 
 Borttag av en sektion ska föregås av en tydlig UI-varning, särskilt eftersom Projects kan ha historiska `ViewScopedChangeSet` som refererar sektionens `SectionId`.
 
-### `EnableChanges`
+### Ändringsrätt På `SheetSection`
 
-Om en användare får använda en view och `EnableChanges` är aktiverat får användaren göra de delade `ReplacementSelection` som Projects tillåter. Detta är en view-egenskap, inte en generell projektinställning.
+Om en användare får använda en view och berörd `SheetSection` tillåter nya ändringar får användaren göra de delade `ReplacementSelection` som Projects tillåter i den sektionen. Detta är en sheet-section-egenskap, inte en generell projektinställning.
 
-Nya views har `EnableChanges` avstängt som standard. Att tillåta nya delade `ReplacementSelection` är ett avsiktligt rapportmallval.
+Nya `SheetSection` har ändringsrätt avstängd som standard. Att tillåta nya delade `ReplacementSelection` är ett avsiktligt rapportmallval per sheet section.
 
 ### Duplicering
 

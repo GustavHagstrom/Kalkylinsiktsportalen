@@ -95,8 +95,12 @@ Stabil identitet för en sektion inom en `View`. En `SectionId` följer sektione
 _Avoid_: listposition när identiteten måste vara stabil
 
 **Change-enabled View**:
-`View` där `EnableChanges` är aktiverat och där användare med rätt att använda vyn får göra delade view-lokala `ReplacementSelection`.
-_Avoid_: Ändringsbar view
+Legacybegrepp för tidigare modell där `View.EnableChanges` styrde om nya delade `ReplacementSelection` fick göras i vyn. Målmodellen använder `Change-enabled SheetSection`.
+_Avoid_: Ändringsbar view när ändringsrätten gäller en sheet section
+
+**Change-enabled SheetSection**:
+`SheetSection` där nya delade view-lokala `ReplacementSelection` får göras av användare som har rätt att använda vyn och där Projects tillåter ändringen.
+_Avoid_: Change-enabled View när bara en viss sheet section är ändringsbar
 
 **Report View**:
 Verksamhetsnära ord för en `View` använd som rapport.
@@ -158,7 +162,11 @@ _Avoid_: error när dokumentet fortfarande är korrekt renderbart
 Identifierbar sektion i en `View` som består av en fri spreadsheet-like layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `DataSection` äger sina egna interna layout- och cellinvariants.
 
 **SheetSection**:
-Identifierbar sektion i en `View` som presenterar exakt ett helt datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet och formatering för bladets fält. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
+Identifierbar sektion i en `View` som presenterar exakt ett helt Bidcon-datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet för bladets kolumner samt synlighet och formatering per radtyp och kolumntyp. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
+
+**SheetKind**:
+Explicit val av vilket Bidcon-datablad en `SheetSection` presenterar, till exempel `TenderSheet`, `SummarySheet` eller `NetSheet`.
+_Avoid_: Content när värdet väljer datablad
 
 **DataCell**:
 Cell i en `DataSection` med användarens `CellExpression` samt format. Visningsvärdet sparas inte, utan beräknas vid rendering från cellens uttryck och aktuell `RenderingContext`.
