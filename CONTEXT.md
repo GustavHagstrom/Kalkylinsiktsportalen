@@ -61,21 +61,28 @@ Ett `ViewScopedChangeSet` är unikt per `View`, `EstimationVersion` och `Estimat
 _Avoid_: SnapshotChangeSet när ändringen avser en viss view
 
 **ReplacementGroup**:
-Kalkylrader på samma nivå i Bidcon-trädet som delar minst ett taggvärde i `Remark`, till exempel `{minTagg}`. En rad kan ha flera klammer-taggar, och rader i samma `ReplacementGroup` får ersätta varandra enligt portalens `ReplacementPolicy`.
+Minst två sheet-rader på samma nivå i Bidcon-trädet som delar samma giltiga `ReplacementTag` och samma `SheetRowKind` enligt berörd `SheetSection`. En rad kan ha flera giltiga taggar och därmed ingå i flera `ReplacementGroup`. Gruppen ger möjliga kandidater men skapar inga automatiska `ReplacementSelection`.
 _Avoid_: Ersättningsgrupp
 
 **ReplacementTag**:
-Klammer-tagg i Bidcons `Remark`-fält som markerar att en kalkylrad kan ingå i en `ReplacementGroup`. Initialt räknas alla `{tagg}`-värden som `ReplacementTag` för kompatibilitet med den befintliga portalen.
+Kanoniskt case-sensitive taggvärde utan klammer, extraherat från en klammer-tagg i Bidcons `Remark`-fält, som kan markera att en sheet-rad får ingå i replacement enligt berörd `SheetSection`. Whitespace innanför klammer trimmas. En `SheetSection` definierar vilka taggar som är giltiga i just den rapportsektionen; matchande giltiga taggar mellan syskonrader gör dem till replacement-kandidater.
 _Avoid_: Ersättningstagg
 
+**Valid Replacement Tags**:
+Explicit lista av `ReplacementTag` som en change-enabled `SheetSection` tillåter för skapande av nya `ReplacementSelection`. Bara taggar i listan kan göra syskonrader till replacement-kandidater; tom lista betyder att inga replacements är möjliga i sektionen och har i praktiken samma användareffekt som att sektionen inte är change-enabled. Listan styr inte applicering av redan sparade selections.
+_Avoid_: alla taggar i Remark när rapportmallen ska vara avsiktlig
+
 **ReplacementPolicy**:
-Modulär regel som avgör vilka kalkylrader som får ersätta varandra och hur mängd hanteras vid bytet. Initial policy behåller originalradens mängd och applicerar den på ersättningsraden.
+Systemdefault-regel för hur ett giltigt replacement utförs, inklusive hur mängd hanteras vid bytet. Initial policy visar ersättningsradens värden på originalradens plats men behåller originalradens `Quantity`. `SheetSection` definierar vilka `ReplacementTag` som kan göra syskonrader till replacement-kandidater; Projects utför och lagrar användarens `ReplacementSelection`.
 _Avoid_: Ersättningspolicy
 
 **ReplacementSelection**:
-Sparat val i ett `ViewScopedChangeSet` som pekar ut berörd `SheetSection`, originalrad, ersättningsrad, matchande `ReplacementTag`, originalmängd vid valtillfället, använd policyversion, stabilt användar-ID, användarens visningsnamn/e-post vid ändringen och ändringstid. Det sparar användarens val för en specifik view och ett specifikt snapshotläge, inte ett färdigräknat kalkylresultat eller en regel för framtida importer.
-Vid rendering visas ersättningsraden på originalradens plats, med originalradens mängd enligt `ReplacementPolicy`, och originalraden ska kunna inspekteras för spårbarhet.
-Ett `ViewScopedChangeSet` har högst ett aktivt `ReplacementSelection` per `SheetSection` och originalrad.
+Sparat val i ett `ViewScopedChangeSet` som pekar ut berörd `SheetSection`, originalrad, ersättningsrad, matchande `ReplacementTag`, originalmängd vid valtillfället, använd policyversion, stabilt användar-ID, användarens visningsnamn/e-post vid ändringen och ändringstid. Det sparar användarens val för en specifik view och ett specifikt snapshotläge, inte ett färdigräknat kalkylresultat eller en regel för framtida importer. En rad kan ingå i flera kandidatgrupper via flera taggar, så selection måste bära vilken tagg valet gjordes genom.
+Originalrad och ersättningsrad måste vara olika sheet-rader.
+Vid rendering visas ersättningsradens värden på originalradens plats, med originalradens mängd enligt `ReplacementPolicy`, och originalraden ska kunna inspekteras för spårbarhet. Bidcon-backed displayvärden kommer från ersättningsraden om inte `ReplacementPolicy` uttryckligen håller fältet från originalraden. Replacement är en overlay på originalpositionen, inte en mutation av snapshotet och inte ett filter som tar bort ersättningsraden från dess egen plats.
+Visibility och format för overlayn utvärderas mot originalradens `SheetRowKind`.
+Ett `ViewScopedChangeSet` har högst ett aktivt `ReplacementSelection` per `SheetSection` och original `SheetRowPath`.
+Lifecycle för sparade selections, inklusive borttag/ångring, ägs av Projects.
 _Avoid_: Ersättningsval
 
 **EstimationVersion**:
@@ -99,7 +106,7 @@ Legacybegrepp för tidigare modell där `View.EnableChanges` styrde om nya delad
 _Avoid_: Ändringsbar view när ändringsrätten gäller en sheet section
 
 **Change-enabled SheetSection**:
-`SheetSection` där nya delade view-lokala `ReplacementSelection` får göras av användare som har rätt att använda vyn och där Projects tillåter ändringen.
+`SheetSection` där nya delade view-lokala `ReplacementSelection` får göras av användare som har rätt att använda vyn, när raderna matchar sektionens giltiga `ReplacementTag` och Projects kan utföra valet.
 _Avoid_: Change-enabled View när bara en viss sheet section är ändringsbar
 
 **Report View**:
@@ -162,11 +169,39 @@ _Avoid_: error när dokumentet fortfarande är korrekt renderbart
 Identifierbar sektion i en `View` som består av en fri spreadsheet-like layout av `DataCell`, med text, formler, formatering och referenser till metadata eller namngivna värden från aktuell `RenderingContext`. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `DataSection` äger sina egna interna layout- och cellinvariants.
 
 **SheetSection**:
-Identifierbar sektion i en `View` som presenterar exakt ett helt Bidcon-datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet för bladets kolumner samt synlighet och formatering per radtyp och kolumntyp. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
+Identifierbar sektion i en `View` som presenterar exakt ett helt Bidcon-datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext` med konfigurerad synlighet för bladets kolumner samt synlighet och formatering per `SheetRowKind` och `SheetColumnKind`. `SheetSection` visar en standardiserad radindikator när en rad är ändrad. Identiteten är stabil inom sin `View` även om sektionen flyttas. En `SheetSection` äger sina egna interna fält-, synlighets- och formateringsinvariants.
 
 **SheetKind**:
 Explicit val av vilket Bidcon-datablad en `SheetSection` presenterar, till exempel `TenderSheet`, `SummarySheet` eller `NetSheet`.
 _Avoid_: Content när värdet väljer datablad
+
+**SheetColumnKind**:
+Explicit kolumntyp som en `SheetSection` kan visa. Begreppet omfattar både Bidcon-backed kolumner och Reports-owned kolumner, bär kolumnens semantiska displaytyp och default `ValueFormat`, och används tillsammans med radtyp för synlighet och format.
+_Avoid_: fria kolumnnamn, string keys när kolumnen är ett domänfält
+
+**Bidcon-backed SheetColumnKind**:
+`SheetColumnKind` vars displayvärde hämtas från en rad i Bidcon-snapshotet.
+_Avoid_: Reports-owned column när värdet kommer från snapshotraden
+
+**Reports-owned SheetColumnKind**:
+`SheetColumnKind` vars displayvärde härleds av Reports från aktuell `RenderingContext`, till exempel `ChangeIndicator` från applicerade `ReplacementSelection`. En Reports-owned kolumn beskriver presentation, inte lagring av radbundna arbetsvärden.
+_Avoid_: Bidcon-backed column när värdet inte finns på snapshotraden
+
+**ChangeIndicator**:
+Reports-owned `SheetColumnKind` som visar att en renderad sheet-rad är påverkad av en applicerad `ReplacementSelection`. Den är en vanlig kolumn i `SheetSection`ens ordnade kolumnlista, inte en separat fast radindikator.
+_Avoid_: specialindikator utanför sheet-kolumnerna
+
+**Sheet Row Identity**:
+Stabil identitet för en rad inom ett valt `SheetKind`, baserad på `SheetRowPath`: sekvensen av syskonindex enligt den importerade `Children`-listans ordning från databladets root till raden. Den används tillsammans med `SectionId` och `SheetKind` för renderingsspårning och `ReplacementSelection`.
+_Avoid_: ExternalId eller Code när du menar sheet-radens identitet
+
+**SheetRowPath**:
+Sekvens av syskonindex från ett valt `SheetKind`'s renderbara root-barn till en rad i ett Bidcon-datablad, baserad på den importerade `Children`-listans ordning, till exempel `0/3/2`. Pathen är deterministisk inom ett immutable `EstimationSnapshot` och används som stabil sheet row identity. Initialt härleds den av en snapshot-row adapter och sparas inte fysiskt på snapshotnoden.
+_Avoid_: RowOrder ensam, ExternalId eller Code när raden behöver identifieras inom ett sheet
+
+**SheetRowKind**:
+Explicit radtyp som en `SheetSection` kan rendera från ett Bidcon-datablad. Begreppet täcker Bidcons radtyper som kan förekomma i snapshotet och används tillsammans med `SheetColumnKind` för synlighet och format.
+_Avoid_: Group/Part/Other när den faktiska Bidcon-radtypen spelar roll
 
 **DataCell**:
 Cell i en `DataSection` med användarens `CellExpression` samt format. Visningsvärdet sparas inte, utan beräknas vid rendering från cellens uttryck och aktuell `RenderingContext`.
