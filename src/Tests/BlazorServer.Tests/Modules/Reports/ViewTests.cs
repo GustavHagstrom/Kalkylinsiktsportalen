@@ -170,7 +170,7 @@ public class ViewTests
     }
 
     [Test]
-    public void ApplyLegacyEditedSections_ReplacesStructureAndNormalizesOrderInsideView()
+    public void ApplyLegacySectionBridge_ReplacesStructureAndNormalizesOrderInsideView()
     {
         var view = ReconstitutedView(
             [new DataSection { SectionId = "data-1", SectionIndex = 0 }],
@@ -179,35 +179,35 @@ public class ViewTests
         var editedDataSection = new DataSection { SectionId = "data-1", SectionIndex = 1 };
         var addedSheetSection = new SheetSection { SectionId = "sheet-2", SectionIndex = 0 };
 
-        view.ApplyLegacyEditedSections([editedDataSection], [addedSheetSection]);
+        view.ApplyLegacySectionBridge([editedDataSection], [addedSheetSection]);
 
         Assert.Multiple(() =>
         {
-            Assert.That(view.LegacyDataSections, Is.EqualTo(new[] { editedDataSection }));
-            Assert.That(view.LegacySheetSections, Is.EqualTo(new[] { addedSheetSection }));
+            Assert.That(view.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
+            Assert.That(view.LegacySheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
             Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
             Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
         });
     }
 
     [Test]
-    public void ApplyLegacyEditedSections_RejectsBlankSectionId()
+    public void ApplyLegacySectionBridge_RejectsBlankSectionId()
     {
         var view = View.Create(new OrganizationId("org-1"), "Tender report");
 
         var exception = Assert.Throws<ReportsDomainException>(() =>
-            view.ApplyLegacyEditedSections([new DataSection { SectionId = "", SectionIndex = 0 }], []));
+            view.ApplyLegacySectionBridge([new DataSection { SectionId = "", SectionIndex = 0 }], []));
 
         Assert.That(exception!.Code, Is.EqualTo("view.section_id.required"));
     }
 
     [Test]
-    public void ApplyLegacyEditedSections_RejectsDuplicateSectionId()
+    public void ApplyLegacySectionBridge_RejectsDuplicateSectionId()
     {
         var view = View.Create(new OrganizationId("org-1"), "Tender report");
 
         var exception = Assert.Throws<ReportsDomainException>(() =>
-            view.ApplyLegacyEditedSections(
+            view.ApplyLegacySectionBridge(
                 [new DataSection { SectionId = "section-1", SectionIndex = 0 }],
                 [new SheetSection { SectionId = "section-1", SectionIndex = 1 }]));
 
@@ -215,25 +215,45 @@ public class ViewTests
     }
 
     [Test]
-    public void ApplyLegacyEditedSections_RejectsTypeChangeForExistingSectionId()
+    public void ApplyLegacySectionBridge_RejectsTypeChangeForExistingSectionId()
     {
         var view = ReconstitutedView([new DataSection { SectionId = "section-1", SectionIndex = 0 }]);
 
         var exception = Assert.Throws<ReportsDomainException>(() =>
-            view.ApplyLegacyEditedSections([], [new SheetSection { SectionId = "section-1", SectionIndex = 0 }]));
+            view.ApplyLegacySectionBridge([], [new SheetSection { SectionId = "section-1", SectionIndex = 0 }]));
 
         Assert.That(exception!.Code, Is.EqualTo("view.section_type.changed"));
     }
 
     [Test]
-    public void ApplyLegacyEditedSections_RejectsNonContiguousSectionIndexes()
+    public void ApplyLegacySectionBridge_RejectsNonContiguousSectionIndexes()
     {
         var view = View.Create(new OrganizationId("org-1"), "Tender report");
 
         var exception = Assert.Throws<ReportsDomainException>(() =>
-            view.ApplyLegacyEditedSections([new DataSection { SectionId = "section-1", SectionIndex = 1 }], []));
+            view.ApplyLegacySectionBridge([new DataSection { SectionId = "section-1", SectionIndex = 1 }], []));
 
         Assert.That(exception!.Code, Is.EqualTo("view.section_order.invalid"));
+    }
+
+    [Test]
+    public void PublicSectionListsDoNotExposeMutableAggregateChildren()
+    {
+        var dataSection = new DataSection { SectionId = "data-1", SectionIndex = 0 };
+        var sheetSection = new SheetSection { SectionId = "sheet-1", SectionIndex = 1, Content = "TenderSheet" };
+        var view = ReconstitutedView([dataSection], [sheetSection]);
+
+        view.LegacyDataSections[0].SectionId = "changed-data";
+        view.LegacySheetSections[0].SectionId = "changed-sheet";
+        view.LegacySheetSections[0].Content = "ChangedSheet";
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(view.Sections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1", "sheet-1" }));
+            Assert.That(view.LegacyDataSections[0].SectionId, Is.EqualTo("data-1"));
+            Assert.That(view.LegacySheetSections[0].SectionId, Is.EqualTo("sheet-1"));
+            Assert.That(view.LegacySheetSections[0].Content, Is.EqualTo("TenderSheet"));
+        });
     }
 
     private static View ReconstitutedView(

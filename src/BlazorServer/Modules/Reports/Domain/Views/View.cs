@@ -23,8 +23,10 @@ public class View
 
     public IReadOnlyList<ViewSection> Sections => _sections;
 
-    public IReadOnlyList<DataSectionModel> LegacyDataSections => OrderedDataSections();
-    public IReadOnlyList<SheetSectionModel> LegacySheetSections => OrderedSheetSections();
+    public IReadOnlyList<DataSectionModel> LegacyDataSections => OrderedDataSections().Select(CloneDataSection).ToList();
+    public IReadOnlyList<SheetSectionModel> LegacySheetSections => OrderedSheetSections().Select(CloneSheetSection).ToList();
+    internal IReadOnlyList<DataSectionModel> MutableLegacyDataSections => OrderedDataSections();
+    internal IReadOnlyList<SheetSectionModel> MutableLegacySheetSections => OrderedSheetSections();
 
     public int SectionCount => _sections.Count;
 
@@ -186,15 +188,15 @@ public class View
         foreach (var section in _sections)
         {
             if (section.SectionType == ViewSectionType.Data)
-                duplicate.AddSection(CloneDataSection(section.DataSection!));
+                duplicate.AddSection(DuplicateDataSection(section.DataSection!));
             else
-                duplicate.AddSection(CloneSheetSection(section.SheetSection!));
+                duplicate.AddSection(DuplicateSheetSection(section.SheetSection!));
         }
 
         return duplicate;
     }
 
-    public void ApplyLegacyEditedSections(
+    public void ApplyLegacySectionBridge(
         IReadOnlyList<DataSectionModel> dataSections,
         IReadOnlyList<SheetSectionModel> sheetSections)
     {
@@ -209,7 +211,7 @@ public class View
         ReplaceLegacySections(dataSections, sheetSections);
     }
 
-    public IEnumerable<object> GetSectionsInOrder()
+    internal IEnumerable<object> GetSectionsInOrder()
         => Sections.Select(section => section.Section);
 
     private void EnsureSectionIdentities()
@@ -247,6 +249,9 @@ public class View
             .Concat(sheetSections.Select(ViewSection.FromSheet))
             .OrderBy(section => section.SectionIndex)
             .ToList();
+
+        foreach (var section in sections)
+            section.EnsureSectionId();
 
         ValidateUniqueSectionIds(sections);
 
@@ -293,7 +298,10 @@ public class View
     private void SynchronizeLegacySectionIndexes()
     {
         for (var index = 0; index < _sections.Count; index++)
+        {
+            _sections[index].SynchronizeSectionIdentity();
             _sections[index].SetSectionIndex(index);
+        }
     }
 
     private void ValidateEditedSectionIdentities(
@@ -388,7 +396,7 @@ public class View
     {
         return new DataSectionModel
         {
-            SectionId = SectionIds.New(),
+            SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
             RowsCount = section.RowsCount,
             ColumnsCount = section.ColumnsCount,
@@ -423,7 +431,7 @@ public class View
     {
         return new SheetSectionModel
         {
-            SectionId = SectionIds.New(),
+            SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
             Content = section.Content,
             SheetCells = section.SheetCells.ToDictionary(
@@ -437,6 +445,20 @@ public class View
                     CellFormat = CloneCellFormat(cell.Value.CellFormat)
                 })
         };
+    }
+
+    private static DataSectionModel DuplicateDataSection(DataSectionModel section)
+    {
+        var duplicate = CloneDataSection(section);
+        duplicate.SectionId = SectionIds.New();
+        return duplicate;
+    }
+
+    private static SheetSectionModel DuplicateSheetSection(SheetSectionModel section)
+    {
+        var duplicate = CloneSheetSection(section);
+        duplicate.SectionId = SectionIds.New();
+        return duplicate;
     }
 
     private static TextFormat CloneTextFormat(TextFormat format)
@@ -482,18 +504,23 @@ public class View
 
 public sealed class ViewSection
 {
+    private string _sectionId = string.Empty;
+    private int _sectionIndex;
+
     private ViewSection(DataSectionModel? dataSection, SheetSectionModel? sheetSection)
     {
         DataSection = dataSection;
         SheetSection = sheetSection;
+        _sectionId = SectionType == ViewSectionType.Data ? dataSection!.SectionId : sheetSection!.SectionId;
+        _sectionIndex = SectionType == ViewSectionType.Data ? dataSection!.SectionIndex : sheetSection!.SectionIndex;
     }
 
     public ViewSectionType SectionType => DataSection is not null ? ViewSectionType.Data : ViewSectionType.Sheet;
-    public string SectionId => SectionType == ViewSectionType.Data ? DataSection!.SectionId : SheetSection!.SectionId;
-    public int SectionIndex => SectionType == ViewSectionType.Data ? DataSection!.SectionIndex : SheetSection!.SectionIndex;
-    public object Section => SectionType == ViewSectionType.Data ? DataSection! : SheetSection!;
-    public DataSectionModel? DataSection { get; }
-    public SheetSectionModel? SheetSection { get; }
+    public string SectionId => _sectionId;
+    public int SectionIndex => _sectionIndex;
+    internal object Section => SectionType == ViewSectionType.Data ? DataSection! : SheetSection!;
+    internal DataSectionModel? DataSection { get; }
+    internal SheetSectionModel? SheetSection { get; }
 
     public static ViewSection FromData(DataSectionModel section)
         => new(section, null);
@@ -507,15 +534,34 @@ public sealed class ViewSection
         {
             if (string.IsNullOrWhiteSpace(DataSection!.SectionId))
                 DataSection.SectionId = SectionIds.New();
+
+            if (string.IsNullOrWhiteSpace(_sectionId))
+                _sectionId = DataSection.SectionId;
         }
-        else if (string.IsNullOrWhiteSpace(SheetSection!.SectionId))
+        else
         {
-            SheetSection.SectionId = SectionIds.New();
+            if (string.IsNullOrWhiteSpace(SheetSection!.SectionId))
+                SheetSection.SectionId = SectionIds.New();
+
+            if (string.IsNullOrWhiteSpace(_sectionId))
+                _sectionId = SheetSection.SectionId;
         }
+
+        SynchronizeSectionIdentity();
+    }
+
+    public void SynchronizeSectionIdentity()
+    {
+        if (SectionType == ViewSectionType.Data)
+            DataSection!.SectionId = _sectionId;
+        else
+            SheetSection!.SectionId = _sectionId;
     }
 
     public void SetSectionIndex(int sectionIndex)
     {
+        _sectionIndex = sectionIndex;
+
         if (SectionType == ViewSectionType.Data)
             DataSection!.SectionIndex = sectionIndex;
         else

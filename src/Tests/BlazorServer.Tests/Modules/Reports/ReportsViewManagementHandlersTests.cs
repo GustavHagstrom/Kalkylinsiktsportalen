@@ -130,8 +130,8 @@ public sealed class ReportsViewManagementHandlersTests
         Assert.That(result, Is.TypeOf<ViewUpdated>());
         Assert.Multiple(() =>
         {
-            Assert.That(existing.LegacyDataSections, Is.EqualTo(new[] { editedDataSection }));
-            Assert.That(existing.LegacySheetSections, Is.EqualTo(new[] { addedSheetSection }));
+            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
+            Assert.That(existing.LegacySheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
             Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
             Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
             Assert.That(store.Upserted, Is.SameAs(existing));

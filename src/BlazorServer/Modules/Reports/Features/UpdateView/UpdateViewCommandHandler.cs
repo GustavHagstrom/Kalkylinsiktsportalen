@@ -36,7 +36,7 @@ internal sealed class UpdateViewCommandHandler(
 
         try
         {
-            view.ApplyLegacyEditedSections(command.DataSections, command.SheetSections);
+            view.ApplyLegacySectionBridge(command.DataSections, command.SheetSections);
             view.Rename(command.Name);
             view.UpdateDescription(command.Description);
         }

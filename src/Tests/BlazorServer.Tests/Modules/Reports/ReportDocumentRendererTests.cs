@@ -51,8 +51,8 @@ public sealed class ReportDocumentRendererTests
         {
             Assert.That(firstRow.Id, Is.EqualTo("data-section-section-1-row-0"));
             Assert.That(firstRow.ComponentType, Is.EqualTo(typeof(DataSectionRowComponent)));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.LegacyDataSections[0]));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.LegacyDataSections[0].RowDefinitions[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.MutableLegacyDataSections[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.MutableLegacyDataSections[0].RowDefinitions[0]));
         });
     }
 
@@ -64,7 +64,7 @@ public sealed class ReportDocumentRendererTests
 
         var original = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
 
-        view.LegacyDataSections[0].DataCells["R0C0"].RawValue = "changed height";
+        view.MutableLegacyDataSections[0].DataCells["R0C0"].RawValue = "changed height";
         var changedView = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
         var changedContext = renderer.Build(view, RenderingContext("version-1", "snapshot-2"));
 
@@ -124,7 +124,7 @@ public sealed class ReportDocumentRendererTests
     public async Task BuildDocument_RendersRowsWhenDataCellsAreIncomplete()
     {
         var view = ViewWithDataSection();
-        view.LegacyDataSections[0].DataCells.Remove("R1C0");
+        view.MutableLegacyDataSections[0].DataCells.Remove("R1C0");
         var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
