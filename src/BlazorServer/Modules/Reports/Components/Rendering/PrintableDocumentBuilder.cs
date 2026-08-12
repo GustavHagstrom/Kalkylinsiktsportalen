@@ -15,7 +15,6 @@ public sealed class PrintableDocumentBuilder
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(renderingContext);
-        view.EnsureSectionIdentities();
 
         return new PrintableDocument(
             Id: $"report-view-{view.Id.Value}",
@@ -76,17 +75,7 @@ public sealed class PrintableDocumentBuilder
                 .ToArray());
 
     private static IEnumerable<object> OrderedSections(View view)
-        => view.DataSections.Cast<object>()
-            .Concat(view.SheetSections)
-            .OrderBy(SectionIndex);
-
-    private static int SectionIndex(object section)
-        => section switch
-        {
-            DataSection dataSection => dataSection.SectionIndex,
-            SheetSection sheetSection => sheetSection.SectionIndex,
-            _ => throw new NotSupportedException($"Unsupported report section type '{section.GetType().Name}'.")
-        };
+        => view.Sections.Select(section => section.Section);
 
     private static string CreateChangeToken(View view, ReportRenderingContext renderingContext)
     {
@@ -111,8 +100,12 @@ public sealed class PrintableDocumentBuilder
                 Id = view.Id.Value,
                 view.Name,
                 view.Description,
-                DataSections = view.DataSections.OrderBy(section => section.SectionIndex),
-                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex)
+                Sections = view.Sections.Select(section => new
+                {
+                    section.SectionId,
+                    section.SectionType,
+                    section.Section
+                })
             }
         });
 

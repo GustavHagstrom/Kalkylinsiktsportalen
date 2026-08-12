@@ -38,8 +38,6 @@ public sealed record ReportRenderingContext
     public static ReportRenderingContext ForViewPreview(View view)
     {
         ArgumentNullException.ThrowIfNull(view);
-        view.EnsureSectionIdentities();
-
         var viewReference = view.Id.Value;
         return new ReportRenderingContext(
             EstimationVersionReference: $"view-preview:{viewReference}:estimation-version",
@@ -49,8 +47,12 @@ public sealed record ReportRenderingContext
                 ViewId = view.Id.Value,
                 view.Name,
                 view.Description,
-                DataSections = view.DataSections.OrderBy(section => section.SectionIndex),
-                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex)
+                Sections = view.Sections.Select(section => new
+                {
+                    section.SectionId,
+                    section.SectionType,
+                    section.Section
+                })
             }));
     }
 

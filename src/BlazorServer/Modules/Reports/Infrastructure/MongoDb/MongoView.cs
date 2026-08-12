@@ -13,6 +13,8 @@ public class MongoView
     public string OrganizationId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public bool EnableChanges { get; set; } = false;
+    public bool IsArchived { get; set; } = false;
     public List<DataSection> DataSections { get; set; } = new();
     public List<SheetSection> SheetSections { get; set; } = new();
 }

@@ -1,3 +1,4 @@
+using BlazorServer.Identity;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
@@ -50,8 +51,8 @@ public sealed class ReportDocumentRendererTests
         {
             Assert.That(firstRow.Id, Is.EqualTo("data-section-section-1-row-0"));
             Assert.That(firstRow.ComponentType, Is.EqualTo(typeof(DataSectionRowComponent)));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.DataSections[0]));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.DataSections[0].RowDefinitions[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.LegacyDataSections[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.LegacyDataSections[0].RowDefinitions[0]));
         });
     }
 
@@ -63,7 +64,7 @@ public sealed class ReportDocumentRendererTests
 
         var original = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
 
-        view.DataSections[0].DataCells["R0C0"].RawValue = "changed height";
+        view.LegacyDataSections[0].DataCells["R0C0"].RawValue = "changed height";
         var changedView = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
         var changedContext = renderer.Build(view, RenderingContext("version-1", "snapshot-2"));
 
@@ -95,14 +96,15 @@ public sealed class ReportDocumentRendererTests
     [Test]
     public void BuildDocument_EmitsSheetSectionsAsBreakableRowBlocks()
     {
-        var view = new View
-        {
-            Id = new ViewId("sheet-view"),
-            SheetSections =
-            [
-                new SheetSection { SectionId = "sheet-1", SectionIndex = 0, Content = "Tender sheet" }
-            ]
-        };
+        var view = View.Reconstitute(
+            new ViewId("sheet-view"),
+            new OrganizationId("org-1"),
+            "Sheet report",
+            "",
+            enableChanges: false,
+            isArchived: false,
+            [],
+            [new SheetSection { SectionId = "sheet-1", SectionIndex = 0, Content = "Tender sheet" }]);
 
         var document = new PrintableDocumentBuilder().Build(
             view,
@@ -122,7 +124,7 @@ public sealed class ReportDocumentRendererTests
     public async Task BuildDocument_RendersRowsWhenDataCellsAreIncomplete()
     {
         var view = ViewWithDataSection();
-        view.DataSections[0].DataCells.Remove("R1C0");
+        view.LegacyDataSections[0].DataCells.Remove("R1C0");
         var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
@@ -134,12 +136,14 @@ public sealed class ReportDocumentRendererTests
 
     private static View ViewWithDataSection()
     {
-        var view = new View
-        {
-            Id = new ViewId("view-1"),
-            Name = "Report",
-            Description = "Demo report",
-            DataSections =
+        var view = View.Reconstitute(
+            new ViewId("view-1"),
+            new OrganizationId("org-1"),
+            "Report",
+            "Demo report",
+            enableChanges: false,
+            isArchived: false,
+            dataSections:
             [
                 new DataSection
                 {
@@ -162,8 +166,8 @@ public sealed class ReportDocumentRendererTests
                         ["R1C0"] = new DataCell { RawValue = "second" }
                     }
                 }
-            ]
-        };
+            ],
+            sheetSections: []);
 
         return view;
     }

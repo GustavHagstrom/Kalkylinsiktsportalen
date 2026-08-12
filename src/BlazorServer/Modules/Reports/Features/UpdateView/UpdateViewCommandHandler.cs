@@ -36,9 +36,9 @@ internal sealed class UpdateViewCommandHandler(
 
         try
         {
-            view.ApplyEditedSections(command.DataSections, command.SheetSections);
-            view.Name = command.Name;
-            view.Description = command.Description;
+            view.ApplyLegacyEditedSections(command.DataSections, command.SheetSections);
+            view.Rename(command.Name);
+            view.UpdateDescription(command.Description);
         }
         catch (ReportsDomainException exception)
         {
