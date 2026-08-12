@@ -42,7 +42,7 @@
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
                 <MudPaper Class="full-height flex-grow-1 pa-1 gap-1 d-flex flex-column" Style="overflow: auto; min-width: 300px;">
-                    @foreach(var section in View.MutableLegacyDataSections.OrderBy(x => x.SectionIndex))
+                    @foreach(var section in View.MutableDataSections.OrderBy(x => x.SectionIndex))
                     {
                         var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSection == section ? selection.DataCell : null;
                         @if (!IsReadOnly)
@@ -56,7 +56,7 @@
                         }
                         <DataSectionComponent DataSection="section" EditMode="@(!IsReadOnly)" SelectedDataCell="selectedCell" OnCellClick="x => SelectDataCell(x)"/>
                     }
-                    @foreach(var section in View.MutableLegacySheetSections.OrderBy(x => x.SectionIndex))
+                    @foreach(var section in View.MutableSheetSections.OrderBy(x => x.SectionIndex))
                     {
                         <div class="d-flex align-center justify-space-between pa-2">
                             <MudText Typo="Typo.subtitle2">@SheetSectionLabel(section)</MudText>
@@ -223,8 +223,8 @@
                     View.Id,
                     ViewName,
                     View.Description,
-                    View.MutableLegacyDataSections,
-                    View.MutableLegacySheetSections,
+                    View.MutableDataSections,
+                    View.MutableSheetSections,
                     ConfirmSectionDelete: true),
                 CancellationToken.None);
         }

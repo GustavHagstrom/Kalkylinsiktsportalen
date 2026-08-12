@@ -69,7 +69,7 @@ public class ReportsViewOwnershipTests
     }
 
     [Test]
-    public void LegacySharedViewTypesAreNoLongerProductionTypes()
+    public void OldSharedViewTypesAreNoLongerProductionTypes()
     {
         var oldTypeNames = new[]
         {

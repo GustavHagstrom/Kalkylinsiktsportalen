@@ -23,10 +23,10 @@ public class View
 
     public IReadOnlyList<ViewSection> Sections => _sections;
 
-    public IReadOnlyList<DataSectionModel> LegacyDataSections => OrderedDataSections().Select(CloneDataSection).ToList();
-    public IReadOnlyList<SheetSectionModel> LegacySheetSections => OrderedSheetSections().Select(CloneSheetSection).ToList();
-    internal IReadOnlyList<DataSectionModel> MutableLegacyDataSections => OrderedDataSections();
-    internal IReadOnlyList<SheetSectionModel> MutableLegacySheetSections => OrderedSheetSections();
+    public IReadOnlyList<DataSectionModel> DataSections => OrderedDataSections().Select(CloneDataSection).ToList();
+    public IReadOnlyList<SheetSectionModel> SheetSections => OrderedSheetSections().Select(CloneSheetSection).ToList();
+    internal IReadOnlyList<DataSectionModel> MutableDataSections => OrderedDataSections();
+    internal IReadOnlyList<SheetSectionModel> MutableSheetSections => OrderedSheetSections();
 
     public int SectionCount => _sections.Count;
 
@@ -86,7 +86,7 @@ public class View
             IsArchived = isArchived
         };
 
-        view.ReplaceLegacySections(dataSections, sheetSections, legacyEnableChangesDefault: enableChanges);
+        view.ReplaceSections(dataSections, sheetSections, enableChangesDefault: enableChanges);
         return view;
     }
 
@@ -166,7 +166,7 @@ public class View
         }
 
         _sections.RemoveAt(index);
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
     }
 
     public void MoveSection(string sectionId, int targetIndex)
@@ -187,7 +187,7 @@ public class View
         var section = _sections[currentIndex];
         _sections.RemoveAt(currentIndex);
         _sections.Insert(targetIndex, section);
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
     }
 
     public void RemoveDataSection(DataSectionModel section)
@@ -218,7 +218,7 @@ public class View
         return duplicate;
     }
 
-    public void ApplyLegacySectionBridge(
+    public void ApplySectionEdits(
         IReadOnlyList<DataSectionModel> dataSections,
         IReadOnlyList<SheetSectionModel> sheetSections)
     {
@@ -230,7 +230,7 @@ public class View
         ValidateExistingSectionTypes(dataSections, sheetSections);
         ValidateEditedSectionOrder(dataSections, sheetSections);
 
-        ReplaceLegacySections(dataSections, sheetSections);
+        ReplaceSections(dataSections, sheetSections);
     }
 
     internal IEnumerable<object> GetSectionsInOrder()
@@ -241,7 +241,7 @@ public class View
         foreach (var section in _sections)
             section.EnsureSectionId();
 
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
     }
 
     private void AddSection(ViewSection section)
@@ -257,16 +257,16 @@ public class View
         }
 
         _sections.Add(section);
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
     }
 
-    private void ReplaceLegacySections(
+    private void ReplaceSections(
         IReadOnlyList<DataSectionModel> dataSections,
         IReadOnlyList<SheetSectionModel> sheetSections,
-        bool legacyEnableChangesDefault = false)
+        bool enableChangesDefault = false)
     {
-        EnsureLegacySectionIdentities(dataSections, sheetSections);
-        ApplyLegacyEnableChangesDefault(sheetSections, legacyEnableChangesDefault);
+        EnsureSectionIdentities(dataSections, sheetSections);
+        ApplyEnableChangesDefault(sheetSections, enableChangesDefault);
 
         var sections = dataSections
             .Select(ViewSection.FromData)
@@ -281,14 +281,14 @@ public class View
 
         _sections.Clear();
         _sections.AddRange(sections);
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
     }
 
-    private static void ApplyLegacyEnableChangesDefault(
+    private static void ApplyEnableChangesDefault(
         IReadOnlyList<SheetSectionModel> sheetSections,
-        bool legacyEnableChangesDefault)
+        bool enableChangesDefault)
     {
-        if (!legacyEnableChangesDefault)
+        if (!enableChangesDefault)
             return;
 
         foreach (var section in sheetSections)
@@ -297,7 +297,7 @@ public class View
 
     private IReadOnlyList<DataSectionModel> OrderedDataSections()
     {
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
         return _sections
             .Where(section => section.SectionType == ViewSectionType.Data)
             .Select(section => section.DataSection!)
@@ -306,14 +306,14 @@ public class View
 
     private IReadOnlyList<SheetSectionModel> OrderedSheetSections()
     {
-        SynchronizeLegacySectionIndexes();
+        SynchronizeSectionIndexes();
         return _sections
             .Where(section => section.SectionType == ViewSectionType.Sheet)
             .Select(section => section.SheetSection!)
             .ToList();
     }
 
-    private static void EnsureLegacySectionIdentities(
+    private static void EnsureSectionIdentities(
         IReadOnlyList<DataSectionModel> dataSections,
         IReadOnlyList<SheetSectionModel> sheetSections)
     {
@@ -330,7 +330,7 @@ public class View
         }
     }
 
-    private void SynchronizeLegacySectionIndexes()
+    private void SynchronizeSectionIndexes()
     {
         for (var index = 0; index < _sections.Count; index++)
         {
@@ -433,20 +433,18 @@ public class View
         {
             SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
-            RowsCount = section.RowsCount,
-            ColumnsCount = section.ColumnsCount,
             RowDefinitions = section.RowDefinitions
                 .Select(row => new RowDefinitionModel
                 {
                     RowIndex = row.RowIndex,
-                    Height = row.Height
+                    HeightMm = row.HeightMm
                 })
                 .ToList(),
             ColumnDefinitions = section.ColumnDefinitions
                 .Select(column => new DataColumnDefinitionModel
                 {
                     ColumnIndex = column.ColumnIndex,
-                    Width = column.Width
+                    RelativeWidth = column.RelativeWidth
                 })
                 .ToList(),
             DataCells = section.DataCells.ToDictionary(
@@ -455,7 +453,7 @@ public class View
                 {
                     RowIndex = cell.Value.RowIndex,
                     ColumnIndex = cell.Value.ColumnIndex,
-                    RawValue = cell.Value.RawValue,
+                    CellExpression = cell.Value.CellExpression,
                     TextFormat = CloneTextFormat(cell.Value.TextFormat),
                     CellFormat = CloneCellFormat(cell.Value.CellFormat)
                 })

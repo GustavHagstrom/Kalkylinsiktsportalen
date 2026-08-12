@@ -27,15 +27,23 @@ public class ReportsViewPersistenceTests
                 {
                     SectionId = "data-section-1",
                     SectionIndex = 1,
-                    RowsCount = 2,
-                    ColumnsCount = 2,
+                    RowDefinitions =
+                    [
+                        new RowDefinition { RowIndex = 0, HeightMm = 10 },
+                        new RowDefinition { RowIndex = 1, HeightMm = 10 }
+                    ],
+                    ColumnDefinitions =
+                    [
+                        new DataColumnDefinition { ColumnIndex = 0, RelativeWidth = 1 },
+                        new DataColumnDefinition { ColumnIndex = 1, RelativeWidth = 1 }
+                    ],
                     DataCells =
                     {
                         ["R0C0"] = new DataCell
                         {
                             RowIndex = 0,
                             ColumnIndex = 0,
-                            RawValue = "=1+2",
+                            CellExpression = "=1+2",
                             TextFormat = new TextFormat
                             {
                                 Type = TextType.Number,
@@ -84,16 +92,16 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
             Assert.That(roundTripped.PageFormat, Is.EqualTo(PageFormat.A5));
             Assert.That(roundTripped.IsArchived, Is.True);
-            Assert.That(roundTripped.LegacyDataSections, Has.Count.EqualTo(1));
-            Assert.That(roundTripped.LegacyDataSections[0].SectionId, Is.EqualTo("data-section-1"));
-            Assert.That(roundTripped.LegacyDataSections[0].DataCells["R0C0"].RawValue, Is.EqualTo("=1+2"));
-            Assert.That(roundTripped.LegacyDataSections[0].DataCells["R0C0"].TextFormat.Type, Is.EqualTo(TextType.Number));
-            Assert.That(roundTripped.LegacyDataSections[0].DataCells["R0C0"].TextFormat.IsBold, Is.True);
-            Assert.That(roundTripped.LegacyDataSections[0].DataCells["R0C0"].CellFormat.BackgroundColor, Is.EqualTo("#ffeecc"));
-            Assert.That(roundTripped.LegacySheetSections, Has.Count.EqualTo(1));
-            Assert.That(roundTripped.LegacySheetSections[0].SectionId, Is.EqualTo("sheet-section-1"));
-            Assert.That(roundTripped.LegacySheetSections[0].EnableChanges, Is.True);
-            Assert.That(roundTripped.LegacySheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
+            Assert.That(roundTripped.DataSections, Has.Count.EqualTo(1));
+            Assert.That(roundTripped.DataSections[0].SectionId, Is.EqualTo("data-section-1"));
+            Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].CellExpression, Is.EqualTo("=1+2"));
+            Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].TextFormat.Type, Is.EqualTo(TextType.Number));
+            Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].TextFormat.IsBold, Is.True);
+            Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].CellFormat.BackgroundColor, Is.EqualTo("#ffeecc"));
+            Assert.That(roundTripped.SheetSections, Has.Count.EqualTo(1));
+            Assert.That(roundTripped.SheetSections[0].SectionId, Is.EqualTo("sheet-section-1"));
+            Assert.That(roundTripped.SheetSections[0].EnableChanges, Is.True);
+            Assert.That(roundTripped.SheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
         });
     }
 
