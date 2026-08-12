@@ -22,8 +22,8 @@
     private IReadOnlyList<DataColumnDefinition> OrderedColumns
         => DataSection.ColumnDefinitions.OrderBy(column => column.ColumnIndex).ToArray();
 
-    private int TableWidth => DataSection.ColumnDefinitions.Sum(column => column.Width);
-    private string RowHeight => $"""height: {RowDefinition.Height}mm""";
+    private double TableWidth => DataSection.ColumnDefinitions.Sum(column => column.RelativeWidth);
+    private string RowHeight => $"""height: {RowDefinition.HeightMm}mm""";
 
     private string ColumnPercentWidth(DataColumnDefinition column)
     {
@@ -32,7 +32,7 @@
             return string.Empty;
         }
 
-        return $"""width: {((double)column.Width / TableWidth * 100).ToString("F2")}%""";
+        return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2")}%""";
     }
 
     private DataCell GetDataCell(DataColumnDefinition column)

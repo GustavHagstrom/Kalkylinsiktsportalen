@@ -1,5 +1,5 @@
 using System.Globalization;
-using BlazorServer.Modules.Reports.Components.Rendering;
+using BlazorServer.Modules.Reports.Rendering;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
@@ -73,13 +73,13 @@ public class DataCellFormulaEvaluatorTests
     }
 
     [Test]
-    public void GetDisplayValue_ReturnsRawValue_WhenFormulaIsInvalid()
+    public void GetDisplayValue_ReturnsExplicitErrorValue_WhenFormulaIsInvalid()
     {
         var cell = CreateCell("=invalid +");
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell);
 
-        Assert.That(result, Is.EqualTo("=invalid +"));
+        Assert.That(result, Is.EqualTo("#ERROR!"));
     }
 
     [Test]
@@ -116,7 +116,7 @@ public class DataCellFormulaEvaluatorTests
     {
         return new DataCell
         {
-            RawValue = rawValue,
+            CellExpression = rawValue,
             TextFormat = new TextFormat
             {
                 Type = textType,

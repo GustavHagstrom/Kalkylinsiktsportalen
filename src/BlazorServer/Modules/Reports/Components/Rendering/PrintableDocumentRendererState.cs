@@ -14,16 +14,20 @@ internal sealed class PrintableDocumentRendererState
     public IReadOnlyList<PaginationIssue> Warnings { get; private set; } = [];
     public IReadOnlyList<PaginationIssue> Errors { get; private set; } = [];
     public IReadOnlyList<PrintablePage> Pages { get; private set; } = [];
+    private IReadOnlyList<PrintableDocumentPrintIssue> printBlockingIssues = [];
 
     public PrintableDocumentPrintResult GetPrintReadiness()
     {
-        if (Status == PrintableRendererStatus.Ready && !NeedsMeasurement && Errors.Count == 0)
+        if (Status == PrintableRendererStatus.Ready && !NeedsMeasurement && Errors.Count == 0 && printBlockingIssues.Count == 0)
         {
             return PrintableDocumentPrintResult.Ready();
         }
 
-        return Errors.Count > 0
-            ? PrintableDocumentPrintResult.BlockedByPaginationErrors(Errors.Select(ToPrintIssue).ToArray())
+        if (Errors.Count > 0)
+            return PrintableDocumentPrintResult.BlockedByPaginationErrors(Errors.Select(ToPrintIssue).ToArray());
+
+        return printBlockingIssues.Count > 0 && Status == PrintableRendererStatus.Ready && !NeedsMeasurement
+            ? PrintableDocumentPrintResult.BlockedByContentErrors(printBlockingIssues)
             : PrintableDocumentPrintResult.NotReady();
     }
 
@@ -38,6 +42,7 @@ internal sealed class PrintableDocumentRendererState
         }
 
         currentKey = nextKey;
+        printBlockingIssues = document.PrintBlockingIssues;
         Status = PrintableRendererStatus.Measuring;
         Warnings = [];
         Errors = [];

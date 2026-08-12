@@ -1,10 +1,10 @@
-@using BlazorServer.Modules.Reports.Components.Rendering
+@using BlazorServer.Modules.Reports.Rendering
 
 <td class="@Class" style="@FormatBuilder.BuildCellStyle(DataCell.CellFormat)" @onclick="() => OnClick.InvokeAsync(DataCell)"> 
     <div style="@FormatBuilder.BuildTextStyle(DataCell.TextFormat)">
         @if (EditMode)
         {
-            @DataCell.RawValue
+            @DataCell.CellExpression
         }
         else
         {

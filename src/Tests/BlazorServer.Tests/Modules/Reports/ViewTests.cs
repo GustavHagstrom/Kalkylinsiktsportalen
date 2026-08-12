@@ -120,7 +120,7 @@ public class ViewTests
     {
         var view = View.Create(new OrganizationId("org-1"), "Tender report", "For review");
         var dataSection = view.AddDataSection();
-        dataSection.GetCell(0, 0).RawValue = "Heading";
+        dataSection.EditCellExpression(0, 0, "Heading");
         var sheetSection = view.AddSheetSection();
         sheetSection.Content = "TenderSheet";
         sheetSection.SetEnableChanges(true);
@@ -135,7 +135,7 @@ public class ViewTests
             Assert.That(duplicate.Description, Is.EqualTo(view.Description));
             Assert.That(duplicate.IsArchived, Is.False);
             Assert.That(duplicate.Sections.Select(section => section.SectionId), Is.Not.EquivalentTo(view.Sections.Select(section => section.SectionId)));
-            Assert.That(duplicate.LegacyDataSections[0].DataCells["R0C0"].RawValue, Is.EqualTo("Heading"));
+            Assert.That(duplicate.LegacyDataSections[0].GetCell(0, 0).CellExpression, Is.EqualTo("Heading"));
             Assert.That(duplicate.LegacySheetSections[0].Content, Is.EqualTo("TenderSheet"));
             Assert.That(duplicate.LegacySheetSections[0].EnableChanges, Is.True);
         });
@@ -153,12 +153,9 @@ public class ViewTests
             Assert.That(section.SectionIndex, Is.EqualTo(1));
             Assert.That(section.RowsCount, Is.EqualTo(3));
             Assert.That(section.ColumnsCount, Is.EqualTo(3));
-            Assert.That(section.DataCells.Keys, Is.EquivalentTo(new[]
-            {
-                "R0C0", "R0C1", "R0C2",
-                "R1C0", "R1C1", "R1C2",
-                "R2C0", "R2C1", "R2C2"
-            }));
+            Assert.That(section.RowDefinitions.Select(row => row.RowIndex), Is.EqualTo(new[] { 0, 1, 2 }));
+            Assert.That(section.ColumnDefinitions.Select(column => column.ColumnIndex), Is.EqualTo(new[] { 0, 1, 2 }));
+            Assert.That(section.DataCells, Is.Empty);
         });
     }
 

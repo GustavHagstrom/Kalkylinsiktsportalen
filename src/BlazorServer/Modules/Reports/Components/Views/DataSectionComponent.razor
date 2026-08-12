@@ -32,11 +32,11 @@
         DataSection.Normalize();
     }
 
-    int TableWidth => DataSection.ColumnDefinitions.Sum(x => x.Width);
-    string ColumnPercentWidth(DataColumnDefinition column) => $"""width: {((double)column.Width / TableWidth * 100).ToString("F2")}%""";
+    double TableWidth => DataSection.ColumnDefinitions.Sum(x => x.RelativeWidth);
+    string ColumnPercentWidth(DataColumnDefinition column) => $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2")}%""";
 
     //row height in mm, 
-    string RowHeight(RowDefinition row) => $"""height: {row.Height}mm""";
+    string RowHeight(RowDefinition row) => $"""height: {row.HeightMm}mm""";
 
     DataCell GetDataCell(RowDefinition row, DataColumnDefinition column)
     {

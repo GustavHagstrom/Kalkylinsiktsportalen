@@ -6,6 +6,7 @@ using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 using BlazorServer.Modules.Reports.Components.Views;
+using BlazorServer.Modules.Reports.Rendering;
 
 namespace BlazorServer.Modules.Reports.Components.Rendering;
 
@@ -22,7 +23,8 @@ public sealed class PrintableDocumentBuilder
             PageFormat: view.PageFormat,
             HeaderItems: [],
             BodyItems: BuildBodyItems(view),
-            FooterItems: []);
+            FooterItems: [],
+            PrintBlockingIssues: BuildPrintBlockingIssues(view));
     }
 
     private static IReadOnlyList<PrintableItem> BuildBodyItems(View view)
@@ -59,6 +61,28 @@ public sealed class PrintableDocumentBuilder
                         [nameof(DataSectionRowComponent.RowDefinition)] = row
                     }))
                 .ToArray());
+
+    private static IReadOnlyList<PrintableDocumentPrintIssue> BuildPrintBlockingIssues(View view)
+        => OrderedSections(view)
+            .OfType<DataSection>()
+            .SelectMany(BuildDataSectionPrintBlockingIssues)
+            .ToArray();
+
+    private static IEnumerable<PrintableDocumentPrintIssue> BuildDataSectionPrintBlockingIssues(DataSection section)
+    {
+        section.Normalize();
+
+        foreach (var cell in section.DataCells.Values.OrderBy(cell => cell.RowIndex).ThenBy(cell => cell.ColumnIndex))
+        {
+            if (DataCellFormulaEvaluator.GetDisplayValue(cell) != DataCellFormulaEvaluator.ErrorDisplayValue)
+                continue;
+
+            yield return new PrintableDocumentPrintIssue(
+                "CellEvaluationError",
+                $"Data section '{section.SectionId}' cell ({cell.RowIndex}, {cell.ColumnIndex}) contains an invalid expression.",
+                $"data-section-{section.SectionId}-row-{cell.RowIndex}");
+        }
+    }
 
     private static PrintableContainer BuildSheetSectionItem(SheetSection section)
         => new(

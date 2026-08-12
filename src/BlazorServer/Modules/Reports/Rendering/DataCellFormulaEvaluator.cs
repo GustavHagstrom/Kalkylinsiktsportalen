@@ -4,31 +4,33 @@ using System.Text.RegularExpressions;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
-namespace BlazorServer.Modules.Reports.Components.Rendering;
+namespace BlazorServer.Modules.Reports.Rendering;
 
 public static partial class DataCellFormulaEvaluator
 {
+    public const string ErrorDisplayValue = "#ERROR!";
+
     public static string GetDisplayValue(
         DataCell dataCell,
         IReadOnlyDictionary<string, object?>? estimationProperties = null)
     {
         ArgumentNullException.ThrowIfNull(dataCell);
 
-        var evaluatedValue = EvaluateRawValue(dataCell.RawValue, estimationProperties);
+        var evaluatedValue = EvaluateCellExpression(dataCell.CellExpression, estimationProperties);
         return FormatValue(evaluatedValue, dataCell.TextFormat);
     }
 
-    private static object? EvaluateRawValue(
-        string? rawValue,
+    private static object? EvaluateCellExpression(
+        string? cellExpression,
         IReadOnlyDictionary<string, object?>? estimationProperties)
     {
-        if (string.IsNullOrWhiteSpace(rawValue))
+        if (string.IsNullOrWhiteSpace(cellExpression))
             return string.Empty;
 
-        if (!IsFormula(rawValue))
-            return rawValue;
+        if (!IsFormula(cellExpression))
+            return cellExpression;
 
-        var expression = rawValue[1..].Trim();
+        var expression = cellExpression[1..].Trim();
         if (string.IsNullOrWhiteSpace(expression))
             return string.Empty;
 
@@ -42,7 +44,7 @@ public static partial class DataCellFormulaEvaluator
         if (TryEvaluateConcatenation(expression, estimationProperties, out var concatenationResult))
             return concatenationResult;
 
-        return rawValue;
+        return ErrorDisplayValue;
     }
 
     private static bool TryEvaluateExpression(string expression, out object? result)

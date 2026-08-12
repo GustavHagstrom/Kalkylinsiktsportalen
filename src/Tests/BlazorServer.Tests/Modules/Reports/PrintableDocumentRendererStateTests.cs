@@ -156,6 +156,28 @@ public sealed class PrintableDocumentRendererStateTests
     }
 
     [Test]
+    public void GetPrintReadiness_BlocksPrintWhenDocumentHasContentErrors()
+    {
+        var state = new PrintableDocumentRendererState();
+        state.SetDocument(Document(
+            "document-1",
+            "change-1",
+            PageFormat.A4,
+            [new PrintableDocumentPrintIssue("CellEvaluationError", "Invalid formula.", "block-1")]));
+
+        state.MarkPaginating();
+        state.MarkReady(EmptyPagination());
+
+        var readiness = state.GetPrintReadiness();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(readiness.Status, Is.EqualTo(PrintableDocumentPrintStatus.BlockedByContentErrors));
+            Assert.That(readiness.Errors.Single().Code, Is.EqualTo("CellEvaluationError"));
+        });
+    }
+
+    [Test]
     public void MarkError_PreventsReadyPagesAfterMeasurementFailure()
     {
         var state = new PrintableDocumentRendererState();
@@ -173,14 +195,19 @@ public sealed class PrintableDocumentRendererStateTests
         });
     }
 
-    private static PrintableDocumentContract Document(string id, string changeToken, PageFormat pageFormat)
+    private static PrintableDocumentContract Document(
+        string id,
+        string changeToken,
+        PageFormat pageFormat,
+        IReadOnlyList<PrintableDocumentPrintIssue>? printBlockingIssues = null)
         => new(
             id,
             changeToken,
             pageFormat,
             HeaderItems: [],
             BodyItems: [],
-            FooterItems: []);
+            FooterItems: [],
+            PrintBlockingIssues: printBlockingIssues);
 
     private static PrintablePaginationResult EmptyPagination()
         => new(Pages: [], Warnings: [], Errors: []);
