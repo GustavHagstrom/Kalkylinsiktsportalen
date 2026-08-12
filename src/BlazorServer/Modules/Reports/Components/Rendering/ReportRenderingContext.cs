@@ -1,4 +1,3 @@
-using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using System.Text.Json;
 
@@ -47,13 +46,20 @@ public sealed record ReportRenderingContext
                 ViewId = view.Id.Value,
                 view.Name,
                 view.Description,
+                PageFormat = new
+                {
+                    view.PageFormat.Name,
+                    view.PageFormat.WidthMm,
+                    view.PageFormat.HeightMm
+                },
                 Sections = view.Sections.Select(section => new
                 {
                     section.SectionId,
                     section.SectionType,
                     section.Section
                 })
-            }));
+            }),
+            PageFormat: view.PageFormat);
     }
 
     public static ReportRenderingContext ForViewPreview(string viewReference, string printableContentChangeToken)

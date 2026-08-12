@@ -19,7 +19,7 @@ public sealed class PrintableDocumentBuilder
         return new PrintableDocument(
             Id: $"report-view-{view.Id.Value}",
             ChangeToken: CreateChangeToken(view, renderingContext),
-            PageFormat: renderingContext.PageFormat,
+            PageFormat: view.PageFormat,
             HeaderItems: [],
             BodyItems: BuildBodyItems(view),
             FooterItems: []);
@@ -87,12 +87,6 @@ public sealed class PrintableDocumentBuilder
                 renderingContext.EstimationSnapshotReference,
                 renderingContext.ViewScopedChangeSetReference,
                 renderingContext.PrintableContentChangeToken,
-                PageFormat = new
-                {
-                    renderingContext.PageFormat.Name,
-                    renderingContext.PageFormat.WidthMm,
-                    renderingContext.PageFormat.HeightMm
-                },
                 Values = renderingContext.Values.OrderBy(value => value.Key)
             },
             View = new
@@ -100,6 +94,12 @@ public sealed class PrintableDocumentBuilder
                 Id = view.Id.Value,
                 view.Name,
                 view.Description,
+                PageFormat = new
+                {
+                    view.PageFormat.Name,
+                    view.PageFormat.WidthMm,
+                    view.PageFormat.HeightMm
+                },
                 Sections = view.Sections.Select(section => new
                 {
                     section.SectionId,

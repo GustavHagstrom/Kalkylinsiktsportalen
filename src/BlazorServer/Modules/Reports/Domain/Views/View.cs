@@ -18,7 +18,7 @@ public class View
     public OrganizationId OrganizationId { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public bool EnableChanges { get; private set; } = false;
+    public PageFormat PageFormat { get; private set; } = PageFormat.A4;
     public bool IsArchived { get; private set; } = false;
 
     public IReadOnlyList<ViewSection> Sections => _sections;
@@ -52,6 +52,27 @@ public class View
         bool isArchived,
         IReadOnlyList<DataSectionModel> dataSections,
         IReadOnlyList<SheetSectionModel> sheetSections)
+        => Reconstitute(
+            id,
+            organizationId,
+            name,
+            description,
+            PageFormat.A4,
+            enableChanges,
+            isArchived,
+            dataSections,
+            sheetSections);
+
+    public static View Reconstitute(
+        ViewId id,
+        OrganizationId organizationId,
+        string name,
+        string description,
+        PageFormat pageFormat,
+        bool enableChanges,
+        bool isArchived,
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
     {
         var view = new View
         {
@@ -61,11 +82,11 @@ public class View
                 "view.name.required",
                 "A view must have a name.") : name.Trim(),
             Description = description ?? string.Empty,
-            EnableChanges = enableChanges,
+            PageFormat = pageFormat ?? PageFormat.A4,
             IsArchived = isArchived
         };
 
-        view.ReplaceLegacySections(dataSections, sheetSections);
+        view.ReplaceLegacySections(dataSections, sheetSections, legacyEnableChangesDefault: enableChanges);
         return view;
     }
 
@@ -89,10 +110,11 @@ public class View
         Description = description ?? string.Empty;
     }
 
-    public void SetEnableChanges(bool enableChanges)
+    public void ChangePageFormat(PageFormat pageFormat)
     {
+        ArgumentNullException.ThrowIfNull(pageFormat);
         EnsureActive();
-        EnableChanges = enableChanges;
+        PageFormat = pageFormat;
     }
 
     public void Archive()
@@ -183,7 +205,7 @@ public class View
     public View Duplicate(string name)
     {
         var duplicate = Create(OrganizationId, name, Description);
-        duplicate.SetEnableChanges(EnableChanges);
+        duplicate.ChangePageFormat(PageFormat);
 
         foreach (var section in _sections)
         {
@@ -240,9 +262,11 @@ public class View
 
     private void ReplaceLegacySections(
         IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<SheetSectionModel> sheetSections,
+        bool legacyEnableChangesDefault = false)
     {
         EnsureLegacySectionIdentities(dataSections, sheetSections);
+        ApplyLegacyEnableChangesDefault(sheetSections, legacyEnableChangesDefault);
 
         var sections = dataSections
             .Select(ViewSection.FromData)
@@ -258,6 +282,17 @@ public class View
         _sections.Clear();
         _sections.AddRange(sections);
         SynchronizeLegacySectionIndexes();
+    }
+
+    private static void ApplyLegacyEnableChangesDefault(
+        IReadOnlyList<SheetSectionModel> sheetSections,
+        bool legacyEnableChangesDefault)
+    {
+        if (!legacyEnableChangesDefault)
+            return;
+
+        foreach (var section in sheetSections)
+            section.SetEnableChanges(true);
     }
 
     private IReadOnlyList<DataSectionModel> OrderedDataSections()
@@ -434,6 +469,7 @@ public class View
             SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
             Content = section.Content,
+            EnableChanges = section.EnableChanges,
             SheetCells = section.SheetCells.ToDictionary(
                 cell => cell.Key,
                 cell => new SheetCellModel

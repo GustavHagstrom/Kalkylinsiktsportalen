@@ -23,7 +23,7 @@ public class ViewTests
             Assert.That(view.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(view.Name, Is.EqualTo("Tender report"));
             Assert.That(view.Description, Is.EqualTo("For review"));
-            Assert.That(view.EnableChanges, Is.False);
+            Assert.That(view.PageFormat, Is.EqualTo(PageFormat.A4));
             Assert.That(view.IsArchived, Is.False);
             Assert.That(view.Sections, Is.Empty);
         });
@@ -36,19 +36,20 @@ public class ViewTests
 
         view.Rename("Updated report");
         view.UpdateDescription("Updated description");
-        view.SetEnableChanges(true);
+        view.ChangePageFormat(PageFormat.A3);
         view.Archive();
 
         Assert.Multiple(() =>
         {
             Assert.That(view.Name, Is.EqualTo("Updated report"));
             Assert.That(view.Description, Is.EqualTo("Updated description"));
-            Assert.That(view.EnableChanges, Is.True);
+            Assert.That(view.PageFormat, Is.EqualTo(PageFormat.A3));
             Assert.That(view.IsArchived, Is.True);
         });
 
         var exception = Assert.Throws<ReportsDomainException>(() => view.Rename("Blocked"));
         Assert.That(exception!.Code, Is.EqualTo("view.archived"));
+        Assert.That(Assert.Throws<ReportsDomainException>(() => view.ChangePageFormat(PageFormat.A5))!.Code, Is.EqualTo("view.archived"));
 
         view.Reactivate();
         view.Rename("Reactivated report");
@@ -57,6 +58,29 @@ public class ViewTests
         {
             Assert.That(view.IsArchived, Is.False);
             Assert.That(view.Name, Is.EqualTo("Reactivated report"));
+        });
+    }
+
+    [Test]
+    public void SheetSectionOwnsChangeEnablementWithLegacyViewDefaultDuringReconstitution()
+    {
+        var newView = View.Create(new OrganizationId("org-1"), "Tender report");
+        var newSheetSection = newView.AddSheetSection();
+
+        var legacyEnabledView = View.Reconstitute(
+            new ViewId("view-1"),
+            new OrganizationId("org-1"),
+            "Tender report",
+            "",
+            enableChanges: true,
+            isArchived: false,
+            [],
+            [new SheetSection { SectionId = "sheet-1", SectionIndex = 0 }]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(newSheetSection.EnableChanges, Is.False);
+            Assert.That(legacyEnabledView.LegacySheetSections.Single().EnableChanges, Is.True);
         });
     }
 
@@ -95,11 +119,11 @@ public class ViewTests
     public void DuplicateCopiesDefinitionWithNewViewAndSectionIdentities()
     {
         var view = View.Create(new OrganizationId("org-1"), "Tender report", "For review");
-        view.SetEnableChanges(true);
         var dataSection = view.AddDataSection();
         dataSection.GetCell(0, 0).RawValue = "Heading";
         var sheetSection = view.AddSheetSection();
         sheetSection.Content = "TenderSheet";
+        sheetSection.SetEnableChanges(true);
 
         var duplicate = view.Duplicate("Tender report copy");
 
@@ -109,11 +133,11 @@ public class ViewTests
             Assert.That(duplicate.OrganizationId, Is.EqualTo(view.OrganizationId));
             Assert.That(duplicate.Name, Is.EqualTo("Tender report copy"));
             Assert.That(duplicate.Description, Is.EqualTo(view.Description));
-            Assert.That(duplicate.EnableChanges, Is.EqualTo(view.EnableChanges));
             Assert.That(duplicate.IsArchived, Is.False);
             Assert.That(duplicate.Sections.Select(section => section.SectionId), Is.Not.EquivalentTo(view.Sections.Select(section => section.SectionId)));
             Assert.That(duplicate.LegacyDataSections[0].DataCells["R0C0"].RawValue, Is.EqualTo("Heading"));
             Assert.That(duplicate.LegacySheetSections[0].Content, Is.EqualTo("TenderSheet"));
+            Assert.That(duplicate.LegacySheetSections[0].EnableChanges, Is.True);
         });
     }
 

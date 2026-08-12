@@ -16,6 +16,7 @@ public static class ViewMappings
             new OrganizationId(mongoView.OrganizationId),
             mongoView.Name,
             mongoView.Description,
+            PageFormat.FromPersistedName(mongoView.PageFormatName),
             mongoView.EnableChanges,
             mongoView.IsArchived,
             mongoView.DataSections,
@@ -31,7 +32,10 @@ public static class ViewMappings
             SheetSections = view.LegacySheetSections.ToList(),
             DataSections = view.LegacyDataSections.ToList(),
             Description = view.Description,
-            EnableChanges = view.EnableChanges,
+            PageFormatName = view.PageFormat.Name,
+            PageFormatWidthMm = view.PageFormat.WidthMm,
+            PageFormatHeightMm = view.PageFormat.HeightMm,
+            EnableChanges = false,
             IsArchived = view.IsArchived,
         };
     }

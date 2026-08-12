@@ -18,6 +18,7 @@ public class ReportsViewPersistenceTests
             new OrganizationId("org-1"),
             "Tender report",
             "For review",
+            PageFormat.A5,
             enableChanges: true,
             isArchived: true,
             dataSections:
@@ -56,6 +57,7 @@ public class ReportsViewPersistenceTests
                     SectionId = "sheet-section-1",
                     SectionIndex = 2,
                     Content = "TenderSheet",
+                    EnableChanges = true,
                     SheetCells =
                     {
                         ["Group-Description"] = new SheetCell
@@ -75,11 +77,12 @@ public class ReportsViewPersistenceTests
         Assert.Multiple(() =>
         {
             Assert.That(mongoView.Id, Is.EqualTo("view-1"));
+            Assert.That(mongoView.EnableChanges, Is.False);
             Assert.That(roundTripped!.Id, Is.EqualTo(new ViewId("view-1")));
             Assert.That(roundTripped.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
-            Assert.That(roundTripped.EnableChanges, Is.True);
+            Assert.That(roundTripped.PageFormat, Is.EqualTo(PageFormat.A5));
             Assert.That(roundTripped.IsArchived, Is.True);
             Assert.That(roundTripped.LegacyDataSections, Has.Count.EqualTo(1));
             Assert.That(roundTripped.LegacyDataSections[0].SectionId, Is.EqualTo("data-section-1"));
@@ -89,6 +92,7 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.LegacyDataSections[0].DataCells["R0C0"].CellFormat.BackgroundColor, Is.EqualTo("#ffeecc"));
             Assert.That(roundTripped.LegacySheetSections, Has.Count.EqualTo(1));
             Assert.That(roundTripped.LegacySheetSections[0].SectionId, Is.EqualTo("sheet-section-1"));
+            Assert.That(roundTripped.LegacySheetSections[0].EnableChanges, Is.True);
             Assert.That(roundTripped.LegacySheetSections[0].SheetCells["Group-Description"].HideValue, Is.True);
         });
     }

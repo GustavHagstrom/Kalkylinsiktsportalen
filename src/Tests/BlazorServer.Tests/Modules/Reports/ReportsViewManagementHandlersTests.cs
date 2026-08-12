@@ -124,7 +124,8 @@ public sealed class ReportsViewManagementHandlersTests
                 "Updated tender report",
                 "Updated description",
                 [editedDataSection],
-                [addedSheetSection]),
+                [addedSheetSection],
+                ConfirmSectionDelete: true),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewUpdated>());
@@ -164,6 +165,39 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_id.required"));
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Field), Does.Contain("Sections"));
             Assert.That(existing.Name, Is.EqualTo("Tender report"));
+            Assert.That(store.Upserted, Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_RequiresExplicitConfirmationBeforeDeletingSection()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = ReconstitutedView(
+            viewId,
+            organizationId,
+            dataSections: [new DataSection { SectionId = "data-1", SectionIndex = 0 }]);
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                [],
+                [],
+                ConfirmSectionDelete: false),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
+            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1" }));
             Assert.That(store.Upserted, Is.Null);
         });
     }

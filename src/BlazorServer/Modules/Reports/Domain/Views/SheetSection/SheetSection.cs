@@ -22,10 +22,16 @@ public class SheetSection
     public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
     public string Content { get; set; } = string.Empty;
+    public bool EnableChanges { get; set; } = false;
     /// <summary>
     /// Key: $"{rowType}-{columnType}"
     /// </summary>
     public Dictionary<string, SheetCell> SheetCells { get; set; } = new();
+
+    public void SetEnableChanges(bool enableChanges)
+    {
+        EnableChanges = enableChanges;
+    }
 
     public void Normalize()
     {

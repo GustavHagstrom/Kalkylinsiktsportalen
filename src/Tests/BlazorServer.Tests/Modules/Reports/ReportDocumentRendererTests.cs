@@ -24,6 +24,7 @@ public sealed class ReportDocumentRendererTests
     public void BuildDocument_TranslatesViewSectionsIntoPrintableDocument()
     {
         var view = ViewWithDataSection();
+        view.ChangePageFormat(PageFormat.A3);
 
         var document = new PrintableDocumentBuilder().Build(
             view,
@@ -32,7 +33,7 @@ public sealed class ReportDocumentRendererTests
         Assert.Multiple(() =>
         {
             Assert.That(document.Id, Is.EqualTo($"report-view-{view.Id.Value}"));
-            Assert.That(document.PageFormat.Name, Is.EqualTo("A4"));
+            Assert.That(document.PageFormat, Is.EqualTo(PageFormat.A3));
             Assert.That(document.HeaderItems, Is.Empty);
             Assert.That(document.FooterItems, Is.Empty);
             Assert.That(document.BodyItems, Has.Count.EqualTo(1));
