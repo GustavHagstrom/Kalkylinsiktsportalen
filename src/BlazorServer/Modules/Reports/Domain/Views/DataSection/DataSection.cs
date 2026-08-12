@@ -4,13 +4,23 @@ namespace BlazorServer.Modules.Reports.Domain.Views.DataSection;
 
 public class DataSection
 {
-    private const double DefaultRowHeight = 8;
-    private const int DefaultColumnWidth = 10;
+    private const double DefaultRowHeightMm = 8;
+    private const double DefaultColumnRelativeWidth = 1;
+    private int _legacyRowsCount;
+    private int _legacyColumnsCount;
 
     public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
-    public int RowsCount { get; set; } = 0;
-    public int ColumnsCount { get; set; } = 0;
+    public int RowsCount
+    {
+        get => RowDefinitions?.Count ?? _legacyRowsCount;
+        set => _legacyRowsCount = value;
+    }
+    public int ColumnsCount
+    {
+        get => ColumnDefinitions?.Count ?? _legacyColumnsCount;
+        set => _legacyColumnsCount = value;
+    }
     /// <summary>
     /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
     /// </summary>
@@ -21,84 +31,85 @@ public class DataSection
     public IReadOnlyList<RowDefinition> Rows => RowDefinitions;
     public IReadOnlyList<DataColumnDefinition> Columns => ColumnDefinitions;
 
-    public static DataSection CreateDefault(int sectionIndex)
+    public static DataSection Create(int rowsCount, int columnsCount, int sectionIndex = 0)
     {
         var section = new DataSection
         {
             SectionIndex = sectionIndex
         };
 
-        section.AddColumn();
-        section.AddColumn();
-        section.AddColumn();
-        section.AddRow();
-        section.AddRow();
-        section.AddRow();
-
+        section.Initialize(rowsCount, columnsCount);
         return section;
     }
 
+    public static DataSection CreateDefault(int sectionIndex)
+        => Create(3, 3, sectionIndex);
+
     public void Initialize(int rowsCount, int columnsCount)
     {
-        if (rowsCount < 0)
+        if (rowsCount < 1)
             throw new ArgumentOutOfRangeException(nameof(rowsCount));
 
-        if (columnsCount < 0)
+        if (columnsCount < 1)
             throw new ArgumentOutOfRangeException(nameof(columnsCount));
 
         RowDefinitions.Clear();
         ColumnDefinitions.Clear();
         DataCells.Clear();
-        RowsCount = 0;
-        ColumnsCount = 0;
+        _legacyRowsCount = rowsCount;
+        _legacyColumnsCount = columnsCount;
 
         for (var i = 0; i < rowsCount; i++)
-            AddRow();
+        {
+            RowDefinitions.Add(new RowDefinition
+            {
+                RowIndex = i,
+                HeightMm = DefaultRowHeightMm
+            });
+        }
 
         for (var i = 0; i < columnsCount; i++)
-            AddColumn();
+        {
+            ColumnDefinitions.Add(new DataColumnDefinition
+            {
+                ColumnIndex = i,
+                RelativeWidth = DefaultColumnRelativeWidth
+            });
+        }
     }
 
-    public RowDefinition AddRow(double height = DefaultRowHeight)
+    public RowDefinition AddRow(double heightMm = DefaultRowHeightMm)
     {
         Normalize();
 
-        if (height <= 0)
-            throw new ArgumentOutOfRangeException(nameof(height));
+        if (heightMm <= 0)
+            throw new ArgumentOutOfRangeException(nameof(heightMm));
 
         var row = new RowDefinition
         {
             RowIndex = RowsCount,
-            Height = height
+            HeightMm = heightMm
         };
 
         RowDefinitions.Add(row);
-        RowsCount = RowDefinitions.Count;
-
-        for (var columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
-            EnsureCellExists(row.RowIndex, columnIndex);
 
         return row;
     }
 
-    public DataColumnDefinition AddColumn(int width = DefaultColumnWidth)
+    public DataColumnDefinition AddColumn(double relativeWidth = DefaultColumnRelativeWidth)
     {
         Normalize();
 
-        if (width <= 0)
-            throw new ArgumentOutOfRangeException(nameof(width));
+        if (relativeWidth <= 0)
+            throw new ArgumentOutOfRangeException(nameof(relativeWidth));
 
         var column = new DataColumnDefinition
         {
             ColumnIndex = ColumnsCount,
-            Width = width
+            RelativeWidth = relativeWidth
         };
 
         ColumnDefinitions.Add(column);
-        ColumnsCount = ColumnDefinitions.Count;
-
-        for (var rowIndex = 0; rowIndex < RowsCount; rowIndex++)
-            EnsureCellExists(rowIndex, column.ColumnIndex);
 
         return column;
     }
@@ -107,6 +118,9 @@ public class DataSection
     {
         Normalize();
         ValidateRowIndex(rowIndex);
+
+        if (RowsCount == 1)
+            throw new InvalidOperationException("A data section cannot remove its last row.");
 
         var rowDefinition = RowDefinitions.Single(x => x.RowIndex == rowIndex);
         RowDefinitions.Remove(rowDefinition);
@@ -127,13 +141,16 @@ public class DataSection
         }
 
         DataCells = updatedCells;
-        RowsCount = RowDefinitions.Count;
+        _legacyRowsCount = RowDefinitions.Count;
     }
 
     public void RemoveColumn(int columnIndex)
     {
         Normalize();
         ValidateColumnIndex(columnIndex);
+
+        if (ColumnsCount == 1)
+            throw new InvalidOperationException("A data section cannot remove its last column.");
 
         var columnDefinition = ColumnDefinitions.Single(x => x.ColumnIndex == columnIndex);
         ColumnDefinitions.Remove(columnDefinition);
@@ -154,7 +171,7 @@ public class DataSection
         }
 
         DataCells = updatedCells;
-        ColumnsCount = ColumnDefinitions.Count;
+        _legacyColumnsCount = ColumnDefinitions.Count;
     }
 
     public DataCell GetCell(int rowIndex, int columnIndex)
@@ -163,7 +180,9 @@ public class DataSection
         ValidateRowIndex(rowIndex);
         ValidateColumnIndex(columnIndex);
 
-        return EnsureCellExists(rowIndex, columnIndex);
+        return DataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out var cell)
+            ? cell
+            : CreateDefaultCell(rowIndex, columnIndex);
     }
 
     public bool TryGetCell(int rowIndex, int columnIndex, out DataCell? cell)
@@ -177,6 +196,17 @@ public class DataSection
         return DataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out cell);
     }
 
+    public void EditCellExpression(int rowIndex, int columnIndex, string? cellExpression)
+    {
+        Normalize();
+        ValidateRowIndex(rowIndex);
+        ValidateColumnIndex(columnIndex);
+
+        var cell = GetStoredOrNewCell(rowIndex, columnIndex);
+        cell.CellExpression = cellExpression ?? string.Empty;
+        StoreOrPruneCell(cell);
+    }
+
     public void Normalize()
     {
         if (string.IsNullOrWhiteSpace(SectionId))
@@ -186,8 +216,14 @@ public class DataSection
         ColumnDefinitions ??= new List<DataColumnDefinition>();
         DataCells ??= new Dictionary<string, DataCell>();
 
-        RowsCount = Math.Max(RowsCount, RowDefinitions.Count);
-        ColumnsCount = Math.Max(ColumnsCount, ColumnDefinitions.Count);
+        _legacyRowsCount = Math.Max(_legacyRowsCount, RowDefinitions.Count);
+        _legacyColumnsCount = Math.Max(_legacyColumnsCount, ColumnDefinitions.Count);
+
+        if (_legacyRowsCount < 1)
+            _legacyRowsCount = 1;
+
+        if (_legacyColumnsCount < 1)
+            _legacyColumnsCount = 1;
 
         NormalizeRows();
         NormalizeColumns();
@@ -201,14 +237,14 @@ public class DataSection
             .GroupBy(x => x.RowIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        RowDefinitions = Enumerable.Range(0, RowsCount)
+        RowDefinitions = Enumerable.Range(0, _legacyRowsCount)
             .Select(index =>
             {
                 if (existingRows.TryGetValue(index, out var row))
                 {
                     row.RowIndex = index;
-                    if (row.Height <= 0)
-                        row.Height = DefaultRowHeight;
+                    if (row.HeightMm <= 0)
+                        row.HeightMm = DefaultRowHeightMm;
 
                     return row;
                 }
@@ -216,10 +252,12 @@ public class DataSection
                 return new RowDefinition
                 {
                     RowIndex = index,
-                    Height = DefaultRowHeight
+                    HeightMm = DefaultRowHeightMm
                 };
             })
             .ToList();
+
+        _legacyRowsCount = RowDefinitions.Count;
     }
 
     private void NormalizeColumns()
@@ -229,14 +267,14 @@ public class DataSection
             .GroupBy(x => x.ColumnIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        ColumnDefinitions = Enumerable.Range(0, ColumnsCount)
+        ColumnDefinitions = Enumerable.Range(0, _legacyColumnsCount)
             .Select(index =>
             {
                 if (existingColumns.TryGetValue(index, out var column))
                 {
                     column.ColumnIndex = index;
-                    if (column.Width <= 0)
-                        column.Width = DefaultColumnWidth;
+                    if (column.RelativeWidth <= 0)
+                        column.RelativeWidth = DefaultColumnRelativeWidth;
 
                     return column;
                 }
@@ -244,57 +282,63 @@ public class DataSection
                 return new DataColumnDefinition
                 {
                     ColumnIndex = index,
-                    Width = DefaultColumnWidth
+                    RelativeWidth = DefaultColumnRelativeWidth
                 };
             })
             .ToList();
+
+        _legacyColumnsCount = ColumnDefinitions.Count;
     }
 
     private void NormalizeCells()
     {
         var normalizedCells = new Dictionary<string, DataCell>();
 
-        foreach (var cell in DataCells.Values)
+        foreach (var keyedCell in DataCells)
         {
+            var cell = keyedCell.Value;
+            if (!TryReadCellPosition(keyedCell.Key, out var rowIndex, out var columnIndex))
+            {
+                rowIndex = cell.RowIndex;
+                columnIndex = cell.ColumnIndex;
+            }
+
+            cell.RowIndex = rowIndex;
+            cell.ColumnIndex = columnIndex;
+            cell.TextFormat ??= new TextFormat();
+            cell.CellFormat ??= new CellFormat();
+
             if (cell.RowIndex < 0 || cell.RowIndex >= RowsCount || cell.ColumnIndex < 0 || cell.ColumnIndex >= ColumnsCount)
+                continue;
+
+            if (cell.IsDefault())
                 continue;
 
             normalizedCells[BuildCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
         }
 
-        for (var rowIndex = 0; rowIndex < RowsCount; rowIndex++)
-        {
-            for (var columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
-            {
-                var key = BuildCellKey(rowIndex, columnIndex);
-                if (normalizedCells.ContainsKey(key))
-                    continue;
-
-                normalizedCells[key] = new DataCell
-                {
-                    RowIndex = rowIndex,
-                    ColumnIndex = columnIndex
-                };
-            }
-        }
-
         DataCells = normalizedCells;
     }
 
-    private DataCell EnsureCellExists(int rowIndex, int columnIndex)
+    private DataCell GetStoredOrNewCell(int rowIndex, int columnIndex)
     {
         var key = BuildCellKey(rowIndex, columnIndex);
         if (DataCells.TryGetValue(key, out var cell))
             return cell;
 
-        cell = new DataCell
+        return CreateDefaultCell(rowIndex, columnIndex);
+    }
+
+    private void StoreOrPruneCell(DataCell cell)
+    {
+        var key = BuildCellKey(cell.RowIndex, cell.ColumnIndex);
+        if (cell.IsDefault())
         {
-            RowIndex = rowIndex,
-            ColumnIndex = columnIndex
-        };
+            DataCells.Remove(key);
+            return;
+        }
 
         DataCells[key] = cell;
-        return cell;
     }
 
     private void ValidateRowIndex(int rowIndex)
@@ -309,5 +353,28 @@ public class DataSection
             throw new ArgumentOutOfRangeException(nameof(columnIndex));
     }
 
+    private static DataCell CreateDefaultCell(int rowIndex, int columnIndex)
+        => new()
+        {
+            RowIndex = rowIndex,
+            ColumnIndex = columnIndex
+        };
+
     private static string BuildCellKey(int rowIndex, int columnIndex) => $"R{rowIndex}C{columnIndex}";
+
+    private static bool TryReadCellPosition(string key, out int rowIndex, out int columnIndex)
+    {
+        rowIndex = default;
+        columnIndex = default;
+
+        if (string.IsNullOrWhiteSpace(key) || key[0] != 'R')
+            return false;
+
+        var columnMarkerIndex = key.IndexOf('C', StringComparison.Ordinal);
+        if (columnMarkerIndex <= 1 || columnMarkerIndex == key.Length - 1)
+            return false;
+
+        return int.TryParse(key[1..columnMarkerIndex], out rowIndex)
+               && int.TryParse(key[(columnMarkerIndex + 1)..], out columnIndex);
+    }
 }

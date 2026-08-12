@@ -10,7 +10,8 @@ public sealed record PrintableDocument
         PageFormat PageFormat,
         IReadOnlyList<PrintableItem> HeaderItems,
         IReadOnlyList<PrintableItem> BodyItems,
-        IReadOnlyList<PrintableItem> FooterItems)
+        IReadOnlyList<PrintableItem> FooterItems,
+        IReadOnlyList<PrintableDocumentPrintIssue>? PrintBlockingIssues = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(Id);
         ArgumentException.ThrowIfNullOrWhiteSpace(ChangeToken);
@@ -21,6 +22,7 @@ public sealed record PrintableDocument
         this.HeaderItems = CopyItems(HeaderItems);
         this.BodyItems = CopyItems(BodyItems);
         this.FooterItems = CopyItems(FooterItems);
+        this.PrintBlockingIssues = Array.AsReadOnly((PrintBlockingIssues ?? []).ToArray());
     }
 
     public string Id { get; }
@@ -29,6 +31,7 @@ public sealed record PrintableDocument
     public IReadOnlyList<PrintableItem> HeaderItems { get; }
     public IReadOnlyList<PrintableItem> BodyItems { get; }
     public IReadOnlyList<PrintableItem> FooterItems { get; }
+    public IReadOnlyList<PrintableDocumentPrintIssue> PrintBlockingIssues { get; }
 
     private static IReadOnlyList<PrintableItem> CopyItems(IReadOnlyList<PrintableItem> items)
     {

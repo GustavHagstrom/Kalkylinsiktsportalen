@@ -4,5 +4,6 @@ public enum PrintableDocumentPrintStatus
 {
     Ready,
     NotReady,
-    BlockedByPaginationErrors
+    BlockedByPaginationErrors,
+    BlockedByContentErrors
 }

@@ -12,4 +12,7 @@ public sealed record PrintableDocumentPrintResult(
 
     public static PrintableDocumentPrintResult BlockedByPaginationErrors(IReadOnlyList<PrintableDocumentPrintIssue> errors)
         => new(PrintableDocumentPrintStatus.BlockedByPaginationErrors, errors);
+
+    public static PrintableDocumentPrintResult BlockedByContentErrors(IReadOnlyList<PrintableDocumentPrintIssue> errors)
+        => new(PrintableDocumentPrintStatus.BlockedByContentErrors, errors);
 }

@@ -77,6 +77,24 @@ public sealed class ReportDocumentRendererTests
     }
 
     [Test]
+    public void BuildDocument_AddsPrintBlockingIssueForDataCellEvaluationErrors()
+    {
+        var view = ViewWithDataSection();
+        view.MutableLegacyDataSections[0].EditCellExpression(0, 0, "=invalid +");
+
+        var document = new PrintableDocumentBuilder().Build(
+            view,
+            RenderingContext("version-1", "snapshot-1"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(document.PrintBlockingIssues, Has.Count.EqualTo(1));
+            Assert.That(document.PrintBlockingIssues[0].Code, Is.EqualTo("CellEvaluationError"));
+            Assert.That(document.PrintBlockingIssues[0].BlockId, Is.EqualTo("data-section-section-1-row-0"));
+        });
+    }
+
+    [Test]
     public async Task BuildDocument_CanRenderThroughPrintableDocumentDynamicComponents()
     {
         var document = new PrintableDocumentBuilder().Build(
