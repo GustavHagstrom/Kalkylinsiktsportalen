@@ -19,6 +19,8 @@ public class ReportsViewPersistenceTests
             OrganizationId = new OrganizationId("org-1"),
             Name = "Tender report",
             Description = "For review",
+            EnableChanges = true,
+            IsArchived = true,
             DataSections =
             [
                 new DataSection
@@ -79,6 +81,8 @@ public class ReportsViewPersistenceTests
             Assert.That(roundTripped.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
             Assert.That(roundTripped.Description, Is.EqualTo("For review"));
+            Assert.That(roundTripped.EnableChanges, Is.True);
+            Assert.That(roundTripped.IsArchived, Is.True);
             Assert.That(roundTripped.DataSections, Has.Count.EqualTo(1));
             Assert.That(roundTripped.DataSections[0].SectionId, Is.EqualTo("data-section-1"));
             Assert.That(roundTripped.DataSections[0].DataCells["R0C0"].RawValue, Is.EqualTo("=1+2"));

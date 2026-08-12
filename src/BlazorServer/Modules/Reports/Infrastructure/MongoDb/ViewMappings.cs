@@ -19,6 +19,8 @@ public static class ViewMappings
             SheetSections = mongoView.SheetSections,
             DataSections = mongoView.DataSections,
             Description = mongoView.Description,
+            EnableChanges = mongoView.EnableChanges,
+            IsArchived = mongoView.IsArchived
         };
 
         view.Normalize();
@@ -36,6 +38,8 @@ public static class ViewMappings
             SheetSections = view.SheetSections,
             DataSections = view.DataSections,
             Description = view.Description,
+            EnableChanges = view.EnableChanges,
+            IsArchived = view.IsArchived
         };
     }
 }

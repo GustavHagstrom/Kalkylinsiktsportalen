@@ -33,6 +33,8 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(created.Name, Is.EqualTo("Tender report"));
             Assert.That(store.Upserted, Is.SameAs(created.View));
             Assert.That(store.Upserted!.OrganizationId, Is.EqualTo(organizationId));
+            Assert.That(store.Upserted.EnableChanges, Is.False);
+            Assert.That(store.Upserted.IsArchived, Is.False);
         });
     }
 
@@ -89,6 +91,8 @@ public sealed class ReportsViewManagementHandlersTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
+                true,
+                false,
                 [],
                 []),
             CancellationToken.None);
@@ -104,6 +108,7 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(store.LoadedViewId, Is.EqualTo(viewId));
             Assert.That(store.Upserted, Is.SameAs(existing));
             Assert.That(store.Upserted!.Description, Is.EqualTo("Updated description"));
+            Assert.That(store.Upserted.EnableChanges, Is.True);
         });
     }
 
@@ -137,6 +142,8 @@ public sealed class ReportsViewManagementHandlersTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
+                false,
+                true,
                 [editedDataSection],
                 [addedSheetSection]),
             CancellationToken.None);
@@ -149,6 +156,46 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
             Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
             Assert.That(store.Upserted, Is.SameAs(existing));
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_RequiresExplicitConfirmationBeforeDeletingSection()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = new View
+        {
+            Id = viewId,
+            OrganizationId = organizationId,
+            Name = "Tender report",
+            DataSections =
+            [
+                new DataSection { SectionId = "data-1", SectionIndex = 0 }
+            ]
+        };
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                false,
+                false,
+                [],
+                []),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
+            Assert.That(existing.DataSections, Has.Count.EqualTo(1));
+            Assert.That(store.Upserted, Is.Null);
         });
     }
 
@@ -172,6 +219,8 @@ public sealed class ReportsViewManagementHandlersTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
+                false,
+                false,
                 [new DataSection { SectionId = "", SectionIndex = 0 }],
                 []),
             CancellationToken.None);
@@ -188,6 +237,38 @@ public sealed class ReportsViewManagementHandlersTests
     }
 
     [Test]
+    public async Task UpdateView_ReturnsValidationErrorWhenViewIsArchived()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = View.Create(organizationId, "Tender report");
+        existing.Archive();
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "",
+                false,
+                false,
+                [],
+                []),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.archived"));
+            Assert.That(existing.Name, Is.EqualTo("Tender report"));
+            Assert.That(store.Upserted, Is.Null);
+        });
+    }
+
+    [Test]
     public async Task UpdateView_DoesNotCreateMissingView()
     {
         var viewId = new ViewId("missing-view");
@@ -195,7 +276,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", [], []),
+            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", false, false, [], []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewToUpdateNotFound(viewId)));
@@ -219,7 +300,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", [], []),
+            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", false, false, [], []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewUpdateOrganizationMismatch(viewId, requestedOrganizationId)));

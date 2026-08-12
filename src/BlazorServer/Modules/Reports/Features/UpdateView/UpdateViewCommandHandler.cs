@@ -1,6 +1,7 @@
 using BlazorServer.Kernel.CQRS;
 using BlazorServer.Kernel.Validation;
 using BlazorServer.Modules.Reports.Domain;
+using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Modules.Reports.Features.UpdateView;
@@ -11,6 +12,7 @@ internal sealed class UpdateViewCommandHandler(
     : ICommandHandler<UpdateViewCommand, UpdateViewResult>
 {
     private const string SectionsField = "Sections";
+    private const string SectionDeleteConfirmationRequiredCode = "view.section_delete.confirmation_required";
     private readonly UpdateViewCommandValidator _validator = validator ?? new UpdateViewCommandValidator();
 
     public async Task<UpdateViewResult> HandleAsync(
@@ -36,9 +38,24 @@ internal sealed class UpdateViewCommandHandler(
 
         try
         {
+            var deletedSectionIds = FindDeletedSectionIds(view, command);
+            if (deletedSectionIds.Count > 0 && !command.ConfirmSectionDelete)
+            {
+                return new InvalidUpdateViewRequest(
+                [
+                    new ValidationError(
+                        SectionDeleteConfirmationRequiredCode,
+                        SectionsField,
+                        "Deleting a section requires explicit confirmation because historical view-scoped changes can reference it.")
+                ]);
+            }
+
             view.ApplyEditedSections(command.DataSections, command.SheetSections);
-            view.Name = command.Name;
-            view.Description = command.Description;
+            view.UpdateMetadata(command.Name, command.Description);
+            if (command.EnableChanges)
+                view.EnableChangeEdits();
+            else
+                view.DisableChangeEdits();
         }
         catch (ReportsDomainException exception)
         {
@@ -58,5 +75,22 @@ internal sealed class UpdateViewCommandHandler(
             view.OrganizationId,
             view.Name,
             view);
+    }
+
+    private static IReadOnlyList<string> FindDeletedSectionIds(
+        View view,
+        UpdateViewCommand command)
+    {
+        view.EnsureSectionIdentities();
+
+        var editedSectionIds = command.DataSections
+            .Select(section => section.SectionId)
+            .Concat(command.SheetSections.Select(section => section.SectionId))
+            .ToHashSet(StringComparer.Ordinal);
+
+        return view.Sections
+            .Select(section => section.SectionId)
+            .Where(sectionId => !editedSectionIds.Contains(sectionId))
+            .ToList();
     }
 }

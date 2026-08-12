@@ -12,6 +12,8 @@ public sealed record UpdateViewCommand(
     ViewId ViewId,
     string Name,
     string Description,
+    bool EnableChanges,
+    bool ConfirmSectionDelete,
     IReadOnlyList<DataSection> DataSections,
     IReadOnlyList<SheetSection> SheetSections) : ICommand<UpdateViewResult>
 {
@@ -21,6 +23,8 @@ public sealed record UpdateViewCommand(
             view.Id,
             view.Name,
             view.Description,
+            view.EnableChanges,
+            false,
             view.DataSections,
             view.SheetSections);
 }

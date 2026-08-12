@@ -31,7 +31,7 @@ public sealed class PrintableDocumentBuilder
         var items = new List<PrintableItem>();
         foreach (var section in OrderedSections(view))
         {
-            switch (section)
+            switch (section.Section)
             {
                 case DataSection dataSection:
                     items.Add(BuildDataSectionItem(dataSection));
@@ -75,18 +75,8 @@ public sealed class PrintableDocumentBuilder
                     }))
                 .ToArray());
 
-    private static IEnumerable<object> OrderedSections(View view)
-        => view.DataSections.Cast<object>()
-            .Concat(view.SheetSections)
-            .OrderBy(SectionIndex);
-
-    private static int SectionIndex(object section)
-        => section switch
-        {
-            DataSection dataSection => dataSection.SectionIndex,
-            SheetSection sheetSection => sheetSection.SectionIndex,
-            _ => throw new NotSupportedException($"Unsupported report section type '{section.GetType().Name}'.")
-        };
+    private static IEnumerable<ViewSection> OrderedSections(View view)
+        => view.Sections;
 
     private static string CreateChangeToken(View view, ReportRenderingContext renderingContext)
     {
