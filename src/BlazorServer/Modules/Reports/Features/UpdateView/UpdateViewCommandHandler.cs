@@ -50,7 +50,7 @@ internal sealed class UpdateViewCommandHandler(
                 ]);
             }
 
-            view.ApplyLegacySectionBridge(command.DataSections, command.SheetSections);
+            view.ApplySectionEdits(command.DataSections, command.SheetSections);
             view.Rename(command.Name);
             view.UpdateDescription(command.Description);
         }

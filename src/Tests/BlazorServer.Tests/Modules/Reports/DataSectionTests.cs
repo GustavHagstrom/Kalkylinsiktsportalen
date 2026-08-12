@@ -15,8 +15,8 @@ public sealed class DataSectionTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(section.RowsCount, Is.EqualTo(2));
-            Assert.That(section.ColumnsCount, Is.EqualTo(2));
+            Assert.That(section.RowCount, Is.EqualTo(2));
+            Assert.That(section.ColumnCount, Is.EqualTo(2));
             Assert.That(section.Rows, Has.Count.EqualTo(2));
             Assert.That(section.Columns, Has.Count.EqualTo(2));
             Assert.That(section.DataCells, Is.Empty);

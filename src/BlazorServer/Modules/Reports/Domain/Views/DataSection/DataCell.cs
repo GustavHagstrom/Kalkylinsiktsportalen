@@ -10,12 +10,6 @@ public class DataCell
     public CellFormat CellFormat { get; set; } = new CellFormat();
     public string CellExpression { get; set; } = string.Empty;
 
-    public string RawValue
-    {
-        get => CellExpression;
-        set => CellExpression = value ?? string.Empty;
-    }
-
     public bool IsDefault()
         => string.IsNullOrEmpty(CellExpression)
            && TextFormat is not null

@@ -6,21 +6,9 @@ public class DataSection
 {
     private const double DefaultRowHeightMm = 8;
     private const double DefaultColumnRelativeWidth = 1;
-    private int _legacyRowsCount;
-    private int _legacyColumnsCount;
 
     public string SectionId { get; set; } = SectionIds.New();
     public int SectionIndex { get; set; } = 0;
-    public int RowsCount
-    {
-        get => RowDefinitions?.Count ?? _legacyRowsCount;
-        set => _legacyRowsCount = value;
-    }
-    public int ColumnsCount
-    {
-        get => ColumnDefinitions?.Count ?? _legacyColumnsCount;
-        set => _legacyColumnsCount = value;
-    }
     /// <summary>
     /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
     /// </summary>
@@ -30,6 +18,8 @@ public class DataSection
 
     public IReadOnlyList<RowDefinition> Rows => RowDefinitions;
     public IReadOnlyList<DataColumnDefinition> Columns => ColumnDefinitions;
+    public int RowCount => Rows.Count;
+    public int ColumnCount => Columns.Count;
 
     public static DataSection Create(int rowsCount, int columnsCount, int sectionIndex = 0)
     {
@@ -56,8 +46,6 @@ public class DataSection
         RowDefinitions.Clear();
         ColumnDefinitions.Clear();
         DataCells.Clear();
-        _legacyRowsCount = rowsCount;
-        _legacyColumnsCount = columnsCount;
 
         for (var i = 0; i < rowsCount; i++)
         {
@@ -87,7 +75,7 @@ public class DataSection
 
         var row = new RowDefinition
         {
-            RowIndex = RowsCount,
+            RowIndex = RowCount,
             HeightMm = heightMm
         };
 
@@ -105,7 +93,7 @@ public class DataSection
 
         var column = new DataColumnDefinition
         {
-            ColumnIndex = ColumnsCount,
+            ColumnIndex = ColumnCount,
             RelativeWidth = relativeWidth
         };
 
@@ -119,7 +107,7 @@ public class DataSection
         Normalize();
         ValidateRowIndex(rowIndex);
 
-        if (RowsCount == 1)
+        if (RowCount == 1)
             throw new InvalidOperationException("A data section cannot remove its last row.");
 
         var rowDefinition = RowDefinitions.Single(x => x.RowIndex == rowIndex);
@@ -141,7 +129,6 @@ public class DataSection
         }
 
         DataCells = updatedCells;
-        _legacyRowsCount = RowDefinitions.Count;
     }
 
     public void RemoveColumn(int columnIndex)
@@ -149,7 +136,7 @@ public class DataSection
         Normalize();
         ValidateColumnIndex(columnIndex);
 
-        if (ColumnsCount == 1)
+        if (ColumnCount == 1)
             throw new InvalidOperationException("A data section cannot remove its last column.");
 
         var columnDefinition = ColumnDefinitions.Single(x => x.ColumnIndex == columnIndex);
@@ -171,7 +158,6 @@ public class DataSection
         }
 
         DataCells = updatedCells;
-        _legacyColumnsCount = ColumnDefinitions.Count;
     }
 
     public DataCell GetCell(int rowIndex, int columnIndex)
@@ -190,7 +176,7 @@ public class DataSection
         Normalize();
         cell = null;
 
-        if (rowIndex < 0 || rowIndex >= RowsCount || columnIndex < 0 || columnIndex >= ColumnsCount)
+        if (rowIndex < 0 || rowIndex >= RowCount || columnIndex < 0 || columnIndex >= ColumnCount)
             return false;
 
         return DataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out cell);
@@ -216,15 +202,6 @@ public class DataSection
         ColumnDefinitions ??= new List<DataColumnDefinition>();
         DataCells ??= new Dictionary<string, DataCell>();
 
-        _legacyRowsCount = Math.Max(_legacyRowsCount, RowDefinitions.Count);
-        _legacyColumnsCount = Math.Max(_legacyColumnsCount, ColumnDefinitions.Count);
-
-        if (_legacyRowsCount < 1)
-            _legacyRowsCount = 1;
-
-        if (_legacyColumnsCount < 1)
-            _legacyColumnsCount = 1;
-
         NormalizeRows();
         NormalizeColumns();
         NormalizeCells();
@@ -237,7 +214,9 @@ public class DataSection
             .GroupBy(x => x.RowIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        RowDefinitions = Enumerable.Range(0, _legacyRowsCount)
+        var rowCount = Math.Max(1, RowDefinitions.Count);
+
+        RowDefinitions = Enumerable.Range(0, rowCount)
             .Select(index =>
             {
                 if (existingRows.TryGetValue(index, out var row))
@@ -256,8 +235,6 @@ public class DataSection
                 };
             })
             .ToList();
-
-        _legacyRowsCount = RowDefinitions.Count;
     }
 
     private void NormalizeColumns()
@@ -267,7 +244,9 @@ public class DataSection
             .GroupBy(x => x.ColumnIndex)
             .ToDictionary(x => x.Key, x => x.First());
 
-        ColumnDefinitions = Enumerable.Range(0, _legacyColumnsCount)
+        var columnCount = Math.Max(1, ColumnDefinitions.Count);
+
+        ColumnDefinitions = Enumerable.Range(0, columnCount)
             .Select(index =>
             {
                 if (existingColumns.TryGetValue(index, out var column))
@@ -286,8 +265,6 @@ public class DataSection
                 };
             })
             .ToList();
-
-        _legacyColumnsCount = ColumnDefinitions.Count;
     }
 
     private void NormalizeCells()
@@ -308,7 +285,7 @@ public class DataSection
             cell.TextFormat ??= new TextFormat();
             cell.CellFormat ??= new CellFormat();
 
-            if (cell.RowIndex < 0 || cell.RowIndex >= RowsCount || cell.ColumnIndex < 0 || cell.ColumnIndex >= ColumnsCount)
+            if (cell.RowIndex < 0 || cell.RowIndex >= RowCount || cell.ColumnIndex < 0 || cell.ColumnIndex >= ColumnCount)
                 continue;
 
             if (cell.IsDefault())
@@ -343,13 +320,13 @@ public class DataSection
 
     private void ValidateRowIndex(int rowIndex)
     {
-        if (rowIndex < 0 || rowIndex >= RowsCount)
+        if (rowIndex < 0 || rowIndex >= RowCount)
             throw new ArgumentOutOfRangeException(nameof(rowIndex));
     }
 
     private void ValidateColumnIndex(int columnIndex)
     {
-        if (columnIndex < 0 || columnIndex >= ColumnsCount)
+        if (columnIndex < 0 || columnIndex >= ColumnCount)
             throw new ArgumentOutOfRangeException(nameof(columnIndex));
     }
 

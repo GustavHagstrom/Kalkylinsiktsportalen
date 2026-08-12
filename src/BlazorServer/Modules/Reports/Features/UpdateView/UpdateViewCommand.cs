@@ -22,6 +22,6 @@ public sealed record UpdateViewCommand(
             view.Id,
             view.Name,
             view.Description,
-            view.LegacyDataSections,
-            view.LegacySheetSections);
+            view.DataSections,
+            view.SheetSections);
 }

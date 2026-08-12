@@ -131,8 +131,8 @@ public sealed class ReportsViewManagementHandlersTests
         Assert.That(result, Is.TypeOf<ViewUpdated>());
         Assert.Multiple(() =>
         {
-            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
-            Assert.That(existing.LegacySheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
+            Assert.That(existing.DataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
+            Assert.That(existing.SheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
             Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
             Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
             Assert.That(store.Upserted, Is.SameAs(existing));
@@ -197,7 +197,7 @@ public sealed class ReportsViewManagementHandlersTests
         Assert.Multiple(() =>
         {
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
-            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1" }));
+            Assert.That(existing.DataSections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1" }));
             Assert.That(store.Upserted, Is.Null);
         });
     }

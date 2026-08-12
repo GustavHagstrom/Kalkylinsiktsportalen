@@ -52,8 +52,8 @@ public sealed class ReportDocumentRendererTests
         {
             Assert.That(firstRow.Id, Is.EqualTo("data-section-section-1-row-0"));
             Assert.That(firstRow.ComponentType, Is.EqualTo(typeof(DataSectionRowComponent)));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.MutableLegacyDataSections[0]));
-            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.MutableLegacyDataSections[0].RowDefinitions[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.DataSection)], Is.SameAs(view.MutableDataSections[0]));
+            Assert.That(firstRow.Parameters[nameof(DataSectionRowComponent.RowDefinition)], Is.SameAs(view.MutableDataSections[0].RowDefinitions[0]));
         });
     }
 
@@ -65,7 +65,7 @@ public sealed class ReportDocumentRendererTests
 
         var original = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
 
-        view.MutableLegacyDataSections[0].DataCells["R0C0"].RawValue = "changed height";
+        view.MutableDataSections[0].EditCellExpression(0, 0, "changed height");
         var changedView = renderer.Build(view, RenderingContext("version-1", "snapshot-1"));
         var changedContext = renderer.Build(view, RenderingContext("version-1", "snapshot-2"));
 
@@ -80,7 +80,7 @@ public sealed class ReportDocumentRendererTests
     public void BuildDocument_AddsPrintBlockingIssueForDataCellEvaluationErrors()
     {
         var view = ViewWithDataSection();
-        view.MutableLegacyDataSections[0].EditCellExpression(0, 0, "=invalid +");
+        view.MutableDataSections[0].EditCellExpression(0, 0, "=invalid +");
 
         var document = new PrintableDocumentBuilder().Build(
             view,
@@ -143,7 +143,7 @@ public sealed class ReportDocumentRendererTests
     public async Task BuildDocument_RendersRowsWhenDataCellsAreIncomplete()
     {
         var view = ViewWithDataSection();
-        view.MutableLegacyDataSections[0].DataCells.Remove("R1C0");
+        view.MutableDataSections[0].DataCells.Remove("R1C0");
         var document = new PrintableDocumentBuilder().Build(
             view,
             RenderingContext("version-1", "snapshot-1"));
@@ -168,21 +168,19 @@ public sealed class ReportDocumentRendererTests
                 {
                     SectionId = "section-1",
                     SectionIndex = 0,
-                    RowsCount = 2,
-                    ColumnsCount = 1,
                     RowDefinitions =
                     [
-                        new RowDefinition { RowIndex = 0, Height = 10 },
-                        new RowDefinition { RowIndex = 1, Height = 10 }
+                        new RowDefinition { RowIndex = 0, HeightMm = 10 },
+                        new RowDefinition { RowIndex = 1, HeightMm = 10 }
                     ],
                     ColumnDefinitions =
                     [
-                        new DataColumnDefinition { ColumnIndex = 0, Width = 100 }
+                        new DataColumnDefinition { ColumnIndex = 0, RelativeWidth = 100 }
                     ],
                     DataCells =
                     {
-                        ["R0C0"] = new DataCell { RawValue = "first" },
-                        ["R1C0"] = new DataCell { RawValue = "second" }
+                        ["R0C0"] = new DataCell { CellExpression = "first" },
+                        ["R1C0"] = new DataCell { CellExpression = "second" }
                     }
                 }
             ],

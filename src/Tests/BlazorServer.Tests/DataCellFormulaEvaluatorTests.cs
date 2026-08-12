@@ -9,7 +9,7 @@ namespace BlazorServer.Tests;
 public class DataCellFormulaEvaluatorTests
 {
     [Test]
-    public void GetDisplayValue_ReturnsRawValue_WhenValueIsNotFormula()
+    public void GetDisplayValue_ReturnsCellExpression_WhenValueIsNotFormula()
     {
         var cell = CreateCell("Hej världen");
 
