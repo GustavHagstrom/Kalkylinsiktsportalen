@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
+namespace BlazorServer.Modules.Reports.Domain.Views;
 
 public sealed record PageFormat
 {
@@ -27,4 +27,15 @@ public sealed record PageFormat
     public string Name { get; }
     public decimal WidthMm { get; }
     public decimal HeightMm { get; }
+
+    public static PageFormat FromPersistedName(string? name)
+    {
+        if (string.Equals(name, A3.Name, StringComparison.Ordinal))
+            return A3;
+
+        if (string.Equals(name, A5.Name, StringComparison.Ordinal))
+            return A5;
+
+        return A4;
+    }
 }

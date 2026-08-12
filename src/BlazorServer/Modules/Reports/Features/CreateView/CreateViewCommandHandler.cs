@@ -21,11 +21,7 @@ internal sealed class CreateViewCommandHandler(
             return new InvalidCreateViewRequest(errors);
         }
 
-        var view = new View
-        {
-            Name = command.Name,
-            OrganizationId = command.OrganizationId
-        };
+        var view = View.Create(command.OrganizationId, command.Name);
 
         await viewStore.UpsertAsync(view);
 

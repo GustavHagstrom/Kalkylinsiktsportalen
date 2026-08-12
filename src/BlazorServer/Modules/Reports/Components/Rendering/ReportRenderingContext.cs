@@ -1,4 +1,3 @@
-using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
 using System.Text.Json;
 
@@ -38,8 +37,6 @@ public sealed record ReportRenderingContext
     public static ReportRenderingContext ForViewPreview(View view)
     {
         ArgumentNullException.ThrowIfNull(view);
-        view.EnsureSectionIdentities();
-
         var viewReference = view.Id.Value;
         return new ReportRenderingContext(
             EstimationVersionReference: $"view-preview:{viewReference}:estimation-version",
@@ -49,9 +46,20 @@ public sealed record ReportRenderingContext
                 ViewId = view.Id.Value,
                 view.Name,
                 view.Description,
-                DataSections = view.DataSections.OrderBy(section => section.SectionIndex),
-                SheetSections = view.SheetSections.OrderBy(section => section.SectionIndex)
-            }));
+                PageFormat = new
+                {
+                    view.PageFormat.Name,
+                    view.PageFormat.WidthMm,
+                    view.PageFormat.HeightMm
+                },
+                Sections = view.Sections.Select(section => new
+                {
+                    section.SectionId,
+                    section.SectionType,
+                    section.Section
+                })
+            }),
+            PageFormat: view.PageFormat);
     }
 
     public static ReportRenderingContext ForViewPreview(string viewReference, string printableContentChangeToken)

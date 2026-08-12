@@ -13,7 +13,8 @@ public sealed record UpdateViewCommand(
     string Name,
     string Description,
     IReadOnlyList<DataSection> DataSections,
-    IReadOnlyList<SheetSection> SheetSections) : ICommand<UpdateViewResult>
+    IReadOnlyList<SheetSection> SheetSections,
+    bool ConfirmSectionDelete = false) : ICommand<UpdateViewResult>
 {
     public static UpdateViewCommand FromEditedView(OrganizationId organizationId, View view)
         => new(
@@ -21,6 +22,6 @@ public sealed record UpdateViewCommand(
             view.Id,
             view.Name,
             view.Description,
-            view.DataSections,
-            view.SheetSections);
+            view.LegacyDataSections,
+            view.LegacySheetSections);
 }

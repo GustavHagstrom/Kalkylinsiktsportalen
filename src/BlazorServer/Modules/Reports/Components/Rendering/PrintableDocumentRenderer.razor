@@ -75,7 +75,9 @@
     
 <div @ref="RendererWrapper" class="printable-document-wrapper">
     
-    <div @ref="RendererRoot" class="printable-document-root d-flex flex-column gap-4 relative" data-printable-renderer-state="@RendererState.Status" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
+@using BlazorServer.Modules.Reports.Domain.Views
+
+<div @ref="RendererRoot" class="printable-document-root d-flex flex-column gap-4 relative" data-printable-renderer-state="@RendererState.Status" style="@($"width: {RenderPageFormat.WidthMm}mm;")">
         @if (RendererState.Status is PrintableRendererStatus.Measuring or PrintableRendererStatus.Paginating)
         {
             <div class="printable-renderer-status print-hide" aria-live="polite">@RendererStatusText</div>

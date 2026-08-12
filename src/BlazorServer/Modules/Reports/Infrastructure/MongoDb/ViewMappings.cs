@@ -11,31 +11,32 @@ public static class ViewMappings
         if (mongoView is null)
             return null;
 
-        var view = new View
-        {
-            Id = new ViewId(mongoView.Id),
-            Name = mongoView.Name,
-            OrganizationId = new OrganizationId(mongoView.OrganizationId),
-            SheetSections = mongoView.SheetSections,
-            DataSections = mongoView.DataSections,
-            Description = mongoView.Description,
-        };
-
-        view.Normalize();
-        return view;
+        return View.Reconstitute(
+            new ViewId(mongoView.Id),
+            new OrganizationId(mongoView.OrganizationId),
+            mongoView.Name,
+            mongoView.Description,
+            PageFormat.FromPersistedName(mongoView.PageFormatName),
+            mongoView.EnableChanges,
+            mongoView.IsArchived,
+            mongoView.DataSections,
+            mongoView.SheetSections);
     }
     public static MongoView ToMongo(this View view)
     {
-        view.Normalize();
-
         return new MongoView
         {
             Id = view.Id.IsEmpty ? ViewId.New().Value : view.Id.Value,
             Name = view.Name,
             OrganizationId = view.OrganizationId.Value,
-            SheetSections = view.SheetSections,
-            DataSections = view.DataSections,
+            SheetSections = view.LegacySheetSections.ToList(),
+            DataSections = view.LegacyDataSections.ToList(),
             Description = view.Description,
+            PageFormatName = view.PageFormat.Name,
+            PageFormatWidthMm = view.PageFormat.WidthMm,
+            PageFormatHeightMm = view.PageFormat.HeightMm,
+            EnableChanges = false,
+            IsArchived = view.IsArchived,
         };
     }
 }

@@ -4,19 +4,30 @@
 @using BlazorServer.Modules.Reports.Features.UpdateView
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Domain.Views
+@using BlazorServer.Modules.Reports.Domain.Views.DataSection
+@using BlazorServer.Modules.Reports.Domain.Views.SheetSection
 @using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments
 
 @if(View is not null)
 {
     <ToolbarPage IsLoading="isLoading" Height="88px">
         <LeftToolbarContent>
+            @if (!IsReadOnly)
+            {
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Data))">@Localizer["Lägg till datasektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddSection(SectionType.Sheet))">@Localizer["Lägg till bladsektion"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveView">@Localizer["Spara"]</MudButton>
 
-            <KipTextField TValue="string" @bind-Value="View!.Name" Label="@Localizer["Namn"]" />
+            <KipTextField TValue="string" @bind-Value="ViewName" Label="@Localizer["Namn"]" />
 
-            @if (SelectedItem is DataSectionSelection selection)
+            }
+            else
+            {
+                <MudText Typo="Typo.subtitle2">@ViewName</MudText>
+                <MudText Color="Color.Warning">@Localizer["Arkiverad vy visas i läsläge"]</MudText>
+            }
+
+            @if (!IsReadOnly && SelectedItem is DataSectionSelection selection)
             {
                 <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
                                     IsActive="@TextFormatIsEnabled"
@@ -31,10 +42,32 @@
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
                 <MudPaper Class="full-height flex-grow-1 pa-1 gap-1 d-flex flex-column" Style="overflow: auto; min-width: 300px;">
-                    @foreach(var section in View.DataSections.OrderBy(x => x.SectionIndex))
+                    @foreach(var section in View.MutableLegacyDataSections.OrderBy(x => x.SectionIndex))
                     {
                         var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSection == section ? selection.DataCell : null;
-                        <DataSectionComponent DataSection="section" EditMode="true" SelectedDataCell="selectedCell" OnCellClick="x => SelectedItem = x"/>
+                        @if (!IsReadOnly)
+                        {
+                            <div class="d-flex justify-end">
+                                <MudIconButton Icon="@Icons.Material.Sharp.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => ConfirmRemoveDataSectionAsync(section))" />
+                            </div>
+                        }
+                        <DataSectionComponent DataSection="section" EditMode="@(!IsReadOnly)" SelectedDataCell="selectedCell" OnCellClick="x => SelectDataCell(x)"/>
+                    }
+                    @foreach(var section in View.MutableLegacySheetSections.OrderBy(x => x.SectionIndex))
+                    {
+                        <div class="d-flex align-center justify-space-between pa-2">
+                            <MudText Typo="Typo.subtitle2">@SheetSectionLabel(section)</MudText>
+                            @if (!IsReadOnly)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Sharp.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => ConfirmRemoveSheetSectionAsync(section))" />
+                            }
+                        </div>
                     }
                 </MudPaper>
                 <div class="full-height overflow-auto pr-4">
@@ -50,17 +83,20 @@
 @inject ICommandHandler<UpdateViewCommand, UpdateViewResult> UpdateView
 @inject ICurrentAccessSubject CurrentAccessSubject
 @inject IViewAccessDecisionService ViewAccessDecisions
+@inject IDialogService DialogService
 
 @code {
     [Parameter] public string? ViewId { get; set; }
 
     View? View { get; set; }
+    string ViewName { get; set; } = string.Empty;
     bool isLoading = false;
     bool TextFormatIsEnabled = true;
     UpdateViewResult? LastSaveResult = null;
     object? SelectedItem = null;
     PrintableDocumentBuilder DocumentBuilder { get; } = new();
     PrintableDocument? Document => View is null ? null : DocumentBuilder.Build(View, ReportRenderingContext.ForViewPreview(View));
+    bool IsReadOnly => View?.IsArchived == true;
 
     enum SectionType
     {
@@ -70,6 +106,7 @@
 
     void ToggleTextFormat()
     {
+        if (IsReadOnly) return;
         TextFormatIsEnabled = !TextFormatIsEnabled;
     }
 
@@ -96,6 +133,7 @@
             CancellationToken.None);
 
         View = result is ViewLoaded loaded ? loaded.View : null;
+        ViewName = View?.Name ?? string.Empty;
         SetLoading(false);
     }
 
@@ -107,7 +145,7 @@
 
     void AddSection(SectionType type)
     {
-        if(View is null) return;
+        if(View is null || IsReadOnly) return;
         switch(type)
         {
             case SectionType.Data:
@@ -119,9 +157,56 @@
         }
     }
 
+    async Task ConfirmRemoveDataSectionAsync(DataSection section)
+    {
+        if (View is null || IsReadOnly) return;
+
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.Message, Localizer["Sektionen tas bort från den aktiva view-definitionen. Historiska ändringar kan fortfarande referera till sektionens identitet. Vill du fortsätta?"] },
+            { x => x.ConfirmText, Localizer["Ta bort"] },
+            { x => x.CancelText, Localizer["Avbryt"] }
+        };
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(Localizer["Ta bort sektion"], parameters);
+        var result = await dialog.Result;
+
+        if (result != DialogResult.Cancel() && result?.Data is true)
+            View.RemoveDataSection(section);
+    }
+
+    async Task ConfirmRemoveSheetSectionAsync(SheetSection section)
+    {
+        if (View is null || IsReadOnly) return;
+
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.Message, Localizer["Sektionen tas bort från den aktiva view-definitionen. Historiska ändringar kan fortfarande referera till sektionens identitet. Vill du fortsätta?"] },
+            { x => x.ConfirmText, Localizer["Ta bort"] },
+            { x => x.CancelText, Localizer["Avbryt"] }
+        };
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(Localizer["Ta bort sektion"], parameters);
+        var result = await dialog.Result;
+
+        if (result != DialogResult.Cancel() && result?.Data is true)
+            View.RemoveSheetSection(section);
+    }
+
+    void SelectDataCell(DataSectionSelection selection)
+    {
+        if (!IsReadOnly)
+            SelectedItem = selection;
+    }
+
+    string SheetSectionLabel(SheetSection section)
+    {
+        return string.IsNullOrWhiteSpace(section.Content)
+            ? Localizer["Bladsektion"]
+            : section.Content;
+    }
+
     async Task SaveView()
     {
-        if (View is null) return;
+        if (View is null || IsReadOnly) return;
         var subject = await CurrentAccessSubject.GetAsync();
         if (subject is null || !await ViewAccessDecisions.CanEditViewAsync(subject, View.Id.Value))
         {
@@ -133,7 +218,14 @@
         try
         {
             LastSaveResult = await UpdateView.HandleAsync(
-                UpdateViewCommand.FromEditedView(subject.OrganizationId, View),
+                new UpdateViewCommand(
+                    subject.OrganizationId,
+                    View.Id,
+                    ViewName,
+                    View.Description,
+                    View.MutableLegacyDataSections,
+                    View.MutableLegacySheetSections,
+                    ConfirmSectionDelete: true),
                 CancellationToken.None);
         }
         finally

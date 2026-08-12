@@ -40,7 +40,7 @@ public sealed class ReportsViewManagementHandlersTests
     public async Task ListViews_ReturnsViewsFromPortForOrganization()
     {
         var organizationId = new OrganizationId("org-1");
-        var expected = new View { OrganizationId = organizationId, Name = "Tender report" };
+        var expected = ReconstitutedView(organizationId: organizationId);
         var store = new RecordingViewStore { AllViews = [expected] };
         var handler = new ListViewsQueryHandler(store);
 
@@ -59,7 +59,7 @@ public sealed class ReportsViewManagementHandlersTests
     public async Task GetView_ReturnsViewFromPort()
     {
         var viewId = new ViewId("view-1");
-        var expected = new View { Id = viewId, Name = "Tender report" };
+        var expected = ReconstitutedView(viewId);
         var store = new RecordingViewStore { View = expected };
         var handler = new GetViewQueryHandler(store);
 
@@ -74,12 +74,7 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = new View
-        {
-            Id = viewId,
-            OrganizationId = organizationId,
-            Name = "Tender report"
-        };
+        var existing = ReconstitutedView(viewId, organizationId);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
@@ -112,20 +107,11 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = new View
-        {
-            Id = viewId,
-            OrganizationId = organizationId,
-            Name = "Tender report",
-            DataSections =
-            [
-                new DataSection { SectionId = "data-1", SectionIndex = 0 }
-            ],
-            SheetSections =
-            [
-                new SheetSection { SectionId = "sheet-1", SectionIndex = 1 }
-            ]
-        };
+        var existing = ReconstitutedView(
+            viewId,
+            organizationId,
+            dataSections: [new DataSection { SectionId = "data-1", SectionIndex = 0 }],
+            sheetSections: [new SheetSection { SectionId = "sheet-1", SectionIndex = 1 }]);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
@@ -138,14 +124,15 @@ public sealed class ReportsViewManagementHandlersTests
                 "Updated tender report",
                 "Updated description",
                 [editedDataSection],
-                [addedSheetSection]),
+                [addedSheetSection],
+                ConfirmSectionDelete: true),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewUpdated>());
         Assert.Multiple(() =>
         {
-            Assert.That(existing.DataSections, Is.EqualTo(new[] { editedDataSection }));
-            Assert.That(existing.SheetSections, Is.EqualTo(new[] { addedSheetSection }));
+            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
+            Assert.That(existing.LegacySheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
             Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
             Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
             Assert.That(store.Upserted, Is.SameAs(existing));
@@ -157,12 +144,7 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = new View
-        {
-            Id = viewId,
-            OrganizationId = organizationId,
-            Name = "Tender report"
-        };
+        var existing = ReconstitutedView(viewId, organizationId);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
@@ -182,6 +164,68 @@ public sealed class ReportsViewManagementHandlersTests
         {
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_id.required"));
             Assert.That(invalidRequest.ValidationErrors.Select(error => error.Field), Does.Contain("Sections"));
+            Assert.That(existing.Name, Is.EqualTo("Tender report"));
+            Assert.That(store.Upserted, Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_RequiresExplicitConfirmationBeforeDeletingSection()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = ReconstitutedView(
+            viewId,
+            organizationId,
+            dataSections: [new DataSection { SectionId = "data-1", SectionIndex = 0 }]);
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                [],
+                [],
+                ConfirmSectionDelete: false),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
+            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1" }));
+            Assert.That(store.Upserted, Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task UpdateView_ReturnsValidationErrorForArchivedView()
+    {
+        var organizationId = new OrganizationId("org-1");
+        var viewId = new ViewId("view-1");
+        var existing = ReconstitutedView(viewId, organizationId, isArchived: true);
+        var store = new RecordingViewStore { View = existing };
+        var handler = new UpdateViewCommandHandler(store);
+
+        var result = await handler.HandleAsync(
+            new UpdateViewCommand(
+                organizationId,
+                viewId,
+                "Updated tender report",
+                "Updated description",
+                [],
+                []),
+            CancellationToken.None);
+
+        Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
+        var invalidRequest = (InvalidUpdateViewRequest)result;
+        Assert.Multiple(() =>
+        {
+            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.archived"));
             Assert.That(existing.Name, Is.EqualTo("Tender report"));
             Assert.That(store.Upserted, Is.Null);
         });
@@ -209,12 +253,7 @@ public sealed class ReportsViewManagementHandlersTests
         var requestedOrganizationId = new OrganizationId("org-2");
         var store = new RecordingViewStore
         {
-            View = new View
-            {
-                Id = viewId,
-                OrganizationId = new OrganizationId("org-1"),
-                Name = "Tender report"
-            }
+            View = ReconstitutedView(viewId, new OrganizationId("org-1"))
         };
         var handler = new UpdateViewCommandHandler(store);
 
@@ -254,4 +293,23 @@ public sealed class ReportsViewManagementHandlersTests
             return Task.CompletedTask;
         }
     }
+
+    private static View ReconstitutedView(
+        ViewId? viewId = null,
+        OrganizationId? organizationId = null,
+        string name = "Tender report",
+        string description = "",
+        bool enableChanges = false,
+        bool isArchived = false,
+        IReadOnlyList<DataSection>? dataSections = null,
+        IReadOnlyList<SheetSection>? sheetSections = null)
+        => View.Reconstitute(
+            viewId ?? new ViewId("view-1"),
+            organizationId ?? new OrganizationId("org-1"),
+            name,
+            description,
+            enableChanges,
+            isArchived,
+            dataSections ?? [],
+            sheetSections ?? []);
 }
