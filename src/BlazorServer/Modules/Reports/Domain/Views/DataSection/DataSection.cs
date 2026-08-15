@@ -207,6 +207,23 @@ public class DataSection
         StoreOrPruneCell(cell);
     }
 
+    public void ApplyFormatPatch(DataCellRange range, ReportFormatPatch patch)
+    {
+        ArgumentNullException.ThrowIfNull(patch);
+        Normalize();
+        ValidateRange(range);
+
+        for (var rowIndex = range.StartRowIndex; rowIndex <= range.EndRowIndex; rowIndex++)
+        {
+            for (var columnIndex = range.StartColumnIndex; columnIndex <= range.EndColumnIndex; columnIndex++)
+            {
+                var cell = GetStoredOrNewCell(rowIndex, columnIndex);
+                cell.ApplyFormatPatch(patch);
+                StoreOrPruneCell(cell);
+            }
+        }
+    }
+
     public void Normalize()
     {
         if (string.IsNullOrWhiteSpace(SectionId))
@@ -305,8 +322,7 @@ public class DataSection
 
             cell.RowIndex = rowIndex;
             cell.ColumnIndex = columnIndex;
-            cell.TextFormat ??= new TextFormat();
-            cell.CellFormat ??= new CellFormat();
+            cell.ApplyLegacyFormatting();
 
             if (cell.RowIndex < 0 || cell.RowIndex >= RowsCount || cell.ColumnIndex < 0 || cell.ColumnIndex >= ColumnsCount)
                 continue;
@@ -351,6 +367,20 @@ public class DataSection
     {
         if (columnIndex < 0 || columnIndex >= ColumnsCount)
             throw new ArgumentOutOfRangeException(nameof(columnIndex));
+    }
+
+    private void ValidateRange(DataCellRange range)
+    {
+        if (range.StartRowIndex > range.EndRowIndex)
+            throw new ArgumentException("Range start row must be before end row.", nameof(range));
+
+        if (range.StartColumnIndex > range.EndColumnIndex)
+            throw new ArgumentException("Range start column must be before end column.", nameof(range));
+
+        ValidateRowIndex(range.StartRowIndex);
+        ValidateRowIndex(range.EndRowIndex);
+        ValidateColumnIndex(range.StartColumnIndex);
+        ValidateColumnIndex(range.EndColumnIndex);
     }
 
     private static DataCell CreateDefaultCell(int rowIndex, int columnIndex)

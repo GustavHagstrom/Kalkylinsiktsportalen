@@ -21,7 +21,7 @@ public class DataCellFormulaEvaluatorTests
     [Test]
     public void GetDisplayValue_EvaluatesArithmeticFormula()
     {
-        var cell = CreateCell("=1+2*3", textType: TextType.Number, decimalCount: 0, hasThousandsSeparator: false);
+        var cell = CreateCell("=1+2*3", valueFormat: ValueFormat.Number(decimalCount: 0, useThousandsSeparator: false));
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell);
 
@@ -42,7 +42,7 @@ public class DataCellFormulaEvaluatorTests
     [Test]
     public void GetDisplayValue_EvaluatesEstimationReferenceInsideArithmeticExpression()
     {
-        var cell = CreateCell("=Estimation.Reconciled + 5", textType: TextType.Number, decimalCount: 0, hasThousandsSeparator: false);
+        var cell = CreateCell("=Estimation.Reconciled + 5", valueFormat: ValueFormat.Number(decimalCount: 0, useThousandsSeparator: false));
         var estimation = CreateEstimationProperties(reconciled: true);
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
@@ -62,9 +62,9 @@ public class DataCellFormulaEvaluatorTests
     }
 
     [Test]
-    public void GetDisplayValue_FormatsDateTime_UsingTextFormat()
+    public void GetDisplayValue_FormatsDateTime_UsingValueFormat()
     {
-        var cell = CreateCell("=Estimation.CreateDate", textType: TextType.DateTime, dateTimeFormat: "yyyy-MM-dd");
+        var cell = CreateCell("=Estimation.CreateDate", valueFormat: ValueFormat.Date);
         var estimation = CreateEstimationProperties(createDate: new DateTime(2025, 02, 03, 10, 30, 00));
 
         var result = DataCellFormulaEvaluator.GetDisplayValue(cell, estimation);
@@ -94,7 +94,7 @@ public class DataCellFormulaEvaluatorTests
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 
-            var cell = CreateCell("=1234.5", textType: TextType.Number, decimalCount: 2, hasThousandsSeparator: true);
+            var cell = CreateCell("=1234.5", valueFormat: ValueFormat.Number(decimalCount: 2, useThousandsSeparator: true));
 
             var result = DataCellFormulaEvaluator.GetDisplayValue(cell);
 
@@ -109,21 +109,12 @@ public class DataCellFormulaEvaluatorTests
 
     private static DataCell CreateCell(
         string rawValue,
-        TextType textType = TextType.PlainText,
-        int decimalCount = 2,
-        bool hasThousandsSeparator = true,
-        string dateTimeFormat = "yyyy-MM-dd")
+        ValueFormat? valueFormat = null)
     {
         return new DataCell
         {
             CellExpression = rawValue,
-            TextFormat = new TextFormat
-            {
-                Type = textType,
-                DecimalCount = decimalCount,
-                HasThoasandsSeparator = hasThousandsSeparator,
-                DayTimeFormat = dateTimeFormat
-            }
+            ValueFormat = valueFormat
         };
     }
 
