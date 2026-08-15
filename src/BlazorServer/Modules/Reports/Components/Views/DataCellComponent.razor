@@ -1,7 +1,7 @@
 @using BlazorServer.Modules.Reports.Rendering
 
-<td class="@Class" style="@FormatBuilder.BuildCellStyle(DataCell.CellFormat)" @onclick="() => OnClick.InvokeAsync(DataCell)"> 
-    <div style="@FormatBuilder.BuildTextStyle(DataCell.TextFormat)">
+<td class="@Class" style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout)" @onclick="() => OnClick.InvokeAsync(DataCell)"> 
+    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle, DisplayType)">
         @if (EditMode)
         {
             @DataCell.CellExpression
@@ -22,4 +22,14 @@
 
 
     string Class => EditMode ? (IsSelected ? "data-cell edit-mode selected" : "data-cell edit-mode") : "data-cell";
+
+    CellLayout? EffectiveCellLayout => DataCell.CellLayout ?? DataCell.CellFormat?.ToCellLayout();
+    TextStyle? EffectiveTextStyle => DataCell.TextStyle ?? DataCell.TextFormat?.ToTextStyle();
+
+    ValueDisplayType DisplayType => (DataCell.ValueFormat ?? DataCell.TextFormat?.ToValueFormat())?.Kind switch
+    {
+        ValueFormatKind.Number => ValueDisplayType.Number,
+        ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => ValueDisplayType.DateTime,
+        _ => ValueDisplayType.Text
+    };
 }

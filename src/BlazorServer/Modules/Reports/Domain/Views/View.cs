@@ -267,6 +267,7 @@ public class View
     {
         EnsureLegacySectionIdentities(dataSections, sheetSections);
         ApplyLegacyEnableChangesDefault(sheetSections, legacyEnableChangesDefault);
+        NormalizeLegacySections(dataSections, sheetSections);
 
         var sections = dataSections
             .Select(ViewSection.FromData)
@@ -282,6 +283,17 @@ public class View
         _sections.Clear();
         _sections.AddRange(sections);
         SynchronizeLegacySectionIndexes();
+    }
+
+    private static void NormalizeLegacySections(
+        IReadOnlyList<DataSectionModel> dataSections,
+        IReadOnlyList<SheetSectionModel> sheetSections)
+    {
+        foreach (var section in dataSections)
+            section.Normalize();
+
+        foreach (var section in sheetSections)
+            section.Normalize();
     }
 
     private static void ApplyLegacyEnableChangesDefault(
@@ -451,14 +463,12 @@ public class View
                 .ToList(),
             DataCells = section.DataCells.ToDictionary(
                 cell => cell.Key,
-                cell => new DataCellModel
+                cell => CloneFormatting(new DataCellModel
                 {
                     RowIndex = cell.Value.RowIndex,
                     ColumnIndex = cell.Value.ColumnIndex,
-                    RawValue = cell.Value.RawValue,
-                    TextFormat = CloneTextFormat(cell.Value.TextFormat),
-                    CellFormat = CloneCellFormat(cell.Value.CellFormat)
-                })
+                    RawValue = cell.Value.RawValue
+                }, cell.Value))
         };
     }
 
@@ -472,14 +482,12 @@ public class View
             EnableChanges = section.EnableChanges,
             SheetCells = section.SheetCells.ToDictionary(
                 cell => cell.Key,
-                cell => new SheetCellModel
+                cell => CloneFormatting(new SheetCellModel
                 {
                     RowType = cell.Value.RowType,
                     ColumnType = cell.Value.ColumnType,
-                    HideValue = cell.Value.HideValue,
-                    TextFormat = CloneTextFormat(cell.Value.TextFormat),
-                    CellFormat = CloneCellFormat(cell.Value.CellFormat)
-                })
+                    HideValue = cell.Value.HideValue
+                }, cell.Value))
         };
     }
 
@@ -497,8 +505,21 @@ public class View
         return duplicate;
     }
 
-    private static TextFormat CloneTextFormat(TextFormat format)
-        => new()
+    private static TCell CloneFormatting<TCell>(TCell target, IReportFormattedCell source)
+        where TCell : IReportFormattedCell
+    {
+        target.CellLayout = CloneCellLayout(source.CellLayout);
+        target.TextStyle = CloneTextStyle(source.TextStyle);
+        target.ValueFormat = CloneValueFormat(source.ValueFormat);
+        target.TextFormat = CloneTextFormat(source.TextFormat);
+        target.CellFormat = CloneCellFormat(source.CellFormat);
+        return target;
+    }
+
+    private static TextFormat? CloneTextFormat(TextFormat? format)
+        => format is null
+            ? null
+            : new TextFormat
         {
             FontFamily = format.FontFamily,
             Color = format.Color,
@@ -514,8 +535,10 @@ public class View
             HasThoasandsSeparator = format.HasThoasandsSeparator
         };
 
-    private static CellFormat CloneCellFormat(CellFormat format)
-        => new()
+    private static CellFormat? CloneCellFormat(CellFormat? format)
+        => format is null
+            ? null
+            : new CellFormat
         {
             LeftBorder = CloneBorderFormat(format.LeftBorder),
             RightBorder = CloneBorderFormat(format.RightBorder),
@@ -536,6 +559,57 @@ public class View
             BorderColor = format.BorderColor,
             BorderWidth = format.BorderWidth
         };
+
+    private static CellLayout? CloneCellLayout(CellLayout? layout)
+        => layout is null
+            ? null
+            : new CellLayout
+            {
+                BackgroundColor = layout.BackgroundColor,
+                PaddingLeftMm = layout.PaddingLeftMm,
+                PaddingRightMm = layout.PaddingRightMm,
+                PaddingTopMm = layout.PaddingTopMm,
+                PaddingBottomMm = layout.PaddingBottomMm,
+                LeftBorder = CloneCellBorder(layout.LeftBorder),
+                RightBorder = CloneCellBorder(layout.RightBorder),
+                TopBorder = CloneCellBorder(layout.TopBorder),
+                BottomBorder = CloneCellBorder(layout.BottomBorder)
+            };
+
+    private static CellBorder? CloneCellBorder(CellBorder? border)
+        => border is null
+            ? null
+            : new CellBorder
+            {
+                WidthPt = border.WidthPt,
+                Style = border.Style,
+                Color = border.Color
+            };
+
+    private static TextStyle? CloneTextStyle(TextStyle? style)
+        => style is null
+            ? null
+            : new TextStyle
+            {
+                Font = style.Font,
+                TextColor = style.TextColor,
+                FontSizePt = style.FontSizePt,
+                IsBold = style.IsBold,
+                IsItalic = style.IsItalic,
+                IsUnderline = style.IsUnderline,
+                HorizontalAlignment = style.HorizontalAlignment,
+                VerticalAlignment = style.VerticalAlignment
+            };
+
+    private static ValueFormat? CloneValueFormat(ValueFormat? valueFormat)
+        => valueFormat is null
+            ? null
+            : new ValueFormat
+            {
+                Kind = valueFormat.Kind,
+                DecimalCount = valueFormat.DecimalCount,
+                UseThousandsSeparator = valueFormat.UseThousandsSeparator
+            };
 }
 
 public sealed class ViewSection

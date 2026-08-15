@@ -4,14 +4,14 @@
             @foreach (var columnType in OrderedColumnTypes)
             {
                 var cell = GetSheetCell(columnType);
-                if (!cell.HideValue)
-                {
-                    <td style="@FormatBuilder.BuildCellStyle(cell.CellFormat)">
-                        <div style="@FormatBuilder.BuildTextStyle(cell.TextFormat)">
+                <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(cell))">
+                    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(cell), DisplayType(cell))">
+                        @if (!cell.HideValue)
+                        {
                             @DisplayValue(columnType)
-                        </div>
-                    </td>
-                }
+                        }
+                    </div>
+                </td>
             }
         </tr>
     </tbody>
@@ -30,6 +30,20 @@
             ? cell
             : new SheetCell { RowType = RowType, ColumnType = columnType };
     }
+
+    private static CellLayout? EffectiveCellLayout(SheetCell cell)
+        => cell.CellLayout ?? cell.CellFormat?.ToCellLayout();
+
+    private static TextStyle? EffectiveTextStyle(SheetCell cell)
+        => cell.TextStyle ?? cell.TextFormat?.ToTextStyle();
+
+    private static ValueDisplayType DisplayType(SheetCell cell)
+        => (cell.ValueFormat ?? cell.TextFormat?.ToValueFormat())?.Kind switch
+        {
+            ValueFormatKind.Number => ValueDisplayType.Number,
+            ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => ValueDisplayType.DateTime,
+            _ => ValueDisplayType.Text
+        };
 
     private string DisplayValue(ColumnType columnType)
         => columnType switch

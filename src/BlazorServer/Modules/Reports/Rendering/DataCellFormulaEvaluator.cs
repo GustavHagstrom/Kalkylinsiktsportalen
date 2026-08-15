@@ -17,7 +17,7 @@ public static partial class DataCellFormulaEvaluator
         ArgumentNullException.ThrowIfNull(dataCell);
 
         var evaluatedValue = EvaluateCellExpression(dataCell.CellExpression, estimationProperties);
-        return FormatValue(evaluatedValue, dataCell.TextFormat);
+        return FormatValue(evaluatedValue, dataCell.ValueFormat ?? dataCell.TextFormat?.ToValueFormat() ?? ValueFormat.Text);
     }
 
     private static object? EvaluateCellExpression(
@@ -248,34 +248,34 @@ public static partial class DataCellFormulaEvaluator
         };
     }
 
-    private static string FormatValue(object? value, TextFormat textFormat)
+    private static string FormatValue(object? value, ValueFormat valueFormat)
     {
-        return textFormat.Type switch
+        return valueFormat.Kind switch
         {
-            TextType.Number => FormatNumber(value, textFormat),
-            TextType.DateTime => FormatDateTime(value, textFormat),
+            ValueFormatKind.Number => FormatNumber(value, valueFormat),
+            ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => FormatDateTime(value, valueFormat),
             _ => Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty
         };
     }
 
-    private static string FormatNumber(object? value, TextFormat textFormat)
+    private static string FormatNumber(object? value, ValueFormat valueFormat)
     {
         if (!TryConvertToDecimal(value, out var decimalValue))
             return Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;
 
-        var format = textFormat.HasThoasandsSeparator
-            ? $"N{textFormat.DecimalCount}"
-            : $"F{textFormat.DecimalCount}";
-
-        return decimalValue.ToString(format, CultureInfo.CurrentCulture);
+        return ReportFormatting.FormatNumber(decimalValue, valueFormat);
     }
 
-    private static string FormatDateTime(object? value, TextFormat textFormat)
+    private static string FormatDateTime(object? value, ValueFormat valueFormat)
     {
         if (!TryConvertToDateTime(value, out var dateTimeValue))
             return Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;
 
-        return dateTimeValue.ToString(textFormat.DayTimeFormat, CultureInfo.CurrentCulture);
+        var format = valueFormat.Kind == ValueFormatKind.DateTimeMinute
+            ? "yyyy-MM-dd HH:mm"
+            : "yyyy-MM-dd";
+
+        return dateTimeValue.ToString(format, CultureInfo.CurrentCulture);
     }
 
     private static bool TryConvertToDecimal(object? value, out decimal decimalValue)

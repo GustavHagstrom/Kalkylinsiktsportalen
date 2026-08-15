@@ -7,21 +7,20 @@ namespace BlazorServer.Tests.Modules.Reports;
 public class FormatBuilderTests
 {
     [Test]
-    public void BuildCellStyle_MapsCellFormatToCss()
+    public void BuildCellStyle_MapsCellLayoutToCss()
     {
-        var format = new CellFormat
+        var format = new CellLayout
         {
             BackgroundColor = "#ffffff",
-            PaddingTop = 1,
-            PaddingRight = 2,
-            PaddingBottom = 3,
-            PaddingLeft = 4,
-            LeftBorder = new BorderFormat
+            PaddingTopMm = 1,
+            PaddingRightMm = 2,
+            PaddingBottomMm = 3,
+            PaddingLeftMm = 4,
+            LeftBorder = new CellBorder
             {
-                IsBorder = true,
-                BorderWidth = 2,
-                BorderStyle = "solid",
-                BorderColor = "#111111"
+                WidthPt = 2,
+                Style = BorderStyle.Solid,
+                Color = "#111111"
             }
         };
 
@@ -29,33 +28,33 @@ public class FormatBuilderTests
 
         Assert.That(GetCssDeclarations(result), Is.EquivalentTo(new[]
         {
-            "border-left: 2px solid #111111",
+            "border-left: 2pt solid #111111",
             "border-top: none",
             "border-right: none",
             "border-bottom: none",
-            "background-color: #ffffff",
-            "padding: 1px 2px 3px 4px"
+            "background-color: #FFFFFF",
+            "padding: 1mm 2mm 3mm 4mm"
         }));
     }
 
     [Test]
-    public void BuildTextStyle_MapsTextFormatToCss()
+    public void BuildTextStyle_MapsTextStyleToCss()
     {
-        var format = new TextFormat
+        var format = new TextStyle
         {
-            Color = "#222222",
-            FontSize = 12,
-            FontFamily = "Arial",
+            TextColor = "#222222",
+            FontSizePt = 12,
+            Font = ReportFont.Arial,
             IsBold = true,
             IsItalic = true,
             IsUnderline = true,
-            HorizontalAlign = Align.End,
-            VerticalAlign = Align.Center
+            HorizontalAlignment = HorizontalTextAlignment.Right,
+            VerticalAlignment = VerticalTextAlignment.Middle
         };
 
-        var result = FormatBuilder.BuildTextStyle(format);
+        var result = FormatBuilder.BuildTextStyle(format, ValueDisplayType.Text);
 
-        Assert.That(result, Is.EqualTo("color: #222222; font-size: 12px; font-family: Arial; font-weight: bold; font-style: italic; text-decoration: underline; text-align: right; vertical-align: middle;"));
+        Assert.That(result, Is.EqualTo("color: #222222; font-size: 12pt; font-family: Arial; font-weight: bold; font-style: italic; text-decoration: underline; text-align: right; vertical-align: middle;"));
     }
 
     private static IReadOnlyList<string> GetCssDeclarations(string style)
