@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 public enum ColumnType
 {

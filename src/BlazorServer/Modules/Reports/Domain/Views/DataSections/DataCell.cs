@@ -1,19 +1,26 @@
 using BlazorServer.Modules.Reports.Domain.Views;
-namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 
-public class SheetCell : IReportFormattedCell
+namespace BlazorServer.Modules.Reports.Domain.Views.DataSections;
+
+public class DataCell : IReportFormattedCell
 {
-    public RowType RowType { get; set; }
-    public ColumnType ColumnType { get; set; }
+    public int RowIndex { get; set; }
+    public int ColumnIndex { get; set; }
     public CellLayout? CellLayout { get; set; }
     public TextStyle? TextStyle { get; set; }
     public ValueFormat? ValueFormat { get; set; }
     public TextFormat? TextFormat { get; set; } = new TextFormat();
     public CellFormat? CellFormat { get; set; } = new CellFormat();
-    public bool HideValue { get; set; } = false;
+    public string CellExpression { get; set; } = string.Empty;
+
+    public string RawValue
+    {
+        get => CellExpression;
+        set => CellExpression = value ?? string.Empty;
+    }
 
     public bool IsDefault()
-        => !HideValue
+        => string.IsNullOrEmpty(CellExpression)
            && ReportFormatting.IsDefault(this);
 
     public void ApplyLegacyFormatting()

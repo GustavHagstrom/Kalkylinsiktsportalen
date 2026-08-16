@@ -1,18 +1,14 @@
 using BlazorServer.Identity;
 using BlazorServer.Modules.Reports.Domain;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Public;
-using DataCellModel = BlazorServer.Modules.Reports.Domain.Views.DataSection.DataCell;
-using DataColumnDefinitionModel = BlazorServer.Modules.Reports.Domain.Views.DataSection.DataColumnDefinition;
-using DataSectionModel = BlazorServer.Modules.Reports.Domain.Views.DataSection.DataSection;
-using RowDefinitionModel = BlazorServer.Modules.Reports.Domain.Views.DataSection.RowDefinition;
-using SheetCellModel = BlazorServer.Modules.Reports.Domain.Views.SheetSection.SheetCell;
-using SheetSectionModel = BlazorServer.Modules.Reports.Domain.Views.SheetSection.SheetSection;
 
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
 public class View
 {
-    private readonly List<ViewSection> _sections = [];
+    private readonly List<IViewSection> _sections = [];
 
     public ViewId Id { get; private set; } = ViewId.New();
     public OrganizationId OrganizationId { get; private set; }
@@ -21,12 +17,7 @@ public class View
     public PageFormat PageFormat { get; private set; } = PageFormat.A4;
     public bool IsArchived { get; private set; } = false;
 
-    public IReadOnlyList<ViewSection> Sections => _sections;
-
-    public IReadOnlyList<DataSectionModel> LegacyDataSections => OrderedDataSections().Select(CloneDataSection).ToList();
-    public IReadOnlyList<SheetSectionModel> LegacySheetSections => OrderedSheetSections().Select(CloneSheetSection).ToList();
-    internal IReadOnlyList<DataSectionModel> MutableLegacyDataSections => OrderedDataSections();
-    internal IReadOnlyList<SheetSectionModel> MutableLegacySheetSections => OrderedSheetSections();
+    public IReadOnlyList<IViewSection> Sections => _sections;
 
     public int SectionCount => _sections.Count;
 
@@ -50,29 +41,8 @@ public class View
         string description,
         bool enableChanges,
         bool isArchived,
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
-        => Reconstitute(
-            id,
-            organizationId,
-            name,
-            description,
-            PageFormat.A4,
-            enableChanges,
-            isArchived,
-            dataSections,
-            sheetSections);
-
-    public static View Reconstitute(
-        ViewId id,
-        OrganizationId organizationId,
-        string name,
-        string description,
-        PageFormat pageFormat,
-        bool enableChanges,
-        bool isArchived,
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<IViewSection> sections,
+        PageFormat? pageFormat = null)
     {
         var view = new View
         {
@@ -83,11 +53,34 @@ public class View
                 "A view must have a name.") : name.Trim(),
             Description = description ?? string.Empty,
             PageFormat = pageFormat ?? PageFormat.A4,
-            IsArchived = isArchived
+            IsArchived = isArchived,
         };
-
-        view.ReplaceLegacySections(dataSections, sheetSections, legacyEnableChangesDefault: enableChanges);
+        view._sections.AddRange(sections);
         return view;
+    }
+    public View Duplicate(string name)
+    {
+        var duplicate = Create(OrganizationId, name, Description);
+        duplicate.ChangePageFormat(PageFormat);
+
+        foreach (var section in _sections)
+        {
+            switch (section)
+            {
+                case DataSection dataSection:
+                    duplicate.AddSection(DuplicateDataSection(dataSection));
+                    break;
+                case SheetSection sheetSection:
+                    duplicate.AddSection(DuplicateSheetSection(sheetSection));
+                    break;
+            }
+            if (section.SectionType == ViewSectionType.Data)
+                duplicate.AddSection(DuplicateDataSection(section.DataSection!));
+            else
+                duplicate.AddSection(DuplicateSheetSection(section.SheetSection!));
+        }
+
+        return duplicate;
     }
 
     public void Rename(string name)
@@ -127,56 +120,54 @@ public class View
         IsArchived = false;
     }
 
-    public DataSectionModel AddDataSection()
+    public DataSection AddDataSection()
     {
-        var section = DataSectionModel.CreateDefault(_sections.Count);
+        var section = DataSection.CreateDefault(_sections.Count);
         AddSection(section);
         return section;
     }
 
-    public SheetSectionModel AddSheetSection()
+    public SheetSection AddSheetSection()
     {
-        var section = new SheetSectionModel();
+        var section = new SheetSection();
         AddSection(section);
         return section;
     }
-
-    public void AddSection(DataSectionModel section)
+    private void AddSection(IViewSection section)
     {
-        ArgumentNullException.ThrowIfNull(section);
-        AddSection(ViewSection.FromData(section));
-    }
+        EnsureActive();
+        
+        if (_sections.Any(existing => existing.Id == section.Id))
+        {
+            throw new ReportsDomainException(
+                "view.section_id.duplicate",
+                "A view cannot contain duplicate section identities.");
+        }
 
-    public void AddSection(SheetSectionModel section)
-    {
-        ArgumentNullException.ThrowIfNull(section);
-        AddSection(ViewSection.FromSheet(section));
+        _sections.Add(section);
     }
-
-    public void RemoveSection(string sectionId)
+    public void RemoveSection(SectionId id)
     {
         EnsureActive();
 
-        var index = _sections.FindIndex(section => section.SectionId == sectionId);
+        var index = _sections.FindIndex(section => section.Id == id);
         if (index < 0)
         {
             throw new ReportsDomainException(
                 "view.section.not_found",
                 "The section does not belong to this view.");
         }
-
         _sections.RemoveAt(index);
-        SynchronizeLegacySectionIndexes();
     }
 
-    public void MoveSection(string sectionId, int targetIndex)
+    public void MoveSection(SectionId id, int targetIndex)
     {
         EnsureActive();
 
         if (targetIndex < 0 || targetIndex >= _sections.Count)
             throw new ArgumentOutOfRangeException(nameof(targetIndex));
 
-        var currentIndex = _sections.FindIndex(section => section.SectionId == sectionId);
+        var currentIndex = _sections.FindIndex(section => section.Id == id);
         if (currentIndex < 0)
         {
             throw new ReportsDomainException(
@@ -187,40 +178,14 @@ public class View
         var section = _sections[currentIndex];
         _sections.RemoveAt(currentIndex);
         _sections.Insert(targetIndex, section);
-        SynchronizeLegacySectionIndexes();
     }
 
-    public void RemoveDataSection(DataSectionModel section)
-    {
-        ArgumentNullException.ThrowIfNull(section);
-        RemoveSection(section.SectionId);
-    }
 
-    public void RemoveSheetSection(SheetSectionModel section)
-    {
-        ArgumentNullException.ThrowIfNull(section);
-        RemoveSection(section.SectionId);
-    }
-
-    public View Duplicate(string name)
-    {
-        var duplicate = Create(OrganizationId, name, Description);
-        duplicate.ChangePageFormat(PageFormat);
-
-        foreach (var section in _sections)
-        {
-            if (section.SectionType == ViewSectionType.Data)
-                duplicate.AddSection(DuplicateDataSection(section.DataSection!));
-            else
-                duplicate.AddSection(DuplicateSheetSection(section.SheetSection!));
-        }
-
-        return duplicate;
-    }
+    
 
     public void ApplyLegacySectionBridge(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<DataSection> dataSections,
+        IReadOnlyList<SheetSection> sheetSections)
     {
         ArgumentNullException.ThrowIfNull(dataSections);
         ArgumentNullException.ThrowIfNull(sheetSections);
@@ -244,116 +209,13 @@ public class View
         SynchronizeLegacySectionIndexes();
     }
 
-    private void AddSection(ViewSection section)
-    {
-        EnsureActive();
-        section.EnsureSectionId();
+  
 
-        if (_sections.Any(existing => existing.SectionId == section.SectionId))
-        {
-            throw new ReportsDomainException(
-                "view.section_id.duplicate",
-                "A view cannot contain duplicate section identities.");
-        }
 
-        _sections.Add(section);
-        SynchronizeLegacySectionIndexes();
-    }
-
-    private void ReplaceLegacySections(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections,
-        bool legacyEnableChangesDefault = false)
-    {
-        EnsureLegacySectionIdentities(dataSections, sheetSections);
-        ApplyLegacyEnableChangesDefault(sheetSections, legacyEnableChangesDefault);
-        NormalizeLegacySections(dataSections, sheetSections);
-
-        var sections = dataSections
-            .Select(ViewSection.FromData)
-            .Concat(sheetSections.Select(ViewSection.FromSheet))
-            .OrderBy(section => section.SectionIndex)
-            .ToList();
-
-        foreach (var section in sections)
-            section.EnsureSectionId();
-
-        ValidateUniqueSectionIds(sections);
-
-        _sections.Clear();
-        _sections.AddRange(sections);
-        SynchronizeLegacySectionIndexes();
-    }
-
-    private static void NormalizeLegacySections(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
-    {
-        foreach (var section in dataSections)
-            section.Normalize();
-
-        foreach (var section in sheetSections)
-            section.Normalize();
-    }
-
-    private static void ApplyLegacyEnableChangesDefault(
-        IReadOnlyList<SheetSectionModel> sheetSections,
-        bool legacyEnableChangesDefault)
-    {
-        if (!legacyEnableChangesDefault)
-            return;
-
-        foreach (var section in sheetSections)
-            section.SetEnableChanges(true);
-    }
-
-    private IReadOnlyList<DataSectionModel> OrderedDataSections()
-    {
-        SynchronizeLegacySectionIndexes();
-        return _sections
-            .Where(section => section.SectionType == ViewSectionType.Data)
-            .Select(section => section.DataSection!)
-            .ToList();
-    }
-
-    private IReadOnlyList<SheetSectionModel> OrderedSheetSections()
-    {
-        SynchronizeLegacySectionIndexes();
-        return _sections
-            .Where(section => section.SectionType == ViewSectionType.Sheet)
-            .Select(section => section.SheetSection!)
-            .ToList();
-    }
-
-    private static void EnsureLegacySectionIdentities(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
-    {
-        foreach (var section in dataSections)
-        {
-            if (string.IsNullOrWhiteSpace(section.SectionId))
-                section.SectionId = SectionIds.New();
-        }
-
-        foreach (var section in sheetSections)
-        {
-            if (string.IsNullOrWhiteSpace(section.SectionId))
-                section.SectionId = SectionIds.New();
-        }
-    }
-
-    private void SynchronizeLegacySectionIndexes()
-    {
-        for (var index = 0; index < _sections.Count; index++)
-        {
-            _sections[index].SynchronizeSectionIdentity();
-            _sections[index].SetSectionIndex(index);
-        }
-    }
 
     private void ValidateEditedSectionIdentities(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<DataSection> dataSections,
+        IReadOnlyList<SheetSection> sheetSections)
     {
         var sectionIds = dataSections
             .Select(section => section.SectionId)
@@ -376,8 +238,8 @@ public class View
     }
 
     private void ValidateExistingSectionTypes(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<DataSection> dataSections,
+        IReadOnlyList<SheetSection> sheetSections)
     {
         var existingDataSectionIds = _sections
             .Where(section => section.SectionType == ViewSectionType.Data)
@@ -399,8 +261,8 @@ public class View
     }
 
     private static void ValidateEditedSectionOrder(
-        IReadOnlyList<DataSectionModel> dataSections,
-        IReadOnlyList<SheetSectionModel> sheetSections)
+        IReadOnlyList<DataSection> dataSections,
+        IReadOnlyList<SheetSection> sheetSections)
     {
         var sectionIndexes = dataSections
             .Select(section => section.SectionIndex)
@@ -419,7 +281,7 @@ public class View
         }
     }
 
-    private static void ValidateUniqueSectionIds(IReadOnlyList<ViewSection> sections)
+    private static void ValidateUniqueSectionIds(IReadOnlyList<IViewSection> sections)
     {
         if (sections.Select(section => section.SectionId).Distinct(StringComparer.Ordinal).Count() != sections.Count)
         {
@@ -439,23 +301,23 @@ public class View
         }
     }
 
-    private static DataSectionModel CloneDataSection(DataSectionModel section)
+    private static DataSection CloneDataSection(DataSection section)
     {
-        return new DataSectionModel
+        return new DataSection.DataSection
         {
             SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
             RowsCount = section.RowsCount,
             ColumnsCount = section.ColumnsCount,
             RowDefinitions = section.RowDefinitions
-                .Select(row => new RowDefinitionModel
+                .Select(row => new RowDefinition
                 {
                     RowIndex = row.RowIndex,
                     Height = row.Height
                 })
                 .ToList(),
             ColumnDefinitions = section.ColumnDefinitions
-                .Select(column => new DataColumnDefinitionModel
+                .Select(column => new DataColumnDefinition
                 {
                     ColumnIndex = column.ColumnIndex,
                     Width = column.Width
@@ -463,7 +325,7 @@ public class View
                 .ToList(),
             DataCells = section.DataCells.ToDictionary(
                 cell => cell.Key,
-                cell => CloneFormatting(new DataCellModel
+                cell => CloneFormatting(new DataCell
                 {
                     RowIndex = cell.Value.RowIndex,
                     ColumnIndex = cell.Value.ColumnIndex,
@@ -472,9 +334,9 @@ public class View
         };
     }
 
-    private static SheetSectionModel CloneSheetSection(SheetSectionModel section)
+    private static SheetSection CloneSheetSection(SheetSection section)
     {
-        return new SheetSectionModel
+        return new SheetSection.SheetSection
         {
             SectionId = section.SectionId,
             SectionIndex = section.SectionIndex,
@@ -482,7 +344,7 @@ public class View
             EnableChanges = section.EnableChanges,
             SheetCells = section.SheetCells.ToDictionary(
                 cell => cell.Key,
-                cell => CloneFormatting(new SheetCellModel
+                cell => CloneFormatting(new SheetCell
                 {
                     RowType = cell.Value.RowType,
                     ColumnType = cell.Value.ColumnType,
@@ -491,17 +353,17 @@ public class View
         };
     }
 
-    private static DataSectionModel DuplicateDataSection(DataSectionModel section)
+    private static DataSection DuplicateDataSection(DataSection section)
     {
         var duplicate = CloneDataSection(section);
-        duplicate.SectionId = SectionIds.New();
+        duplicate.SectionId = SectionId.New();
         return duplicate;
     }
 
-    private static SheetSectionModel DuplicateSheetSection(SheetSectionModel section)
+    private static SheetSection DuplicateSheetSection(.SheetSection section)
     {
         var duplicate = CloneSheetSection(section);
-        duplicate.SectionId = SectionIds.New();
+        duplicate.SectionId = SectionId.New();
         return duplicate;
     }
 
@@ -610,77 +472,4 @@ public class View
                 DecimalCount = valueFormat.DecimalCount,
                 UseThousandsSeparator = valueFormat.UseThousandsSeparator
             };
-}
-
-public sealed class ViewSection
-{
-    private string _sectionId = string.Empty;
-    private int _sectionIndex;
-
-    private ViewSection(DataSectionModel? dataSection, SheetSectionModel? sheetSection)
-    {
-        DataSection = dataSection;
-        SheetSection = sheetSection;
-        _sectionId = SectionType == ViewSectionType.Data ? dataSection!.SectionId : sheetSection!.SectionId;
-        _sectionIndex = SectionType == ViewSectionType.Data ? dataSection!.SectionIndex : sheetSection!.SectionIndex;
-    }
-
-    public ViewSectionType SectionType => DataSection is not null ? ViewSectionType.Data : ViewSectionType.Sheet;
-    public string SectionId => _sectionId;
-    public int SectionIndex => _sectionIndex;
-    internal object Section => SectionType == ViewSectionType.Data ? DataSection! : SheetSection!;
-    internal DataSectionModel? DataSection { get; }
-    internal SheetSectionModel? SheetSection { get; }
-
-    public static ViewSection FromData(DataSectionModel section)
-        => new(section, null);
-
-    public static ViewSection FromSheet(SheetSectionModel section)
-        => new(null, section);
-
-    public void EnsureSectionId()
-    {
-        if (SectionType == ViewSectionType.Data)
-        {
-            if (string.IsNullOrWhiteSpace(DataSection!.SectionId))
-                DataSection.SectionId = SectionIds.New();
-
-            if (string.IsNullOrWhiteSpace(_sectionId))
-                _sectionId = DataSection.SectionId;
-        }
-        else
-        {
-            if (string.IsNullOrWhiteSpace(SheetSection!.SectionId))
-                SheetSection.SectionId = SectionIds.New();
-
-            if (string.IsNullOrWhiteSpace(_sectionId))
-                _sectionId = SheetSection.SectionId;
-        }
-
-        SynchronizeSectionIdentity();
-    }
-
-    public void SynchronizeSectionIdentity()
-    {
-        if (SectionType == ViewSectionType.Data)
-            DataSection!.SectionId = _sectionId;
-        else
-            SheetSection!.SectionId = _sectionId;
-    }
-
-    public void SetSectionIndex(int sectionIndex)
-    {
-        _sectionIndex = sectionIndex;
-
-        if (SectionType == ViewSectionType.Data)
-            DataSection!.SectionIndex = sectionIndex;
-        else
-            SheetSection!.SectionIndex = sectionIndex;
-    }
-}
-
-public enum ViewSectionType
-{
-    Data,
-    Sheet
 }

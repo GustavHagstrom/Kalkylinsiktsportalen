@@ -1,4 +1,4 @@
-namespace BlazorServer.Modules.Reports.Domain.Views.DataSection;
+namespace BlazorServer.Modules.Reports.Domain.Views.DataSections;
 
 public class RowDefinition
 {

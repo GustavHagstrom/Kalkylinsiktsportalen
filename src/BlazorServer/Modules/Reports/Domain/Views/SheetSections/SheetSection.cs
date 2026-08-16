@@ -1,10 +1,10 @@
 using BlazorServer.Modules.Reports.Domain.Views;
 
-namespace BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 public class SheetSection
 {
-    public string SectionId { get; set; } = SectionIds.New();
+    public string SectionId { get; set; } = Views.SectionId.New();
     public int SectionIndex { get; set; } = 0;
     public string Content { get; set; } = string.Empty;
     public bool EnableChanges { get; set; } = false;
@@ -44,7 +44,7 @@ public class SheetSection
     public void Normalize()
     {
         if (string.IsNullOrWhiteSpace(SectionId))
-            SectionId = SectionIds.New();
+            SectionId = Views.SectionId.New();
 
         SheetCells ??= new Dictionary<string, SheetCell>();
 
