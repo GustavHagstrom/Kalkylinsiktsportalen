@@ -77,6 +77,7 @@ public sealed class ValueFormat
             UseThousandsSeparator = useThousandsSeparator
         };
 
+    public static ValueFormat Default => new();
     public bool IsDefault()
         => Kind == ValueFormatKind.Text
            && DecimalCount == 0
@@ -110,6 +111,8 @@ public sealed class TextStyle
     public bool IsUnderline { get; set; }
     public HorizontalTextAlignment? HorizontalAlignment { get; set; }
     public VerticalTextAlignment? VerticalAlignment { get; set; }
+
+    public static TextStyle Default => new();
 
     public bool IsDefault()
         => Font is null
@@ -162,6 +165,8 @@ public sealed class CellLayout
     public CellBorder? TopBorder { get; set; }
     public CellBorder? BottomBorder { get; set; }
 
+
+    public static CellLayout Default => new();
     public bool IsDefault()
         => BackgroundColor is null
            && PaddingLeftMm is null
@@ -264,8 +269,6 @@ public interface IReportFormattedCell
     CellLayout? CellLayout { get; set; }
     TextStyle? TextStyle { get; set; }
     ValueFormat? ValueFormat { get; set; }
-    TextFormat? TextFormat { get; set; }
-    CellFormat? CellFormat { get; set; }
 }
 
 public static partial class ReportColor
