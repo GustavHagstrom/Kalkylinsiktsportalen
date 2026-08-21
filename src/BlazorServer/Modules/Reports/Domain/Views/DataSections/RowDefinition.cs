@@ -2,11 +2,10 @@ namespace BlazorServer.Modules.Reports.Domain.Views.DataSections;
 
 public class RowDefinition
 {
-    public double HeightMm { get; set; }
+    public double HeightMm { get; set; } = 8;
 
-    public double Height
+    public RowDefinition(double heightMm)
     {
-        get => HeightMm;
-        set => HeightMm = value;
+        HeightMm = heightMm;
     }
-}
+};

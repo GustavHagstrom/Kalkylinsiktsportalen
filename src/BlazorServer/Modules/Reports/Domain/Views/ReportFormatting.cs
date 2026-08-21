@@ -305,28 +305,7 @@ public static class ReportFormatting
     public static bool IsDefault(IReportFormattedCell cell)
         => (cell.TextStyle is null || cell.TextStyle.IsDefault())
            && (cell.CellLayout is null || cell.CellLayout.IsDefault())
-           && (cell.ValueFormat is null || cell.ValueFormat.IsDefault())
-           && (cell.TextFormat is null || IsDefault(cell.TextFormat))
-           && (cell.CellFormat is null || IsDefault(cell.CellFormat));
-
-    public static void ApplyLegacyFormatting(IReportFormattedCell cell)
-    {
-        if (cell.TextFormat is not null)
-        {
-            cell.TextStyle ??= cell.TextFormat.ToTextStyle();
-            cell.ValueFormat ??= cell.TextFormat.ToValueFormat();
-            if (cell.ValueFormat.IsDefault())
-                cell.ValueFormat = null;
-        }
-
-        if (cell.CellFormat is not null)
-        {
-            cell.CellLayout ??= cell.CellFormat.ToCellLayout();
-            if (cell.CellLayout.IsDefault())
-                cell.CellLayout = null;
-        }
-    }
-
+           && (cell.ValueFormat is null || cell.ValueFormat.IsDefault());
     public static void ApplyPatch(IReportFormattedCell cell, ReportFormatPatch patch)
     {
         ArgumentNullException.ThrowIfNull(patch);
@@ -350,44 +329,6 @@ public static class ReportFormatting
         if (patch.ValueFormat is not null)
             cell.ValueFormat = patch.ValueFormat.IsDefault() ? null : patch.ValueFormat;
     }
-
-    public static TextStyle ToTextStyle(this TextFormat format)
-        => new()
-        {
-            Font = ParseFont(format.FontFamily),
-            TextColor = IsDefaultBlack(format.Color) ? null : format.Color,
-            FontSizePt = format.FontSize == 12 ? null : format.FontSize,
-            IsBold = format.IsBold,
-            IsItalic = format.IsItalic,
-            IsUnderline = format.IsUnderline,
-            HorizontalAlignment = format.HorizontalAlign.ToHorizontalAlignment(),
-            VerticalAlignment = format.VerticalAlign.ToVerticalAlignment()
-        };
-
-    public static ValueFormat ToValueFormat(this TextFormat format)
-        => format.Type switch
-        {
-            TextType.Number => ValueFormat.Number(format.DecimalCount, format.HasThoasandsSeparator),
-            TextType.DateTime when string.Equals(format.DayTimeFormat, "yyyy-MM-dd HH:ss", StringComparison.Ordinal)
-                => ValueFormat.DateTimeMinute,
-            TextType.DateTime => ValueFormat.Date,
-            _ => ValueFormat.Text
-        };
-
-    public static CellLayout ToCellLayout(this CellFormat format)
-        => new()
-        {
-            BackgroundColor = IsDefaultWhite(format.BackgroundColor) ? null : format.BackgroundColor,
-            PaddingLeftMm = format.PaddingLeft == 4 ? null : format.PaddingLeft,
-            PaddingRightMm = format.PaddingRight == 4 ? null : format.PaddingRight,
-            PaddingTopMm = format.PaddingTop == 2 ? null : format.PaddingTop,
-            PaddingBottomMm = format.PaddingBottom == 2 ? null : format.PaddingBottom,
-            LeftBorder = format.LeftBorder.ToCellBorderOrNull(),
-            RightBorder = format.RightBorder.ToCellBorderOrNull(),
-            TopBorder = format.TopBorder.ToCellBorderOrNull(),
-            BottomBorder = format.BottomBorder.ToCellBorderOrNull()
-        };
-
     public static CellBorder? ToCellBorderOrNull(this BorderFormat border)
     {
         if (!border.IsBorder || string.Equals(border.BorderStyle, "None", StringComparison.OrdinalIgnoreCase))
@@ -500,38 +441,6 @@ public static class ReportFormatting
 
         return value.ToString(format, CultureInfo.CurrentCulture);
     }
-
-    private static bool IsDefault(TextFormat format)
-    {
-        var defaultFormat = new TextFormat();
-        return format.FontFamily == defaultFormat.FontFamily
-               && format.Color == defaultFormat.Color
-               && format.FontSize == defaultFormat.FontSize
-               && format.IsBold == defaultFormat.IsBold
-               && format.IsItalic == defaultFormat.IsItalic
-               && format.IsUnderline == defaultFormat.IsUnderline
-               && format.HorizontalAlign == defaultFormat.HorizontalAlign
-               && format.VerticalAlign == defaultFormat.VerticalAlign
-               && format.Type == defaultFormat.Type
-               && format.DayTimeFormat == defaultFormat.DayTimeFormat
-               && format.DecimalCount == defaultFormat.DecimalCount
-               && format.HasThoasandsSeparator == defaultFormat.HasThoasandsSeparator;
-    }
-
-    private static bool IsDefault(CellFormat format)
-    {
-        var defaultFormat = new CellFormat();
-        return IsDefault(format.LeftBorder, defaultFormat.LeftBorder)
-               && IsDefault(format.RightBorder, defaultFormat.RightBorder)
-               && IsDefault(format.TopBorder, defaultFormat.TopBorder)
-               && IsDefault(format.BottomBorder, defaultFormat.BottomBorder)
-               && format.BackgroundColor == defaultFormat.BackgroundColor
-               && format.PaddingLeft == defaultFormat.PaddingLeft
-               && format.PaddingRight == defaultFormat.PaddingRight
-               && format.PaddingTop == defaultFormat.PaddingTop
-               && format.PaddingBottom == defaultFormat.PaddingBottom;
-    }
-
     private static bool IsDefault(BorderFormat format, BorderFormat defaultFormat)
         => format.IsBorder == defaultFormat.IsBorder
            && format.BorderStyle == defaultFormat.BorderStyle

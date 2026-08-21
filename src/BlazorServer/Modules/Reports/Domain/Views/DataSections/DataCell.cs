@@ -9,12 +9,9 @@ public class DataCell : IReportFormattedCell
     public ValueFormat? ValueFormat { get; set; }
     public string CellExpression { get; set; } = string.Empty;
 
-
     public bool IsDefault()
         => string.IsNullOrEmpty(CellExpression)
            && ReportFormatting.IsDefault(this);
-
-
     public void ApplyFormatPatch(ReportFormatPatch patch)
     {
         ReportFormatting.ApplyPatch(this, patch);

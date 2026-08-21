@@ -4,17 +4,22 @@ namespace BlazorServer.Modules.Reports.Domain.Views.DataSections;
 
 public class DataSection : IViewSection
 {
-    private List<RowDefinition> _rowDefinitions = [];
-    private List<DataColumnDefinition> _columnDefinitions = [];
     private const double DefaultRowHeightMm = 8;
     private const double DefaultColumnRelativeWidth = 1;
+
+    private List<RowDefinition> _rowDefinitions = [];
+    private List<ColumnDefinition> _columnDefinitions = [];
     /// <summary>
     /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
     /// </summary>
-    private Dictionary<string, DataCell> _dataCells = new();
-    public SectionId Id { get; set; } = SectionId.New();
+    private Dictionary<DataCellKey, DataCell> _dataCells = new();
+    public SectionId SectionId { get; private set; } = SectionId.New();
+    public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
+
+
     public IReadOnlyList<RowDefinition> Rows => _rowDefinitions;
-    public IReadOnlyList<DataColumnDefinition> Columns => _columnDefinitions;
+    public IReadOnlyList<ColumnDefinition> Columns => _columnDefinitions;
+    
     public static DataSection Create(int rowsCount, int columnsCount)
     {
         var section = new DataSection();
@@ -36,7 +41,7 @@ public class DataSection : IViewSection
 
         for (var i = 0; i < columnsCount; i++)
         {
-            section._columnDefinitions.Add(new DataColumnDefinition
+            section._columnDefinitions.Add(new ColumnDefinition
             {
                 RelativeWidth = DefaultColumnRelativeWidth
             });
@@ -44,9 +49,7 @@ public class DataSection : IViewSection
 
         return section;
     }
-
     public static DataSection CreateDefault() => Create(3, 3);
-
     public RowDefinition AddRow(double heightMm = DefaultRowHeightMm)
     {
         if (heightMm <= 0)
@@ -61,13 +64,12 @@ public class DataSection : IViewSection
 
         return row;
     }
-
-    public DataColumnDefinition AddColumn(double relativeWidth = DefaultColumnRelativeWidth)
+    public ColumnDefinition AddColumn(double relativeWidth = DefaultColumnRelativeWidth)
     {
         if (relativeWidth <= 0)
             throw new ArgumentOutOfRangeException(nameof(relativeWidth));
 
-        var column = new DataColumnDefinition
+        var column = new ColumnDefinition
         {
             RelativeWidth = relativeWidth
         };
@@ -76,7 +78,6 @@ public class DataSection : IViewSection
 
         return column;
     }
-
     public void RemoveRow(int rowIndex)
     {
         ValidateRowIndex(rowIndex);
@@ -86,7 +87,7 @@ public class DataSection : IViewSection
 
         _rowDefinitions.RemoveAt(rowIndex);
 
-        var updatedCells = new Dictionary<string, DataCell>();
+        var updatedCells = new Dictionary<DataCellKey, DataCell>();
         foreach (var cell in _dataCells.Values)
         {
             if (cell.RowIndex == rowIndex)
@@ -95,12 +96,11 @@ public class DataSection : IViewSection
             if (cell.RowIndex > rowIndex)
                 cell.RowIndex--;
 
-            updatedCells[BuildCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
+            updatedCells[new DataCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
         }
 
         _dataCells = updatedCells;
     }
-
     public void RemoveColumn(int columnIndex)
     {
         ValidateColumnIndex(columnIndex);
@@ -110,7 +110,7 @@ public class DataSection : IViewSection
 
         _columnDefinitions.RemoveAt(columnIndex);
 
-        var updatedCells = new Dictionary<string, DataCell>();
+        var updatedCells = new Dictionary<DataCellKey, DataCell>();
         foreach (var cell in _dataCells.Values)
         {
             if (cell.ColumnIndex == columnIndex)
@@ -119,20 +119,18 @@ public class DataSection : IViewSection
             if (cell.ColumnIndex > columnIndex)
                 cell.ColumnIndex--;
 
-            updatedCells[BuildCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
+            updatedCells[new DataCellKey(cell.RowIndex, cell.ColumnIndex)] = cell;
         }
 
         _dataCells = updatedCells;
     }
-
     public DataCell GetCell(int rowIndex, int columnIndex)
     {
         ValidateRowIndex(rowIndex);
         ValidateColumnIndex(columnIndex);
 
-        return _dataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out var cell) ? cell : CreateDefaultCell(rowIndex, columnIndex);
+        return _dataCells.TryGetValue(new DataCellKey(rowIndex, columnIndex), out var cell) ? cell : DataCell.CreateDefault(rowIndex, columnIndex);
     }
-
     public bool TryGetCell(int rowIndex, int columnIndex, out DataCell? cell)
     {
         cell = null;
@@ -140,9 +138,8 @@ public class DataSection : IViewSection
         if (rowIndex < 0 || rowIndex >= Rows.Count || columnIndex < 0 || columnIndex >= Columns.Count)
             return false;
 
-        return _dataCells.TryGetValue(BuildCellKey(rowIndex, columnIndex), out cell);
+        return _dataCells.TryGetValue(new DataCellKey(rowIndex, columnIndex), out cell);
     }
-
     public void EditCellExpression(int rowIndex, int columnIndex, string? cellExpression)
     {
         ValidateRowIndex(rowIndex);
@@ -152,7 +149,6 @@ public class DataSection : IViewSection
         cell.CellExpression = cellExpression ?? string.Empty;
         StoreOrPruneCell(cell);
     }
-
     public void ApplyFormatPatch(DataCellRange range, ReportFormatPatch patch)
     {
         ArgumentNullException.ThrowIfNull(patch);
@@ -168,19 +164,17 @@ public class DataSection : IViewSection
             }
         }
     }
-
     private DataCell GetStoredOrNewCell(int rowIndex, int columnIndex)
     {
-        var key = BuildCellKey(rowIndex, columnIndex);
+        var key = new DataCellKey(rowIndex, columnIndex);
         if (_dataCells.TryGetValue(key, out var cell))
             return cell;
 
-        return CreateDefaultCell(rowIndex, columnIndex);
+        return DataCell.CreateDefault(rowIndex, columnIndex);
     }
-
     private void StoreOrPruneCell(DataCell cell)
     {
-        var key = BuildCellKey(cell.RowIndex, cell.ColumnIndex);
+        var key = new DataCellKey(cell.RowIndex, cell.ColumnIndex);
         if (cell.IsDefault())
         {
             _dataCells.Remove(key);
@@ -189,19 +183,16 @@ public class DataSection : IViewSection
 
         _dataCells[key] = cell;
     }
-
     private void ValidateRowIndex(int rowIndex)
     {
         if (rowIndex < 0 || rowIndex >= Rows.Count)
             throw new ArgumentOutOfRangeException(nameof(rowIndex));
     }
-
     private void ValidateColumnIndex(int columnIndex)
     {
         if (columnIndex < 0 || columnIndex >= Columns.Count)
             throw new ArgumentOutOfRangeException(nameof(columnIndex));
     }
-
     private void ValidateRange(DataCellRange range)
     {
         if (range.StartRowIndex > range.EndRowIndex)
@@ -215,18 +206,23 @@ public class DataSection : IViewSection
         ValidateColumnIndex(range.StartColumnIndex);
         ValidateColumnIndex(range.EndColumnIndex);
     }
-
-    private static DataCell CreateDefaultCell(int rowIndex, int columnIndex)
-        => new()
-        {
-            RowIndex = rowIndex,
-            ColumnIndex = columnIndex
-        };
-
-    private static string BuildCellKey(int rowIndex, int columnIndex) => $"R{rowIndex}C{columnIndex}";
-
     public IViewSection Clone()
     {
-        throw new NotImplementedException();
+        return new DataSection
+        {
+            SectionId = SectionId.New(),
+            PageBreakBehavior = this.PageBreakBehavior,
+            _rowDefinitions = this._rowDefinitions.Select(r => new RowDefinition(r.HeightMm)).ToList(),
+            _columnDefinitions = this._columnDefinitions.Select(c => new ColumnDefinition(c.RelativeWidth)).ToList(),
+            _dataCells = this._dataCells.ToDictionary(kvp => kvp.Key, kvp => new DataCell
+            {
+                RowIndex = kvp.Value.RowIndex,
+                ColumnIndex = kvp.Value.ColumnIndex,
+                CellLayout = kvp.Value.CellLayout,
+                TextStyle = kvp.Value.TextStyle,
+                ValueFormat = kvp.Value.ValueFormat,
+                CellExpression = kvp.Value.CellExpression
+            })
+        };
     }
 }

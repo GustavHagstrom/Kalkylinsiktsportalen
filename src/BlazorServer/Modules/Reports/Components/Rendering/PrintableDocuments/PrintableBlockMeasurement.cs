@@ -1,6 +1,6 @@
 namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
-using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
+using BlazorServer.Modules.Reports.Domain.Views;
 
 public sealed record PrintableBlockMeasurement
 {

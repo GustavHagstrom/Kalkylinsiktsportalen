@@ -5,7 +5,6 @@ public enum ColumnType
     Description,
     Code,
     Remark,
-    IsActive,
     Quantity,
     Unit,
     Reference

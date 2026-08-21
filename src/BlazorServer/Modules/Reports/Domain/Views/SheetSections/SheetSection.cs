@@ -1,68 +1,31 @@
-using BlazorServer.Modules.Reports.Domain.Views;
-
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
-public class SheetSection
+public class SheetSection : IViewSection
 {
-    public string SectionId { get; set; } = Views.SectionId.New();
-    public int SectionIndex { get; set; } = 0;
-    public string Content { get; set; } = string.Empty;
+    public SectionId SectionId { get; private set; } = SectionId.New();
+    public SheetSourceType SourceType { get; set; } = SheetSourceType.TenderSheet;
     public bool EnableChanges { get; set; } = false;
-    /// <summary>
-    /// Key: $"{rowType}-{columnType}"
-    /// </summary>
-    public Dictionary<string, SheetCell> SheetCells { get; set; } = new();
+    public Dictionary<SheetCellKey, SheetCell> SheetCells { get; set; } = new();
+    public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
-    public void SetEnableChanges(bool enableChanges)
-    {
-        EnableChanges = enableChanges;
-    }
 
-    public SheetCell GetCellConfiguration(RowType rowType, ColumnType columnType)
+    public SheetCell GetCell(RowType rowType, ColumnType columnType)
     {
-        Normalize();
-        var key = BuildCellKey(rowType, columnType);
-        return SheetCells.TryGetValue(key, out var cell)
-            ? cell
-            : CreateDefaultCell(rowType, columnType);
+        var key = new SheetCellKey(columnType, rowType);
+        return SheetCells.TryGetValue(key, out var cell) ? cell : SheetCell.CreateDefault(columnType, rowType);
     }
 
     public void ApplyFormatPatch(RowType rowType, ColumnType columnType, ReportFormatPatch patch)
     {
         ArgumentNullException.ThrowIfNull(patch);
-        Normalize();
 
-        var key = BuildCellKey(rowType, columnType);
-        var cell = SheetCells.TryGetValue(key, out var existing)
-            ? existing
-            : CreateDefaultCell(rowType, columnType);
+        var key = new SheetCellKey(columnType, rowType);
+        var cell = SheetCells.TryGetValue(key, out var existing) ? existing : SheetCell.CreateDefault(columnType, rowType);
 
         cell.ApplyFormatPatch(patch);
         StoreOrPruneCell(key, cell);
     }
-
-    public void Normalize()
-    {
-        if (string.IsNullOrWhiteSpace(SectionId))
-            SectionId = Views.SectionId.New();
-
-        SheetCells ??= new Dictionary<string, SheetCell>();
-
-        var normalizedCells = new Dictionary<string, SheetCell>();
-        foreach (var keyedCell in SheetCells)
-        {
-            var cell = keyedCell.Value;
-            cell.ApplyLegacyFormatting();
-
-            var key = BuildCellKey(cell.RowType, cell.ColumnType);
-            if (!cell.IsDefault())
-                normalizedCells[key] = cell;
-        }
-
-        SheetCells = normalizedCells;
-    }
-
-    private void StoreOrPruneCell(string key, SheetCell cell)
+    private void StoreOrPruneCell(SheetCellKey key, SheetCell cell)
     {
         if (cell.IsDefault())
         {
@@ -72,14 +35,27 @@ public class SheetSection
 
         SheetCells[key] = cell;
     }
-
-    private static SheetCell CreateDefaultCell(RowType rowType, ColumnType columnType)
-        => new()
+    public IViewSection Clone()
+    {
+        var clone = new SheetSection
         {
-            RowType = rowType,
-            ColumnType = columnType
+            SectionId = SectionId.New(),
+            SourceType = SourceType,
+            EnableChanges = EnableChanges,
+            PageBreakBehavior = PageBreakBehavior
         };
-
-    private static string BuildCellKey(RowType rowType, ColumnType columnType)
-        => $"{rowType}-{columnType}";
+        foreach (var kvp in SheetCells)
+        {
+            clone.SheetCells[kvp.Key] = new SheetCell
+            {
+                RowType = kvp.Value.RowType,
+                ColumnType = kvp.Value.ColumnType,
+                CellLayout = kvp.Value.CellLayout,
+                TextStyle = kvp.Value.TextStyle,
+                ValueFormat = kvp.Value.ValueFormat,
+                HideValue = kvp.Value.HideValue
+            };
+        }
+        return clone;
+    }
 }

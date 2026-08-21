@@ -4,6 +4,10 @@ public sealed record SectionId
 {
     public SectionId(string value)
     {
+        if(string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException("SectionId cannot be null or whitespace.", nameof(value));
+        }
         Value = value.Trim();
     }
 
