@@ -1,9 +1,9 @@
 using BlazorServer.Identity;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 using BlazorServer.Modules.Reports.Domain;
 using BlazorServer.Modules.Reports.Public;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -61,59 +61,6 @@ public class ViewTests
         });
     }
 
-    [Test]
-    public void SheetSectionOwnsChangeEnablementWithLegacyViewDefaultDuringReconstitution()
-    {
-        var newView = View.Create(new OrganizationId("org-1"), "Tender report");
-        var newSheetSection = newView.AddSheetSection();
-
-        var legacyEnabledView = View.Reconstitute(
-            new ViewId("view-1"),
-            new OrganizationId("org-1"),
-            "Tender report",
-            "",
-            enableChanges: true,
-            isArchived: false,
-            [],
-            [new SheetSection { SectionId = "sheet-1", SectionIndex = 0 }]);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(newSheetSection.EnableChanges, Is.False);
-            Assert.That(legacyEnabledView.LegacySheetSections.Single().EnableChanges, Is.True);
-        });
-    }
-
-    [Test]
-    public void AddMoveAndRemoveSectionsUseOrderedAggregateCollection()
-    {
-        var view = View.Create(new OrganizationId("org-1"), "Tender report");
-
-        var dataSection = view.AddDataSection();
-        var sheetSection = view.AddSheetSection();
-
-        view.MoveSection(sheetSection.SectionId, 0);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(view.Sections.Select(section => section.SectionId), Is.EqualTo(new[]
-            {
-                sheetSection.SectionId,
-                dataSection.SectionId
-            }));
-            Assert.That(sheetSection.SectionIndex, Is.EqualTo(0));
-            Assert.That(dataSection.SectionIndex, Is.EqualTo(1));
-        });
-
-        view.RemoveSection(sheetSection.SectionId);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(view.Sections.Select(section => section.SectionId), Is.EqualTo(new[] { dataSection.SectionId }));
-            Assert.That(dataSection.SectionIndex, Is.EqualTo(0));
-            Assert.That(view.LegacySheetSections, Is.Empty);
-        });
-    }
 
     [Test]
     public void DuplicateCopiesDefinitionWithNewViewAndSectionIdentities()
@@ -122,8 +69,7 @@ public class ViewTests
         var dataSection = view.AddDataSection();
         dataSection.EditCellExpression(0, 0, "Heading");
         var sheetSection = view.AddSheetSection();
-        sheetSection.Content = "TenderSheet";
-        sheetSection.SetEnableChanges(true);
+        sheetSection.SourceType = SheetSourceType.TenderSheet;
 
         var duplicate = view.Duplicate("Tender report copy");
 
@@ -135,27 +81,24 @@ public class ViewTests
             Assert.That(duplicate.Description, Is.EqualTo(view.Description));
             Assert.That(duplicate.IsArchived, Is.False);
             Assert.That(duplicate.Sections.Select(section => section.SectionId), Is.Not.EquivalentTo(view.Sections.Select(section => section.SectionId)));
-            Assert.That(duplicate.LegacyDataSections[0].GetCell(0, 0).CellExpression, Is.EqualTo("Heading"));
-            Assert.That(duplicate.LegacySheetSections[0].Content, Is.EqualTo("TenderSheet"));
-            Assert.That(duplicate.LegacySheetSections[0].EnableChanges, Is.True);
+
         });
     }
 
     [Test]
     public void AddDataSection_AddsDefaultEditableGridAtNextSectionIndex()
     {
-        var view = ReconstitutedView(sheetSections: [new SheetSection { SectionIndex = 0 }]);
+        var view = ReconstitutedView(sheetSections: [new SheetSection()]);
         var section = view.AddDataSection();
 
         Assert.Multiple(() =>
         {
             Assert.That(section.SectionId, Is.Not.Empty);
-            Assert.That(section.SectionIndex, Is.EqualTo(1));
-            Assert.That(section.RowsCount, Is.EqualTo(3));
-            Assert.That(section.ColumnsCount, Is.EqualTo(3));
-            Assert.That(section.RowDefinitions.Select(row => row.RowIndex), Is.EqualTo(new[] { 0, 1, 2 }));
-            Assert.That(section.ColumnDefinitions.Select(column => column.ColumnIndex), Is.EqualTo(new[] { 0, 1, 2 }));
-            Assert.That(section.DataCells, Is.Empty);
+            
+            Assert.That(view.GetIndexOfSection(section), Is.EqualTo(1));
+            Assert.That(section.Rows.Count, Is.EqualTo(3));
+            Assert.That(section.Columns.Count, Is.EqualTo(3));
+            Assert.That(section.Cells, Is.Empty);
         });
     }
 

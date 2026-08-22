@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -64,7 +64,7 @@ public sealed class ReportFormatModelTests
     [Test]
     public void DataSection_AppliesFormatPatchToRangeAndPrunesDefaultCells()
     {
-        var section = DataSection.Create(2, 2, sectionIndex: 0);
+        var section = DataSection.Create(2, 2);
 
         section.ApplyFormatPatch(
             DataCellRange.FromBounds(0, 0, 0, 1),
@@ -75,7 +75,7 @@ public sealed class ReportFormatModelTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(section.DataCells, Has.Count.EqualTo(2));
+            Assert.That(section.Cells, Has.Count.EqualTo(2));
             Assert.That(section.GetCell(0, 0).TextStyle!.IsBold, Is.True);
             Assert.That(section.GetCell(0, 1).TextStyle!.IsBold, Is.True);
         });
@@ -87,7 +87,7 @@ public sealed class ReportFormatModelTests
                 TextStyle = new TextStylePatch { IsBold = false }
             });
 
-        Assert.That(section.DataCells, Is.Empty);
+        Assert.That(section.Cells, Is.Empty);
     }
 
     [Test]
@@ -104,7 +104,7 @@ public sealed class ReportFormatModelTests
                 ValueFormat = ValueFormat.Number(decimalCount: 0, useThousandsSeparator: false)
             });
 
-        var cell = section.GetCellConfiguration(RowType.Group, ColumnType.Description);
+        var cell = section.GetCell(RowType.Group, ColumnType.Description);
 
         Assert.Multiple(() =>
         {

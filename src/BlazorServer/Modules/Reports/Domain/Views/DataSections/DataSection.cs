@@ -16,7 +16,7 @@ public class DataSection : IViewSection
     public SectionId SectionId { get; private set; } = SectionId.New();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
-
+    public IReadOnlyList<DataCell> Cells => _dataCells.Values.ToList();
     public IReadOnlyList<RowDefinition> Rows => _rowDefinitions;
     public IReadOnlyList<ColumnDefinition> Columns => _columnDefinitions;
     

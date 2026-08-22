@@ -144,6 +144,11 @@ public class View
         _sections.RemoveAt(currentIndex);
         _sections.Insert(targetIndex, section);
     }
+    public int GetIndexOfSection(IViewSection section)
+    {
+        return _sections.IndexOf(section);
+    }
+
     private void EnsureActive()
     {
         if (IsArchived)
@@ -153,4 +158,5 @@ public class View
                 "Archived views must be reactivated or duplicated before they can change.");
         }
     }
+
 }
