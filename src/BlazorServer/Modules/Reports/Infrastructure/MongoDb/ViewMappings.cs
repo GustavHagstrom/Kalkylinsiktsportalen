@@ -1,4 +1,6 @@
 using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Identity;
 
@@ -16,11 +18,11 @@ public static class ViewMappings
             new OrganizationId(mongoView.OrganizationId),
             mongoView.Name,
             mongoView.Description,
-            PageFormat.FromPersistedName(mongoView.PageFormatName),
-            mongoView.EnableChanges,
             mongoView.IsArchived,
-            mongoView.DataSections,
-            mongoView.SheetSections);
+            mongoView.DataSections.Cast<IViewSection>()
+                .Concat(mongoView.SheetSections)
+                .ToArray(),
+            PageFormat.FromPersistedName(mongoView.PageFormatName));
     }
     public static MongoView ToMongo(this View view)
     {
@@ -29,8 +31,8 @@ public static class ViewMappings
             Id = view.Id.IsEmpty ? ViewId.New().Value : view.Id.Value,
             Name = view.Name,
             OrganizationId = view.OrganizationId.Value,
-            SheetSections = view.LegacySheetSections.ToList(),
-            DataSections = view.LegacyDataSections.ToList(),
+            SheetSections = view.Sections.OfType<SheetSection>().ToList(),
+            DataSections = view.Sections.OfType<DataSection>().ToList(),
             Description = view.Description,
             PageFormatName = view.PageFormat.Name,
             PageFormatWidthMm = view.PageFormat.WidthMm,

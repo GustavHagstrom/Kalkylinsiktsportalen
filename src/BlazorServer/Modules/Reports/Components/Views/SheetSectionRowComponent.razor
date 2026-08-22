@@ -25,20 +25,20 @@
 
     private SheetCell GetSheetCell(ColumnType columnType)
     {
-        var key = $"{RowType}-{columnType}";
+        var key = new SheetCellKey(columnType, RowType);
         return SheetSection.SheetCells.TryGetValue(key, out var cell)
             ? cell
-            : new SheetCell { RowType = RowType, ColumnType = columnType };
+            : SheetCell.CreateDefault(columnType, RowType);
     }
 
     private static CellLayout? EffectiveCellLayout(SheetCell cell)
-        => cell.CellLayout ?? cell.CellFormat?.ToCellLayout();
+        => cell.CellLayout;
 
     private static TextStyle? EffectiveTextStyle(SheetCell cell)
-        => cell.TextStyle ?? cell.TextFormat?.ToTextStyle();
+        => cell.TextStyle;
 
     private static ValueDisplayType DisplayType(SheetCell cell)
-        => (cell.ValueFormat ?? cell.TextFormat?.ToValueFormat())?.Kind switch
+        => cell.ValueFormat?.Kind switch
         {
             ValueFormatKind.Number => ValueDisplayType.Number,
             ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => ValueDisplayType.DateTime,
@@ -48,9 +48,9 @@
     private string DisplayValue(ColumnType columnType)
         => columnType switch
         {
-            ColumnType.Description => string.IsNullOrWhiteSpace(SheetSection.Content)
+            ColumnType.Description => SheetSection.SourceType == SheetSourceType.TenderSheet
                 ? RowType.ToString()
-                : SheetSection.Content,
+                : SheetSection.SourceType.ToString(),
             _ => string.Empty
         };
 }

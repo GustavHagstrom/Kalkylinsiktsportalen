@@ -1,17 +1,18 @@
 <table class="@Class">
     <colgroup>
-        @foreach (var column in DataSection.ColumnDefinitions.OrderBy(x => x.ColumnIndex))
+        @foreach (var column in DataSection.Columns)
         {
             <col style="@ColumnPercentWidth(column)"/>
         }
     </colgroup>
     <tbody>
-        @foreach(var row in DataSection.RowDefinitions.OrderBy(x => x.RowIndex))
+        @for (var rowIndex = 0; rowIndex < DataSection.Rows.Count; rowIndex++)
         {
+            var row = DataSection.Rows[rowIndex];
             <tr style="@RowHeight(row)">
-                @foreach(var column in DataSection.ColumnDefinitions.OrderBy(x => x.ColumnIndex))
+                @for (var columnIndex = 0; columnIndex < DataSection.Columns.Count; columnIndex++)
                 {
-                    var cell = GetDataCell(row, column);
+                    var cell = GetDataCell(rowIndex, columnIndex);
                     <DataCellComponent DataCell="cell" EditMode="@EditMode" IsSelected="cell == SelectedDataCell" OnClick="() => OnCellClick.InvokeAsync(new DataSectionSelection(DataSection, cell))"/>
                 }
             </tr>
@@ -20,28 +21,21 @@
 </table>
 
 @code {
-    [Parameter] public DataSection DataSection { get; set; } = new DataSection();
+    [Parameter] public DataSection DataSection { get; set; } = DataSection.CreateDefault();
     [Parameter] public DataCell? SelectedDataCell { get; set; }
     [Parameter] public bool EditMode { get; set; } = false;
     [Parameter] public EventCallback<DataSectionSelection> OnCellClick { get; set; }
 
     string Class => EditMode ? (SelectedDataCell is not null ? "data-table edit-mode selected" : "data-table edit-mode") : "data-table";
 
-    protected override void OnParametersSet()
-    {
-        DataSection.Normalize();
-    }
-
-    double TableWidth => DataSection.ColumnDefinitions.Sum(x => x.RelativeWidth);
-    string ColumnPercentWidth(DataColumnDefinition column) => $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2")}%""";
+    double TableWidth => DataSection.Columns.Sum(x => x.RelativeWidth);
+    string ColumnPercentWidth(BlazorServer.Modules.Reports.Domain.Views.DataSections.ColumnDefinition column) => $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2")}%""";
 
     //row height in mm, 
     string RowHeight(RowDefinition row) => $"""height: {row.HeightMm}mm""";
 
-    DataCell GetDataCell(RowDefinition row, DataColumnDefinition column)
-    {
-        return DataSection.GetCell(row.RowIndex, column.ColumnIndex);
-    }
+    DataCell GetDataCell(int rowIndex, int columnIndex)
+        => DataSection.GetCell(rowIndex, columnIndex);
 
 
 

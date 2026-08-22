@@ -329,19 +329,6 @@ public static class ReportFormatting
         if (patch.ValueFormat is not null)
             cell.ValueFormat = patch.ValueFormat.IsDefault() ? null : patch.ValueFormat;
     }
-    public static CellBorder? ToCellBorderOrNull(this BorderFormat border)
-    {
-        if (!border.IsBorder || string.Equals(border.BorderStyle, "None", StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        return new CellBorder
-        {
-            WidthPt = border.BorderWidth,
-            Style = border.BorderStyle.ToBorderStyle(),
-            Color = border.BorderColor
-        };
-    }
-
     private static CellLayout ApplyPatch(CellLayout? current, CellLayoutPatch patch)
     {
         var layout = current ?? new CellLayout();
@@ -441,50 +428,4 @@ public static class ReportFormatting
 
         return value.ToString(format, CultureInfo.CurrentCulture);
     }
-    private static bool IsDefault(BorderFormat format, BorderFormat defaultFormat)
-        => format.IsBorder == defaultFormat.IsBorder
-           && format.BorderStyle == defaultFormat.BorderStyle
-           && format.BorderColor == defaultFormat.BorderColor
-           && format.BorderWidth == defaultFormat.BorderWidth;
-
-    private static ReportFont? ParseFont(string fontFamily)
-        => fontFamily.Trim() switch
-        {
-            "Arial" => ReportFont.Arial,
-            "Times New Roman" => ReportFont.TimesNewRoman,
-            "Calibri" => null,
-            "" => null,
-            _ => null
-        };
-
-    private static HorizontalTextAlignment? ToHorizontalAlignment(this Align align)
-        => align switch
-        {
-            Align.Center => HorizontalTextAlignment.Center,
-            Align.End => HorizontalTextAlignment.Right,
-            _ => null
-        };
-
-    private static VerticalTextAlignment? ToVerticalAlignment(this Align align)
-        => align switch
-        {
-            Align.Start => VerticalTextAlignment.Top,
-            Align.Center => VerticalTextAlignment.Middle,
-            _ => null
-        };
-
-    private static BorderStyle ToBorderStyle(this string style)
-        => style.Trim() switch
-        {
-            "Dashed" or "dashed" => BorderStyle.Dashed,
-            "Dotted" or "dotted" => BorderStyle.Dotted,
-            "Double" or "double" => BorderStyle.Double,
-            _ => BorderStyle.Solid
-        };
-
-    private static bool IsDefaultWhite(string color)
-        => string.Equals(color, "#FFFFFF", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsDefaultBlack(string color)
-        => string.Equals(color, "#000000", StringComparison.OrdinalIgnoreCase);
 }

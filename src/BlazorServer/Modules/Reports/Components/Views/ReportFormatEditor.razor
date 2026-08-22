@@ -1,0 +1,393 @@
+@if (!Enabled)
+{
+}
+else
+{
+    <div class="row">
+        <div class="column">
+            <div class="row">
+                <IsActiveIconButton IsActive="SelectedBorderSide == BorderSide.Top"
+                                    Icon="@Icons.Material.Sharp.BorderTop"
+                                    OnClick="() => SelectedBorderSide = BorderSide.Top"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="SelectedBorderSide == BorderSide.Left"
+                                    Icon="@Icons.Material.Sharp.BorderLeft"
+                                    OnClick="() => SelectedBorderSide = BorderSide.Left"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="SelectedBorderSide == BorderSide.Right"
+                                    Icon="@Icons.Material.Sharp.BorderRight"
+                                    OnClick="() => SelectedBorderSide = BorderSide.Right"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="SelectedBorderSide == BorderSide.Bottom"
+                                    Icon="@Icons.Material.Sharp.BorderBottom"
+                                    OnClick="() => SelectedBorderSide = BorderSide.Bottom"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+            </div>
+            <div class="row">
+                <IsActiveIconButton IsActive="SelectedBorder is not null"
+                                    Icon="@Icons.Material.Sharp.BorderOuter"
+                                    OnClick="ToggleSelectedBorder"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+
+                <div class="relative">
+                    <IsActiveIconButton IsActive="ActiveColorPicker == ColorPickerTarget.Background && ShowColorPicker"
+                                        Icon="@Icons.Material.Sharp.FormatColorFill"
+                                        OnClick="() => ToggleColorPicker(ColorPickerTarget.Background)"
+                                        Class="border border-solid"
+                                        Style="@($"color: {Layout?.BackgroundColor ?? "#FFFFFF"}; border-color: var(--mud-palette-text-primary);")"
+                                        Enabled="@Enabled" />
+                </div>
+
+                <div class="relative">
+                    <IsActiveIconButton IsActive="ActiveColorPicker == ColorPickerTarget.Text && ShowColorPicker"
+                                        Icon="@Icons.Material.Sharp.FormatColorText"
+                                        OnClick="() => ToggleColorPicker(ColorPickerTarget.Text)"
+                                        Class="border border-solid"
+                                        Style="@($"color: {TextStyle?.TextColor ?? "#000000"}; border-color: var(--mud-palette-text-primary);")"
+                                        Enabled="@Enabled" />
+                </div>
+
+                <div class="relative">
+                    <IsActiveIconButton IsActive="ActiveColorPicker == ColorPickerTarget.Border && ShowColorPicker"
+                                        Icon="@Icons.Material.Sharp.BorderColor"
+                                        OnClick="() => ToggleColorPicker(ColorPickerTarget.Border)"
+                                        Class="border border-solid"
+                                        Style="@($"color: {SelectedBorder?.Color ?? "#000000"}; border-color: var(--mud-palette-text-primary);")"
+                                        Enabled="@Enabled" />
+
+                    <MudOverlay Visible="ShowColorPicker" OnClick="OnOverlayClicked" />
+                    <MudColorPicker PickerVariant="PickerVariant.Static"
+                                    Class="absolute z-10"
+                                    Elevation="4"
+                                    ThrottleInterval="200"
+                                    Style="@(ShowColorPicker ? "display: block;" : "display: none;")"
+                                    Value="@CurrentColor"
+                                    ValueChanged="@OnColorChanged"
+                                    ShowAlpha="false"
+                                    ShowModeSwitch="true" />
+                </div>
+            </div>
+        </div>
+
+        <hr class="vertical-divider" />
+
+        <div class="column">
+            <div class="row">
+                <input class="kip-input row-height" style="width: 70px;" type="number" step="0.1" @bind="PaddingLeftMmSelection" placeholder="Left" />
+                <input class="kip-input row-height" style="width: 70px;" type="number" step="0.1" @bind="PaddingRightMmSelection" placeholder="Right" />
+            </div>
+            <div class="row">
+                <input class="kip-input row-height" style="width: 70px;" type="number" step="0.1" @bind="PaddingTopMmSelection" placeholder="Top" />
+                <input class="kip-input row-height" style="width: 70px;" type="number" step="0.1" @bind="PaddingBottomMmSelection" placeholder="Bottom" />
+            </div>
+        </div>
+
+        <hr class="vertical-divider" />
+
+        <div class="column">
+            <div class="row">
+                <IsActiveIconButton IsActive="TextStyleModel.IsBold"
+                                    Icon="@Icons.Material.Sharp.FormatBold"
+                                    OnClick="ToggleBold"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="TextStyleModel.IsItalic"
+                                    Icon="@Icons.Material.Sharp.FormatItalic"
+                                    OnClick="ToggleItalic"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+                <IsActiveIconButton IsActive="TextStyleModel.IsUnderline"
+                                    Icon="@Icons.Material.Sharp.FormatUnderlined"
+                                    OnClick="ToggleUnderline"
+                                    Class="border border-solid"
+                                    Enabled="@Enabled" />
+            </div>
+            <div class="row">
+                <KipSelect Style="width: 120px; height: 36px;" TItem="ReportFont?" Items="@FontOptions" @bind-SelectedItem="FontSelection" />
+                <input class="kip-input row-height" style="width: 56px;" type="number" step="0.5" @bind="FontSizePtSelection" />
+            </div>
+        </div>
+
+        <hr class="vertical-divider" />
+
+        <div class="column">
+            <div class="row">
+                <KipSelect Style="width: 120px; height: 36px;" TItem="BorderStyle" Items="@BorderStyleOptions" @bind-SelectedItem="BorderStyleSelection" />
+                <input class="kip-input row-height" style="width: 48px;" type="number" step="0.25" @bind="BorderWidthSelection" />
+            </div>
+            <div class="row">
+                <KipSelect Style="width: 120px; height: 36px;" TItem="ValueFormatKind" Items="@ValueFormatKindOptions" @bind-SelectedItem="ValueFormatKindSelection" />
+                @if (ValueFormatKindSelection == ValueFormatKind.Number)
+                {
+                    <input class="kip-input row-height" style="width: 48px;" type="number" @bind="DecimalCountSelection" />
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public CellLayout? Layout { get; set; }
+    [Parameter] public EventCallback<CellLayout?> LayoutChanged { get; set; }
+    [Parameter] public TextStyle? TextStyle { get; set; }
+    [Parameter] public EventCallback<TextStyle?> TextStyleChanged { get; set; }
+    [Parameter] public ValueFormat? ValueFormat { get; set; }
+    [Parameter] public EventCallback<ValueFormat?> ValueFormatChanged { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+
+    private bool ShowColorPicker;
+    private ColorPickerTarget ActiveColorPicker = ColorPickerTarget.None;
+    private BorderSide SelectedBorderSide = BorderSide.Top;
+    private List<ReportFont?> FontOptions { get; } = [null, ReportFont.Calibri, ReportFont.Arial, ReportFont.TimesNewRoman];
+    private List<BorderStyle> BorderStyleOptions { get; } = [BorderStyle.Solid, BorderStyle.Dashed, BorderStyle.Dotted, BorderStyle.Double];
+    private List<ValueFormatKind> ValueFormatKindOptions { get; } = [ValueFormatKind.Text, ValueFormatKind.Number, ValueFormatKind.Date, ValueFormatKind.DateTimeMinute];
+
+    private CellLayout LayoutModel => Layout ??= new CellLayout();
+    private TextStyle TextStyleModel => TextStyle ??= new TextStyle();
+    private ValueFormat ValueFormatModel => ValueFormat ??= new ValueFormat();
+
+    private CellBorder? SelectedBorder => SelectedBorderSide switch
+    {
+        BorderSide.Left => Layout?.LeftBorder,
+        BorderSide.Right => Layout?.RightBorder,
+        BorderSide.Bottom => Layout?.BottomBorder,
+        _ => Layout?.TopBorder
+    };
+
+    private BorderStyle BorderStyleSelection
+    {
+        get => SelectedBorder?.Style ?? BorderStyle.Solid;
+        set
+        {
+            EnsureSelectedBorder().Style = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private double? PaddingLeftMmSelection
+    {
+        get => Layout?.PaddingLeftMm;
+        set
+        {
+            LayoutModel.PaddingLeftMm = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private double? PaddingRightMmSelection
+    {
+        get => Layout?.PaddingRightMm;
+        set
+        {
+            LayoutModel.PaddingRightMm = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private double? PaddingTopMmSelection
+    {
+        get => Layout?.PaddingTopMm;
+        set
+        {
+            LayoutModel.PaddingTopMm = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private double? PaddingBottomMmSelection
+    {
+        get => Layout?.PaddingBottomMm;
+        set
+        {
+            LayoutModel.PaddingBottomMm = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private ReportFont? FontSelection
+    {
+        get => TextStyle?.Font;
+        set
+        {
+            TextStyleModel.Font = value;
+            NotifyTextStyleChanged();
+        }
+    }
+
+    private double? FontSizePtSelection
+    {
+        get => TextStyle?.FontSizePt;
+        set
+        {
+            TextStyleModel.FontSizePt = value;
+            NotifyTextStyleChanged();
+        }
+    }
+
+    private ValueFormatKind ValueFormatKindSelection
+    {
+        get => ValueFormat?.Kind ?? ValueFormatKind.Text;
+        set
+        {
+            ValueFormatModel.Kind = value;
+            NotifyValueFormatChanged();
+        }
+    }
+
+    private int DecimalCountSelection
+    {
+        get => ValueFormat?.DecimalCount ?? 0;
+        set
+        {
+            ValueFormatModel.DecimalCount = value;
+            NotifyValueFormatChanged();
+        }
+    }
+
+    private double BorderWidthSelection
+    {
+        get => SelectedBorder?.WidthPt ?? 1;
+        set
+        {
+            EnsureSelectedBorder().WidthPt = value;
+            NotifyLayoutChanged();
+        }
+    }
+
+    private MudBlazor.Utilities.MudColor CurrentColor => ActiveColorPicker switch
+    {
+        ColorPickerTarget.Background => new(Layout?.BackgroundColor ?? "#FFFFFF"),
+        ColorPickerTarget.Text => new(TextStyle?.TextColor ?? "#000000"),
+        ColorPickerTarget.Border => new(SelectedBorder?.Color ?? "#000000"),
+        _ => new("#000000")
+    };
+
+    private void ToggleSelectedBorder()
+    {
+        if (SelectedBorder is null)
+            SetSelectedBorder(new CellBorder { WidthPt = 1, Style = BorderStyle.Solid, Color = "#000000" });
+        else
+            SetSelectedBorder(null);
+
+        NotifyLayoutChanged();
+    }
+
+    private void ToggleBold()
+    {
+        TextStyleModel.IsBold = !TextStyleModel.IsBold;
+        NotifyTextStyleChanged();
+    }
+
+    private void ToggleItalic()
+    {
+        TextStyleModel.IsItalic = !TextStyleModel.IsItalic;
+        NotifyTextStyleChanged();
+    }
+
+    private void ToggleUnderline()
+    {
+        TextStyleModel.IsUnderline = !TextStyleModel.IsUnderline;
+        NotifyTextStyleChanged();
+    }
+
+    private void ToggleColorPicker(ColorPickerTarget target)
+    {
+        if (ShowColorPicker && ActiveColorPicker == target)
+        {
+            ShowColorPicker = false;
+            ActiveColorPicker = ColorPickerTarget.None;
+            return;
+        }
+
+        ActiveColorPicker = target;
+        ShowColorPicker = true;
+    }
+
+    private void OnOverlayClicked()
+    {
+        ShowColorPicker = false;
+        ActiveColorPicker = ColorPickerTarget.None;
+    }
+
+    private Task OnColorChanged(MudBlazor.Utilities.MudColor color)
+    {
+        var hexColor = color.ToString(MudBlazor.Utilities.MudColorOutputFormats.Hex);
+
+        switch (ActiveColorPicker)
+        {
+            case ColorPickerTarget.Background:
+                LayoutModel.BackgroundColor = hexColor;
+                NotifyLayoutChanged();
+                break;
+            case ColorPickerTarget.Text:
+                TextStyleModel.TextColor = hexColor;
+                NotifyTextStyleChanged();
+                break;
+            case ColorPickerTarget.Border:
+                EnsureSelectedBorder().Color = hexColor;
+                NotifyLayoutChanged();
+                break;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private CellBorder EnsureSelectedBorder()
+    {
+        if (SelectedBorder is { } existing)
+            return existing;
+
+        var border = new CellBorder { WidthPt = 1, Style = BorderStyle.Solid, Color = "#000000" };
+        SetSelectedBorder(border);
+        return border;
+    }
+
+    private void SetSelectedBorder(CellBorder? border)
+    {
+        switch (SelectedBorderSide)
+        {
+            case BorderSide.Left:
+                LayoutModel.LeftBorder = border;
+                break;
+            case BorderSide.Right:
+                LayoutModel.RightBorder = border;
+                break;
+            case BorderSide.Bottom:
+                LayoutModel.BottomBorder = border;
+                break;
+            default:
+                LayoutModel.TopBorder = border;
+                break;
+        }
+    }
+
+    private void NotifyLayoutChanged()
+        => LayoutChanged.InvokeAsync(Layout);
+
+    private void NotifyTextStyleChanged()
+        => TextStyleChanged.InvokeAsync(TextStyle);
+
+    private void NotifyValueFormatChanged()
+        => ValueFormatChanged.InvokeAsync(ValueFormat);
+
+    private enum BorderSide
+    {
+        Top,
+        Left,
+        Right,
+        Bottom
+    }
+
+    private enum ColorPickerTarget
+    {
+        None,
+        Background,
+        Text,
+        Border
+    }
+}

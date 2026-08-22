@@ -13,5 +13,4 @@ public sealed record SectionId
 
     public string Value { get; }
     public static SectionId New() => new(Guid.NewGuid().ToString());
-    public static SectionId Empty => new(string.Empty);
 }

@@ -3,8 +3,8 @@ using System.Text;
 using System.Text.Json;
 using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Components.Views;
 using BlazorServer.Modules.Reports.Rendering;
 
@@ -50,15 +50,15 @@ public sealed class PrintableDocumentBuilder
     private static PrintableContainer BuildDataSectionItem(DataSection section)
         => new(
             $"data-section-{section.SectionId}",
-            section.RowDefinitions
-                .OrderBy(row => row.RowIndex)
-                .Select(row => new PrintableBlock(
-                    $"data-section-{section.SectionId}-row-{row.RowIndex}",
+            section.Rows
+                .Select((row, rowIndex) => new PrintableBlock(
+                    $"data-section-{section.SectionId}-row-{rowIndex}",
                     typeof(DataSectionRowComponent),
                     new Dictionary<string, object?>
                     {
                         [nameof(DataSectionRowComponent.DataSection)] = section,
-                        [nameof(DataSectionRowComponent.RowDefinition)] = row
+                        [nameof(DataSectionRowComponent.RowDefinition)] = row,
+                        [nameof(DataSectionRowComponent.RowIndex)] = rowIndex
                     }))
                 .ToArray());
 
@@ -70,17 +70,19 @@ public sealed class PrintableDocumentBuilder
 
     private static IEnumerable<PrintableDocumentPrintIssue> BuildDataSectionPrintBlockingIssues(DataSection section)
     {
-        section.Normalize();
-
-        foreach (var cell in section.DataCells.Values.OrderBy(cell => cell.RowIndex).ThenBy(cell => cell.ColumnIndex))
+        foreach (var rowIndex in Enumerable.Range(0, section.Rows.Count))
         {
-            if (DataCellFormulaEvaluator.GetDisplayValue(cell) != DataCellFormulaEvaluator.ErrorDisplayValue)
-                continue;
+            foreach (var columnIndex in Enumerable.Range(0, section.Columns.Count))
+            {
+                var cell = section.GetCell(rowIndex, columnIndex);
+                if (cell.IsDefault() || DataCellFormulaEvaluator.GetDisplayValue(cell) != DataCellFormulaEvaluator.ErrorDisplayValue)
+                    continue;
 
-            yield return new PrintableDocumentPrintIssue(
-                "CellEvaluationError",
-                $"Data section '{section.SectionId}' cell ({cell.RowIndex}, {cell.ColumnIndex}) contains an invalid expression.",
-                $"data-section-{section.SectionId}-row-{cell.RowIndex}");
+                yield return new PrintableDocumentPrintIssue(
+                    "CellEvaluationError",
+                    $"Data section '{section.SectionId}' cell ({rowIndex}, {columnIndex}) contains an invalid expression.",
+                    $"data-section-{section.SectionId}-row-{rowIndex}");
+            }
         }
     }
 
@@ -98,8 +100,8 @@ public sealed class PrintableDocumentBuilder
                     }))
                 .ToArray());
 
-    private static IEnumerable<object> OrderedSections(View view)
-        => view.Sections.Select(section => section.Section);
+    private static IEnumerable<IViewSection> OrderedSections(View view)
+        => view.Sections;
 
     private static string CreateChangeToken(View view, ReportRenderingContext renderingContext)
     {
@@ -126,9 +128,7 @@ public sealed class PrintableDocumentBuilder
                 },
                 Sections = view.Sections.Select(section => new
                 {
-                    section.SectionId,
-                    section.SectionType,
-                    section.Section
+                    section.SectionId
                 })
             }
         });

@@ -33,18 +33,12 @@ public class DataSection : IViewSection
 
         for (var i = 0; i < rowsCount; i++)
         {
-            section._rowDefinitions.Add(new RowDefinition
-            {
-                HeightMm = DefaultRowHeightMm
-            });
+            section._rowDefinitions.Add(new RowDefinition(DefaultRowHeightMm));
         }
 
         for (var i = 0; i < columnsCount; i++)
         {
-            section._columnDefinitions.Add(new ColumnDefinition
-            {
-                RelativeWidth = DefaultColumnRelativeWidth
-            });
+            section._columnDefinitions.Add(new ColumnDefinition(DefaultColumnRelativeWidth));
         }
 
         return section;
@@ -55,10 +49,7 @@ public class DataSection : IViewSection
         if (heightMm <= 0)
             throw new ArgumentOutOfRangeException(nameof(heightMm));
 
-        var row = new RowDefinition
-        {
-            HeightMm = heightMm
-        };
+        var row = new RowDefinition(heightMm);
 
         _rowDefinitions.Add(row);
 
@@ -69,10 +60,7 @@ public class DataSection : IViewSection
         if (relativeWidth <= 0)
             throw new ArgumentOutOfRangeException(nameof(relativeWidth));
 
-        var column = new ColumnDefinition
-        {
-            RelativeWidth = relativeWidth
-        };
+        var column = new ColumnDefinition(relativeWidth);
 
         _columnDefinitions.Add(column);
 

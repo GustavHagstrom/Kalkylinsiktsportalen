@@ -25,20 +25,21 @@ internal sealed class UpdateViewCommandHandler(
             return new InvalidUpdateViewRequest(errors);
         }
 
-        var view = await viewStore.GetAsync(command.ViewId);
-        if (view is null)
+        var existingView = await viewStore.GetAsync(command.ViewId);
+        if (existingView is null)
         {
             return new ViewToUpdateNotFound(command.ViewId);
         }
 
-        if (view.OrganizationId != command.OrganizationId)
+        if (existingView.OrganizationId != command.OrganizationId)
         {
             return new ViewUpdateOrganizationMismatch(command.ViewId, command.OrganizationId);
         }
 
+        View view;
         try
         {
-            var deletedSectionIds = FindDeletedSectionIds(view, command);
+            var deletedSectionIds = FindDeletedSectionIds(existingView, command);
             if (deletedSectionIds.Count > 0 && !command.ConfirmSectionDelete)
             {
                 return new InvalidUpdateViewRequest(
@@ -50,9 +51,16 @@ internal sealed class UpdateViewCommandHandler(
                 ]);
             }
 
-            view.ApplyLegacySectionBridge(command.DataSections, command.SheetSections);
-            view.Rename(command.Name);
-            view.UpdateDescription(command.Description);
+            view = View.Reconstitute(
+                existingView.Id,
+                existingView.OrganizationId,
+                command.Name,
+                command.Description,
+                existingView.IsArchived,
+                command.DataSections.Cast<IViewSection>()
+                    .Concat(command.SheetSections)
+                    .ToArray(),
+                existingView.PageFormat);
         }
         catch (ReportsDomainException exception)
         {
@@ -74,14 +82,14 @@ internal sealed class UpdateViewCommandHandler(
             view);
     }
 
-    private static IReadOnlyList<string> FindDeletedSectionIds(
+    private static IReadOnlyList<SectionId> FindDeletedSectionIds(
         View view,
         UpdateViewCommand command)
     {
         var editedSectionIds = command.DataSections
             .Select(section => section.SectionId)
             .Concat(command.SheetSections.Select(section => section.SectionId))
-            .ToHashSet(StringComparer.Ordinal);
+            .ToHashSet();
 
         return view.Sections
             .Select(section => section.SectionId)

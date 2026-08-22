@@ -54,9 +54,7 @@ public sealed record ReportRenderingContext
                 },
                 Sections = view.Sections.Select(section => new
                 {
-                    section.SectionId,
-                    section.SectionType,
-                    section.Section
+                    section.SectionId
                 })
             }),
             PageFormat: view.PageFormat);

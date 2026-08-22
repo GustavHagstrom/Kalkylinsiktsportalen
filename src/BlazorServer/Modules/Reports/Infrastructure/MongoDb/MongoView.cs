@@ -1,6 +1,6 @@
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
