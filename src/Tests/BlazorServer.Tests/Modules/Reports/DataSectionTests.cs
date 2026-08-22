@@ -1,4 +1,4 @@
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
 
 namespace BlazorServer.Tests.Modules.Reports;
 

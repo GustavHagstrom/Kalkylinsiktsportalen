@@ -6,8 +6,8 @@ using BlazorServer.Modules.Reports.Rendering;
 using BlazorServer.Modules.Reports.Persistence;
 using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
