@@ -36,7 +36,6 @@ internal sealed class UpdateViewCommandHandler(
             return new ViewUpdateOrganizationMismatch(command.ViewId, command.OrganizationId);
         }
 
-        View view;
         try
         {
             var deletedSectionIds = FindDeletedSectionIds(existingView, command);
@@ -51,16 +50,11 @@ internal sealed class UpdateViewCommandHandler(
                 ]);
             }
 
-            view = View.Reconstitute(
-                existingView.Id,
-                existingView.OrganizationId,
-                command.Name,
-                command.Description,
-                existingView.IsArchived,
-                command.DataSections.Cast<IViewSection>()
-                    .Concat(command.SheetSections)
-                    .ToArray(),
-                existingView.PageFormat);
+            existingView.ReplaceSections(command.DataSections.Cast<IViewSection>()
+                .Concat(command.SheetSections)
+                .ToArray());
+            existingView.Rename(command.Name);
+            existingView.UpdateDescription(command.Description);
         }
         catch (ReportsDomainException exception)
         {
@@ -73,13 +67,13 @@ internal sealed class UpdateViewCommandHandler(
             ]);
         }
 
-        await viewStore.UpsertAsync(view);
+        await viewStore.UpsertAsync(existingView);
 
         return new ViewUpdated(
-            view.Id,
-            view.OrganizationId,
-            view.Name,
-            view);
+            existingView.Id,
+            existingView.OrganizationId,
+            existingView.Name,
+            existingView);
     }
 
     private static IReadOnlyList<SectionId> FindDeletedSectionIds(

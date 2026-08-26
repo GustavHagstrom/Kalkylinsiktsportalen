@@ -8,6 +8,33 @@ public class SheetSection : IViewSection
     public Dictionary<SheetCellKey, SheetCell> SheetCells { get; set; } = new();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
+    internal static SheetSection Reconstitute(SectionId sectionId, SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    {
+        ArgumentNullException.ThrowIfNull(sectionId);
+
+        var section = new SheetSection
+        {
+            SectionId = sectionId,
+            SourceType = sourceType,
+            EnableChanges = enableChanges,
+            PageBreakBehavior = pageBreakBehavior
+        };
+
+        foreach (var kvp in sheetCells ?? new Dictionary<SheetCellKey, SheetCell>())
+        {
+            section.StoreOrPruneCell(kvp.Key, new SheetCell
+            {
+                RowType = kvp.Value.RowType,
+                ColumnType = kvp.Value.ColumnType,
+                CellLayout = kvp.Value.CellLayout,
+                TextStyle = kvp.Value.TextStyle,
+                ValueFormat = kvp.Value.ValueFormat,
+                HideValue = kvp.Value.HideValue
+            });
+        }
+
+        return section;
+    }
 
     public SheetCell GetCell(RowType rowType, ColumnType columnType)
     {

@@ -40,7 +40,7 @@ public class View
             PageFormat = pageFormat ?? PageFormat.A4,
             IsArchived = isArchived,
         };
-        view._sections.AddRange(sections);
+        view.ReplaceSectionsForHydration(sections);
         return view;
     }
     public View Duplicate(string name)
@@ -144,9 +144,47 @@ public class View
         _sections.RemoveAt(currentIndex);
         _sections.Insert(targetIndex, section);
     }
+    public void ReplaceSections(IReadOnlyList<IViewSection> sections)
+    {
+        EnsureActive();
+        ValidateSections(sections, _sections);
+
+        _sections.Clear();
+        _sections.AddRange(sections);
+    }
     public int GetIndexOfSection(IViewSection section)
     {
         return _sections.IndexOf(section);
+    }
+
+    private void ReplaceSectionsForHydration(IReadOnlyList<IViewSection> sections)
+    {
+        ValidateSections(sections, []);
+        _sections.AddRange(sections);
+    }
+
+    private static void ValidateSections(
+        IReadOnlyList<IViewSection> sections,
+        IReadOnlyList<IViewSection> existingSections)
+    {
+        var sectionIds = new HashSet<SectionId>();
+        foreach (var section in sections)
+        {
+            if (!sectionIds.Add(section.SectionId))
+            {
+                throw new ReportsDomainException(
+                    "view.section_id.duplicate",
+                    "A view cannot contain duplicate section identities.");
+            }
+
+            var existingSection = existingSections.FirstOrDefault(existing => existing.SectionId == section.SectionId);
+            if (existingSection is not null && existingSection.GetType() != section.GetType())
+            {
+                throw new ReportsDomainException(
+                    "view.section_type.changed",
+                    "An existing section cannot change type.");
+            }
+        }
     }
 
     private void EnsureActive()

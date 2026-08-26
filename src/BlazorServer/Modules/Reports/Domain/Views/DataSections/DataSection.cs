@@ -44,6 +44,43 @@ public class DataSection : IViewSection
         return section;
     }
     public static DataSection CreateDefault() => Create(3, 3);
+    internal static DataSection Reconstitute(SectionId sectionId, IReadOnlyList<RowDefinition> rows, IReadOnlyList<ColumnDefinition> columns, IReadOnlyDictionary<DataCellKey, DataCell>? cells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    {
+        ArgumentNullException.ThrowIfNull(sectionId);
+        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(columns);
+
+        if (rows.Count < 1)
+            throw new ArgumentOutOfRangeException(nameof(rows));
+
+        if (columns.Count < 1)
+            throw new ArgumentOutOfRangeException(nameof(columns));
+
+        var section = new DataSection
+        {
+            SectionId = sectionId,
+            PageBreakBehavior = pageBreakBehavior,
+            _rowDefinitions = rows.Select(row => new RowDefinition(row.HeightMm)).ToList(),
+            _columnDefinitions = columns.Select(column => new ColumnDefinition(column.RelativeWidth)).ToList()
+        };
+
+        foreach (var cell in cells?.Values ?? [])
+        {
+            section.ValidateRowIndex(cell.RowIndex);
+            section.ValidateColumnIndex(cell.ColumnIndex);
+            section.StoreOrPruneCell(new DataCell
+            {
+                RowIndex = cell.RowIndex,
+                ColumnIndex = cell.ColumnIndex,
+                CellExpression = cell.CellExpression,
+                CellLayout = cell.CellLayout,
+                TextStyle = cell.TextStyle,
+                ValueFormat = cell.ValueFormat
+            });
+        }
+
+        return section;
+    }
     public RowDefinition AddRow(double heightMm = DefaultRowHeightMm)
     {
         if (heightMm <= 0)

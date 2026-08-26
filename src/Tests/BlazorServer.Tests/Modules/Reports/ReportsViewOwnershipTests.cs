@@ -23,8 +23,8 @@ public class ReportsViewOwnershipTests
         {
             Assert.That(typeof(View).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views"));
             Assert.That(typeof(ViewId).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Public"));
-            Assert.That(typeof(DataSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.DataSection"));
-            Assert.That(typeof(SheetSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.SheetSection"));
+            Assert.That(typeof(DataSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.DataSections"));
+            Assert.That(typeof(SheetSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.SheetSections"));
             Assert.That(typeof(DataCellFormulaEvaluator).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Rendering"));
             Assert.That(typeof(FormatBuilder).Namespace, Does.StartWith("BlazorServer.Modules.Reports."));
             Assert.That(typeof(FormatBuilder).Namespace, Does.Contain(".Components.Rendering"));

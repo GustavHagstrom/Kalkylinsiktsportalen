@@ -13,4 +13,5 @@ public sealed record SectionId
 
     public string Value { get; }
     public static SectionId New() => new(Guid.NewGuid().ToString());
+    public override string ToString() => Value;
 }

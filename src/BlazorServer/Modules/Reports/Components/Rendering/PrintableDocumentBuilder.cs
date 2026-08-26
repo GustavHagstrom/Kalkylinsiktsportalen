@@ -126,14 +126,62 @@ public sealed class PrintableDocumentBuilder
                     view.PageFormat.WidthMm,
                     view.PageFormat.HeightMm
                 },
-                Sections = view.Sections.Select(section => new
-                {
-                    section.SectionId
-                })
+                Sections = view.Sections.Select(DescribeSection)
             }
         });
 
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(tokenInput));
         return Convert.ToHexString(hash);
     }
+
+    private static object DescribeSection(IViewSection section)
+        => section switch
+        {
+            DataSection dataSection => new
+            {
+                Type = nameof(DataSection),
+                SectionId = dataSection.SectionId.Value,
+                dataSection.PageBreakBehavior,
+                Rows = dataSection.Rows.Select(row => row.HeightMm),
+                Columns = dataSection.Columns.Select(column => column.RelativeWidth),
+                Cells = dataSection.Cells
+                    .OrderBy(cell => cell.RowIndex)
+                    .ThenBy(cell => cell.ColumnIndex)
+                    .Select(cell => new
+                    {
+                        cell.RowIndex,
+                        cell.ColumnIndex,
+                        cell.CellExpression,
+                        cell.CellLayout,
+                        cell.TextStyle,
+                        cell.ValueFormat
+                    })
+            },
+            SheetSection sheetSection => new
+            {
+                Type = nameof(SheetSection),
+                SectionId = sheetSection.SectionId.Value,
+                sheetSection.PageBreakBehavior,
+                sheetSection.SourceType,
+                sheetSection.EnableChanges,
+                Cells = sheetSection.SheetCells
+                    .OrderBy(cell => cell.Key.RowType)
+                    .ThenBy(cell => cell.Key.ColumnType)
+                    .Select(cell => new
+                    {
+                        cell.Key.RowType,
+                        cell.Key.ColumnType,
+                        cell.Value.HideValue,
+                        cell.Value.CellLayout,
+                        cell.Value.TextStyle,
+                        cell.Value.ValueFormat
+                    })
+            },
+            _ => new
+            {
+                Type = section.GetType().FullName,
+                SectionId = section.SectionId.Value,
+                section.PageBreakBehavior
+            }
+        };
 }
