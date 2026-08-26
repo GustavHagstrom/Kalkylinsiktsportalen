@@ -6,7 +6,7 @@ using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Persistence.MongoDb;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 

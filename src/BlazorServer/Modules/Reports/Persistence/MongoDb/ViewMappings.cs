@@ -4,7 +4,7 @@ using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Identity;
 
-namespace BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+namespace BlazorServer.Modules.Reports.Persistence.MongoDb;
 
 public static class ViewMappings
 {

@@ -5,7 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using BlazorServer.Identity;
 
-namespace BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+namespace BlazorServer.Modules.Reports.Persistence.MongoDb;
 
 public class MongoViewStore : IViewStore
 {

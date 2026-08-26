@@ -5,8 +5,8 @@ using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Persistence;
 
 namespace BlazorServer.Tests.Modules.Reports;

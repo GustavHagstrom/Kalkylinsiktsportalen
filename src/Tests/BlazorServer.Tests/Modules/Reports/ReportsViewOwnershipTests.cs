@@ -4,7 +4,7 @@ using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Components.Rendering;
 using BlazorServer.Modules.Reports.Rendering;
 using BlazorServer.Modules.Reports.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Persistence.MongoDb;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSections;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
@@ -30,9 +30,9 @@ public class ReportsViewOwnershipTests
             Assert.That(typeof(FormatBuilder).Namespace, Does.Contain(".Components.Rendering"));
             Assert.That(typeof(PrintableDocumentRenderer).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Components.Rendering"));
             Assert.That(typeof(IViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence"));
-            Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
-            Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
-            Assert.That(typeof(ViewMappings).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
+            Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
+            Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
+            Assert.That(typeof(ViewMappings).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
         });
     }
 

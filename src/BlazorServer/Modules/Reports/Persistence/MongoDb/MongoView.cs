@@ -4,7 +4,7 @@ using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+namespace BlazorServer.Modules.Reports.Persistence.MongoDb;
 
 public class MongoView
 {
