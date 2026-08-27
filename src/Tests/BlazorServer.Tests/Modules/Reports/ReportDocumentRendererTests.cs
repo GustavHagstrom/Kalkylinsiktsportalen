@@ -105,7 +105,7 @@ public sealed class ReportDocumentRendererTargetModelTests
             "Sheet report",
             "",
             isArchived: false,
-            [SheetSection.Reconstitute(new SectionId("sheet-1"), SheetSection.DefaultColumns())]);
+            [SheetSection.Reconstitute(new SectionId("sheet-1"), SheetSection.DefaultColumns(), SheetSourceType.TenderSheet)]);
 
         var document = new PrintableDocumentBuilder().Build(view, RenderingContext("version-1", "snapshot-1"));
         var section = (PrintableContainer)document.BodyItems.Single();

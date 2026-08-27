@@ -17,8 +17,6 @@ public sealed class DataSectionTests
         {
             Assert.That(section.Rows, Has.Count.EqualTo(2));
             Assert.That(section.Columns, Has.Count.EqualTo(2));
-            Assert.That(section.Rows, Has.Count.EqualTo(2));
-            Assert.That(section.Columns, Has.Count.EqualTo(2));
             Assert.That(section.Cells, Is.Empty);
         });
     }
