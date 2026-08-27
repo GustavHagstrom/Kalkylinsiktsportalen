@@ -202,6 +202,8 @@ Ansvar:
 - kunna starta ny sida efter sig genom `PageBreakBehavior.After`
 - ge spårbarhet från pagineringsresultat och fel till källblocket
 
+`PageBreakBehavior.Before` finns i domänens enum som reserverad section-/blockintention, men nuvarande paginator implementerar bara `None` och `After`. Tills `Before` får pagineringssemantik ska callers inte förlita sig på att det startar en ny sida före blocket.
+
 ### `ReportDocumentRenderer`
 
 Adapter mellan rapportdefinitionen och det modellstyrda pagineringsflödet.
@@ -241,7 +243,7 @@ Ansvar:
 - Hel-view update är ett legitimt bulk-save-use case för rapporteditorn när användaren arbetar med hela rapportmallen som ett dokument. Smalare workflows kan fortfarande uttrycka strukturella ändringar som intentioner, till exempel `AddSection`, `RemoveSection` och `MoveSection`, när det ger tydligare audit, behörighet, concurrency eller användarintention.
 - Hel-view update får ersätta hela view-definitionen atomiskt, men måste validera att alla sektioner har icke-tom och unik `SectionId`, att existerande sektioner behåller sin `SectionId`, att en existerande `SectionId` inte byter sektionstyp och att payloadens sektionsordning bevaras. En saknad existerande sektion behandlas som delete bara när borttag är explicit bekräftat. Nya sektioner får introduceras med nya `SectionId`. `DataSection` och `SheetSection` validerar fortsatt sina egna interna invariants.
 - Normalisering är en legacy-/hydration-mekanism. Nya feature-slices ska använda domänbeteenden som håller `View` giltig utan att callers behöver reparera modellen efteråt.
-- I en `DataSection` är `RowDefinition`- och `DataColumnDefinition`-samlingarna sanningen för gridens storlek. Separata row/column count-fält är derived eller legacy/payload, inte egna domänsanningar.
+- I en `DataSection` är `RowDefinition`- och `ColumnDefinition`-samlingarna sanningen för gridens storlek. Separata row/column count-fält är derived eller legacy/payload, inte egna domänsanningar.
 - En existerande `DataSection` har minst en rad och minst en kolumn.
 - En `DataSection` får inte ta bort sin sista rad eller sista kolumn; då ska sektionen tas bort från `View` i stället.
 - En ny `DataSection` kan skapas med explicit storlek. En 3x3-grid är en editor-default, inte en affärsregel.
@@ -257,13 +259,13 @@ Ansvar:
 - En `DataCell` lagrar användarens `CellExpression`. Displayvärdet härleds vid rendering; uttryck som börjar med `=` tolkas som formler, annars visas uttrycket som text. Format ligger bredvid celluttrycket.
 - `DataCell` har systemdefault för textformat och cellformat. En cell behöver bara lagras när dess uttryck eller format avviker från systemdefault.
 - Cell- och textformat i en `DataSection` är del av rapportmallens layout, inte bara editor-state.
-- `CellFormat`, `TextFormat` och `BorderFormat` är Reports-domänvärden för rapportlayout. De uttrycker layoutintention; rendering översätter dem till CSS eller annan presentationsrepresentation.
-- Formatmodeller är value objects. Målmodellen bör ersätta formatvärden via domänoperationer i stället för att behandla format som muterbara entities.
+- `CellLayout`, `TextStyle`, `ValueFormat` och `CellBorder` är Reports-domänvärden för rapportlayout. De uttrycker layoutintention; rendering översätter dem till CSS eller annan presentationsrepresentation.
+- Målmodellen är att formatmodellerna ska vara value objects och ersättas via domänoperationer. Nuvarande implementation använder fortfarande muterbara klasser, men har explicita `Clone`-metoder för att undvika delad formatreferens när sektioner dupliceras.
 - Målmodellen skiljer `CellLayout`, `TextStyle` och `ValueFormat`. `CellLayout` äger bakgrund, padding och borders; `TextStyle` äger font, färg, styling och alignment; `ValueFormat` äger plain text/number/date-regler.
 - En `DataCell` lagrar bara formatdelar som overrides från systemdefault. Saknade `CellLayout`, `TextStyle` eller `ValueFormat` betyder systemdefault för den formatdelen.
 - Efter cell edits eller formatpatchar tas en cell bort ur `DataSection`ens lagrade cellsamling när den åter är helt default: tomt `CellExpression` och inga format-overrides.
 - Systemdefault för cellformat är initialt en global Reports-default, inte ett `View`-specifikt tema.
-- Dagens `TextFormat` blandar textstil och värdeformat och bör delas enligt målmodellen.
+- Det tidigare `TextFormat`-begreppet blandade textstil och värdeformat och är ersatt av separata `TextStyle` och `ValueFormat`.
 - Default `ValueFormat` är text. Tal- och datumformat måste vara explicit valda; programmet ska inte auto-tolka celler som tal eller datum.
 - Number `ValueFormat` tillåter `DecimalCount` mellan 0 och 6.
 - Number `ValueFormat` har en enkel `UseThousandsSeparator`-inställning. Själva separatorns tecken och kultur kommer från rendering/export-context, inte från cellen.

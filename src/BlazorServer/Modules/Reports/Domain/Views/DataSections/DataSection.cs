@@ -16,7 +16,7 @@ public class DataSection : IViewSection
     public IReadOnlyList<DataCell> Cells => _dataCells.Values.ToList();
     public IReadOnlyList<RowDefinition> Rows => _rowDefinitions;
     public IReadOnlyList<ColumnDefinition> Columns => _columnDefinitions;
-    
+
     public static DataSection Create(int rowsCount, int columnsCount)
     {
         var section = new DataSection();
