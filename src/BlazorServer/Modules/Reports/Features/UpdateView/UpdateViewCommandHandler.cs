@@ -50,9 +50,7 @@ internal sealed class UpdateViewCommandHandler(
                 ]);
             }
 
-            existingView.ReplaceSections(command.DataSections.Cast<IViewSection>()
-                .Concat(command.SheetSections)
-                .ToArray());
+            existingView.ReplaceSections(command.Sections);
             existingView.Rename(command.Name);
             existingView.UpdateDescription(command.Description);
         }
@@ -80,14 +78,8 @@ internal sealed class UpdateViewCommandHandler(
         View view,
         UpdateViewCommand command)
     {
-        var editedSectionIds = command.DataSections
-            .Select(section => section.SectionId)
-            .Concat(command.SheetSections.Select(section => section.SectionId))
-            .ToHashSet();
+        var editedSectionIds = command.Sections.Select(section => section.SectionId).ToHashSet();
 
-        return view.Sections
-            .Select(section => section.SectionId)
-            .Where(sectionId => !editedSectionIds.Contains(sectionId))
-            .ToList();
+        return view.Sections.Select(section => section.SectionId).Where(sectionId => !editedSectionIds.Contains(sectionId)).ToList();
     }
 }

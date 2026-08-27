@@ -74,7 +74,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", [], []),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", []),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewUpdated>());
@@ -107,8 +107,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
-                [editedDataSection],
-                [addedSheetSection],
+                [editedDataSection, addedSheetSection],
                 ConfirmSectionDelete: true),
             CancellationToken.None);
 
@@ -132,7 +131,6 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
-                [],
                 [SheetSection("section-1")],
                 ConfirmSectionDelete: true),
             CancellationToken.None);
@@ -154,7 +152,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", [], [], ConfirmSectionDelete: false),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", [], ConfirmSectionDelete: false),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
@@ -174,7 +172,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", [], []),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", []),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
@@ -192,7 +190,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", [], []),
+            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewToUpdateNotFound(viewId)));
@@ -208,7 +206,7 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", [], []),
+            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewUpdateOrganizationMismatch(viewId, requestedOrganizationId)));
