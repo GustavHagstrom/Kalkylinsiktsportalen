@@ -82,6 +82,14 @@ public sealed class ValueFormat
         => Kind == ValueFormatKind.Text
            && DecimalCount == 0
            && !UseThousandsSeparator;
+
+    public ValueFormat Clone()
+        => new()
+        {
+            Kind = Kind,
+            DecimalCount = DecimalCount,
+            UseThousandsSeparator = UseThousandsSeparator
+        };
 }
 
 public sealed class TextStyle
@@ -123,6 +131,19 @@ public sealed class TextStyle
            && !IsUnderline
            && HorizontalAlignment is null
            && VerticalAlignment is null;
+
+    public TextStyle Clone()
+        => new()
+        {
+            Font = Font,
+            TextColor = TextColor,
+            FontSizePt = FontSizePt,
+            IsBold = IsBold,
+            IsItalic = IsItalic,
+            IsUnderline = IsUnderline,
+            HorizontalAlignment = HorizontalAlignment,
+            VerticalAlignment = VerticalAlignment
+        };
 }
 
 public sealed class CellLayout
@@ -178,6 +199,20 @@ public sealed class CellLayout
            && TopBorder is null
            && BottomBorder is null;
 
+    public CellLayout Clone()
+        => new()
+        {
+            BackgroundColor = BackgroundColor,
+            PaddingLeftMm = PaddingLeftMm,
+            PaddingRightMm = PaddingRightMm,
+            PaddingTopMm = PaddingTopMm,
+            PaddingBottomMm = PaddingBottomMm,
+            LeftBorder = LeftBorder?.Clone(),
+            RightBorder = RightBorder?.Clone(),
+            TopBorder = TopBorder?.Clone(),
+            BottomBorder = BottomBorder?.Clone()
+        };
+
     private static double? ValidateNonNegative(double? value, string parameterName)
     {
         if (value < 0)
@@ -209,6 +244,14 @@ public sealed class CellBorder
         get => _color;
         set => _color = ReportColor.Normalize(value);
     }
+
+    public CellBorder Clone()
+        => new()
+        {
+            WidthPt = WidthPt,
+            Style = Style,
+            Color = Color
+        };
 }
 
 public sealed class ReportFormatPatch

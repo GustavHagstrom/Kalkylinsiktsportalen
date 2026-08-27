@@ -62,6 +62,51 @@ public sealed class ReportFormatModelTests
     }
 
     [Test]
+    public void FormatObjectsCloneAsIndependentCopies()
+    {
+        var valueFormat = ValueFormat.Number(decimalCount: 2, useThousandsSeparator: true);
+        var textStyle = new TextStyle
+        {
+            Font = ReportFont.Arial,
+            TextColor = "#ffeecc",
+            FontSizePt = 12,
+            IsBold = true,
+            HorizontalAlignment = HorizontalTextAlignment.Center,
+            VerticalAlignment = VerticalTextAlignment.Middle
+        };
+        var cellLayout = new CellLayout
+        {
+            BackgroundColor = "#112233",
+            PaddingLeftMm = 1,
+            LeftBorder = new CellBorder
+            {
+                WidthPt = 0.5,
+                Style = BorderStyle.Dashed,
+                Color = "#445566"
+            }
+        };
+
+        var valueFormatClone = valueFormat.Clone();
+        var textStyleClone = textStyle.Clone();
+        var cellLayoutClone = cellLayout.Clone();
+
+        valueFormatClone.DecimalCount = 4;
+        textStyleClone.TextColor = "#abcdef";
+        cellLayoutClone.LeftBorder!.Color = "#778899";
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(valueFormatClone, Is.Not.SameAs(valueFormat));
+            Assert.That(textStyleClone, Is.Not.SameAs(textStyle));
+            Assert.That(cellLayoutClone, Is.Not.SameAs(cellLayout));
+            Assert.That(cellLayoutClone.LeftBorder, Is.Not.SameAs(cellLayout.LeftBorder));
+            Assert.That(valueFormat.DecimalCount, Is.EqualTo(2));
+            Assert.That(textStyle.TextColor, Is.EqualTo("#FFEECC"));
+            Assert.That(cellLayout.LeftBorder!.Color, Is.EqualTo("#445566"));
+        });
+    }
+
+    [Test]
     public void DataSection_AppliesFormatPatchToRangeAndPrunesDefaultCells()
     {
         var section = DataSection.Create(2, 2);
@@ -93,7 +138,7 @@ public sealed class ReportFormatModelTests
     [Test]
     public void SheetSection_AppliesFormatPatchPerRowTypeAndColumnType()
     {
-        var section = new SheetSection();
+        var section = SheetSection.Create();
 
         section.ApplyFormatPatch(
             RowType.Group,

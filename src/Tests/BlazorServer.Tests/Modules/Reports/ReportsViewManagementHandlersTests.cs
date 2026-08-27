@@ -264,5 +264,5 @@ public sealed class ReportsViewManagementHandlersTargetModelTests
             [new DataColumnDefinition(1)]);
 
     private static SheetSection SheetSection(string sectionId)
-        => BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.Reconstitute(new SectionId(sectionId));
+        => BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.Reconstitute(new SectionId(sectionId), BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.DefaultColumns().ToArray());
 }

@@ -146,7 +146,7 @@
                 View.AddDataSection();
                 break;
             case SectionType.Sheet:
-                View.AddSheetSection();
+                View.AddSheetSection(SheetSourceType.TenderSheet);
                 break;
         }
     }
@@ -233,9 +233,8 @@
                     View.Id,
                     ViewName,
                     View.Description,
-                    View.Sections.OfType<DataSection>().ToArray(),
-                    View.Sections.OfType<SheetSection>().ToArray(),
-                    ConfirmSectionDelete: true),
+                    View.Sections.ToArray(),
+                    true),
                 CancellationToken.None);
         }
         finally

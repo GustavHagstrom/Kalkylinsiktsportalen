@@ -19,8 +19,11 @@ public static class ViewMappings
             mongoView.Name,
             mongoView.Description,
             mongoView.IsArchived,
-            mongoView.DataSections.Cast<IViewSection>()
-                .Concat(mongoView.SheetSections)
+            mongoView.DataSections
+                .Select(section => new OrderedViewSection(section.Order, Section: ToDomain(section)))
+                .Concat(mongoView.SheetSections.Select(section => new OrderedViewSection(section.Order, ToDomain(section))))
+                .OrderBy(section => section.Order)
+                .Select(section => section.Section)
                 .ToArray(),
             PageFormat.FromPersistedName(mongoView.PageFormatName));
     }
@@ -31,8 +34,16 @@ public static class ViewMappings
             Id = view.Id.IsEmpty ? ViewId.New().Value : view.Id.Value,
             Name = view.Name,
             OrganizationId = view.OrganizationId.Value,
-            SheetSections = view.Sections.OfType<SheetSection>().ToList(),
-            DataSections = view.Sections.OfType<DataSection>().ToList(),
+            SheetSections = view.Sections
+                .Select((section, index) => new { section, index })
+                .Where(item => item.section is SheetSection)
+                .Select(item => ToMongo((SheetSection)item.section, item.index))
+                .ToList(),
+            DataSections = view.Sections
+                .Select((section, index) => new { section, index })
+                .Where(item => item.section is DataSection)
+                .Select(item => ToMongo((DataSection)item.section, item.index))
+                .ToList(),
             Description = view.Description,
             PageFormatName = view.PageFormat.Name,
             PageFormatWidthMm = view.PageFormat.WidthMm,
@@ -41,4 +52,50 @@ public static class ViewMappings
             IsArchived = view.IsArchived,
         };
     }
+
+    private static DataSection ToDomain(MongoDataSection section)
+        => DataSection.Reconstitute(
+            section.SectionId,
+            section.Rows,
+            section.Columns,
+            section.DataCells,
+            section.PageBreakBehavior);
+
+    private static SheetSection ToDomain(MongoSheetSection section)
+        => SheetSection.Reconstitute(
+            section.SectionId,
+            section.Columns,
+            section.SourceType,
+            section.EnableChanges,
+            section.ShowHeaders,
+            section.SheetCells,
+            section.PageBreakBehavior);
+
+    private static MongoDataSection ToMongo(DataSection section, int order)
+        => new()
+        {
+            Order = order,
+            SectionId = section.SectionId,
+            PageBreakBehavior = section.PageBreakBehavior,
+            Rows = section.Rows.ToList(),
+            Columns = section.Columns.ToList(),
+            DataCells = section.Cells.ToDictionary(
+                cell => new DataCellKey(cell.RowIndex, cell.ColumnIndex),
+                cell => cell)
+        };
+
+    private static MongoSheetSection ToMongo(SheetSection section, int order)
+        => new()
+        {
+            Order = order,
+            SectionId = section.SectionId,
+            SourceType = section.SourceType,
+            ShowHeaders = section.ShowHeaders,
+            Columns = section.Columns.ToArray(),
+            EnableChanges = section.EnableChanges,
+            SheetCells = section.SheetCells,
+            PageBreakBehavior = section.PageBreakBehavior
+        };
+
+    private sealed record OrderedViewSection(int Order, IViewSection Section);
 }

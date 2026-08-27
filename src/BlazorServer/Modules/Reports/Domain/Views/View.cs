@@ -93,9 +93,9 @@ public class View
         AddSection(section);
         return section;
     }
-    public SheetSection AddSheetSection()
+    public SheetSection AddSheetSection(SheetSourceType sourceType)
     {
-        var section = new SheetSection();
+        var section = SheetSection.Create(sourceType);
         AddSection(section);
         return section;
     }

@@ -1,6 +1,3 @@
-using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSections;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -18,6 +15,6 @@ public class MongoView
     public decimal PageFormatHeightMm { get; set; } = 0;
     public bool EnableChanges { get; set; } = false;
     public bool IsArchived { get; set; } = false;
-    public List<DataSection> DataSections { get; set; } = new();
-    public List<SheetSection> SheetSections { get; set; } = new();
+    public List<MongoDataSection> DataSections { get; set; } = new();
+    public List<MongoSheetSection> SheetSections { get; set; } = new();
 }

@@ -39,6 +39,7 @@ public class ReportsViewPersistenceTargetModelTests
                     }),
                 SheetSection.Reconstitute(
                     new SectionId("sheet-section-1"),
+                    SheetSection.DefaultColumns(),
                     enableChanges: true,
                     sheetCells: new Dictionary<SheetCellKey, SheetCell>
                     {

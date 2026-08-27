@@ -9,9 +9,6 @@ public class DataSection : IViewSection
 
     private List<RowDefinition> _rowDefinitions = [];
     private List<ColumnDefinition> _columnDefinitions = [];
-    /// <summary>
-    /// Key: "R{rowIndex}C{columnIndex}" 0 based arrays
-    /// </summary>
     private Dictionary<DataCellKey, DataCell> _dataCells = new();
     public SectionId SectionId { get; private set; } = SectionId.New();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
@@ -243,9 +240,9 @@ public class DataSection : IViewSection
             {
                 RowIndex = kvp.Value.RowIndex,
                 ColumnIndex = kvp.Value.ColumnIndex,
-                CellLayout = kvp.Value.CellLayout,
-                TextStyle = kvp.Value.TextStyle,
-                ValueFormat = kvp.Value.ValueFormat,
+                CellLayout = kvp.Value.CellLayout?.Clone(),
+                TextStyle = kvp.Value.TextStyle?.Clone(),
+                ValueFormat = kvp.Value.ValueFormat?.Clone(),
                 CellExpression = kvp.Value.CellExpression
             })
         };

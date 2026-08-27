@@ -103,9 +103,7 @@ public class ViewTargetModelTests
         var view = View.Create(new OrganizationId("org-1"), "Tender report", "For review");
         var dataSection = view.AddDataSection();
         dataSection.EditCellExpression(0, 0, "Heading");
-        var sheetSection = view.AddSheetSection();
-        sheetSection.SourceType = SheetSourceType.SummarySheet;
-
+        var sheetSection = view.AddSheetSection(SheetSourceType.TenderSheet);
         var duplicate = view.Duplicate("Tender report copy");
 
         Assert.Multiple(() =>
@@ -171,5 +169,7 @@ public class ViewTargetModelTests
 
     private static SheetSection SheetSection(string sectionId)
         => BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.Reconstitute(
-            new SectionId(sectionId));
+            new SectionId(sectionId),
+            BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.DefaultColumns(),
+            SheetSourceType.TenderSheet);
 }
