@@ -6,14 +6,14 @@ public class SheetSection : IViewSection
 {
     public SectionId SectionId { get; private set; } = SectionId.New();
     public SheetSourceType SourceType { get; private set; } = SheetSourceType.TenderSheet;
-    public bool ShowHeaders { get; set; }
+    public bool ShowHeaders { get; set; } = true;
     public IReadOnlyList<ColumnDefinition> Columns { get; private set; } = DefaultColumns();
     public bool EnableChanges { get; set; } = false;
     public Dictionary<SheetCellKey, SheetCell> SheetCells { get; } = new();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
     private SheetSection() { }
-    public static SheetSection Create(SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = false, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    public static SheetSection Create(SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = true, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         return new SheetSection
         {
@@ -24,7 +24,7 @@ public class SheetSection : IViewSection
             PageBreakBehavior = pageBreakBehavior
         };
     }
-    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<ColumnDefinition> columns, SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = false, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<ColumnDefinition> columns, SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         ArgumentNullException.ThrowIfNull(sectionId);
 

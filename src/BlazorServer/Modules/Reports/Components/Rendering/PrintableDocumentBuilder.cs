@@ -89,16 +89,34 @@ public sealed class PrintableDocumentBuilder
     private static PrintableContainer BuildSheetSectionItem(SheetSection section)
         => new(
             $"sheet-section-{section.SectionId}",
-            Enum.GetValues<RowType>()
-                .Select(rowType => new PrintableBlock(
-                    $"sheet-section-{section.SectionId}-row-{rowType}",
-                    typeof(SheetSectionRowComponent),
-                    new Dictionary<string, object?>
-                    {
-                        [nameof(SheetSectionRowComponent.SheetSection)] = section,
-                        [nameof(SheetSectionRowComponent.RowType)] = rowType
-                    }))
+            BuildSheetSectionBlocks(section)
                 .ToArray());
+
+    private static IEnumerable<PrintableBlock> BuildSheetSectionBlocks(SheetSection section)
+    {
+        if (section.ShowHeaders)
+        {
+            yield return new PrintableBlock(
+                $"sheet-section-{section.SectionId}-header",
+                typeof(SheetSectionHeaderRowComponent),
+                new Dictionary<string, object?>
+                {
+                    [nameof(SheetSectionHeaderRowComponent.SheetSection)] = section
+                });
+        }
+
+        foreach (var rowType in Enum.GetValues<RowType>())
+        {
+            yield return new PrintableBlock(
+                $"sheet-section-{section.SectionId}-row-{rowType}",
+                typeof(SheetSectionRowComponent),
+                new Dictionary<string, object?>
+                {
+                    [nameof(SheetSectionRowComponent.SheetSection)] = section,
+                    [nameof(SheetSectionRowComponent.RowType)] = rowType
+                });
+        }
+    }
 
     private static IEnumerable<IViewSection> OrderedSections(View view)
         => view.Sections;
@@ -164,6 +182,13 @@ public sealed class PrintableDocumentBuilder
                 sheetSection.PageBreakBehavior,
                 sheetSection.SourceType,
                 sheetSection.EnableChanges,
+                sheetSection.ShowHeaders,
+                Columns = sheetSection.Columns.Select(column => new
+                {
+                    column.ColumnType,
+                    column.RelativeWidth,
+                    column.IsVisible
+                }),
                 Cells = sheetSection.SheetCells
                     .OrderBy(cell => cell.Key.RowType)
                     .ThenBy(cell => cell.Key.ColumnType)

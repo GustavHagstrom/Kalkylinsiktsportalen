@@ -1,8 +1,15 @@
 <table class="sheet-section">
+    <colgroup>
+        @foreach (var column in VisibleColumns)
+        {
+            <col style="@ColumnPercentWidth(column)" />
+        }
+    </colgroup>
     <tbody>
         <tr>
-            @foreach (var columnType in OrderedColumnTypes)
+            @foreach (var column in VisibleColumns)
             {
+                var columnType = column.ColumnType;
                 var cell = GetSheetCell(columnType);
                 <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(cell))">
                     <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(cell), DisplayType(cell))">
@@ -21,7 +28,20 @@
     [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = SheetSection.Create();
     [Parameter, EditorRequired] public RowType RowType { get; set; }
 
-    private static IReadOnlyList<ColumnType> OrderedColumnTypes { get; } = Enum.GetValues<ColumnType>();
+    private IReadOnlyList<BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition> VisibleColumns
+        => SheetSection.Columns.Where(column => column.IsVisible).ToArray();
+
+    private double TableWidth => VisibleColumns.Sum(column => column.RelativeWidth);
+
+    private string ColumnPercentWidth(BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition column)
+    {
+        if (TableWidth <= 0)
+        {
+            return string.Empty;
+        }
+
+        return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}%""";
+    }
 
     private SheetCell GetSheetCell(ColumnType columnType)
     {

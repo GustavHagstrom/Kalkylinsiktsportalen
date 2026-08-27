@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using DataColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.DataSections.ColumnDefinition;
+using SheetColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition;
 using PrintableDocumentContract = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments.PrintableDocument;
 using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
@@ -113,8 +114,43 @@ public sealed class ReportDocumentRendererTargetModelTests
         Assert.Multiple(() =>
         {
             Assert.That(section.Id, Is.EqualTo("sheet-section-sheet-1"));
-            Assert.That(section.Items, Has.Count.EqualTo(Enum.GetValues<RowType>().Length));
-            Assert.That(section.Items.Cast<PrintableBlock>().Select(block => block.ComponentType).Distinct(), Is.EqualTo([typeof(SheetSectionRowComponent)]));
+            Assert.That(section.Items, Has.Count.EqualTo(Enum.GetValues<RowType>().Length + 1));
+            Assert.That(((PrintableBlock)section.Items[0]).Id, Is.EqualTo("sheet-section-sheet-1-header"));
+            Assert.That(((PrintableBlock)section.Items[0]).ComponentType, Is.EqualTo(typeof(SheetSectionHeaderRowComponent)));
+            Assert.That(section.Items.Cast<PrintableBlock>().Skip(1).Select(block => block.ComponentType).Distinct(), Is.EqualTo([typeof(SheetSectionRowComponent)]));
+        });
+    }
+
+    [Test]
+    public async Task BuildDocument_RendersSheetSectionVisibleColumnsInConfiguredOrder()
+    {
+        var columns = new[]
+        {
+            SheetColumnDefinition.Create(ColumnType.Quantity, relativeWidth: 2),
+            SheetColumnDefinition.Create(ColumnType.Description, relativeWidth: 1),
+            SheetColumnDefinition.Create(ColumnType.Unit, isVisible: false),
+            SheetColumnDefinition.Create(ColumnType.Reference, isVisible: false),
+            SheetColumnDefinition.Create(ColumnType.Code, isVisible: false),
+            SheetColumnDefinition.Create(ColumnType.Remark, isVisible: false)
+        };
+        var view = View.Reconstitute(
+            new ViewId("sheet-view"),
+            new OrganizationId("org-1"),
+            "Sheet report",
+            "",
+            isArchived: false,
+            [SheetSection.Reconstitute(new SectionId("sheet-1"), columns, SheetSourceType.TenderSheet)]);
+
+        var document = new PrintableDocumentBuilder().Build(view, RenderingContext("version-1", "snapshot-1"));
+        var html = await RenderDocumentAsync(document);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(html, Does.Contain("data-printable-block-id=\"sheet-section-sheet-1-header\""));
+            Assert.That(html.IndexOf(">Quantity<", StringComparison.Ordinal), Is.LessThan(html.IndexOf(">Description<", StringComparison.Ordinal)));
+            Assert.That(html, Does.Contain("width: 66.67%"));
+            Assert.That(html, Does.Contain("width: 33.33%"));
+            Assert.That(html, Does.Not.Contain(">Unit<"));
         });
     }
 

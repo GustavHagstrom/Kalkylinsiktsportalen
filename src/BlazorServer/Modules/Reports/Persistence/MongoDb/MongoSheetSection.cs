@@ -7,7 +7,7 @@ public sealed class MongoSheetSection
 {
     public int Order { get; set; }
     public SectionId SectionId { get; set; } = SectionId.New();
-    public bool ShowHeaders { get; set; }
+    public bool ShowHeaders { get; set; } = true;
     public SheetSourceType SourceType { get; set; } = SheetSourceType.TenderSheet;
     public ColumnDefinition[] Columns { get; set; } = [];
     public bool EnableChanges { get; set; } = false;
