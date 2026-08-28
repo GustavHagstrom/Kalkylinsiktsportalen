@@ -91,17 +91,17 @@ else
 
         <div class="column">
             <div class="row">
-                <IsActiveIconButton IsActive="TextStyleModel.IsBold"
+                <IsActiveIconButton IsActive="TextStyle?.IsBold == true"
                                     Icon="@Icons.Material.Sharp.FormatBold"
                                     OnClick="ToggleBold"
                                     Class="border border-solid"
                                     Enabled="@Enabled" />
-                <IsActiveIconButton IsActive="TextStyleModel.IsItalic"
+                <IsActiveIconButton IsActive="TextStyle?.IsItalic == true"
                                     Icon="@Icons.Material.Sharp.FormatItalic"
                                     OnClick="ToggleItalic"
                                     Class="border border-solid"
                                     Enabled="@Enabled" />
-                <IsActiveIconButton IsActive="TextStyleModel.IsUnderline"
+                <IsActiveIconButton IsActive="TextStyle?.IsUnderline == true"
                                     Icon="@Icons.Material.Sharp.FormatUnderlined"
                                     OnClick="ToggleUnderline"
                                     Class="border border-solid"
@@ -147,10 +147,6 @@ else
     private List<BorderStyle> BorderStyleOptions { get; } = [BorderStyle.Solid, BorderStyle.Dashed, BorderStyle.Dotted, BorderStyle.Double];
     private List<ValueFormatKind> ValueFormatKindOptions { get; } = [ValueFormatKind.Text, ValueFormatKind.Number, ValueFormatKind.Date, ValueFormatKind.DateTimeMinute];
 
-    private CellLayout LayoutModel => Layout ??= new CellLayout();
-    private TextStyle TextStyleModel => TextStyle ??= new TextStyle();
-    private ValueFormat ValueFormatModel => ValueFormat ??= new ValueFormat();
-
     private CellBorder? SelectedBorder => SelectedBorderSide switch
     {
         BorderSide.Left => Layout?.LeftBorder,
@@ -164,8 +160,7 @@ else
         get => SelectedBorder?.Style ?? BorderStyle.Solid;
         set
         {
-            EnsureSelectedBorder().Style = value;
-            NotifyLayoutChanged();
+            SetSelectedBorder(EnsureSelectedBorder() with { Style = value });
         }
     }
 
@@ -174,8 +169,7 @@ else
         get => Layout?.PaddingLeftMm;
         set
         {
-            LayoutModel.PaddingLeftMm = value;
-            NotifyLayoutChanged();
+            SetLayout((Layout ?? new CellLayout()) with { PaddingLeftMm = value });
         }
     }
 
@@ -184,8 +178,7 @@ else
         get => Layout?.PaddingRightMm;
         set
         {
-            LayoutModel.PaddingRightMm = value;
-            NotifyLayoutChanged();
+            SetLayout((Layout ?? new CellLayout()) with { PaddingRightMm = value });
         }
     }
 
@@ -194,8 +187,7 @@ else
         get => Layout?.PaddingTopMm;
         set
         {
-            LayoutModel.PaddingTopMm = value;
-            NotifyLayoutChanged();
+            SetLayout((Layout ?? new CellLayout()) with { PaddingTopMm = value });
         }
     }
 
@@ -204,8 +196,7 @@ else
         get => Layout?.PaddingBottomMm;
         set
         {
-            LayoutModel.PaddingBottomMm = value;
-            NotifyLayoutChanged();
+            SetLayout((Layout ?? new CellLayout()) with { PaddingBottomMm = value });
         }
     }
 
@@ -214,8 +205,7 @@ else
         get => TextStyle?.Font;
         set
         {
-            TextStyleModel.Font = value;
-            NotifyTextStyleChanged();
+            SetTextStyle((TextStyle ?? new TextStyle()) with { Font = value });
         }
     }
 
@@ -224,8 +214,7 @@ else
         get => TextStyle?.FontSizePt;
         set
         {
-            TextStyleModel.FontSizePt = value;
-            NotifyTextStyleChanged();
+            SetTextStyle((TextStyle ?? new TextStyle()) with { FontSizePt = value });
         }
     }
 
@@ -234,8 +223,7 @@ else
         get => ValueFormat?.Kind ?? ValueFormatKind.Text;
         set
         {
-            ValueFormatModel.Kind = value;
-            NotifyValueFormatChanged();
+            SetValueFormat((ValueFormat ?? new ValueFormat()) with { Kind = value });
         }
     }
 
@@ -244,8 +232,7 @@ else
         get => ValueFormat?.DecimalCount ?? 0;
         set
         {
-            ValueFormatModel.DecimalCount = value;
-            NotifyValueFormatChanged();
+            SetValueFormat((ValueFormat ?? new ValueFormat()) with { DecimalCount = value });
         }
     }
 
@@ -254,8 +241,7 @@ else
         get => SelectedBorder?.WidthPt ?? 1;
         set
         {
-            EnsureSelectedBorder().WidthPt = value;
-            NotifyLayoutChanged();
+            SetSelectedBorder(EnsureSelectedBorder() with { WidthPt = value });
         }
     }
 
@@ -273,26 +259,24 @@ else
             SetSelectedBorder(new CellBorder { WidthPt = 1, Style = BorderStyle.Solid, Color = "#000000" });
         else
             SetSelectedBorder(null);
-
-        NotifyLayoutChanged();
     }
 
     private void ToggleBold()
     {
-        TextStyleModel.IsBold = !TextStyleModel.IsBold;
-        NotifyTextStyleChanged();
+        var current = TextStyle ?? new TextStyle();
+        SetTextStyle(current with { IsBold = !current.IsBold });
     }
 
     private void ToggleItalic()
     {
-        TextStyleModel.IsItalic = !TextStyleModel.IsItalic;
-        NotifyTextStyleChanged();
+        var current = TextStyle ?? new TextStyle();
+        SetTextStyle(current with { IsItalic = !current.IsItalic });
     }
 
     private void ToggleUnderline()
     {
-        TextStyleModel.IsUnderline = !TextStyleModel.IsUnderline;
-        NotifyTextStyleChanged();
+        var current = TextStyle ?? new TextStyle();
+        SetTextStyle(current with { IsUnderline = !current.IsUnderline });
     }
 
     private void ToggleColorPicker(ColorPickerTarget target)
@@ -321,16 +305,13 @@ else
         switch (ActiveColorPicker)
         {
             case ColorPickerTarget.Background:
-                LayoutModel.BackgroundColor = hexColor;
-                NotifyLayoutChanged();
+                SetLayout((Layout ?? new CellLayout()) with { BackgroundColor = hexColor });
                 break;
             case ColorPickerTarget.Text:
-                TextStyleModel.TextColor = hexColor;
-                NotifyTextStyleChanged();
+                SetTextStyle((TextStyle ?? new TextStyle()) with { TextColor = hexColor });
                 break;
             case ColorPickerTarget.Border:
-                EnsureSelectedBorder().Color = hexColor;
-                NotifyLayoutChanged();
+                SetSelectedBorder(EnsureSelectedBorder() with { Color = hexColor });
                 break;
         }
 
@@ -342,37 +323,48 @@ else
         if (SelectedBorder is { } existing)
             return existing;
 
-        var border = new CellBorder { WidthPt = 1, Style = BorderStyle.Solid, Color = "#000000" };
-        SetSelectedBorder(border);
-        return border;
+        return new CellBorder { WidthPt = 1, Style = BorderStyle.Solid, Color = "#000000" };
     }
 
     private void SetSelectedBorder(CellBorder? border)
     {
-        switch (SelectedBorderSide)
+        var layout = Layout ?? new CellLayout();
+        layout = SelectedBorderSide switch
         {
-            case BorderSide.Left:
-                LayoutModel.LeftBorder = border;
-                break;
-            case BorderSide.Right:
-                LayoutModel.RightBorder = border;
-                break;
-            case BorderSide.Bottom:
-                LayoutModel.BottomBorder = border;
-                break;
-            default:
-                LayoutModel.TopBorder = border;
-                break;
-        }
+            BorderSide.Left => layout with { LeftBorder = border },
+            BorderSide.Right => layout with { RightBorder = border },
+            BorderSide.Bottom => layout with { BottomBorder = border },
+            _ => layout with { TopBorder = border }
+        };
+
+        SetLayout(layout);
     }
 
-    private void NotifyLayoutChanged()
+    private void SetLayout(CellLayout layout)
+    {
+        Layout = layout.IsDefault() ? null : layout;
+        NotifyLayoutChanged();
+    }
+
+    private void SetTextStyle(TextStyle textStyle)
+    {
+        TextStyle = textStyle.IsDefault() ? null : textStyle;
+        NotifyTextStyleChanged();
+    }
+
+    private void SetValueFormat(ValueFormat valueFormat)
+    {
+        ValueFormat = valueFormat.IsDefault() ? null : valueFormat;
+        NotifyValueFormatChanged();
+    }
+
+    private Task NotifyLayoutChanged()
         => LayoutChanged.InvokeAsync(Layout);
 
-    private void NotifyTextStyleChanged()
+    private Task NotifyTextStyleChanged()
         => TextStyleChanged.InvokeAsync(TextStyle);
 
-    private void NotifyValueFormatChanged()
+    private Task NotifyValueFormatChanged()
         => ValueFormatChanged.InvokeAsync(ValueFormat);
 
     private enum BorderSide

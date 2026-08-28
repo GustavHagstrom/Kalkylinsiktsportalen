@@ -1,44 +1,44 @@
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
-public sealed class CellLayout
+public sealed record CellLayout
 {
-    private string? _backgroundColor;
-    private double? _paddingLeftMm;
-    private double? _paddingRightMm;
-    private double? _paddingTopMm;
-    private double? _paddingBottomMm;
+    private readonly string? _backgroundColor;
+    private readonly double? _paddingLeftMm;
+    private readonly double? _paddingRightMm;
+    private readonly double? _paddingTopMm;
+    private readonly double? _paddingBottomMm;
 
     public string? BackgroundColor
     {
         get => _backgroundColor;
-        set => _backgroundColor = ReportColor.NormalizeOptional(value);
+        init => _backgroundColor = ReportColor.NormalizeOptional(value);
     }
 
     public double? PaddingLeftMm
     {
         get => _paddingLeftMm;
-        set => _paddingLeftMm = ValidateNonNegative(value, nameof(PaddingLeftMm));
+        init => _paddingLeftMm = ValidateNonNegative(value, nameof(PaddingLeftMm));
     }
     public double? PaddingRightMm
     {
         get => _paddingRightMm;
-        set => _paddingRightMm = ValidateNonNegative(value, nameof(PaddingRightMm));
+        init => _paddingRightMm = ValidateNonNegative(value, nameof(PaddingRightMm));
     }
     public double? PaddingTopMm
     {
         get => _paddingTopMm;
-        set => _paddingTopMm = ValidateNonNegative(value, nameof(PaddingTopMm));
+        init => _paddingTopMm = ValidateNonNegative(value, nameof(PaddingTopMm));
     }
     public double? PaddingBottomMm
     {
         get => _paddingBottomMm;
-        set => _paddingBottomMm = ValidateNonNegative(value, nameof(PaddingBottomMm));
+        init => _paddingBottomMm = ValidateNonNegative(value, nameof(PaddingBottomMm));
     }
 
-    public CellBorder? LeftBorder { get; set; }
-    public CellBorder? RightBorder { get; set; }
-    public CellBorder? TopBorder { get; set; }
-    public CellBorder? BottomBorder { get; set; }
+    public CellBorder? LeftBorder { get; init; }
+    public CellBorder? RightBorder { get; init; }
+    public CellBorder? TopBorder { get; init; }
+    public CellBorder? BottomBorder { get; init; }
 
     public static CellLayout Default => new();
     public bool IsDefault()
@@ -51,20 +51,6 @@ public sealed class CellLayout
            && RightBorder is null
            && TopBorder is null
            && BottomBorder is null;
-
-    public CellLayout Clone()
-        => new()
-        {
-            BackgroundColor = BackgroundColor,
-            PaddingLeftMm = PaddingLeftMm,
-            PaddingRightMm = PaddingRightMm,
-            PaddingTopMm = PaddingTopMm,
-            PaddingBottomMm = PaddingBottomMm,
-            LeftBorder = LeftBorder?.Clone(),
-            RightBorder = RightBorder?.Clone(),
-            TopBorder = TopBorder?.Clone(),
-            BottomBorder = BottomBorder?.Clone()
-        };
 
     private static double? ValidateNonNegative(double? value, string parameterName)
     {

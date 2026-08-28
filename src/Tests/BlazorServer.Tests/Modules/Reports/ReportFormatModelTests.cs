@@ -15,8 +15,8 @@ public sealed class ReportFormatModelTests
         Assert.Multiple(() =>
         {
             Assert.That(style.TextColor, Is.EqualTo("#FFEECC"));
-            Assert.That(() => style.TextColor = "#11223344", Throws.TypeOf<ArgumentException>());
-            Assert.That(() => style.TextColor = "red", Throws.TypeOf<ArgumentException>());
+            Assert.That(() => style with { TextColor = "#11223344" }, Throws.TypeOf<ArgumentException>());
+            Assert.That(() => style with { TextColor = "red" }, Throws.TypeOf<ArgumentException>());
         });
     }
 
@@ -43,8 +43,8 @@ public sealed class ReportFormatModelTests
             Assert.That(new CellLayout().BackgroundColor, Is.Null);
             Assert.That(layout.BackgroundColor, Is.EqualTo("#FFEECC"));
             Assert.That(layout.LeftBorder!.Color, Is.EqualTo("#111111"));
-            Assert.That(() => layout.PaddingLeftMm = -0.1, Throws.TypeOf<ArgumentOutOfRangeException>());
-            Assert.That(() => layout.LeftBorder = new CellBorder { WidthPt = 0 }, Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => layout with { PaddingLeftMm = -0.1 }, Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => layout with { LeftBorder = new CellBorder { WidthPt = 0 } }, Throws.TypeOf<ArgumentOutOfRangeException>());
         });
     }
 
@@ -62,7 +62,7 @@ public sealed class ReportFormatModelTests
     }
 
     [Test]
-    public void FormatObjectsCloneAsIndependentCopies()
+    public void FormatObjectsHaveValueEqualityAndWithCopies()
     {
         var valueFormat = ValueFormat.Number(decimalCount: 2, useThousandsSeparator: true);
         var textStyle = new TextStyle
@@ -86,20 +86,21 @@ public sealed class ReportFormatModelTests
             }
         };
 
-        var valueFormatClone = valueFormat.Clone();
-        var textStyleClone = textStyle.Clone();
-        var cellLayoutClone = cellLayout.Clone();
-
-        valueFormatClone.DecimalCount = 4;
-        textStyleClone.TextColor = "#abcdef";
-        cellLayoutClone.LeftBorder!.Color = "#778899";
+        var matchingValueFormat = ValueFormat.Number(decimalCount: 2, useThousandsSeparator: true);
+        var matchingTextStyle = textStyle with { };
+        var matchingCellLayout = cellLayout with { };
+        var changedValueFormat = valueFormat with { DecimalCount = 4 };
+        var changedTextStyle = textStyle with { TextColor = "#abcdef" };
+        var changedCellLayout = cellLayout with { LeftBorder = cellLayout.LeftBorder! with { Color = "#778899" } };
 
         Assert.Multiple(() =>
         {
-            Assert.That(valueFormatClone, Is.Not.SameAs(valueFormat));
-            Assert.That(textStyleClone, Is.Not.SameAs(textStyle));
-            Assert.That(cellLayoutClone, Is.Not.SameAs(cellLayout));
-            Assert.That(cellLayoutClone.LeftBorder, Is.Not.SameAs(cellLayout.LeftBorder));
+            Assert.That(matchingValueFormat, Is.EqualTo(valueFormat));
+            Assert.That(matchingTextStyle, Is.EqualTo(textStyle));
+            Assert.That(matchingCellLayout, Is.EqualTo(cellLayout));
+            Assert.That(changedValueFormat, Is.Not.EqualTo(valueFormat));
+            Assert.That(changedTextStyle, Is.Not.EqualTo(textStyle));
+            Assert.That(changedCellLayout, Is.Not.EqualTo(cellLayout));
             Assert.That(valueFormat.DecimalCount, Is.EqualTo(2));
             Assert.That(textStyle.TextColor, Is.EqualTo("#FFEECC"));
             Assert.That(cellLayout.LeftBorder!.Color, Is.EqualTo("#445566"));

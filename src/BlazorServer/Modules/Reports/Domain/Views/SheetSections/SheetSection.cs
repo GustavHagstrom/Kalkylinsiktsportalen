@@ -120,9 +120,9 @@ public class SheetSection : IViewSection
             {
                 RowType = kvp.Value.RowType,
                 ColumnType = kvp.Value.ColumnType,
-                CellLayout = kvp.Value.CellLayout?.Clone(),
-                TextStyle = kvp.Value.TextStyle?.Clone(),
-                ValueFormat = kvp.Value.ValueFormat?.Clone(),
+                CellLayout = kvp.Value.CellLayout,
+                TextStyle = kvp.Value.TextStyle,
+                ValueFormat = kvp.Value.ValueFormat,
                 HideValue = kvp.Value.HideValue
             };
         }

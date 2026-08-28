@@ -1,20 +1,20 @@
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
-public sealed class TextStyle
+public sealed record TextStyle
 {
-    private string? _textColor;
-    private double? _fontSizePt;
+    private readonly string? _textColor;
+    private readonly double? _fontSizePt;
 
-    public ReportFont? Font { get; set; }
+    public ReportFont? Font { get; init; }
     public string? TextColor
     {
         get => _textColor;
-        set => _textColor = ReportColor.NormalizeOptional(value);
+        init => _textColor = ReportColor.NormalizeOptional(value);
     }
     public double? FontSizePt
     {
         get => _fontSizePt;
-        set
+        init
         {
             if (value <= 0)
                 throw new ArgumentOutOfRangeException(nameof(value), "Font size must be greater than zero.");
@@ -22,11 +22,11 @@ public sealed class TextStyle
             _fontSizePt = value;
         }
     }
-    public bool IsBold { get; set; }
-    public bool IsItalic { get; set; }
-    public bool IsUnderline { get; set; }
-    public HorizontalTextAlignment? HorizontalAlignment { get; set; }
-    public VerticalTextAlignment? VerticalAlignment { get; set; }
+    public bool IsBold { get; init; }
+    public bool IsItalic { get; init; }
+    public bool IsUnderline { get; init; }
+    public HorizontalTextAlignment? HorizontalAlignment { get; init; }
+    public VerticalTextAlignment? VerticalAlignment { get; init; }
 
     public static TextStyle Default => new();
 
@@ -40,16 +40,4 @@ public sealed class TextStyle
            && HorizontalAlignment is null
            && VerticalAlignment is null;
 
-    public TextStyle Clone()
-        => new()
-        {
-            Font = Font,
-            TextColor = TextColor,
-            FontSizePt = FontSizePt,
-            IsBold = IsBold,
-            IsItalic = IsItalic,
-            IsUnderline = IsUnderline,
-            HorizontalAlignment = HorizontalAlignment,
-            VerticalAlignment = VerticalAlignment
-        };
 }

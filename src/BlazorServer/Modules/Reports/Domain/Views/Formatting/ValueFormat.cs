@@ -1,14 +1,14 @@
 namespace BlazorServer.Modules.Reports.Domain.Views;
 
-public sealed class ValueFormat
+public sealed record ValueFormat
 {
-    private int _decimalCount;
+    private readonly int _decimalCount;
 
-    public ValueFormatKind Kind { get; set; } = ValueFormatKind.Text;
+    public ValueFormatKind Kind { get; init; } = ValueFormatKind.Text;
     public int DecimalCount
     {
         get => _decimalCount;
-        set
+        init
         {
             if (value < 0 || value > 6)
                 throw new ArgumentOutOfRangeException(nameof(value), "Decimal count must be between 0 and 6.");
@@ -16,7 +16,7 @@ public sealed class ValueFormat
             _decimalCount = value;
         }
     }
-    public bool UseThousandsSeparator { get; set; }
+    public bool UseThousandsSeparator { get; init; }
 
     public static ValueFormat Text => new();
     public static ValueFormat Date => new() { Kind = ValueFormatKind.Date };
@@ -36,11 +36,4 @@ public sealed class ValueFormat
            && DecimalCount == 0
            && !UseThousandsSeparator;
 
-    public ValueFormat Clone()
-        => new()
-        {
-            Kind = Kind,
-            DecimalCount = DecimalCount,
-            UseThousandsSeparator = UseThousandsSeparator
-        };
 }

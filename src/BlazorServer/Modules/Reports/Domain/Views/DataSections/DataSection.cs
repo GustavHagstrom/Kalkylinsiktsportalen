@@ -240,9 +240,9 @@ public class DataSection : IViewSection
             {
                 RowIndex = kvp.Value.RowIndex,
                 ColumnIndex = kvp.Value.ColumnIndex,
-                CellLayout = kvp.Value.CellLayout?.Clone(),
-                TextStyle = kvp.Value.TextStyle?.Clone(),
-                ValueFormat = kvp.Value.ValueFormat?.Clone(),
+                CellLayout = kvp.Value.CellLayout,
+                TextStyle = kvp.Value.TextStyle,
+                ValueFormat = kvp.Value.ValueFormat,
                 CellExpression = kvp.Value.CellExpression
             })
         };
