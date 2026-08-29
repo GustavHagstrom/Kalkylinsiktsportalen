@@ -75,7 +75,9 @@ Beslut som är långlivade, svåra att backa ur och resultatet av en verklig tra
 ## Principer För Dokumentation
 
 - Skriv kort, konkret och versionsnära.
-- Dokumentera beslut och riktning, inte bara implementation.
+- Dokumentera i första hand målbilden: hur produkten, domänen och arkitekturen ska fungera när modellen är rätt uttryckt.
+- Beskriv nuläge, migration och temporära implementationer bara när det behövs för att undvika missförstånd.
+- Märk sådana avvikelser tydligt som nuläge, migration eller tillfälligt val.
 - Låt ett dokument äga varje informationsslag.
 - Uppdatera [../CONTEXT.md](../CONTEXT.md) när kanoniska domäntermer ändras eller etableras.
 - Uppdatera `docs/domain/*.md` när aggregates, relationer, invariants eller modulnära policyer förfinas.

@@ -6,7 +6,7 @@ Läs dokumentet i den här ordningen om du vill förstå modulen snabbt:
 
 1. börja med modulgränsen
 2. läs huvudaggregaten
-3. läs `SheetSection` som flera delområden: migration, ändringsförutsättningar, replacements, kolumner, format, headers, rendering och rader
+3. läs `SheetSection` som eget huvudkapitel: migration, ändringsförutsättningar, replacements, kolumner, format, headers, rendering och rader
 4. läs renderingsmodellerna
 5. avsluta med relationer, invariants, policyer och framtida variationer
 
@@ -62,7 +62,7 @@ Ansvar:
 - läsa metadata och namngivna värden via aktuell `RenderingContext`
 - inte själv tolka celluttryck till displayvärden
 
-### `SheetSection`
+## `SheetSection`
 
 Identifierbar sektion i en `View` som visar exakt ett helt Bidcon-datablad, till exempel `TenderSheet` eller `SummarySheet`, från aktuell `RenderingContext`.
 
@@ -77,17 +77,17 @@ Ansvar:
 
 `Content` är legacy-/payloadspråk och ska inte användas som domänbegrepp för `SheetSection`. En eventuell rubrik eller beskrivande label för en sheet section är ett separat layoutval, inte samma sak som vilket datablad sektionen renderar.
 
-#### Migration
+### Migration
 
 Nuvarande implementation är en migrationsmodell mot den här målbilden. Den etablerar `SheetSection` som identifierbar sektion med explicit sheet-källa, sparse cellkonfiguration och renderingsstyrande kolumnkonfiguration. Under migration får koden använda förenklade `ColumnType`/`RowType`-namn så länge gränsen är lokal för Reports och inte sprids som kanoniskt domänspråk. Den förenklade `ColumnType`-konfigurationen är ändå nuvarande Reports-sanning för kolumnordning, synlighet och relativ bredd tills den ersätts av den fulla `SheetColumnKind`-modellen. Nuvarande implementation implementerar inte ännu hela `SheetColumnKind`/`SheetRowKind`-målmodellen, `ChangeIndicator` eller snapshotdriven sheet-row-rendering.
 
-#### Ändringsförutsättningar
+### Ändringsförutsättningar
 
 Målmodellen låter ändringsförutsättningarna ligga på `SheetSection`, inte på hela `View`. `ViewScopedChangeSet` är fortfarande scoped till `View`, estimation version och snapshot eftersom Projects utför och lagrar delade val för rapportmallen som helhet, men varje nytt `ReplacementSelection` måste vara giltigt enligt den `SheetSection` där ändringen görs. Dagens `View.EnableChanges` är legacy-/kompatibilitetsspråk eller en temporär default under migration, inte långsiktig domänsanning.
 
 En change-enabled `SheetSection` definierar en explicit lista av giltiga `ReplacementTag` för sektionen. Taggarna matchas mot snapshotradens `Remark`-kolumn. Bara taggar i sektionens lista kan göra syskonrader till replacement-kandidater. Om två syskonrader i samma sheet tree har matchande giltiga `ReplacementTag` och samma `SheetRowKind` enligt sektionens konfiguration är de en giltig replacement-kandidat inom den `SheetSection`, förutsatt att övriga Projects-regler för att utföra och lagra valet uppfylls. Tom tagglista betyder att inga replacements är möjliga i sektionen även om `Remark` innehåller klammer-taggar; i praktiken är det samma användareffekt som att sektionen inte är change-enabled. `SheetSection` definierar alltså förutsättningarna för giltiga replacements i rapportmallen; Projects utför, validerar concurrency och lagrar `ReplacementSelection`.
 
-#### Replacement tags och grupper
+### Replacement tags och grupper
 
 `ReplacementTag` lagras som kanoniskt taggvärde utan klammer. Remark-parsern extraherar till exempel `{minTagg}` till `minTagg`, och matchning görs på det kanoniska värdet. UI kan visa taggar med eller utan klammer, men domänen lagrar inte `{}` som del av taggvärdet.
 
@@ -99,7 +99,7 @@ En `ReplacementGroup` uppstår bara när minst två syskonrader delar samma gilt
 
 Initialt kräver replacement-kandidater samma `SheetRowKind`. Syskonrader med matchande giltig `ReplacementTag` men olika `SheetRowKind` bildar inte en giltig replacement-kandidatgrupp. Cross-kind replacements är en framtida explicit policyvariation om behovet uppstår.
 
-#### Replacement-kandidater
+### Replacement-kandidater
 
 Replacement-kandidater måste vara renderbara i berörd `SheetSection`. Candidate discovery utgår från rader som passerar sektionens `SheetRowKind`-synlighet; rader med dold `SheetRowKind` blir inte replacement-kandidater i den sektionen. Om användaren ska kunna välja en rad som replacement måste dess radtyp vara synlig i samma `SheetSection`.
 
@@ -113,7 +113,7 @@ Det finns högst ett aktivt `ReplacementSelection` per `SheetSection` och origin
 
 Samma ersättningsrad får användas av flera olika originalrader samtidigt i första modellen. Unikhetsregeln gäller originalraden, inte replacement-raden. Varje selection är spårbar genom original `SheetRowPath`, replacement `SheetRowPath` och matchande `ReplacementTag`.
 
-#### Replacement overlay
+### Replacement overlay
 
 Vid rendering av ett aktivt `ReplacementSelection` visas ersättningsradens värden på originalradens plats. Initial `ReplacementPolicy` är systemdefault och inte konfigurerbar per `SheetSection`: visa ersättningsradens värden på originalradens plats men behåll originalradens `Quantity`. Det betyder att till exempel `Remark`, `Description`, `Code` och `Unit` normalt kommer från ersättningsraden. Replacement är en overlay på originalpositionen, inte en mutation av snapshotet och inte ett filter som tar bort ersättningsraden från dess egen plats. Om ersättningsraden också renderas som vanlig snapshotrad på sin ursprungliga plats fortsätter den göra det, om den inte filtreras bort av andra `SheetSection`-regler.
 
@@ -133,7 +133,7 @@ Initialt får replacement-kandidater bara skapas för leaf-rader i sheet-trädet
 
 Replacement overlay använder originalradens plats och `SheetRowKind` för visibility och format. Cell visibility och format nycklat på `SheetRowKind` och `SheetColumnKind` utvärderas alltså mot originalradens `SheetRowKind`, medan displayvärden hämtas från ersättningsraden med originalradens mängd enligt policy. `ChangeIndicator` visar att raden är ersatt.
 
-#### Kolumner och värden
+### Kolumner och värden
 
 `SheetSection` använder en explicit `SheetColumnKind` för kolumner i stället för fria kolumnnamn. `SheetColumnKind` omfattar både Bidcon-baserade kolumner, till exempel description, code, remark, active-status, quantity, unit och reference, och Reports-ägda kolumner, till exempel comment eller change-indikator om sådana behövs. Kolumnordning och kolumnsynlighet är konfiguration på `SheetSection`. Cellkonfiguration, värdesynlighet och format nycklas på kombinationen `SheetRowKind` och `SheetColumnKind`.
 
@@ -141,7 +141,7 @@ Replacement overlay använder originalradens plats och `SheetRowKind` för visib
 
 `SheetColumnKind` bär kolumnens semantiska displaytyp och default `ValueFormat`. En mängdkolumn är därför numeric och har number-format som default; textkolumner är text; eventuella datumkolumner har date/time-default. `SheetSection` lagrar bara overrides från kolumnens semantiska default, till exempel decimalantal, tusentalsseparator, textstil eller cell-layout. Detta skiljer `SheetSection` från `DataSection`, där `ValueFormat` måste väljas explicit eftersom cellinnehållet är användarinput och inte ska auto-tolkas.
 
-#### Cellkonfiguration och format
+### Cellkonfiguration och format
 
 Första `SheetSection`-formatmodellen har systemdefault, kolumnens semantiska default och cell override per `SheetRowKind` och `SheetColumnKind`. Den har inte separata cascading formatlager per hel `SheetRowKind` eller hel `SheetColumnKind` initialt. Radnivå- och kolumnnivå-format som egna lager är framtida variationer om behovet uppstår.
 
@@ -159,23 +159,23 @@ Kolumnbredd är del av `SheetSection`ens rapportlayout. `SheetSection` bär rela
 
 `SheetSection` bär inte radhöjd per `SheetRowKind` i första modellen. Radhöjd härleds av rendering från cellinnehåll, textstil, padding och tillgänglig bredd. En renderad sheet-rad som inte ryms i aktuell sidbody blir ett blockerande pagineringsfel. Radhöjd per `SheetRowKind` är en sannolik framtida layoutvariation, särskilt för rubrik- eller grupprader, men ingår inte initialt.
 
-#### Headers
+### Headers
 
 `SheetSection` kan visa en header-rad med displaynamn för de synliga kolumnerna i aktuell kolumnordning. Header-raden är en del av sheet-tabellens rendering, inte en snapshotrad. Nuvarande implementation bär `ShowHeaders`, med default `true`, och rendering ska skapa ett header-block när `ShowHeaders` är true. Headertext får under migration komma från den förenklade `ColumnType`-katalogen tills den fulla `SheetColumnKind`-katalogen finns. Pagineringsmotorn är domänblind och ska inte känna till sheet headers eller automatiskt upprepa dem vid sidbrytning. Egna header-labels per kolumn och upprepade sheet headers vid pagination är framtida variationer.
 
 Headern har ingen `SheetRowKind`. Cellkonfiguration som nycklas på `SheetRowKind` och `SheetColumnKind` gäller bara data rows från snapshotet. Headern använder systemdefault header style i första modellen; egna header-format, till exempel `HeaderTextStyle` eller `HeaderCellLayout`, är en framtida section-level variation.
 
-#### Rendering till printable-modellen
+### Rendering till printable-modellen
 
 Vid rendering översätter `ReportDocumentRenderer`/sheet-adaptern en `SheetSection` till en `PrintableContainer` med stabil identitet för sektionen. Containern innehåller en följd av mätbara `Printable Block`: ett header-block när `ShowHeaders` är true, följt av ett block per renderad sheet-rad. Hela sheet-tabellen renderas inte som ett enda odelbart block. Containern är inte odelbar, men ger gruppering, spårbarhet och en plats för framtida section-level page-break behavior. Pagineringsmotorn ser bara generiska blocks och containers och behöver inte känna till sheet-rader, tabeller eller headers.
 
-#### Sheet row identity
+### Sheet row identity
 
 Ett renderat sheet row-block identifieras stabilt genom `SectionId`, `SheetKind` och snapshotradens `SheetRowPath`. `SheetKind` identifierar databladets root, så `SheetRowPath` börjar vid rootens renderbara barn. Pathen är sekvensen av syskonindex enligt den importerade `Children`-listans ordning, till exempel `0` för första top-level-raden och `0/3` för dess fjärde barn. Pathen är deterministisk inom ett immutable `EstimationSnapshot` och beskriver radens plats i snapshotets importerade träd. `RowOrder` är inte ensam unik inom ett helt `SheetKind`, och `ExternalId` och `Code` är andra orelaterade fält; de ska inte användas som sheet row identity. `ReplacementSelection`, `ChangeIndicator` och renderingsspårning ska peka på samma snapshotrad genom `SheetRowPath` även när omkringliggande rader filtreras bort eller presentationen ändras.
 
 I första implementationen sparas `SheetRowPath` inte fysiskt på snapshotpayloadens noder. Reports/Projects använder en snapshot-row adapter som traverserar snapshotets tree, tilldelar `SheetRowPath` från `Children`-index och producerar renderbara sheet rows. Om flera moduler senare behöver samma path som persisted data kan den materialiseras i en ny snapshotpayload-version.
 
-#### Radtyper och hierarki
+### Radtyper och hierarki
 
 `SheetSection` använder i målmodellen en explicit `SheetRowKind` för bladets radtyper. `SheetRowKind` täcker de Bidcon-radtyper som kan renderas från snapshotet, till exempel group, part, posting, layer-rader, quantity posting, locked stages, text och invoice. Nuvarande implementation får använda `RowType.Group/Part/Other` som lokalt migrationsspråk i Reports tills snapshot-row-adaptern och full `SheetRowKind` finns. `RowType` är inte kanoniskt domänspråk och ska ersättas eller mappas bort under migration.
 
@@ -191,7 +191,7 @@ När parent-rader filtreras bort komprimerar `SheetSection` inte hierarkin för 
 
 Hierarkivisning är initialt systemstandard, inte konfiguration på `SheetSection`. Renderingen visar snapshotets hierarki på ett standardiserat sätt, initialt i description-kolumnen. `SheetSection` bär inte egna inställningar för indent-size, expand/collapse eller separat nivåkolumn i första modellen.
 
-#### Innehållsfilter och defaults
+### Innehållsfilter och defaults
 
 Initialt har `SheetSection` inga egna innehållsfilter utöver synliga `SheetRowKind`. Den filtrerar inte på radinnehåll, taggar, aktiv-status eller hierarkisubträd. Sådana filter är framtida variationer och måste modelleras explicit när behovet finns, särskilt eftersom de påverkar radidentitet, ändringsindikatorer och hur totalsummor förstås.
 
