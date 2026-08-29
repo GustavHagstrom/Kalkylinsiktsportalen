@@ -260,6 +260,8 @@ Ansvar:
 
 ## Invariants
 
+### `View`
+
 - `View` äger rapportdefinitionen men inte snapshotets sanning eller `ReplacementSelection`-persistens.
 - En `View` skapas inom exakt en `Organization` och kan inte flyttas till en annan `Organization`.
 - En `View` måste ha ett namn, men namnet behöver inte vara unikt inom en `Organization`.
@@ -276,7 +278,12 @@ Ansvar:
 - Strukturell redigering identifierar befintliga sektioner med `SectionId`; dubbletter eller saknade sektionsidentiteter är ogiltig edit-input. Under kompatibilitetsperioden får ett editor-payload introducera en ny sektion med ny `SectionId`, men bara om identiteten är unik, icke-tom, sektionstypen är känd och resultatets ordning är giltig.
 - Hel-view update är ett legitimt bulk-save-use case för rapporteditorn när användaren arbetar med hela rapportmallen som ett dokument. Smalare workflows kan fortfarande uttrycka strukturella ändringar som intentioner, till exempel `AddSection`, `RemoveSection` och `MoveSection`, när det ger tydligare audit, behörighet, concurrency eller användarintention.
 - Hel-view update får ersätta hela view-definitionen atomiskt, men måste validera att alla sektioner har icke-tom och unik `SectionId`, att existerande sektioner behåller sin `SectionId`, att en existerande `SectionId` inte byter sektionstyp och att payloadens sektionsordning bevaras. En saknad existerande sektion behandlas som delete bara när borttag är explicit bekräftat. Nya sektioner får introduceras med nya `SectionId`. `DataSection` och `SheetSection` validerar fortsatt sina egna interna invariants.
+- En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
+- Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
 - Normalisering är en legacy-/hydration-mekanism. Nya feature-slices ska använda domänbeteenden som håller `View` giltig utan att callers behöver reparera modellen efteråt.
+
+### `DataSection`
+
 - I en `DataSection` är `RowDefinition`- och `ColumnDefinition`-samlingarna sanningen för gridens storlek. Separata row/column count-fält är derived eller legacy/payload, inte egna domänsanningar.
 - En existerande `DataSection` har minst en rad och minst en kolumn.
 - En `DataSection` får inte ta bort sin sista rad eller sista kolumn; då ska sektionen tas bort från `View` i stället.
@@ -290,6 +297,9 @@ Ansvar:
 - `DataSection` stödjer inte sammanslagna celler i nuläget.
 - I en `DataSection` identifieras en `DataCell` av sin position `(rowIndex, columnIndex)` inom sektionen. Stringnycklar som `R0C0` är lookup-/persistence-detaljer, inte domänspråk.
 - En `DataSection` får inte innehålla celler utanför aktuell gridstorlek. Nya cell edits utanför gridens bounds ska avvisas i stället för att tyst repareras.
+
+### `DataCell` och format
+
 - En `DataCell` lagrar användarens `CellExpression`. Displayvärdet härleds vid rendering; uttryck som börjar med `=` tolkas som formler, annars visas uttrycket som text. Format ligger bredvid celluttrycket.
 - `DataCell` har systemdefault för textformat och cellformat. En cell behöver bara lagras när dess uttryck eller format avviker från systemdefault.
 - Cell- och textformat i en `DataSection` är del av rapportmallens layout, inte bara editor-state.
@@ -336,12 +346,16 @@ Ansvar:
 - Formatpatchar kan både sätta ett explicit formatvärde och återställa ett formatfält till systemdefault/auto.
 - `DataSection` har ingen separat titel i nuläget. Rapportens rubriker bärs av cellinnehåll i gridden.
 - Page-break-regler hör hemma på gemensam section-/rapportblocknivå, inte som interna cell- eller radregler i `DataSection`.
+
+### `SheetSection`
+
+- Ändringsförutsättningarna på en `SheetSection` styr rätten att göra nya ändringar i den sektionen och vilka replacement-taggar som är giltiga, inte om redan sparade ändringar ska appliceras.
+
+### Rendering och paginering
+
 - En `DataSection` kan renderas som flera mätbara radblock för paginering. Den behöver inte placeras som ett enda odelbart `Printable Block`.
 - En `SheetSection` kan renderas som flera mätbara blocks för paginering: eventuellt header-block och sedan ett block per renderad sheet-rad.
 - `DataSection` validerar inte radhöjd mot en specifik sidbody. En renderad rad som inte ryms i aktuell sidbody blir ett blockerande pagineringsfel.
-- Ändringsförutsättningarna på en `SheetSection` styr rätten att göra nya ändringar i den sektionen och vilka replacement-taggar som är giltiga, inte om redan sparade ändringar ska appliceras.
-- En arkiverad `View` ska inte användas för nya normala arbetsflöden eller nya ändringar.
-- Duplicering av en `View` skapar en ny view-definition, inte ett nytt workspace med gamla `ViewScopedChangeSet`.
 - Ett `PrintableDocument` måste bära en change token så mätning och paginering kan knytas till samma dokumentversion.
 - `PrintableContainer` ska flattenas före paginering och får inte placeras som ett odelbart block.
 - Header och footer reserverar höjd på varje sida innan body-block placeras.
