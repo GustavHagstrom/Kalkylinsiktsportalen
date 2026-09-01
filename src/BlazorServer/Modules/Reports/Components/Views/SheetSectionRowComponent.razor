@@ -10,10 +10,10 @@
             @foreach (var column in VisibleColumns)
             {
                 var sheetColumnKind = column.SheetColumnKind;
-                var cell = GetSheetCell(sheetColumnKind);
-                <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(cell))">
-                    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(cell), DisplayType(cell))">
-                        @if (!cell.HideValue)
+                var configuration = GetSheetCellConfiguration(sheetColumnKind);
+                <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(configuration))">
+                    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(configuration), DisplayType(configuration))">
+                        @if (!configuration.HideValue)
                         {
                             @DisplayValue(sheetColumnKind)
                         }
@@ -43,21 +43,21 @@
         return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}%""";
     }
 
-    private SheetCell GetSheetCell(SheetColumnKind sheetColumnKind)
+    private SheetCellConfiguration GetSheetCellConfiguration(SheetColumnKind sheetColumnKind)
     {
         var key = new SheetCellKey(sheetColumnKind, RowType);
-        return SheetSection.SheetCells.TryGetValue(key, out var cell)
+        return SheetSection.SheetCellConfigurations.TryGetValue(key, out var cell)
             ? cell
-            : SheetCell.CreateDefault(sheetColumnKind, RowType);
+            : SheetCellConfiguration.Create();
     }
 
-    private static CellLayout? EffectiveCellLayout(SheetCell cell)
+    private static CellLayout? EffectiveCellLayout(SheetCellConfiguration cell)
         => cell.CellLayout;
 
-    private static TextStyle? EffectiveTextStyle(SheetCell cell)
+    private static TextStyle? EffectiveTextStyle(SheetCellConfiguration cell)
         => cell.TextStyle;
 
-    private static ValueDisplayType DisplayType(SheetCell cell)
+    private static ValueDisplayType DisplayType(SheetCellConfiguration cell)
         => cell.ValueFormat?.Kind switch
         {
             ValueFormatKind.Number => ValueDisplayType.Number,

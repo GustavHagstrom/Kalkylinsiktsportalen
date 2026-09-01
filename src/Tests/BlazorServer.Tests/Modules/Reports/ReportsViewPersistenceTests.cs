@@ -42,12 +42,10 @@ public class ReportsViewPersistenceTargetModelTests
                     SheetSection.DefaultColumns(),
                     SheetKind.SummarySheet,
                     enableChanges: true,
-                    sheetCells: new Dictionary<SheetCellKey, SheetCell>
+                    sheetCellConfigurations: new Dictionary<SheetCellKey, SheetCellConfiguration>
                     {
-                        [new(SheetColumnKind.Description, RowType.Group)] = new SheetCell
+                        [new(SheetColumnKind.Description, RowType.Group)] = new SheetCellConfiguration
                         {
-                            RowType = RowType.Group,
-                            SheetColumnKind = SheetColumnKind.Description,
                             HideValue = true,
                             TextStyle = new TextStyle { IsItalic = true }
                         }
@@ -59,7 +57,7 @@ public class ReportsViewPersistenceTargetModelTests
         var roundTripped = ViewMappings.ToDomain(mongoView);
         var roundTrippedDataCell = roundTripped!.Sections.OfType<DataSection>().Single().GetCell(0, 0);
         var roundTrippedSheetSection = roundTripped.Sections.OfType<SheetSection>().Single();
-        var roundTrippedSheetCell = roundTrippedSheetSection.GetCell(RowType.Group, SheetColumnKind.Description);
+        var roundTrippedSheetCellConfiguration = roundTrippedSheetSection.GetCell(RowType.Group, SheetColumnKind.Description);
 
         Assert.Multiple(() =>
         {
@@ -80,8 +78,8 @@ public class ReportsViewPersistenceTargetModelTests
             Assert.That(roundTrippedSheetSection.SectionId.Value, Is.EqualTo("sheet-section-1"));
             Assert.That(roundTrippedSheetSection.SheetKind, Is.EqualTo(SheetKind.SummarySheet));
             Assert.That(roundTrippedSheetSection.EnableChanges, Is.True);
-            Assert.That(roundTrippedSheetCell.HideValue, Is.True);
-            Assert.That(roundTrippedSheetCell.TextStyle!.IsItalic, Is.True);
+            Assert.That(roundTrippedSheetCellConfiguration.HideValue, Is.True);
+            Assert.That(roundTrippedSheetCellConfiguration.TextStyle!.IsItalic, Is.True);
         });
     }
 

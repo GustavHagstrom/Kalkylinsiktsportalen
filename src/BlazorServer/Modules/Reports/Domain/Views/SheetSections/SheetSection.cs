@@ -3,13 +3,15 @@ namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 public class SheetSection : IViewSection
 {
     private List<SheetColumnConfiguration> _columns = DefaultColumns();
+    private readonly Dictionary<SheetCellKey, SheetCellConfiguration> _sheetCellConfigurations = new();
 
     public SectionId SectionId { get; private set; } = SectionId.New();
     public SheetKind SheetKind { get; private set; } = SheetKind.TenderSheet;
     public bool ShowHeaders { get; set; } = true;
     public IReadOnlyList<SheetColumnConfiguration> Columns => _columns.AsReadOnly();
     public bool EnableChanges { get; set; } = false;
-    public Dictionary<SheetCellKey, SheetCell> SheetCells { get; } = new();
+    public IReadOnlyDictionary<SheetCellKey, SheetCellConfiguration> SheetCellConfigurations
+        => new System.Collections.ObjectModel.ReadOnlyDictionary<SheetCellKey, SheetCellConfiguration>(_sheetCellConfigurations);
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
     private SheetSection() { }
@@ -24,7 +26,7 @@ public class SheetSection : IViewSection
             PageBreakBehavior = pageBreakBehavior
         };
     }
-    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<SheetColumnConfiguration> columns, SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<SheetColumnConfiguration> columns, SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCellConfiguration>? sheetCellConfigurations = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         ArgumentNullException.ThrowIfNull(sectionId);
 
@@ -38,12 +40,10 @@ public class SheetSection : IViewSection
         };
         section.ReplaceColumnConfigurations(columns);
 
-        foreach (var kvp in sheetCells ?? new Dictionary<SheetCellKey, SheetCell>())
+        foreach (var kvp in sheetCellConfigurations ?? new Dictionary<SheetCellKey, SheetCellConfiguration>())
         {
-            section.StoreOrPruneCell(kvp.Key, new SheetCell
+            section.StoreOrPruneCell(kvp.Key, new SheetCellConfiguration
             {
-                RowType = kvp.Value.RowType,
-                SheetColumnKind = kvp.Value.SheetColumnKind,
                 CellLayout = kvp.Value.CellLayout,
                 TextStyle = kvp.Value.TextStyle,
                 ValueFormat = kvp.Value.ValueFormat,
@@ -53,19 +53,19 @@ public class SheetSection : IViewSection
 
         return section;
     }
-    public SheetCell GetCell(RowType rowType, SheetColumnKind sheetColumnKind)
+    public SheetCellConfiguration GetCell(RowType rowType, SheetColumnKind sheetColumnKind)
     {
         var key = new SheetCellKey(sheetColumnKind, rowType);
-        return SheetCells.TryGetValue(key, out var cell) ? cell : SheetCell.CreateDefault(sheetColumnKind, rowType);
+        return _sheetCellConfigurations.TryGetValue(key, out var cell) ? cell : SheetCellConfiguration.Create();
     }
     public void ApplyFormatPatch(RowType rowType, SheetColumnKind sheetColumnKind, ReportFormatPatch patch)
     {
         ArgumentNullException.ThrowIfNull(patch);
 
         var key = new SheetCellKey(sheetColumnKind, rowType);
-        var cell = SheetCells.TryGetValue(key, out var existing) ? existing : SheetCell.CreateDefault(sheetColumnKind, rowType);
+        var cell = _sheetCellConfigurations.TryGetValue(key, out var existing) ? existing : SheetCellConfiguration.Create();
 
-        cell.ApplyFormatPatch(patch);
+        cell = SheetCellConfiguration.CreateFromPatch(cell, patch);
         StoreOrPruneCell(key, cell);
     }
     public void SetColumnVisibility(SheetColumnKind sheetColumnKind, bool isVisible)
@@ -103,15 +103,15 @@ public class SheetSection : IViewSection
     {
         _columns = ValidateColumnConfigurations(columns);
     }
-    private void StoreOrPruneCell(SheetCellKey key, SheetCell cell)
+    private void StoreOrPruneCell(SheetCellKey key, SheetCellConfiguration cell)
     {
         if (cell.IsDefault())
         {
-            SheetCells.Remove(key);
+            _sheetCellConfigurations.Remove(key);
             return;
         }
 
-        SheetCells[key] = cell;
+        _sheetCellConfigurations[key] = cell;
     }
     private void ReplaceColumnConfiguration(
         SheetColumnKind sheetColumnKind,
@@ -182,12 +182,10 @@ public class SheetSection : IViewSection
                 .Select(column => column with { })
                 .ToList()
         };
-        foreach (var kvp in SheetCells)
+        foreach (var kvp in SheetCellConfigurations)
         {
-            clone.SheetCells[kvp.Key] = new SheetCell
+            clone._sheetCellConfigurations[kvp.Key] = new SheetCellConfiguration
             {
-                RowType = kvp.Value.RowType,
-                SheetColumnKind = kvp.Value.SheetColumnKind,
                 CellLayout = kvp.Value.CellLayout,
                 TextStyle = kvp.Value.TextStyle,
                 ValueFormat = kvp.Value.ValueFormat,

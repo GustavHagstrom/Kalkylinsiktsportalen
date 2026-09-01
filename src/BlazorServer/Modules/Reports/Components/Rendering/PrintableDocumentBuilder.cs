@@ -189,7 +189,7 @@ public sealed class PrintableDocumentBuilder
                     column.RelativeWidth,
                     column.IsVisible
                 }),
-                Cells = sheetSection.SheetCells
+                Cells = sheetSection.SheetCellConfigurations
                     .OrderBy(cell => cell.Key.RowType)
                     .ThenBy(cell => cell.Key.SheetColumnKind)
                     .Select(cell => new

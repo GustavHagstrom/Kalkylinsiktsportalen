@@ -155,8 +155,35 @@ public sealed class ReportFormatModelTests
 
         Assert.Multiple(() =>
         {
+            Assert.That(section.SheetCellConfigurations, Is.Not.InstanceOf<Dictionary<SheetCellKey, SheetCellConfiguration>>());
+            Assert.That(section.SheetCellConfigurations.Keys.Single(), Is.EqualTo(new SheetCellKey(SheetColumnKind.Description, RowType.Group)));
             Assert.That(cell.CellLayout!.BackgroundColor, Is.EqualTo("#FFEECC"));
             Assert.That(cell.ValueFormat!.Kind, Is.EqualTo(ValueFormatKind.Number));
+        });
+    }
+
+    [Test]
+    public void SheetCellConfiguration_IsValueObjectLikeAndKeepsIdentityInMatrixKey()
+    {
+        var configuration = new SheetCellConfiguration
+        {
+            HideValue = true,
+            TextStyle = new TextStyle { IsItalic = true }
+        };
+        var matching = new SheetCellConfiguration
+        {
+            HideValue = true,
+            TextStyle = new TextStyle { IsItalic = true }
+        };
+        var changed = configuration with { HideValue = false };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(configuration, Is.EqualTo(matching));
+            Assert.That(changed, Is.Not.EqualTo(configuration));
+            Assert.That(changed.TextStyle, Is.EqualTo(configuration.TextStyle));
+            Assert.That(typeof(SheetCellConfiguration).GetProperty(nameof(RowType)), Is.Null);
+            Assert.That(typeof(SheetCellConfiguration).GetProperty(nameof(SheetColumnKind)), Is.Null);
         });
     }
 

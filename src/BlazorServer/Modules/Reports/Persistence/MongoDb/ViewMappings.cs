@@ -68,7 +68,7 @@ public static class ViewMappings
             section.SheetKind,
             section.EnableChanges,
             section.ShowHeaders,
-            section.SheetCells,
+            section.SheetCellConfigurations,
             section.PageBreakBehavior);
 
     private static MongoDataSection ToMongo(DataSection section, int order)
@@ -93,7 +93,9 @@ public static class ViewMappings
             ShowHeaders = section.ShowHeaders,
             Columns = section.Columns.ToArray(),
             EnableChanges = section.EnableChanges,
-            SheetCells = section.SheetCells,
+            SheetCellConfigurations = section.SheetCellConfigurations.ToDictionary(
+                cell => cell.Key,
+                cell => cell.Value),
             PageBreakBehavior = section.PageBreakBehavior
         };
 

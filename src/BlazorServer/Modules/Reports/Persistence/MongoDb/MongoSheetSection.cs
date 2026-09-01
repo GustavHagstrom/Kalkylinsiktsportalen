@@ -11,6 +11,6 @@ public sealed class MongoSheetSection
     public SheetKind SheetKind { get; set; } = SheetKind.TenderSheet;
     public SheetColumnConfiguration[] Columns { get; set; } = [];
     public bool EnableChanges { get; set; } = false;
-    public Dictionary<SheetCellKey, SheetCell> SheetCells { get; set; } = [];
+    public Dictionary<SheetCellKey, SheetCellConfiguration> SheetCellConfigurations { get; set; } = [];
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 }

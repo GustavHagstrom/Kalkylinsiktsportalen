@@ -150,7 +150,7 @@ Första `SheetSection`-formatmodellen har systemdefault, kolumnens semantiska de
 
 `SheetSection` har en effektivt komplett cellkonfigurationsmatris med exakt en `SheetCellConfiguration` per känd `SheetRowKind` och `SheetColumnKind`, inklusive default-celler. Varje cellkonfiguration är ett immutable value object som bär effektiv presentation för kombinationen, till exempel `HideValue`, `CellLayout`, `TextStyle` eller `ValueFormat`. Värdets grundtyp kommer från `SheetColumnKind`, inte från cellkonfigurationen.
 
-Rad- och kolumnidentiteten för en `SheetCellConfiguration` ägs av matrisnyckeln `SheetRowKind` + `SheetColumnKind`, inte av cellkonfigurationen. Nuvarande kodnamn `SheetCell` motsvarar `SheetCellConfiguration`, men bör bytas till `SheetCellConfiguration` när målmodellen implementeras. Klassens `RowType`/`SheetColumnKind`-fält är migrationsbrus och ska bort när cellen blir ett immutable value object.
+Rad- och kolumnidentiteten för en `SheetCellConfiguration` ägs av matrisnyckeln `SheetRowKind` + `SheetColumnKind`, inte av cellkonfigurationen. Nuvarande implementation använder `SheetCellConfiguration` som immutable value object för presentation och behåller cellens identitet i `SheetCellKey`.
 
 En `SheetCellConfiguration` får finnas för en dold kolumn eller framtida dold radtyp. Eftersom `SheetSection` bär en komplett kolumnkatalog, och målmodellen bär en effektivt komplett cellmatris, ska cellkonfigurationen överleva att kolumnen eller radtypen döljs och senare visas igen; den påverkar bara rendering när både kolumnen och raden är synliga.
 
