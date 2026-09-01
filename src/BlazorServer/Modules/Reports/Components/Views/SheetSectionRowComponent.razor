@@ -9,13 +9,13 @@
         <tr>
             @foreach (var column in VisibleColumns)
             {
-                var columnType = column.ColumnType;
-                var cell = GetSheetCell(columnType);
+                var sheetColumnKind = column.SheetColumnKind;
+                var cell = GetSheetCell(sheetColumnKind);
                 <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(cell))">
                     <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(cell), DisplayType(cell))">
                         @if (!cell.HideValue)
                         {
-                            @DisplayValue(columnType)
+                            @DisplayValue(sheetColumnKind)
                         }
                     </div>
                 </td>
@@ -28,12 +28,12 @@
     [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = SheetSection.Create();
     [Parameter, EditorRequired] public RowType RowType { get; set; }
 
-    private IReadOnlyList<BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition> VisibleColumns
+    private IReadOnlyList<SheetColumnConfiguration> VisibleColumns
         => SheetSection.Columns.Where(column => column.IsVisible).ToArray();
 
     private double TableWidth => VisibleColumns.Sum(column => column.RelativeWidth);
 
-    private string ColumnPercentWidth(BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition column)
+    private string ColumnPercentWidth(SheetColumnConfiguration column)
     {
         if (TableWidth <= 0)
         {
@@ -43,12 +43,12 @@
         return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}%""";
     }
 
-    private SheetCell GetSheetCell(ColumnType columnType)
+    private SheetCell GetSheetCell(SheetColumnKind sheetColumnKind)
     {
-        var key = new SheetCellKey(columnType, RowType);
+        var key = new SheetCellKey(sheetColumnKind, RowType);
         return SheetSection.SheetCells.TryGetValue(key, out var cell)
             ? cell
-            : SheetCell.CreateDefault(columnType, RowType);
+            : SheetCell.CreateDefault(sheetColumnKind, RowType);
     }
 
     private static CellLayout? EffectiveCellLayout(SheetCell cell)
@@ -65,10 +65,10 @@
             _ => ValueDisplayType.Text
         };
 
-    private string DisplayValue(ColumnType columnType)
-        => columnType switch
+    private string DisplayValue(SheetColumnKind sheetColumnKind)
+        => sheetColumnKind switch
         {
-            ColumnType.Description => SheetSection.SheetKind == SheetKind.TenderSheet
+            SheetColumnKind.Description => SheetSection.SheetKind == SheetKind.TenderSheet
                 ? RowType.ToString()
                 : SheetSection.SheetKind.ToString(),
             _ => string.Empty

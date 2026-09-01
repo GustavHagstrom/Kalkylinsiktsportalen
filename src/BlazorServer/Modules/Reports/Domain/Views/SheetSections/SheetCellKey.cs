@@ -1,3 +1,3 @@
 ﻿namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
-public record SheetCellKey(ColumnType ColumnType, RowType RowType);
+public record SheetCellKey(SheetColumnKind SheetColumnKind, RowType RowType);

@@ -137,25 +137,52 @@ public sealed class ReportFormatModelTests
     }
 
     [Test]
-    public void SheetSection_AppliesFormatPatchPerRowTypeAndColumnType()
+    public void SheetSection_AppliesFormatPatchPerRowTypeAndSheetColumnKind()
     {
         var section = SheetSection.Create();
 
         section.ApplyFormatPatch(
             RowType.Group,
-            ColumnType.Description,
+            SheetColumnKind.Description,
             new ReportFormatPatch
             {
                 CellLayout = new CellLayoutPatch { BackgroundColor = "#ffeecc" },
                 ValueFormat = ValueFormat.Number(decimalCount: 0, useThousandsSeparator: false)
             });
 
-        var cell = section.GetCell(RowType.Group, ColumnType.Description);
+        var cell = section.GetCell(RowType.Group, SheetColumnKind.Description);
 
         Assert.Multiple(() =>
         {
             Assert.That(cell.CellLayout!.BackgroundColor, Is.EqualTo("#FFEECC"));
             Assert.That(cell.ValueFormat!.Kind, Is.EqualTo(ValueFormatKind.Number));
+        });
+    }
+
+    [Test]
+    public void SheetColumnConfiguration_IsValueObjectLikeAndRejectsNonPositiveWidths()
+    {
+        var configuration = SheetColumnConfiguration.Create(
+            SheetColumnKind.Quantity,
+            relativeWidth: 2,
+            isVisible: false);
+
+        var matching = SheetColumnConfiguration.Create(
+            SheetColumnKind.Quantity,
+            relativeWidth: 2,
+            isVisible: false);
+        var changed = configuration with { RelativeWidth = 3 };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(configuration.SheetColumnKind, Is.EqualTo(SheetColumnKind.Quantity));
+            Assert.That(configuration.RelativeWidth, Is.EqualTo(2));
+            Assert.That(configuration.IsVisible, Is.False);
+            Assert.That(matching, Is.EqualTo(configuration));
+            Assert.That(changed, Is.Not.EqualTo(configuration));
+            Assert.That(configuration.RelativeWidth, Is.EqualTo(2));
+            Assert.That(() => SheetColumnConfiguration.Create(SheetColumnKind.Quantity, relativeWidth: 0), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => configuration with { RelativeWidth = -1 }, Throws.TypeOf<ArgumentOutOfRangeException>());
         });
     }
 }

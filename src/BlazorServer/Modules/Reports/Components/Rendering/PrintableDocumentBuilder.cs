@@ -185,17 +185,17 @@ public sealed class PrintableDocumentBuilder
                 sheetSection.ShowHeaders,
                 Columns = sheetSection.Columns.Select(column => new
                 {
-                    column.ColumnType,
+                    column.SheetColumnKind,
                     column.RelativeWidth,
                     column.IsVisible
                 }),
                 Cells = sheetSection.SheetCells
                     .OrderBy(cell => cell.Key.RowType)
-                    .ThenBy(cell => cell.Key.ColumnType)
+                    .ThenBy(cell => cell.Key.SheetColumnKind)
                     .Select(cell => new
                     {
                         cell.Key.RowType,
-                        cell.Key.ColumnType,
+                        cell.Key.SheetColumnKind,
                         cell.Value.HideValue,
                         cell.Value.CellLayout,
                         cell.Value.TextStyle,

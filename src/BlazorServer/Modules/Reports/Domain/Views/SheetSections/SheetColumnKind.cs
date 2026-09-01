@@ -1,6 +1,6 @@
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
-public enum ColumnType
+public enum SheetColumnKind
 {
     Description,
     Quantity,

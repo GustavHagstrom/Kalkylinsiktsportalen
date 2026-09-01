@@ -9,7 +9,7 @@ public sealed class MongoSheetSection
     public SectionId SectionId { get; set; } = SectionId.New();
     public bool ShowHeaders { get; set; } = true;
     public SheetKind SheetKind { get; set; } = SheetKind.TenderSheet;
-    public ColumnDefinition[] Columns { get; set; } = [];
+    public SheetColumnConfiguration[] Columns { get; set; } = [];
     public bool EnableChanges { get; set; } = false;
     public Dictionary<SheetCellKey, SheetCell> SheetCells { get; set; } = [];
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;

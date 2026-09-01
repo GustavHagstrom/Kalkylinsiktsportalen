@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 public class SheetSection : IViewSection
@@ -7,7 +5,7 @@ public class SheetSection : IViewSection
     public SectionId SectionId { get; private set; } = SectionId.New();
     public SheetKind SheetKind { get; private set; } = SheetKind.TenderSheet;
     public bool ShowHeaders { get; set; } = true;
-    public IReadOnlyList<ColumnDefinition> Columns { get; private set; } = DefaultColumns();
+    public IReadOnlyList<SheetColumnConfiguration> Columns { get; private set; } = DefaultColumns();
     public bool EnableChanges { get; set; } = false;
     public Dictionary<SheetCellKey, SheetCell> SheetCells { get; } = new();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
@@ -24,7 +22,7 @@ public class SheetSection : IViewSection
             PageBreakBehavior = pageBreakBehavior
         };
     }
-    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<ColumnDefinition> columns, SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<SheetColumnConfiguration> columns, SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         ArgumentNullException.ThrowIfNull(sectionId);
 
@@ -36,14 +34,14 @@ public class SheetSection : IViewSection
             EnableChanges = enableChanges,
             PageBreakBehavior = pageBreakBehavior
         };
-        section.SetColumnDefinitions(columns);
+        section.SetColumnConfigurations(columns);
 
         foreach (var kvp in sheetCells ?? new Dictionary<SheetCellKey, SheetCell>())
         {
             section.StoreOrPruneCell(kvp.Key, new SheetCell
             {
                 RowType = kvp.Value.RowType,
-                ColumnType = kvp.Value.ColumnType,
+                SheetColumnKind = kvp.Value.SheetColumnKind,
                 CellLayout = kvp.Value.CellLayout,
                 TextStyle = kvp.Value.TextStyle,
                 ValueFormat = kvp.Value.ValueFormat,
@@ -53,17 +51,17 @@ public class SheetSection : IViewSection
 
         return section;
     }
-    public SheetCell GetCell(RowType rowType, ColumnType columnType)
+    public SheetCell GetCell(RowType rowType, SheetColumnKind sheetColumnKind)
     {
-        var key = new SheetCellKey(columnType, rowType);
-        return SheetCells.TryGetValue(key, out var cell) ? cell : SheetCell.CreateDefault(columnType, rowType);
+        var key = new SheetCellKey(sheetColumnKind, rowType);
+        return SheetCells.TryGetValue(key, out var cell) ? cell : SheetCell.CreateDefault(sheetColumnKind, rowType);
     }
-    public void ApplyFormatPatch(RowType rowType, ColumnType columnType, ReportFormatPatch patch)
+    public void ApplyFormatPatch(RowType rowType, SheetColumnKind sheetColumnKind, ReportFormatPatch patch)
     {
         ArgumentNullException.ThrowIfNull(patch);
 
-        var key = new SheetCellKey(columnType, rowType);
-        var cell = SheetCells.TryGetValue(key, out var existing) ? existing : SheetCell.CreateDefault(columnType, rowType);
+        var key = new SheetCellKey(sheetColumnKind, rowType);
+        var cell = SheetCells.TryGetValue(key, out var existing) ? existing : SheetCell.CreateDefault(sheetColumnKind, rowType);
 
         cell.ApplyFormatPatch(patch);
         StoreOrPruneCell(key, cell);
@@ -78,25 +76,25 @@ public class SheetSection : IViewSection
 
         SheetCells[key] = cell;
     }
-    private void SetColumnDefinitions(IEnumerable<ColumnDefinition> columns)
+    private void SetColumnConfigurations(IEnumerable<SheetColumnConfiguration> columns)
     {
-        var columnsToAdd = new Dictionary<ColumnType, ColumnDefinition>();
+        var columnsToAdd = new Dictionary<SheetColumnKind, SheetColumnConfiguration>();
         ArgumentNullException.ThrowIfNull(columns);
-        if (columns.Count() != Enum.GetValues<ColumnType>().Length)
+        if (columns.Count() != Enum.GetValues<SheetColumnKind>().Length)
         {
             throw new ReportsDomainException(
                 "sheetsection.columns.invalid",
-                $"The number of column definitions must match the number of column types. Expected {Enum.GetValues<ColumnType>().Length}, but got {columns.Count()}.");
+                $"The number of sheet column configurations must match the number of sheet column kinds. Expected {Enum.GetValues<SheetColumnKind>().Length}, but got {columns.Count()}.");
         }
         foreach (var column in columns)
         {
-            if (columnsToAdd.ContainsKey(column.ColumnType))
+            if (columnsToAdd.ContainsKey(column.SheetColumnKind))
             {
                 throw new ReportsDomainException(
                     "sheetsection.columns.duplicate",
-                    $"Duplicate column definition for column type {column.ColumnType}.");
+                    $"Duplicate sheet column configuration for sheet column kind {column.SheetColumnKind}.");
             }
-            columnsToAdd[column.ColumnType] = column;
+            columnsToAdd[column.SheetColumnKind] = column;
         }
 
         Columns = columnsToAdd.Values.ToList();
@@ -111,7 +109,7 @@ public class SheetSection : IViewSection
             EnableChanges = EnableChanges,
             PageBreakBehavior = PageBreakBehavior,
             Columns = Columns
-                .Select(column => ColumnDefinition.Create(column.ColumnType, column.RelativeWidth, column.IsVisible))
+                .Select(column => column with { })
                 .ToList()
         };
         foreach (var kvp in SheetCells)
@@ -119,7 +117,7 @@ public class SheetSection : IViewSection
             clone.SheetCells[kvp.Key] = new SheetCell
             {
                 RowType = kvp.Value.RowType,
-                ColumnType = kvp.Value.ColumnType,
+                SheetColumnKind = kvp.Value.SheetColumnKind,
                 CellLayout = kvp.Value.CellLayout,
                 TextStyle = kvp.Value.TextStyle,
                 ValueFormat = kvp.Value.ValueFormat,
@@ -128,12 +126,12 @@ public class SheetSection : IViewSection
         }
         return clone;
     }
-    public static List<ColumnDefinition> DefaultColumns()
+    public static List<SheetColumnConfiguration> DefaultColumns()
     {
-        var columns = new List<ColumnDefinition>();
-        foreach (var columnType in Enum.GetValues<ColumnType>())
+        var columns = new List<SheetColumnConfiguration>();
+        foreach (var sheetColumnKind in Enum.GetValues<SheetColumnKind>())
         {
-            columns.Add(ColumnDefinition.Create(columnType));
+            columns.Add(SheetColumnConfiguration.Create(sheetColumnKind));
         }
         return columns;
     }

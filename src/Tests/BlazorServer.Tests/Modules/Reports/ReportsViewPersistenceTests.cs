@@ -44,10 +44,10 @@ public class ReportsViewPersistenceTargetModelTests
                     enableChanges: true,
                     sheetCells: new Dictionary<SheetCellKey, SheetCell>
                     {
-                        [new(ColumnType.Description, RowType.Group)] = new SheetCell
+                        [new(SheetColumnKind.Description, RowType.Group)] = new SheetCell
                         {
                             RowType = RowType.Group,
-                            ColumnType = ColumnType.Description,
+                            SheetColumnKind = SheetColumnKind.Description,
                             HideValue = true,
                             TextStyle = new TextStyle { IsItalic = true }
                         }
@@ -59,7 +59,7 @@ public class ReportsViewPersistenceTargetModelTests
         var roundTripped = ViewMappings.ToDomain(mongoView);
         var roundTrippedDataCell = roundTripped!.Sections.OfType<DataSection>().Single().GetCell(0, 0);
         var roundTrippedSheetSection = roundTripped.Sections.OfType<SheetSection>().Single();
-        var roundTrippedSheetCell = roundTrippedSheetSection.GetCell(RowType.Group, ColumnType.Description);
+        var roundTrippedSheetCell = roundTrippedSheetSection.GetCell(RowType.Group, SheetColumnKind.Description);
 
         Assert.Multiple(() =>
         {

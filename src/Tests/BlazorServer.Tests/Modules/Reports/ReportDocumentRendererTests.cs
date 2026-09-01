@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using DataColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.DataSections.ColumnDefinition;
-using SheetColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition;
 using PrintableDocumentContract = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments.PrintableDocument;
 using ReportPaginatedDocumentRenderer = BlazorServer.Modules.Reports.Components.Rendering.PrintableDocumentRenderer;
 
@@ -126,12 +125,12 @@ public sealed class ReportDocumentRendererTargetModelTests
     {
         var columns = new[]
         {
-            SheetColumnDefinition.Create(ColumnType.Quantity, relativeWidth: 2),
-            SheetColumnDefinition.Create(ColumnType.Description, relativeWidth: 1),
-            SheetColumnDefinition.Create(ColumnType.Unit, isVisible: false),
-            SheetColumnDefinition.Create(ColumnType.Reference, isVisible: false),
-            SheetColumnDefinition.Create(ColumnType.Code, isVisible: false),
-            SheetColumnDefinition.Create(ColumnType.Remark, isVisible: false)
+            SheetColumnConfiguration.Create(SheetColumnKind.Quantity, relativeWidth: 2),
+            SheetColumnConfiguration.Create(SheetColumnKind.Description, relativeWidth: 1),
+            SheetColumnConfiguration.Create(SheetColumnKind.Unit, isVisible: false),
+            SheetColumnConfiguration.Create(SheetColumnKind.Reference, isVisible: false),
+            SheetColumnConfiguration.Create(SheetColumnKind.Code, isVisible: false),
+            SheetColumnConfiguration.Create(SheetColumnKind.Remark, isVisible: false)
         };
         var view = View.Reconstitute(
             new ViewId("sheet-view"),

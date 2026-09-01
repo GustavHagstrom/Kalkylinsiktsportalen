@@ -9,7 +9,7 @@
         <tr>
             @foreach (var column in VisibleColumns)
             {
-                <th>@DisplayName(column.ColumnType)</th>
+                <th>@DisplayName(column.SheetColumnKind)</th>
             }
         </tr>
     </tbody>
@@ -18,12 +18,12 @@
 @code {
     [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = SheetSection.Create();
 
-    private IReadOnlyList<BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition> VisibleColumns
+    private IReadOnlyList<SheetColumnConfiguration> VisibleColumns
         => SheetSection.Columns.Where(column => column.IsVisible).ToArray();
 
     private double TableWidth => VisibleColumns.Sum(column => column.RelativeWidth);
 
-    private string ColumnPercentWidth(BlazorServer.Modules.Reports.Domain.Views.SheetSections.ColumnDefinition column)
+    private string ColumnPercentWidth(SheetColumnConfiguration column)
     {
         if (TableWidth <= 0)
         {
@@ -33,6 +33,6 @@
         return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}%""";
     }
 
-    private static string DisplayName(ColumnType columnType)
-        => columnType.ToString();
+    private static string DisplayName(SheetColumnKind sheetColumnKind)
+        => sheetColumnKind.ToString();
 }
