@@ -35,7 +35,7 @@ public static class ReportFormatting
                 cell.TextStyle = null;
         }
 
-        if (patch.ClearValueFormat)
+        if (patch.ValueFormat is null)
             cell.ValueFormat = null;
         if (patch.ValueFormat is not null)
             cell.ValueFormat = patch.ValueFormat.IsDefault() ? null : patch.ValueFormat;

@@ -44,11 +44,10 @@ public class ReportsViewPersistenceTargetModelTests
                     enableChanges: true,
                     sheetCellConfigurations: new Dictionary<SheetCellKey, SheetCellConfiguration>
                     {
-                        [new(SheetColumnKind.Description, RowType.Group)] = new SheetCellConfiguration
-                        {
-                            HideValue = true,
-                            TextStyle = new TextStyle { IsItalic = true }
-                        }
+                        [new(SheetColumnKind.Description, RowType.Group)] = SheetCellConfiguration.Create(
+                            hideValue: true,
+                            textStyle: new TextStyle { IsItalic = true }
+                        )
                     })
             ],
             PageFormat.A5);

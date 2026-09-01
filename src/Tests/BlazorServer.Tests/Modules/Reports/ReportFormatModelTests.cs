@@ -165,16 +165,14 @@ public sealed class ReportFormatModelTests
     [Test]
     public void SheetCellConfiguration_IsValueObjectLikeAndKeepsIdentityInMatrixKey()
     {
-        var configuration = new SheetCellConfiguration
-        {
-            HideValue = true,
-            TextStyle = new TextStyle { IsItalic = true }
-        };
-        var matching = new SheetCellConfiguration
-        {
-            HideValue = true,
-            TextStyle = new TextStyle { IsItalic = true }
-        };
+        var configuration = SheetCellConfiguration.Create(
+            hideValue: true,
+            textStyle: new TextStyle { IsItalic = true }
+        );
+        var matching = SheetCellConfiguration.Create(
+            hideValue: true,
+            textStyle: new TextStyle { IsItalic = true }
+        );
         var changed = configuration with { HideValue = false };
 
         Assert.Multiple(() =>

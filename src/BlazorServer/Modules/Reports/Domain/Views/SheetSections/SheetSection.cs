@@ -42,13 +42,11 @@ public class SheetSection : IViewSection
 
         foreach (var kvp in sheetCellConfigurations ?? new Dictionary<SheetCellKey, SheetCellConfiguration>())
         {
-            section.StoreOrPruneCell(kvp.Key, new SheetCellConfiguration
-            {
-                CellLayout = kvp.Value.CellLayout,
-                TextStyle = kvp.Value.TextStyle,
-                ValueFormat = kvp.Value.ValueFormat,
-                HideValue = kvp.Value.HideValue
-            });
+            section.StoreOrPruneCell(kvp.Key, SheetCellConfiguration.Create(
+                cellLayout: kvp.Value.CellLayout,
+                textStyle: kvp.Value.TextStyle,
+                valueFormat: kvp.Value.ValueFormat,
+                hideValue: kvp.Value.HideValue));
         }
 
         return section;
@@ -184,13 +182,11 @@ public class SheetSection : IViewSection
         };
         foreach (var kvp in SheetCellConfigurations)
         {
-            clone._sheetCellConfigurations[kvp.Key] = new SheetCellConfiguration
-            {
-                CellLayout = kvp.Value.CellLayout,
-                TextStyle = kvp.Value.TextStyle,
-                ValueFormat = kvp.Value.ValueFormat,
-                HideValue = kvp.Value.HideValue
-            };
+            clone._sheetCellConfigurations[kvp.Key] = SheetCellConfiguration.Create(
+                cellLayout: kvp.Value.CellLayout,
+                textStyle: kvp.Value.TextStyle,
+                valueFormat: kvp.Value.ValueFormat,
+                hideValue: kvp.Value.HideValue);
         }
         return clone;
     }

@@ -7,6 +7,7 @@ public sealed record class SheetCellConfiguration
     public ValueFormat? ValueFormat { get; init; }
     public bool HideValue { get; init; } = false;
 
+    private SheetCellConfiguration() { }
     public static SheetCellConfiguration Create()
         => new()
         {
@@ -16,14 +17,16 @@ public sealed record class SheetCellConfiguration
             HideValue = false
         };
 
-    public bool IsDefault()
-        => !HideValue
-           && ReportFormatting.IsDefault(new MutableFormattedCell
-           {
-               CellLayout = CellLayout,
-               TextStyle = TextStyle,
-               ValueFormat = ValueFormat
-           });
+    public static SheetCellConfiguration Create(bool hideValue = false, CellLayout? cellLayout = null, TextStyle? textStyle = null, ValueFormat? valueFormat = null)
+    {
+        return new SheetCellConfiguration
+        {
+            HideValue = hideValue,
+            CellLayout = cellLayout ?? CellLayout.Default,
+            TextStyle = textStyle ?? TextStyle.Default,
+            ValueFormat = valueFormat ?? ValueFormat.Default
+        };
+    }
 
     public static SheetCellConfiguration CreateFromPatch(SheetCellConfiguration current, ReportFormatPatch patch)
     {
@@ -45,6 +48,7 @@ public sealed record class SheetCellConfiguration
             ValueFormat = formattedCell.ValueFormat
         };
     }
+    public bool IsDefault() => !HideValue && CellLayout == CellLayout.Default && TextStyle == TextStyle.Default && ValueFormat == ValueFormat.Default;
 
     private sealed class MutableFormattedCell : IReportFormattedCell
     {
