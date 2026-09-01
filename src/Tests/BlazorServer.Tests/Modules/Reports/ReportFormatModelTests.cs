@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Reports.Domain;
 using BlazorServer.Modules.Reports.Domain.Views;
 using BlazorServer.Modules.Reports.Domain.Views.DataSections;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
@@ -183,6 +184,77 @@ public sealed class ReportFormatModelTests
             Assert.That(configuration.RelativeWidth, Is.EqualTo(2));
             Assert.That(() => SheetColumnConfiguration.Create(SheetColumnKind.Quantity, relativeWidth: 0), Throws.TypeOf<ArgumentOutOfRangeException>());
             Assert.That(() => configuration with { RelativeWidth = -1 }, Throws.TypeOf<ArgumentOutOfRangeException>());
+        });
+    }
+
+    [Test]
+    public void SheetSection_ChangesColumnVisibilityWidthAndOrderThroughMethods()
+    {
+        var section = SheetSection.Create();
+
+        section.SetColumnVisibility(SheetColumnKind.Unit, false);
+        section.SetColumnRelativeWidth(SheetColumnKind.Quantity, 2.5);
+        section.MoveColumn(SheetColumnKind.Quantity, 0);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(section.Columns, Is.Not.InstanceOf<List<SheetColumnConfiguration>>());
+            Assert.That(section.Columns[0].SheetColumnKind, Is.EqualTo(SheetColumnKind.Quantity));
+            Assert.That(section.Columns.Single(column => column.SheetColumnKind == SheetColumnKind.Unit).IsVisible, Is.False);
+            Assert.That(section.Columns.Single(column => column.SheetColumnKind == SheetColumnKind.Quantity).RelativeWidth, Is.EqualTo(2.5));
+            Assert.That(section.Columns.Select(column => column.SheetColumnKind), Is.Unique);
+            Assert.That(section.Columns, Has.Count.EqualTo(Enum.GetValues<SheetColumnKind>().Length));
+        });
+    }
+
+    [Test]
+    public void SheetSection_RejectsColumnCatalogsWithoutExactlyOneConfigurationPerKind()
+    {
+        var section = SheetSection.Create();
+        var missingColumn = SheetSection.DefaultColumns()
+            .Where(column => column.SheetColumnKind != SheetColumnKind.Remark)
+            .ToArray();
+        var duplicateColumn = SheetSection.DefaultColumns()
+            .Select(column => column.SheetColumnKind == SheetColumnKind.Remark
+                ? column with { SheetColumnKind = SheetColumnKind.Description }
+                : column)
+            .ToArray();
+        var unknownColumn = SheetSection.DefaultColumns()
+            .Select(column => column.SheetColumnKind == SheetColumnKind.Remark
+                ? column with { SheetColumnKind = (SheetColumnKind)999 }
+                : column)
+            .ToArray();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(() => section.ReplaceColumnConfigurations(missingColumn), Throws.TypeOf<ReportsDomainException>()
+                .With.Property(nameof(ReportsDomainException.Code)).EqualTo("sheetsection.columns.invalid"));
+            Assert.That(() => section.ReplaceColumnConfigurations(duplicateColumn), Throws.TypeOf<ReportsDomainException>()
+                .With.Property(nameof(ReportsDomainException.Code)).EqualTo("sheetsection.columns.duplicate"));
+            Assert.That(() => section.ReplaceColumnConfigurations(unknownColumn), Throws.TypeOf<ReportsDomainException>()
+                .With.Property(nameof(ReportsDomainException.Code)).EqualTo("sheetsection.columns.unknown"));
+        });
+    }
+
+    [Test]
+    public void SheetSection_RejectsColumnCatalogsWithNoVisibleColumns()
+    {
+        var section = SheetSection.Create();
+        var hiddenColumns = SheetSection.DefaultColumns()
+            .Select(column => column with { IsVisible = false })
+            .ToArray();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(() => section.ReplaceColumnConfigurations(hiddenColumns), Throws.TypeOf<ReportsDomainException>()
+                .With.Property(nameof(ReportsDomainException.Code)).EqualTo("sheetsection.columns.no_visible_columns"));
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Description, false), Throws.Nothing);
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Quantity, false), Throws.Nothing);
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Unit, false), Throws.Nothing);
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Reference, false), Throws.Nothing);
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Code, false), Throws.Nothing);
+            Assert.That(() => section.SetColumnVisibility(SheetColumnKind.Remark, false), Throws.TypeOf<ReportsDomainException>()
+                .With.Property(nameof(ReportsDomainException.Code)).EqualTo("sheetsection.columns.no_visible_columns"));
         });
     }
 }

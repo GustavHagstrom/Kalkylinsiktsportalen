@@ -2,10 +2,12 @@ namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 public class SheetSection : IViewSection
 {
+    private List<SheetColumnConfiguration> _columns = DefaultColumns();
+
     public SectionId SectionId { get; private set; } = SectionId.New();
     public SheetKind SheetKind { get; private set; } = SheetKind.TenderSheet;
     public bool ShowHeaders { get; set; } = true;
-    public IReadOnlyList<SheetColumnConfiguration> Columns { get; private set; } = DefaultColumns();
+    public IReadOnlyList<SheetColumnConfiguration> Columns => _columns.AsReadOnly();
     public bool EnableChanges { get; set; } = false;
     public Dictionary<SheetCellKey, SheetCell> SheetCells { get; } = new();
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
@@ -34,7 +36,7 @@ public class SheetSection : IViewSection
             EnableChanges = enableChanges,
             PageBreakBehavior = pageBreakBehavior
         };
-        section.SetColumnConfigurations(columns);
+        section.ReplaceColumnConfigurations(columns);
 
         foreach (var kvp in sheetCells ?? new Dictionary<SheetCellKey, SheetCell>())
         {
@@ -66,6 +68,41 @@ public class SheetSection : IViewSection
         cell.ApplyFormatPatch(patch);
         StoreOrPruneCell(key, cell);
     }
+    public void SetColumnVisibility(SheetColumnKind sheetColumnKind, bool isVisible)
+    {
+        ReplaceColumnConfiguration(
+            sheetColumnKind,
+            column => column with { IsVisible = isVisible });
+    }
+    public void SetColumnRelativeWidth(SheetColumnKind sheetColumnKind, double relativeWidth)
+    {
+        ReplaceColumnConfiguration(
+            sheetColumnKind,
+            column => column with { RelativeWidth = relativeWidth });
+    }
+    public void MoveColumn(SheetColumnKind sheetColumnKind, int targetIndex)
+    {
+        if (targetIndex < 0 || targetIndex >= _columns.Count)
+            throw new ArgumentOutOfRangeException(nameof(targetIndex));
+
+        var columns = _columns.ToList();
+        var currentIndex = columns.FindIndex(column => column.SheetColumnKind == sheetColumnKind);
+        if (currentIndex < 0)
+        {
+            throw new ReportsDomainException(
+                "sheetsection.columns.missing",
+                $"Missing sheet column configuration for sheet column kind {sheetColumnKind}.");
+        }
+
+        var column = columns[currentIndex];
+        columns.RemoveAt(currentIndex);
+        columns.Insert(targetIndex, column);
+        ReplaceColumnConfigurations(columns);
+    }
+    internal void ReplaceColumnConfigurations(IReadOnlyList<SheetColumnConfiguration> columns)
+    {
+        _columns = ValidateColumnConfigurations(columns);
+    }
     private void StoreOrPruneCell(SheetCellKey key, SheetCell cell)
     {
         if (cell.IsDefault())
@@ -76,18 +113,45 @@ public class SheetSection : IViewSection
 
         SheetCells[key] = cell;
     }
-    private void SetColumnConfigurations(IEnumerable<SheetColumnConfiguration> columns)
+    private void ReplaceColumnConfiguration(
+        SheetColumnKind sheetColumnKind,
+        Func<SheetColumnConfiguration, SheetColumnConfiguration> replacement)
     {
-        var columnsToAdd = new Dictionary<SheetColumnKind, SheetColumnConfiguration>();
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        var currentIndex = _columns.FindIndex(column => column.SheetColumnKind == sheetColumnKind);
+        if (currentIndex < 0)
+        {
+            throw new ReportsDomainException(
+                "sheetsection.columns.missing",
+                $"Missing sheet column configuration for sheet column kind {sheetColumnKind}.");
+        }
+
+        var columns = _columns.ToList();
+        columns[currentIndex] = replacement(columns[currentIndex]);
+        ReplaceColumnConfigurations(columns);
+    }
+    private static List<SheetColumnConfiguration> ValidateColumnConfigurations(IEnumerable<SheetColumnConfiguration> columns)
+    {
         ArgumentNullException.ThrowIfNull(columns);
-        if (columns.Count() != Enum.GetValues<SheetColumnKind>().Length)
+        var columnList = columns.ToList();
+        var knownColumnKinds = Enum.GetValues<SheetColumnKind>();
+        var columnsToAdd = new Dictionary<SheetColumnKind, SheetColumnConfiguration>();
+        if (columnList.Count != knownColumnKinds.Length)
         {
             throw new ReportsDomainException(
                 "sheetsection.columns.invalid",
-                $"The number of sheet column configurations must match the number of sheet column kinds. Expected {Enum.GetValues<SheetColumnKind>().Length}, but got {columns.Count()}.");
+                $"The number of sheet column configurations must match the number of sheet column kinds. Expected {knownColumnKinds.Length}, but got {columnList.Count}.");
         }
-        foreach (var column in columns)
+        foreach (var column in columnList)
         {
+            if (!Enum.IsDefined(column.SheetColumnKind))
+            {
+                throw new ReportsDomainException(
+                    "sheetsection.columns.unknown",
+                    $"Unknown sheet column kind {column.SheetColumnKind}.");
+            }
+
             if (columnsToAdd.ContainsKey(column.SheetColumnKind))
             {
                 throw new ReportsDomainException(
@@ -96,8 +160,14 @@ public class SheetSection : IViewSection
             }
             columnsToAdd[column.SheetColumnKind] = column;
         }
+        if (columnList.All(column => !column.IsVisible))
+        {
+            throw new ReportsDomainException(
+                "sheetsection.columns.no_visible_columns",
+                "A sheet section must have at least one visible column.");
+        }
 
-        Columns = columnsToAdd.Values.ToList();
+        return columnList;
     }
     public IViewSection Clone()
     {
@@ -108,7 +178,7 @@ public class SheetSection : IViewSection
             ShowHeaders = ShowHeaders,
             EnableChanges = EnableChanges,
             PageBreakBehavior = PageBreakBehavior,
-            Columns = Columns
+            _columns = _columns
                 .Select(column => column with { })
                 .ToList()
         };
