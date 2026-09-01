@@ -40,6 +40,7 @@ public class ReportsViewPersistenceTargetModelTests
                 SheetSection.Reconstitute(
                     new SectionId("sheet-section-1"),
                     SheetSection.DefaultColumns(),
+                    SheetKind.SummarySheet,
                     enableChanges: true,
                     sheetCells: new Dictionary<SheetCellKey, SheetCell>
                     {
@@ -64,6 +65,7 @@ public class ReportsViewPersistenceTargetModelTests
         {
             Assert.That(mongoView.Id, Is.EqualTo("view-1"));
             Assert.That(mongoView.EnableChanges, Is.False);
+            Assert.That(mongoView.SheetSections.Single().SheetKind, Is.EqualTo(SheetKind.SummarySheet));
             Assert.That(roundTripped.Id, Is.EqualTo(new ViewId("view-1")));
             Assert.That(roundTripped.OrganizationId, Is.EqualTo(new OrganizationId("org-1")));
             Assert.That(roundTripped.Name, Is.EqualTo("Tender report"));
@@ -76,6 +78,7 @@ public class ReportsViewPersistenceTargetModelTests
             Assert.That(roundTrippedDataCell.TextStyle!.IsBold, Is.True);
             Assert.That(roundTrippedDataCell.CellLayout!.BackgroundColor, Is.EqualTo("#FFEECC"));
             Assert.That(roundTrippedSheetSection.SectionId.Value, Is.EqualTo("sheet-section-1"));
+            Assert.That(roundTrippedSheetSection.SheetKind, Is.EqualTo(SheetKind.SummarySheet));
             Assert.That(roundTrippedSheetSection.EnableChanges, Is.True);
             Assert.That(roundTrippedSheetCell.HideValue, Is.True);
             Assert.That(roundTrippedSheetCell.TextStyle!.IsItalic, Is.True);

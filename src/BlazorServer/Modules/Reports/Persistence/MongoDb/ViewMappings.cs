@@ -65,7 +65,7 @@ public static class ViewMappings
         => SheetSection.Reconstitute(
             section.SectionId,
             section.Columns,
-            section.SourceType,
+            section.SheetKind,
             section.EnableChanges,
             section.ShowHeaders,
             section.SheetCells,
@@ -89,7 +89,7 @@ public static class ViewMappings
         {
             Order = order,
             SectionId = section.SectionId,
-            SourceType = section.SourceType,
+            SheetKind = section.SheetKind,
             ShowHeaders = section.ShowHeaders,
             Columns = section.Columns.ToArray(),
             EnableChanges = section.EnableChanges,

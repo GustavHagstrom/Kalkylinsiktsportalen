@@ -1,6 +1,6 @@
 ﻿namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
-public enum SheetSourceType
+public enum SheetKind
 {
     TenderSheet,
     SummarySheet,

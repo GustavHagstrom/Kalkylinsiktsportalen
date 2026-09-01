@@ -5,6 +5,7 @@ using BlazorServer.Modules.Reports.Domain.Views.DataSections;
 using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Public;
 using DataColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.DataSections.ColumnDefinition;
+using SheetSectionModel = BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -103,8 +104,11 @@ public class ViewTargetModelTests
         var view = View.Create(new OrganizationId("org-1"), "Tender report", "For review");
         var dataSection = view.AddDataSection();
         dataSection.EditCellExpression(0, 0, "Heading");
-        var sheetSection = view.AddSheetSection(SheetSourceType.TenderSheet);
+        var sheetSection = view.AddSheetSection(SheetKind.SummarySheet);
         var duplicate = view.Duplicate("Tender report copy");
+        var duplicatedSheetSection = duplicate.Sections
+            .OfType<SheetSectionModel>()
+            .Single();
 
         Assert.Multiple(() =>
         {
@@ -115,6 +119,25 @@ public class ViewTargetModelTests
             Assert.That(duplicate.IsArchived, Is.False);
             Assert.That(duplicate.Sections.Select(section => section.SectionId), Is.Not.EquivalentTo(view.Sections.Select(section => section.SectionId)));
             Assert.That(duplicate.Sections.Select(section => section.GetType()), Is.EqualTo(view.Sections.Select(section => section.GetType())));
+            Assert.That(duplicatedSheetSection.SheetKind, Is.EqualTo(sheetSection.SheetKind));
+        });
+    }
+
+    [Test]
+    public void SheetSectionsCarrySheetKindWhenCreatedAndReconstituted()
+    {
+        var view = View.Create(new OrganizationId("org-1"), "Tender report");
+
+        var created = view.AddSheetSection(SheetKind.SummarySheet);
+        var reconstituted = SheetSectionModel.Reconstitute(
+            new SectionId("sheet-1"),
+            SheetSectionModel.DefaultColumns(),
+            SheetKind.SummarySheet);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(created.SheetKind, Is.EqualTo(SheetKind.SummarySheet));
+            Assert.That(reconstituted.SheetKind, Is.EqualTo(SheetKind.SummarySheet));
         });
     }
 
@@ -168,8 +191,8 @@ public class ViewTargetModelTests
             [new DataColumnDefinition(1)]);
 
     private static SheetSection SheetSection(string sectionId)
-        => BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.Reconstitute(
+        => SheetSectionModel.Reconstitute(
             new SectionId(sectionId),
-            BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.DefaultColumns(),
-            SheetSourceType.TenderSheet);
+            SheetSectionModel.DefaultColumns(),
+            SheetKind.TenderSheet);
 }

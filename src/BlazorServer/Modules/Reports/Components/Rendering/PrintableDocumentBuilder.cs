@@ -180,7 +180,7 @@ public sealed class PrintableDocumentBuilder
                 Type = nameof(SheetSection),
                 SectionId = sheetSection.SectionId.Value,
                 sheetSection.PageBreakBehavior,
-                sheetSection.SourceType,
+                sheetSection.SheetKind,
                 sheetSection.EnableChanges,
                 sheetSection.ShowHeaders,
                 Columns = sheetSection.Columns.Select(column => new

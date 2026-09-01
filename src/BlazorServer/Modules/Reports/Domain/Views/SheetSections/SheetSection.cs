@@ -5,7 +5,7 @@ namespace BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 public class SheetSection : IViewSection
 {
     public SectionId SectionId { get; private set; } = SectionId.New();
-    public SheetSourceType SourceType { get; private set; } = SheetSourceType.TenderSheet;
+    public SheetKind SheetKind { get; private set; } = SheetKind.TenderSheet;
     public bool ShowHeaders { get; set; } = true;
     public IReadOnlyList<ColumnDefinition> Columns { get; private set; } = DefaultColumns();
     public bool EnableChanges { get; set; } = false;
@@ -13,25 +13,25 @@ public class SheetSection : IViewSection
     public PageBreakBehavior PageBreakBehavior { get; set; } = PageBreakBehavior.None;
 
     private SheetSection() { }
-    public static SheetSection Create(SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = true, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    public static SheetSection Create(SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         return new SheetSection
         {
             SectionId = SectionId.New(),
-            SourceType = sourceType,
+            SheetKind = sheetKind,
             ShowHeaders = showHeaders,
             EnableChanges = enableChanges,
             PageBreakBehavior = pageBreakBehavior
         };
     }
-    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<ColumnDefinition> columns, SheetSourceType sourceType = SheetSourceType.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
+    internal static SheetSection Reconstitute(SectionId sectionId, IReadOnlyList<ColumnDefinition> columns, SheetKind sheetKind = SheetKind.TenderSheet, bool enableChanges = false, bool showHeaders = true, IReadOnlyDictionary<SheetCellKey, SheetCell>? sheetCells = null, PageBreakBehavior pageBreakBehavior = PageBreakBehavior.None)
     {
         ArgumentNullException.ThrowIfNull(sectionId);
 
         var section = new SheetSection
         {
             SectionId = sectionId,
-            SourceType = sourceType,
+            SheetKind = sheetKind,
             ShowHeaders = showHeaders,
             EnableChanges = enableChanges,
             PageBreakBehavior = pageBreakBehavior
@@ -106,7 +106,7 @@ public class SheetSection : IViewSection
         var clone = new SheetSection
         {
             SectionId = SectionId.New(),
-            SourceType = SourceType,
+            SheetKind = SheetKind,
             ShowHeaders = ShowHeaders,
             EnableChanges = EnableChanges,
             PageBreakBehavior = PageBreakBehavior,

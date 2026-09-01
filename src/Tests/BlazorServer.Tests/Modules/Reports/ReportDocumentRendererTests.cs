@@ -106,7 +106,7 @@ public sealed class ReportDocumentRendererTargetModelTests
             "Sheet report",
             "",
             isArchived: false,
-            [SheetSection.Reconstitute(new SectionId("sheet-1"), SheetSection.DefaultColumns(), SheetSourceType.TenderSheet)]);
+            [SheetSection.Reconstitute(new SectionId("sheet-1"), SheetSection.DefaultColumns(), SheetKind.TenderSheet)]);
 
         var document = new PrintableDocumentBuilder().Build(view, RenderingContext("version-1", "snapshot-1"));
         var section = (PrintableContainer)document.BodyItems.Single();
@@ -139,7 +139,7 @@ public sealed class ReportDocumentRendererTargetModelTests
             "Sheet report",
             "",
             isArchived: false,
-            [SheetSection.Reconstitute(new SectionId("sheet-1"), columns, SheetSourceType.TenderSheet)]);
+            [SheetSection.Reconstitute(new SectionId("sheet-1"), columns, SheetKind.TenderSheet)]);
 
         var document = new PrintableDocumentBuilder().Build(view, RenderingContext("version-1", "snapshot-1"));
         var html = await RenderDocumentAsync(document);
@@ -151,6 +151,27 @@ public sealed class ReportDocumentRendererTargetModelTests
             Assert.That(html, Does.Contain("width: 66.67%"));
             Assert.That(html, Does.Contain("width: 33.33%"));
             Assert.That(html, Does.Not.Contain(">Unit<"));
+        });
+    }
+
+    [Test]
+    public async Task BuildDocument_RendersSelectedSheetKind()
+    {
+        var view = View.Reconstitute(
+            new ViewId("sheet-view"),
+            new OrganizationId("org-1"),
+            "Sheet report",
+            "",
+            isArchived: false,
+            [SheetSection.Reconstitute(new SectionId("sheet-1"), SheetSection.DefaultColumns(), SheetKind.SummarySheet)]);
+
+        var document = new PrintableDocumentBuilder().Build(view, RenderingContext("version-1", "snapshot-1"));
+        var html = await RenderDocumentAsync(document);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(html, Does.Contain("SummarySheet"));
+            Assert.That(html, Does.Not.Contain(">Group<"));
         });
     }
 

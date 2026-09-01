@@ -68,9 +68,9 @@
     private string DisplayValue(ColumnType columnType)
         => columnType switch
         {
-            ColumnType.Description => SheetSection.SourceType == SheetSourceType.TenderSheet
+            ColumnType.Description => SheetSection.SheetKind == SheetKind.TenderSheet
                 ? RowType.ToString()
-                : SheetSection.SourceType.ToString(),
+                : SheetSection.SheetKind.ToString(),
             _ => string.Empty
         };
 }
