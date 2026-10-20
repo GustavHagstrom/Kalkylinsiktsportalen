@@ -16,7 +16,7 @@ När Bidcon rör sig mot API-baserad integration bygger jag en ny webbaserad lö
 
 ## Status och målbild
 
-**Projektet är under aktiv utveckling och har ännu inga färdiga användarflöden.** Fokus ligger just nu på rapporternas backendmodell och gränssnittet för rapportredigering.
+**Projektet är under aktiv utveckling och har ännu inga färdiga användarflöden.** Appen går att köra lokalt med mockad inloggning för att utforska det som finns. Fokus ligger just nu på rapporternas backendmodell och gränssnittet för rapportredigering.
 
 Målet är att kunna:
 
@@ -38,6 +38,31 @@ Några områden att utforska:
 - **Tester:** domän- och användningsfallstester samt arkitekturtester som kontrollerar beroenden och modulgränser.
 
 Arkitekturriktningen och avvägningarna finns i [målarkitekturen](docs/architecture/target-architecture.md) och [arkitekturbesluten](docs/adr/README.md).
+
+## Provkör lokalt
+
+Du behöver .NET SDK 10 och en lokal MongoDB-instans. Ingen Entra ID-konfiguration behövs när du använder mockad inloggning.
+
+Kör kommandona från repots rot. Om du har Docker kan du starta MongoDB med repots befintliga Compose-konfiguration:
+
+```powershell
+docker compose -f .devcontainer/docker-compose.yml up -d mongodb
+```
+
+Har du redan MongoDB på `localhost:27017` kan du hoppa över det steget. Appen använder som standard databasen `BidconCompanion`.
+
+Lita på det lokala HTTPS-utvecklingscertifikatet och starta appen med profilen för mockad inloggning:
+
+```powershell
+dotnet dev-certs https --trust
+dotnet run --project src/BlazorServer --launch-profile https_MockedAuth
+```
+
+Öppna [https://localhost:7184](https://localhost:7184), klicka på **Logga in** och välj **Admin** för att utforska appen med administratörsbehörighet. Det finns även mockanvändarna **User** och **Guest**.
+
+Mockningen gäller inloggningen. MongoDB används fortfarande för lagring, och hämtning av verkliga kalkyler kräver egna Bidcon API-uppgifter. En ny lokal databas innehåller inga förberedda kalkyler eller rapportvyer. Provkörningen visar pågående funktionalitet, inte en färdig produktdemo.
+
+För fler konfigurationsalternativ och testkommandon, se [lokal utveckling](docs/development.md).
 
 ## Hitta i repot
 
