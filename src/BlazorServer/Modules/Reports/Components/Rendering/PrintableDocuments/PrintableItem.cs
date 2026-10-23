@@ -1,3 +1,5 @@
+using BlazorServer.Modules.Reports.Domain.Views;
+
 namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;
 
 public abstract record PrintableItem

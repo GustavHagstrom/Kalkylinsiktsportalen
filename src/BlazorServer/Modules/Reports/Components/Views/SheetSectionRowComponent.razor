@@ -1,14 +1,21 @@
 <table class="sheet-section">
+    <colgroup>
+        @foreach (var column in VisibleColumns)
+        {
+            <col style="@ColumnPercentWidth(column)" />
+        }
+    </colgroup>
     <tbody>
         <tr>
-            @foreach (var columnType in OrderedColumnTypes)
+            @foreach (var column in VisibleColumns)
             {
-                var cell = GetSheetCell(columnType);
-                <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(cell))">
-                    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(cell), DisplayType(cell))">
-                        @if (!cell.HideValue)
+                var sheetColumnKind = column.SheetColumnKind;
+                var configuration = GetSheetCellConfiguration(sheetColumnKind);
+                <td style="@FormatBuilder.BuildCellStyle(EffectiveCellLayout(configuration))">
+                    <div style="@FormatBuilder.BuildTextStyle(EffectiveTextStyle(configuration), DisplayType(configuration))">
+                        @if (!configuration.HideValue)
                         {
-                            @DisplayValue(columnType)
+                            @DisplayValue(sheetColumnKind)
                         }
                     </div>
                 </td>
@@ -18,39 +25,52 @@
 </table>
 
 @code {
-    [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = new();
+    [Parameter, EditorRequired] public SheetSection SheetSection { get; set; } = SheetSection.Create();
     [Parameter, EditorRequired] public RowType RowType { get; set; }
 
-    private static IReadOnlyList<ColumnType> OrderedColumnTypes { get; } = Enum.GetValues<ColumnType>();
+    private IReadOnlyList<SheetColumnConfiguration> VisibleColumns
+        => SheetSection.Columns.Where(column => column.IsVisible).ToArray();
 
-    private SheetCell GetSheetCell(ColumnType columnType)
+    private double TableWidth => VisibleColumns.Sum(column => column.RelativeWidth);
+
+    private string ColumnPercentWidth(SheetColumnConfiguration column)
     {
-        var key = $"{RowType}-{columnType}";
-        return SheetSection.SheetCells.TryGetValue(key, out var cell)
-            ? cell
-            : new SheetCell { RowType = RowType, ColumnType = columnType };
+        if (TableWidth <= 0)
+        {
+            return string.Empty;
+        }
+
+        return $"""width: {(column.RelativeWidth / TableWidth * 100).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}%""";
     }
 
-    private static CellLayout? EffectiveCellLayout(SheetCell cell)
-        => cell.CellLayout ?? cell.CellFormat?.ToCellLayout();
+    private SheetCellConfiguration GetSheetCellConfiguration(SheetColumnKind sheetColumnKind)
+    {
+        var key = new SheetCellKey(sheetColumnKind, RowType);
+        return SheetSection.SheetCellConfigurations.TryGetValue(key, out var cell)
+            ? cell
+            : SheetCellConfiguration.Create();
+    }
 
-    private static TextStyle? EffectiveTextStyle(SheetCell cell)
-        => cell.TextStyle ?? cell.TextFormat?.ToTextStyle();
+    private static CellLayout? EffectiveCellLayout(SheetCellConfiguration cell)
+        => cell.CellLayout;
 
-    private static ValueDisplayType DisplayType(SheetCell cell)
-        => (cell.ValueFormat ?? cell.TextFormat?.ToValueFormat())?.Kind switch
+    private static TextStyle? EffectiveTextStyle(SheetCellConfiguration cell)
+        => cell.TextStyle;
+
+    private static ValueDisplayType DisplayType(SheetCellConfiguration cell)
+        => cell.ValueFormat?.Kind switch
         {
             ValueFormatKind.Number => ValueDisplayType.Number,
             ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => ValueDisplayType.DateTime,
             _ => ValueDisplayType.Text
         };
 
-    private string DisplayValue(ColumnType columnType)
-        => columnType switch
+    private string DisplayValue(SheetColumnKind sheetColumnKind)
+        => sheetColumnKind switch
         {
-            ColumnType.Description => string.IsNullOrWhiteSpace(SheetSection.Content)
+            SheetColumnKind.Description => SheetSection.SheetKind == SheetKind.TenderSheet
                 ? RowType.ToString()
-                : SheetSection.Content,
+                : SheetSection.SheetKind.ToString(),
             _ => string.Empty
         };
 }

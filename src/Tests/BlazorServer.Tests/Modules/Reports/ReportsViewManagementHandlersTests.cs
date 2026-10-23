@@ -1,18 +1,19 @@
 using BlazorServer.Identity;
+using BlazorServer.Modules.Reports.Domain.Views;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 using BlazorServer.Modules.Reports.Features.CreateView;
 using BlazorServer.Modules.Reports.Features.GetView;
 using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
-using BlazorServer.Modules.Reports.Public;
-using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
 using BlazorServer.Modules.Reports.Persistence;
+using BlazorServer.Modules.Reports.Public;
+using DataColumnDefinition = BlazorServer.Modules.Reports.Domain.Views.DataSections.ColumnDefinition;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
 [TestFixture]
-public sealed class ReportsViewManagementHandlersTests
+public sealed class ReportsViewManagementHandlersTargetModelTests
 {
     [Test]
     public async Task CreateView_StoresNewOrganizationViewThroughPort()
@@ -21,9 +22,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new CreateViewCommandHandler(store);
         var organizationId = new OrganizationId("org-1");
 
-        var result = await handler.HandleAsync(
-            new CreateViewCommand(organizationId, "Tender report"),
-            CancellationToken.None);
+        var result = await handler.HandleAsync(new CreateViewCommand(organizationId, "Tender report"), CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewCreated>());
         var created = (ViewCreated)result;
@@ -47,12 +46,8 @@ public sealed class ReportsViewManagementHandlersTests
         var result = await handler.HandleAsync(new ListViewsQuery(organizationId), CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewsListed>());
-        var listed = (ViewsListed)result;
-        Assert.Multiple(() =>
-        {
-            Assert.That(listed.Views, Is.EqualTo(new[] { expected }));
-            Assert.That(store.ListedOrganizationId, Is.EqualTo(organizationId));
-        });
+        Assert.That(((ViewsListed)result).Views, Is.EqualTo(new[] { expected }));
+        Assert.That(store.ListedOrganizationId, Is.EqualTo(organizationId));
     }
 
     [Test]
@@ -79,13 +74,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(
-                organizationId,
-                viewId,
-                "Updated tender report",
-                "Updated description",
-                [],
-                []),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", []),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewUpdated>());
@@ -96,7 +85,6 @@ public sealed class ReportsViewManagementHandlersTests
             Assert.That(updated.OrganizationId, Is.EqualTo(organizationId));
             Assert.That(updated.Name, Is.EqualTo("Updated tender report"));
             Assert.That(updated.View, Is.SameAs(existing));
-            Assert.That(store.LoadedViewId, Is.EqualTo(viewId));
             Assert.That(store.Upserted, Is.SameAs(existing));
             Assert.That(store.Upserted!.Description, Is.EqualTo("Updated description"));
         });
@@ -107,36 +95,25 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = ReconstitutedView(
-            viewId,
-            organizationId,
-            dataSections: [new DataSection { SectionId = "data-1", SectionIndex = 0 }],
-            sheetSections: [new SheetSection { SectionId = "sheet-1", SectionIndex = 1 }]);
+        var existing = ReconstitutedView(viewId, organizationId, sections: [DataSection("data-1"), SheetSection("sheet-1")]);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
-        var editedDataSection = new DataSection { SectionId = "data-1", SectionIndex = 1 };
-        var addedSheetSection = new SheetSection { SectionId = "sheet-2", SectionIndex = 0 };
+        var editedDataSection = DataSection("data-1");
+        var addedSheetSection = SheetSection("sheet-2");
         var result = await handler.HandleAsync(
             new UpdateViewCommand(
                 organizationId,
                 viewId,
                 "Updated tender report",
                 "Updated description",
-                [editedDataSection],
-                [addedSheetSection],
+                [editedDataSection, addedSheetSection],
                 ConfirmSectionDelete: true),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<ViewUpdated>());
-        Assert.Multiple(() =>
-        {
-            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { editedDataSection.SectionId }));
-            Assert.That(existing.LegacySheetSections.Select(section => section.SectionId), Is.EqualTo(new[] { addedSheetSection.SectionId }));
-            Assert.That(addedSheetSection.SectionIndex, Is.EqualTo(0));
-            Assert.That(editedDataSection.SectionIndex, Is.EqualTo(1));
-            Assert.That(store.Upserted, Is.SameAs(existing));
-        });
+        Assert.That(existing.Sections.Select(section => section.SectionId.Value), Is.EqualTo(new[] { "data-1", "sheet-2" }));
+        Assert.That(store.Upserted, Is.SameAs(existing));
     }
 
     [Test]
@@ -144,7 +121,7 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = ReconstitutedView(viewId, organizationId);
+        var existing = ReconstitutedView(viewId, organizationId, sections: [DataSection("section-1")]);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
@@ -154,19 +131,15 @@ public sealed class ReportsViewManagementHandlersTests
                 viewId,
                 "Updated tender report",
                 "Updated description",
-                [new DataSection { SectionId = "", SectionIndex = 0 }],
-                []),
+                [SheetSection("section-1")],
+                ConfirmSectionDelete: true),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
         var invalidRequest = (InvalidUpdateViewRequest)result;
-        Assert.Multiple(() =>
-        {
-            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_id.required"));
-            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Field), Does.Contain("Sections"));
-            Assert.That(existing.Name, Is.EqualTo("Tender report"));
-            Assert.That(store.Upserted, Is.Null);
-        });
+        Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_type.changed"));
+        Assert.That(existing.Name, Is.EqualTo("Tender report"));
+        Assert.That(store.Upserted, Is.Null);
     }
 
     [Test]
@@ -174,32 +147,19 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var organizationId = new OrganizationId("org-1");
         var viewId = new ViewId("view-1");
-        var existing = ReconstitutedView(
-            viewId,
-            organizationId,
-            dataSections: [new DataSection { SectionId = "data-1", SectionIndex = 0 }]);
+        var existing = ReconstitutedView(viewId, organizationId, sections: [DataSection("data-1")]);
         var store = new RecordingViewStore { View = existing };
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(
-                organizationId,
-                viewId,
-                "Updated tender report",
-                "Updated description",
-                [],
-                [],
-                ConfirmSectionDelete: false),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", [], ConfirmSectionDelete: false),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
         var invalidRequest = (InvalidUpdateViewRequest)result;
-        Assert.Multiple(() =>
-        {
-            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
-            Assert.That(existing.LegacyDataSections.Select(section => section.SectionId), Is.EqualTo(new[] { "data-1" }));
-            Assert.That(store.Upserted, Is.Null);
-        });
+        Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.section_delete.confirmation_required"));
+        Assert.That(existing.Sections.Select(section => section.SectionId.Value), Is.EqualTo(new[] { "data-1" }));
+        Assert.That(store.Upserted, Is.Null);
     }
 
     [Test]
@@ -212,23 +172,14 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(
-                organizationId,
-                viewId,
-                "Updated tender report",
-                "Updated description",
-                [],
-                []),
+            new UpdateViewCommand(organizationId, viewId, "Updated tender report", "Updated description", []),
             CancellationToken.None);
 
         Assert.That(result, Is.TypeOf<InvalidUpdateViewRequest>());
         var invalidRequest = (InvalidUpdateViewRequest)result;
-        Assert.Multiple(() =>
-        {
-            Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.archived"));
-            Assert.That(existing.Name, Is.EqualTo("Tender report"));
-            Assert.That(store.Upserted, Is.Null);
-        });
+        Assert.That(invalidRequest.ValidationErrors.Select(error => error.Code), Does.Contain("view.archived"));
+        Assert.That(existing.Name, Is.EqualTo("Tender report"));
+        Assert.That(store.Upserted, Is.Null);
     }
 
     [Test]
@@ -239,7 +190,7 @@ public sealed class ReportsViewManagementHandlersTests
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", [], []),
+            new UpdateViewCommand(new OrganizationId("org-1"), viewId, "Updated", "", []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewToUpdateNotFound(viewId)));
@@ -251,14 +202,11 @@ public sealed class ReportsViewManagementHandlersTests
     {
         var viewId = new ViewId("view-1");
         var requestedOrganizationId = new OrganizationId("org-2");
-        var store = new RecordingViewStore
-        {
-            View = ReconstitutedView(viewId, new OrganizationId("org-1"))
-        };
+        var store = new RecordingViewStore { View = ReconstitutedView(viewId, new OrganizationId("org-1")) };
         var handler = new UpdateViewCommandHandler(store);
 
         var result = await handler.HandleAsync(
-            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", [], []),
+            new UpdateViewCommand(requestedOrganizationId, viewId, "Updated", "", []),
             CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new ViewUpdateOrganizationMismatch(viewId, requestedOrganizationId)));
@@ -299,17 +247,22 @@ public sealed class ReportsViewManagementHandlersTests
         OrganizationId? organizationId = null,
         string name = "Tender report",
         string description = "",
-        bool enableChanges = false,
         bool isArchived = false,
-        IReadOnlyList<DataSection>? dataSections = null,
-        IReadOnlyList<SheetSection>? sheetSections = null)
+        IReadOnlyList<IViewSection>? sections = null)
         => View.Reconstitute(
             viewId ?? new ViewId("view-1"),
             organizationId ?? new OrganizationId("org-1"),
             name,
             description,
-            enableChanges,
             isArchived,
-            dataSections ?? [],
-            sheetSections ?? []);
+            sections ?? []);
+
+    private static DataSection DataSection(string sectionId)
+        => BlazorServer.Modules.Reports.Domain.Views.DataSections.DataSection.Reconstitute(
+            new SectionId(sectionId),
+            [new RowDefinition(8)],
+            [new DataColumnDefinition(1)]);
+
+    private static SheetSection SheetSection(string sectionId)
+        => BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.Reconstitute(new SectionId(sectionId), BlazorServer.Modules.Reports.Domain.Views.SheetSections.SheetSection.DefaultColumns().ToArray());
 }

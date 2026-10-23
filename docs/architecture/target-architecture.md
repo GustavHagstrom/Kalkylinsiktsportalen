@@ -40,7 +40,7 @@ Handlers returnerar normalt slice-ägda result contracts i stället för domäne
 
 Validators i en slice ansvarar för request- och input-validering, till exempel obligatoriska fält, format och enkla gränsvärden. Affärsinvarianter som måste gälla oavsett klient eller use case hör hemma i domänmodellen och ska inte bara skyddas av en validator.
 
-Store-portar ligger nära slicen när de bara behövs av ett användningsfall. När flera slices i samma modul behöver samma persistence-förmåga kan porten flyttas upp till en avsiktlig modulnivå. Store-implementationer, dokumentmodeller och mappings ligger fortsatt i modulens `Infrastructure`.
+Store-portar ligger nära slicen när de bara behövs av ett användningsfall. När flera slices i samma modul behöver samma persistence-förmåga kan porten flyttas upp till en avsiktlig modulnivå. Store-implementationer, dokumentmodeller och mappings ligger i modulens persistence-område, till exempel `Persistence/MongoDb`.
 
 Handlern är den primära testytan för use case-beteende i en slice. Domänmodellen testas separat när den bär affärsregler eller invariants. UI-komponenttester ska fokusera på presentation och interaktion, inte vara den enda verifieringen av affärsregler.
 
@@ -168,7 +168,7 @@ Får innehålla generella UI-primitiver utan produktspecifik logik, modulkunskap
 
 Får innehålla neutral teknisk implementation som flera ägare kan använda. Den får inte känna till modulernas entities, stores, collection names eller externa integrationsmodeller.
 
-Varje modul äger sin egen persistence-implementation, mappings, collections och registrering. Modulintern `Infrastructure` får bero på modulens egna kontrakt och på neutral top-level-infrastruktur.
+Varje modul äger sin egen persistence-implementation, mappings, collections och registrering. Modulintern persistence får bero på modulens egna kontrakt och på neutral top-level-infrastruktur.
 
 ## Modulregistrering Och UI Composition
 

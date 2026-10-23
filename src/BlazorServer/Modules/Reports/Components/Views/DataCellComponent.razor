@@ -23,10 +23,10 @@
 
     string Class => EditMode ? (IsSelected ? "data-cell edit-mode selected" : "data-cell edit-mode") : "data-cell";
 
-    CellLayout? EffectiveCellLayout => DataCell.CellLayout ?? DataCell.CellFormat?.ToCellLayout();
-    TextStyle? EffectiveTextStyle => DataCell.TextStyle ?? DataCell.TextFormat?.ToTextStyle();
+    CellLayout? EffectiveCellLayout => DataCell.CellLayout;
+    TextStyle? EffectiveTextStyle => DataCell.TextStyle;
 
-    ValueDisplayType DisplayType => (DataCell.ValueFormat ?? DataCell.TextFormat?.ToValueFormat())?.Kind switch
+    ValueDisplayType DisplayType => DataCell.ValueFormat?.Kind switch
     {
         ValueFormatKind.Number => ValueDisplayType.Number,
         ValueFormatKind.Date or ValueFormatKind.DateTimeMinute => ValueDisplayType.DateTime,

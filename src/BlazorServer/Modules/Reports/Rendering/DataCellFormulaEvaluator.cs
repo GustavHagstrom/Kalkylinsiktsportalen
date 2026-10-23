@@ -2,7 +2,7 @@ using System.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
 
 namespace BlazorServer.Modules.Reports.Rendering;
 
@@ -17,7 +17,7 @@ public static partial class DataCellFormulaEvaluator
         ArgumentNullException.ThrowIfNull(dataCell);
 
         var evaluatedValue = EvaluateCellExpression(dataCell.CellExpression, estimationProperties);
-        return FormatValue(evaluatedValue, dataCell.ValueFormat ?? dataCell.TextFormat?.ToValueFormat() ?? ValueFormat.Text);
+        return FormatValue(evaluatedValue, dataCell.ValueFormat ?? ValueFormat.Text);
     }
 
     private static object? EvaluateCellExpression(

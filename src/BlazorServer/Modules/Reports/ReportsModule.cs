@@ -10,7 +10,7 @@ using BlazorServer.Modules.Reports.Features.ListViews;
 using BlazorServer.Modules.Reports.Features.UpdateView;
 using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Persistence.MongoDb;
 using MongoDB.Driver;
 using MudBlazor;
 

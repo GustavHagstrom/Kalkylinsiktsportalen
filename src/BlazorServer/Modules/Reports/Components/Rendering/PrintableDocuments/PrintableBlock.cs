@@ -1,3 +1,4 @@
+using BlazorServer.Modules.Reports.Domain.Views;
 using System.Collections.ObjectModel;
 
 namespace BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments;

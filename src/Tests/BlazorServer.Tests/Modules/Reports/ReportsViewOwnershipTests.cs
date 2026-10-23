@@ -4,10 +4,10 @@ using BlazorServer.Modules.Reports.Public;
 using BlazorServer.Modules.Reports.Components.Rendering;
 using BlazorServer.Modules.Reports.Rendering;
 using BlazorServer.Modules.Reports.Persistence;
-using BlazorServer.Modules.Reports.Infrastructure.MongoDb;
+using BlazorServer.Modules.Reports.Persistence.MongoDb;
 using BlazorServer.Modules.Reports.Domain.Views;
-using BlazorServer.Modules.Reports.Domain.Views.DataSection;
-using BlazorServer.Modules.Reports.Domain.Views.SheetSection;
+using BlazorServer.Modules.Reports.Domain.Views.DataSections;
+using BlazorServer.Modules.Reports.Domain.Views.SheetSections;
 
 namespace BlazorServer.Tests.Modules.Reports;
 
@@ -23,16 +23,16 @@ public class ReportsViewOwnershipTests
         {
             Assert.That(typeof(View).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views"));
             Assert.That(typeof(ViewId).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Public"));
-            Assert.That(typeof(DataSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.DataSection"));
-            Assert.That(typeof(SheetSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.SheetSection"));
+            Assert.That(typeof(DataSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.DataSections"));
+            Assert.That(typeof(SheetSection).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Domain.Views.SheetSections"));
             Assert.That(typeof(DataCellFormulaEvaluator).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Rendering"));
             Assert.That(typeof(FormatBuilder).Namespace, Does.StartWith("BlazorServer.Modules.Reports."));
             Assert.That(typeof(FormatBuilder).Namespace, Does.Contain(".Components.Rendering"));
             Assert.That(typeof(PrintableDocumentRenderer).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Components.Rendering"));
             Assert.That(typeof(IViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence"));
-            Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
-            Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
-            Assert.That(typeof(ViewMappings).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Infrastructure.MongoDb"));
+            Assert.That(typeof(MongoView).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
+            Assert.That(typeof(MongoViewStore).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
+            Assert.That(typeof(ViewMappings).Namespace, Is.EqualTo("BlazorServer.Modules.Reports.Persistence.MongoDb"));
         });
     }
 

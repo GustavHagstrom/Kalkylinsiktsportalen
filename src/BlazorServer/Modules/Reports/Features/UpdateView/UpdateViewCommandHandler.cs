@@ -25,20 +25,20 @@ internal sealed class UpdateViewCommandHandler(
             return new InvalidUpdateViewRequest(errors);
         }
 
-        var view = await viewStore.GetAsync(command.ViewId);
-        if (view is null)
+        var existingView = await viewStore.GetAsync(command.ViewId);
+        if (existingView is null)
         {
             return new ViewToUpdateNotFound(command.ViewId);
         }
 
-        if (view.OrganizationId != command.OrganizationId)
+        if (existingView.OrganizationId != command.OrganizationId)
         {
             return new ViewUpdateOrganizationMismatch(command.ViewId, command.OrganizationId);
         }
 
         try
         {
-            var deletedSectionIds = FindDeletedSectionIds(view, command);
+            var deletedSectionIds = FindDeletedSectionIds(existingView, command);
             if (deletedSectionIds.Count > 0 && !command.ConfirmSectionDelete)
             {
                 return new InvalidUpdateViewRequest(
@@ -50,9 +50,9 @@ internal sealed class UpdateViewCommandHandler(
                 ]);
             }
 
-            view.ApplyLegacySectionBridge(command.DataSections, command.SheetSections);
-            view.Rename(command.Name);
-            view.UpdateDescription(command.Description);
+            existingView.ReplaceSections(command.Sections);
+            existingView.Rename(command.Name);
+            existingView.UpdateDescription(command.Description);
         }
         catch (ReportsDomainException exception)
         {
@@ -65,27 +65,21 @@ internal sealed class UpdateViewCommandHandler(
             ]);
         }
 
-        await viewStore.UpsertAsync(view);
+        await viewStore.UpsertAsync(existingView);
 
         return new ViewUpdated(
-            view.Id,
-            view.OrganizationId,
-            view.Name,
-            view);
+            existingView.Id,
+            existingView.OrganizationId,
+            existingView.Name,
+            existingView);
     }
 
-    private static IReadOnlyList<string> FindDeletedSectionIds(
+    private static IReadOnlyList<SectionId> FindDeletedSectionIds(
         View view,
         UpdateViewCommand command)
     {
-        var editedSectionIds = command.DataSections
-            .Select(section => section.SectionId)
-            .Concat(command.SheetSections.Select(section => section.SectionId))
-            .ToHashSet(StringComparer.Ordinal);
+        var editedSectionIds = command.Sections.Select(section => section.SectionId).ToHashSet();
 
-        return view.Sections
-            .Select(section => section.SectionId)
-            .Where(sectionId => !editedSectionIds.Contains(sectionId))
-            .ToList();
+        return view.Sections.Select(section => section.SectionId).Where(sectionId => !editedSectionIds.Contains(sectionId)).ToList();
     }
 }

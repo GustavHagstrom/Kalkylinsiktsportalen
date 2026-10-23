@@ -4,8 +4,8 @@
 @using BlazorServer.Modules.Reports.Features.UpdateView
 @using BlazorServer.Modules.Reports.Public
 @using BlazorServer.Modules.Reports.Domain.Views
-@using BlazorServer.Modules.Reports.Domain.Views.DataSection
-@using BlazorServer.Modules.Reports.Domain.Views.SheetSection
+@using BlazorServer.Modules.Reports.Domain.Views.DataSections
+@using BlazorServer.Modules.Reports.Domain.Views.SheetSections
 @using BlazorServer.Modules.Reports.Components.Rendering.PrintableDocuments
 
 @if(View is not null)
@@ -29,20 +29,21 @@
 
             @if (!IsReadOnly && SelectedItem is DataSectionSelection selection)
             {
-                <IsActiveIconButton Icon="@Icons.Material.Sharp.PowerSettingsNew"
-                                    IsActive="@TextFormatIsEnabled"
-                                    OnClick="@ToggleTextFormat"
-                                    Class="mx-2" />
-
-                <CellFormatEditor Format="selection.DataCell.CellFormat" Enabled="@TextFormatIsEnabled" />
-                <MudDivider Vertical="true" FlexItem="true" Class="mx-2"/>
-                <TextFormatEditor Format="selection.DataCell.TextFormat" Enabled="@TextFormatIsEnabled" />
+                <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
+                <ReportFormatEditor Layout="selection.DataCell.CellLayout"
+                                    LayoutChanged="SetSelectedCellLayout"
+                                    TextStyle="selection.DataCell.TextStyle"
+                                    TextStyleChanged="SetSelectedCellTextStyle"
+                                    ValueFormat="selection.DataCell.ValueFormat"
+                                    ValueFormatChanged="SetSelectedCellValueFormat"
+                                    Enabled="@(!IsReadOnly)" />
             }
+
         </LeftToolbarContent>
         <ChildContent>
             <div class="full-height pa-4 d-flex gap-4">
                 <MudPaper Class="full-height flex-grow-1 pa-1 gap-1 d-flex flex-column" Style="overflow: auto; min-width: 300px;">
-                    @foreach(var section in View.MutableLegacyDataSections.OrderBy(x => x.SectionIndex))
+                    @foreach(var section in View.Sections.OfType<DataSection>())
                     {
                         var selectedCell = SelectedItem is DataSectionSelection selection && selection.DataSection == section ? selection.DataCell : null;
                         @if (!IsReadOnly)
@@ -56,7 +57,7 @@
                         }
                         <DataSectionComponent DataSection="section" EditMode="@(!IsReadOnly)" SelectedDataCell="selectedCell" OnCellClick="x => SelectDataCell(x)"/>
                     }
-                    @foreach(var section in View.MutableLegacySheetSections.OrderBy(x => x.SectionIndex))
+                    @foreach(var section in View.Sections.OfType<SheetSection>())
                     {
                         <div class="d-flex align-center justify-space-between pa-2">
                             <MudText Typo="Typo.subtitle2">@SheetSectionLabel(section)</MudText>
@@ -91,7 +92,6 @@
     View? View { get; set; }
     string ViewName { get; set; } = string.Empty;
     bool isLoading = false;
-    bool TextFormatIsEnabled = true;
     UpdateViewResult? LastSaveResult = null;
     object? SelectedItem = null;
     PrintableDocumentBuilder DocumentBuilder { get; } = new();
@@ -102,12 +102,6 @@
     {
         Data,
         Sheet
-    }
-
-    void ToggleTextFormat()
-    {
-        if (IsReadOnly) return;
-        TextFormatIsEnabled = !TextFormatIsEnabled;
     }
 
     protected override Task OnInitializedAsync()
@@ -152,7 +146,7 @@
                 View.AddDataSection();
                 break;
             case SectionType.Sheet:
-                View.AddSheetSection();
+                View.AddSheetSection(SheetKind.TenderSheet);
                 break;
         }
     }
@@ -171,7 +165,7 @@
         var result = await dialog.Result;
 
         if (result != DialogResult.Cancel() && result?.Data is true)
-            View.RemoveDataSection(section);
+            View.RemoveSection(section.SectionId);
     }
 
     async Task ConfirmRemoveSheetSectionAsync(SheetSection section)
@@ -188,7 +182,7 @@
         var result = await dialog.Result;
 
         if (result != DialogResult.Cancel() && result?.Data is true)
-            View.RemoveSheetSection(section);
+            View.RemoveSection(section.SectionId);
     }
 
     void SelectDataCell(DataSectionSelection selection)
@@ -197,11 +191,27 @@
             SelectedItem = selection;
     }
 
+    void SetSelectedCellLayout(CellLayout? layout)
+    {
+        if (SelectedItem is DataSectionSelection selection)
+            selection.DataCell.CellLayout = layout;
+    }
+
+    void SetSelectedCellTextStyle(TextStyle? textStyle)
+    {
+        if (SelectedItem is DataSectionSelection selection)
+            selection.DataCell.TextStyle = textStyle;
+    }
+
+    void SetSelectedCellValueFormat(ValueFormat? valueFormat)
+    {
+        if (SelectedItem is DataSectionSelection selection)
+            selection.DataCell.ValueFormat = valueFormat;
+    }
+
     string SheetSectionLabel(SheetSection section)
     {
-        return string.IsNullOrWhiteSpace(section.Content)
-            ? Localizer["Bladsektion"]
-            : section.Content;
+        return section.SheetKind.ToString();
     }
 
     async Task SaveView()
@@ -223,9 +233,8 @@
                     View.Id,
                     ViewName,
                     View.Description,
-                    View.MutableLegacyDataSections,
-                    View.MutableLegacySheetSections,
-                    ConfirmSectionDelete: true),
+                    View.Sections.ToArray(),
+                    true),
                 CancellationToken.None);
         }
         finally
